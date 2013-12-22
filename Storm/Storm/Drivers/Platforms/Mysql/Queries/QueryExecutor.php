@@ -16,7 +16,7 @@ class QueryExecutor extends Queries\QueryExecutor {
         $QueryBuilder->AppendIdentifiers('FROM # ', array_keys($Request->GetTables()), ', ');
     }
     
-    protected function ExecuteCommit(IConnection $Connection, 
+    protected function ExecuteCommit(IConnection $Connection, array $Tables,
             array &$DiscardedRequests, array &$DiscardedPrimaryKeys, 
             array $Operations, array &$PersistedRowGroups) {
         foreach($DiscardedRequests as $Request) {
@@ -29,17 +29,18 @@ class QueryExecutor extends Queries\QueryExecutor {
             $this->UpdateQuery($Connection, $Operation)->Execute();
         }
         foreach ($PersistedRowGroups as $TableName => $PersistedRows) {
-            $this->SaveQuery($Connection, $TableName, $PersistedRows)->Execute();
+            $this->SaveQuery($Connection, $Tables[$TableName], $PersistedRows)->Execute();
         }
     }
     
-    protected function SaveQuery(IConnection $Connection, $TableName, array $Rows) {
+    protected function SaveQuery(IConnection $Connection, Relational\Table $Table, array $Rows) {
         if(count($Rows) === 0)
             return;
         
         $QueryBuilder = $Connection->QueryBuilder();
         
-        $ColumnNames = array_keys($Rows[0]->GetColumnData());
+        $ColumnNames = array_keys($Table->GetColumns());
+        $TableName = $Table->GetName();
         $Identifiers = array();
         foreach($ColumnNames as $ColumnName) {
             $Identifiers[] = [$TableName, $ColumnName];
@@ -54,7 +55,9 @@ class QueryExecutor extends Queries\QueryExecutor {
             else
                 $QueryBuilder->Append(', ');
             
-            $QueryBuilder->AppendAllColumnData('(#)', $Row, ',');
+            $QueryBuilder->Append('(');
+            $QueryBuilder->AppendAllColumnData($Row, ',');
+            $QueryBuilder->Append(')');
         }
         
         $QueryBuilder->Append(' ON DUPLICATE KEY UPDATE ');

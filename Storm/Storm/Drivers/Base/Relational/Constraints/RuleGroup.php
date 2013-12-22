@@ -3,20 +3,20 @@
 namespace Storm\Drivers\Base\Relational\Constraints;
 
 use \Storm\Core\Relational\Constraints\Rule;
-use \Storm\Core\Relational\TableColumnData;
+use \Storm\Core\Relational\ColumnData;
+use \Storm\Core\Relational\ResultRow;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Drivers\Base\Relational\Expressions\Operators\Binary;
 
 class RuleGroup extends \Storm\Core\Relational\Constraints\RuleGroup {
     
-    public static function Matches(TableColumnData $ColumnData) {
+    public static function Matches(ColumnData $ColumnData) {
         $Rules = array();
-        $Table = $ColumnData->GetTable();
-        $Columns = $Table->GetColumns();
-        foreach($ColumnData as $ColumnName => $Value) {
+        foreach($ColumnData as $ColumnIdentifier => $Value) {
+            $Column = $ColumnData->GetColumn($ColumnIdentifier);
             $Rules[] = new Rule(
                     Expression::BinaryOperation(
-                            Expression::Column($Columns[$ColumnName]), 
+                            Expression::Column($Column), 
                             Binary::Equality,
                             Expression::Constant($Value)));
         }

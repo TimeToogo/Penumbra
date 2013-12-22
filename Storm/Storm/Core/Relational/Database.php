@@ -95,34 +95,7 @@ abstract class Database {
     }
     
     /**
-     * @return Row[]
-     */
-    final public function LoadToOneRelation(IToOneRelation $Relation, array $Rows) {
-        if(count($Rows) === 0)
-            return array();
-        foreach($Rows as $Row)
-            $this->VerifyTable($Row->GetTables());
-        
-        return $this->ReviveToOneRelation($Relation, $Rows);
-    }
-    protected abstract function ReviveToOneRelation(IToOneRelation $Relation, array $Rows);
-    
-    /**
-     * @return Row[][]
-     */
-    final public function LoadToManyRelation(IToManyRelation $Relation, array $Rows) {
-        if(count($Rows) === 0)
-            return array();
-        foreach($Rows as $Row) {
-            $this->VerifyTable($Row->GetTables());
-        }
-        
-        return $this->ReviveToManyRelation($Relation, $Rows);
-    }
-    protected abstract function ReviveToManyRelation(IToManyRelation $Relation, array $Rows);
-    
-    /**
-     * @return Row[]
+     * @return ResultRow[]
      */
     final public function Load(Request $Request) {
         foreach($Request->GetTables() as $Table) {

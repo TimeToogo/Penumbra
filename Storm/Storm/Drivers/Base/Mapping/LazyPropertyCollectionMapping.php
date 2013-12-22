@@ -15,23 +15,26 @@ final class LazyPropertyCollectionMapping extends PropertyCollectionMapping {
         parent::__construct($Property, $EntityType, $ToManyRelation);
     }
 
-    public function Revive(Mapping\RevivingContext $Context, Map $RowStateMap) {
-        $Rows = iterator_to_array($RowStateMap, false);
-        $RelatedEntityType = $this->GetRelatedEntityType($Context);
-        $RelatedEntitiesArrayLoader = function ($Key) use (&$RelatedEntityType, &$Context, &$Rows) {
-            static $RelatedRowsArray;
-            if($RelatedRowsArray === null) {
-                $RelatedRowsArray = $this->LoadRows($Context, $Rows);
+    public function Revive(Mapping\RevivingContext $Context, Map $ResultRowStateMap) {
+        $EntityType = $this->GetEntityType();
+        $RelatedEntitiesArrayLoader = function ($ParentRow) use (&$EntityType, &$Context, &$ResultRowStateMap) {
+            static $ParentRelatedRowArraysMap;
+            if($ParentRelatedRowArraysMap === null) {
+                $RelatedRows = $this->LoadRelatedRows($Context, $ResultRowStateMap);
+                $ParentRelatedRowArraysMap = $this->GetRelation()
+                        ->MapRelatedRows($ResultRowStateMap->GetInstances(), $RelatedRows);
             }
             
-            return $Context->ReviveEntities($RelatedEntityType, $RelatedRowsArray[$Key]);
+            return $Context->ReviveEntities($EntityType, $ParentRelatedRowArraysMap[$ParentRow]);
         };
-        foreach($Rows as $Key => $Row) {
-            $RelatedEntitiesLoader = function () use (&$RelatedEntitiesArrayLoader, $Key) {
-                return $RelatedEntitiesArrayLoader($Key);
+        
+        $Property = $this->GetProperty();
+        foreach($ResultRowStateMap as $ResultRow) {
+            $RelatedEntitiesLoader = function () use (&$RelatedEntitiesArrayLoader, $ResultRow) {
+                return $RelatedEntitiesArrayLoader($ResultRow);
             };
-            $EntityState = $RowStateMap[$Row];
-            $EntityState[$this->GetProperty()] = new Collections\LazyCollection($RelatedEntitiesLoader, $RelatedEntityType);
+            $EntityState = $ResultRowStateMap[$ResultRow];
+            $EntityState[$Property] = new Collections\LazyCollection($RelatedEntitiesLoader, $EntityType);
         }
     }
 }

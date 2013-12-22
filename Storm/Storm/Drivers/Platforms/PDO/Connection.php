@@ -56,7 +56,10 @@ class Connection extends Queries\Connection {
         }
         
         return new Queries\QueryBuilder($this, '?', $Bindings, 
-                $this->RequestCompiler, $this->PredicateCompiler, $this->IdentifierEscaper);
+                $this->ExpressionCompiler, 
+                $this->RequestCompiler, 
+                $this->PredicateCompiler, 
+                $this->IdentifierEscaper);
     }
 
     public function Execute($QueryString, Queries\Bindings $Bindings = null) {

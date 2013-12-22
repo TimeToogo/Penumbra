@@ -32,7 +32,7 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
                 
             case E\KeywordExpression::GetType():
                 return $this->AppendKeyword($QueryBuilder, $Expression);
-                
+                                
             case E\ValueListExpression::GetType():
                 return $this->AppendList($QueryBuilder, $Expression);
 

@@ -3,31 +3,60 @@
 namespace Storm\Drivers\Base\Relational\Columns;
 
 use \Storm\Core\Relational\IColumn;
+use \Storm\Core\Relational\Table;
 use \Storm\Core\Relational\ColumnData;
 
 class Column implements IColumn {
     use \Storm\Core\Helpers\Type;
     
     private $Name;
+    private $Identifier;
+    private $Table;
     private $DataType;
     private $Traits = array();
     
     public function __construct($Name, DataType $DataType, array $Traits = array()) {
         $this->Name = $Name;
+        $this->Identifier = $Name;
         $this->DataType = $DataType;
         foreach($Traits as $Trait) {
             $this->AddTrait($Trait);
         }
     }
-
+    
     final public function GetName() {
         return $this->Name;
     }
     
     final public function SetName($Name) {
         $this->Name = $Name;
+        $this->UpdateIdentifier();
     }
-
+    
+    final public function GetIdentifier() {
+        return $this->Identifier;
+    }
+    
+    final public function GetTable() {
+        return $this->Table;
+    }
+    
+    final public function HasTable() {
+        return $this->Table !== null;
+    }
+    
+    final public function SetTable(Table $Table = null) {
+        $this->Table = $Table;
+        $this->UpdateIdentifier();
+    }
+    
+    private function UpdateIdentifier() {
+        $this->Identifier = ($this->Table ? $this->Table->GetName() : '') . '.' . $this->Name;
+    }
+    
+    /**
+     * @return DataType
+     */
     final public function GetDataType() {
         return $this->DataType;
     }

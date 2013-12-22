@@ -7,40 +7,38 @@ class Platform implements IPlatform {
     private $ExpressionMapper;
     private $ColumnSet;
     private $KeyGeneratorSet;
+    private $ExpressionCompiler;
     private $RequestCompiler;
     private $PredicateCompiler;
     private $IdentifierEscaper;
     private $DatabaseSyncer;
     private $QueryExecutor;
-    private $ToOneRelationReviver;
-    private $ToManyRelationReviver;
     
     public function __construct(
             Queries\IConnection $Connection,
             Expressions\IExpressionMapper $ExpressionMapper,
             Columns\IColumnSet $ColumnSet,
             PrimaryKeys\IKeyGeneratorSet $KeyGeneratorSet,
+            Queries\IExpressionCompiler $ExpressionCompiler, 
             Queries\IRequestCompiler $RequestCompiler, 
             Queries\IPredicateCompiler $PredicateCompiler, 
             Queries\IIdentifierEscaper $IdentifierEscaper,
             Syncing\IDatabaseSyncer $DatabaseSyncer, 
-            Queries\IQueryExecutor $QueryExecutor, 
-            Relations\IToOneReviver $ToOneRelationReviver, 
-            Relations\IToManyReviver $ToManyRelationReviver) {
+            Queries\IQueryExecutor $QueryExecutor) {
         $this->Connection = $Connection;
         $this->ExpressionMapper = $ExpressionMapper;
         $this->ColumnSet = $ColumnSet;
         $this->KeyGeneratorSet = $KeyGeneratorSet;
+        $this->ExpressionCompiler = $ExpressionCompiler;
         $this->RequestCompiler = $RequestCompiler;
         $this->PredicateCompiler = $PredicateCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
+        $this->Connection->SetExpressionCompiler($ExpressionCompiler);
         $this->Connection->SetRequestCompiler($RequestCompiler);
         $this->Connection->SetPredicateCompiler($PredicateCompiler);
         $this->Connection->SetIdentifierEscaper($IdentifierEscaper);
         $this->DatabaseSyncer = $DatabaseSyncer;
         $this->QueryExecutor = $QueryExecutor;
-        $this->ToOneRelationReviver = $ToOneRelationReviver;
-        $this->ToManyRelationReviver = $ToManyRelationReviver;
     }
 
     
@@ -58,6 +56,10 @@ class Platform implements IPlatform {
     
     public function GetKeyGeneratorSet() {
         return $this->KeyGeneratorSet;
+    }
+    
+    final public function GetExpressionCompiler() {
+        return $this->ExpressionCompiler;
     }
     
     final public function GetRequestCompiler() {
@@ -78,14 +80,6 @@ class Platform implements IPlatform {
 
     final public function GetQueryExecutor() {
         return $this->QueryExecutor;
-    }
-
-    final public function GetToOneRelationReviver() {
-        return $this->ToOneRelationReviver;
-    }
-
-    final public function GetToManyRelationReviver() {
-        return $this->ToManyRelationReviver;
     }
 }
 

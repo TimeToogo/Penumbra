@@ -8,6 +8,10 @@ abstract class Connection implements IConnection {
      */
     protected $IdentifierEscaper;
     /**
+     * @var IExpressionCompiler 
+     */
+    protected $ExpressionCompiler;
+    /**
      * @var IRequestCompiler 
      */
     protected $RequestCompiler;
@@ -16,6 +20,10 @@ abstract class Connection implements IConnection {
      */
     protected $PredicateCompiler;
     
+    final public function SetExpressionCompiler(IExpressionCompiler $ExpressionCompiler) {
+        $this->ExpressionCompiler = $ExpressionCompiler;
+    }
+        
     final public function SetIdentifierEscaper(IIdentifierEscaper $IdentifierEscaper) {
         $this->IdentifierEscaper = $IdentifierEscaper;
     }

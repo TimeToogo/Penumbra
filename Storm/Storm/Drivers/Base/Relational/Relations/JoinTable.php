@@ -57,15 +57,21 @@ abstract class JoinTable extends Base\Relational\Table {
     }
     protected abstract function MapForeignKey2(Map $Map, Relational\Table $Table2);
     
+    /**
+     * @return Relational\Table
+     */
     final public function GetTable1() {
         return $this->Table1;
     }
+    /**
+     * @return ForeignKey
+     */
     final public function GetForeignKey1() {
         return $this->ForeignKey1;
     }
     
     /**
-     * @return ForeignKey
+     * @return Relational\Table
      */
     final public function GetTable2() {
         return $this->Table2;

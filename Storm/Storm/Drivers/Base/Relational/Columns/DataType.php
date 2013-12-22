@@ -3,22 +3,18 @@
 namespace Storm\Drivers\Base\Relational\Columns;
 
 use \Storm\Drivers\Base\Relational\Queries\ParameterType;
+use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
 class DataType {
     private $DataType;
     private $Parameters;
     private $Extra;
-    private $PersistFormat;
-    private $ReviveFormat;
     private $ParameterType;
     
-    public function __construct($DataType, array $Parameters = array(), $Extra = null,
-            $PersistFormat = '#', $ReviveFormat = '#', $ParameterType = ParameterType::String) {
+    public function __construct($DataType, array $Parameters = array(), $Extra = null, $ParameterType = ParameterType::String) {
         $this->DataType = $DataType;
         $this->Parameters = $Parameters;
         $this->Extra = $Extra;
-        $this->PersistFormat = $PersistFormat;
-        $this->ReviveFormat = $ReviveFormat;
         $this->ParameterType = $ParameterType;
     }
     
@@ -42,13 +38,13 @@ class DataType {
         else
             return $OtherDataType->Parameters === $OtherDataType->Parameters;
     }
-    
-    final public function GetPersistFormat() {
-        return $this->PersistFormat;
-    }
 
-    final public function GetReviveFormat() {
-        return $this->ReviveFormat;
+    public function GetReviveExpression(Expression $Expression) {
+        return $Expression;
+    }
+    
+    public function GetPersistExpression(Expression $Expression) {
+        return $Expression;
     }
     
     final public function GetParameterType() {

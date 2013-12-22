@@ -33,7 +33,12 @@ abstract class QueryExecutor implements IQueryExecutor {
             $PersistedRows = $this->OrderByTableDependency($Transaction->GetPersistedRows(), $TablesOrderedByPersistingDependency);
             $PersistedRowGroups = $this->GroupRowsByTable($PersistedRows);
             
-            $this->ExecuteCommit($Connection, $DiscardedRequests, $DiscardedPrimaryKeys, $Operations, $PersistedRowGroups);
+            $Tables = array_combine(
+                    array_map(function ($Table) {
+                        return $Table->GetName();
+                    }, $TablesOrderedByPersistingDependency), 
+                    $TablesOrderedByPersistingDependency);
+            $this->ExecuteCommit($Connection, $Tables, $DiscardedRequests, $DiscardedPrimaryKeys, $Operations, $PersistedRowGroups);
             
             $Connection->CommitTransaction();
         }
@@ -46,7 +51,7 @@ abstract class QueryExecutor implements IQueryExecutor {
     /**
      * @return IQuery
      */
-    protected abstract function ExecuteCommit(IConnection $Connection, 
+    protected abstract function ExecuteCommit(IConnection $Connection, array $Tables,
             array &$DiscardedRequests, array &$DiscardedPrimaryKeys, array $Operations, array &$PersistedRowGroups);
     
     

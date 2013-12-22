@@ -2,6 +2,7 @@
 
 namespace Storm\Drivers\Base\Relational\Relations;
 
+use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
 
 abstract class Relation implements Relational\IRelation {
@@ -31,6 +32,14 @@ abstract class Relation implements Relational\IRelation {
     final public function GetDiscardingDependencyOrder() {
         return $this->DiscardingOrder;
     }
+    
+    final public function MapRelatedRows(array $ParentRows, array $RelatedRows) {
+        $Map = new Map();
+        $this->MapParentToRelatedRows($Map, $ParentRows, $RelatedRows);
+        
+        return $Map;
+    }
+    protected abstract function MapParentToRelatedRows(Map $Map, array $ParentRows, array $RelatedRows);
 }
 
 ?>

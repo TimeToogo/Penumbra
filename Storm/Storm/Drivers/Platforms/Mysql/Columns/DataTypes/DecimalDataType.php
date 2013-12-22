@@ -8,7 +8,7 @@ use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 class DecimalDataType extends Columns\Column {
     public function __construct($Name, $Length, $Precision, $Unsigned = false) {
         parent::__construct($Name, new Columns\DataType('DECIMAL', [$Length, $Precision], 
-                $Unsigned ? 'UNSIGNED' : '', '#', '#', ParameterType::String));
+                $Unsigned ? 'UNSIGNED' : '', ParameterType::String));
     }
     
     public function ToPersistedValue($PropertyValue) {

@@ -17,21 +17,12 @@ class ExtraLazyPropertyEntityMapping extends LazyPropertyEntityMapping {
         parent::__construct($Property, $EntityType, $ToOneRelation, $ProxyGenerator);
     }
 
-    public function Revive(Mapping\RevivingContext $Context, Map $RowStateMap) {
-        $Rows = iterator_to_array($RowStateMap, false);
-        
-        $DomainDatabaseMap = $Context->GetDomainDatabaseMap();
-        $RelatedEntityType = $this->GetRelatedEntityType($Context);
-        foreach($Rows as $Row) {
-            $EntityState = $RowStateMap[$Row];
-            $RelatedEntityLoader = function ($Instance) use (&$DomainDatabaseMap, &$Context, $Row) {
-                $RelatedRow = $this->LoadRows($Context, [$Row])[0];
-                $RowInstanceMap = new Map();
-                $RowInstanceMap[$RelatedRow] = $Instance;
-                $DomainDatabaseMap->ReviveEntityInstances($RowInstanceMap);
-            };
-            $EntityState[$this->GetProperty()] = 
-                    $this->ProxyGenerator->GenerateProxy($RelatedEntityType, $RelatedEntityLoader);
+    public function Revive(Mapping\RevivingContext $Context, Map $ResultRowStateMap) {
+        foreach($ResultRowStateMap as $ResultRow) {
+            $State = $ResultRowStateMap[$ResultRow];
+            $Map = new Map();
+            $Map->Map($ResultRow, $State);
+            parent::Revive($Context, $Map);
         }
     }
 }

@@ -19,6 +19,8 @@ class Predicate {
         $this->VerifyRules($Rules);
         
         $this->RuleGroups[] = $Rules;
+        
+        return $this;
     }
     
     /**

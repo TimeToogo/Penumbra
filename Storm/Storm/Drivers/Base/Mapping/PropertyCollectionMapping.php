@@ -2,6 +2,7 @@
 
 namespace Storm\Drivers\Base\Mapping;
 
+use \Storm\Core\Containers\Map;
 use \Storm\Core\Mapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
@@ -27,6 +28,23 @@ abstract class PropertyCollectionMapping extends PropertyRelationMapping impleme
     
     final protected function LoadRows(Mapping\RevivingContext $Context, array $Rows) {
         return $Context->LoadToManyRelationRows($this->ToManyRelation, $Rows);
+    }
+    
+    protected function ReviveProperties(
+            Map $ResultRowStateMap, 
+            Map $ParentRelatedRowsMap, 
+            Map $RelatedRowEntityMap) {
+        $Property = $this->GetProperty();
+        $EntityType = $this->GetEntityType();
+        foreach($ResultRowStateMap as $ResultRow) {
+            $State = $RelatedRowEntityMap[$ResultRow];
+            $RelatedRows = $ParentRelatedRowsMap[$ResultRow];
+            $Entities = array();
+            foreach($RelatedRows as $RelatedRow) {
+                $Entities[] = $RelatedRowEntityMap[$RelatedRow];
+            }
+            $State[$Property] = new Collections\Collection($Entities, $EntityType);
+        }
     }
     
     public function Persist(Mapping\PersistingContext $Context, Mapping\TransactionalContext $TransactionalContext) {

@@ -3,20 +3,22 @@
 namespace Storm\Core\Relational;
 
 abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
+    private $Columns = array();
     private $ColumnData;
     
-    protected function __construct(array $ColumnData, $IsVerifiedData) {
-        if($IsVerifiedData)
-            $this->ColumnData = $ColumnData;
-        else {
-            foreach($ColumnData as $ColumnName => $Value) {
-                $this->SetColumn($ColumnName, $Value);
-            }
+    protected function __construct(array $Columns, array $ColumnData) {
+        foreach ($Columns as $Column) {
+            $this->Columns[$Column->GetIdentifier()] = $Column;
         }
+        $this->ColumnData = $ColumnData;
     }
     
     final public function GetColumnData() {
         return $this->ColumnData;
+    }
+    
+    final public function GetColumn($Identifier) {
+        return $this->Columns[$Identifier];
     }
     
     final public function SetColumn(IColumn $Column, $Data) {
@@ -24,7 +26,16 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
     
     protected function AddColumn($ColumnIdentifier, $Data) {
+        if(!isset($this->Columns[$ColumnIdentifier])) {
+            throw new \InvalidArgumentException('$Column must be one of: ' . 
+                    implode(', ', array_keys($this->Columns)));
+        }
+        
         $this->ColumnData[$ColumnIdentifier] = $Data;
+    }
+    
+    final public function Hash() {
+        return md5(serialize(asort($this->ColumnData)));
     }
     
     final public function getIterator() {

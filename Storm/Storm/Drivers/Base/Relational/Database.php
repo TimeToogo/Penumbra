@@ -9,16 +9,12 @@ abstract class Database extends Relational\Database {
     private $Connection;
     private $DatabaseSyncer;
     private $QueryExecutor;
-    private $ToOneRelationReviver;
-    private $ToManyRelationReviver;
     
     public function __construct() {
         $this->Platform = $this->Platform();        
         $this->Connection = $this->Platform->GetConnection();
         $this->DatabaseSyncer = $this->Platform->GetDatabaseSyncer();
         $this->QueryExecutor = $this->Platform->GetQueryExecutor();
-        $this->ToOneRelationReviver = $this->Platform->GetToOneRelationReviver();
-        $this->ToManyRelationReviver = $this->Platform->GetToManyRelationReviver();
         
         parent::__construct();
         
@@ -45,16 +41,6 @@ abstract class Database extends Relational\Database {
                 $this->GetTablesOrderedByPersistingDependency(),
                 $this->GetTablesOrderedByDiscardingDependency(),
                 $Transaction);
-    }
-    
-    final protected function ReviveToOneRelation(Relational\IToOneRelation $Relation, array $Rows) {
-        return $this->ToOneRelationReviver->Revive($this->Connection,
-                $Relation, $Rows);
-    }
-    
-    final protected function ReviveToManyRelation(Relational\IToManyRelation $Relation, array $Rows) {
-        return $this->ToManyRelationReviver->Revive($this->Connection, 
-                $Relation, $Rows);
     }
     
     final public function GeneratePrimaryKeys(Relational\Table $Table, $Amount = 1) {

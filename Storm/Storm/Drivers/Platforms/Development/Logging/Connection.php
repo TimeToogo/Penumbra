@@ -67,6 +67,7 @@ class Connection implements Queries\IConnection {
                 $this, 
                 $QueryBuilder->GetParameterPlaceholder(), 
                 $QueryBuilder->GetBindings(),
+                $QueryBuilder->GetExpressionCompiler(),
                 $QueryBuilder->GetRequestCompiler(),
                 $QueryBuilder->GetPredicateCompiler(),
                 $QueryBuilder->GetIdentifierEscaper());

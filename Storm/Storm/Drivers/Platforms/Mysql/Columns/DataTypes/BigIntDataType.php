@@ -6,7 +6,7 @@ use \Storm\Drivers\Base\Relational\Columns;
 use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 
 class BigIntDataType extends IntDataType {
-    private static $Is64BitPHP;
+    private static $Is64BitPHP = null;
     
     public function __construct($Unsigned = false) {
         if(self::$Is64BitPHP === null) {

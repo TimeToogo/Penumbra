@@ -24,10 +24,12 @@ class Request {
     }
     
     final public function AddColumn(IColumn $Column) {
-        $Table = $Column->GetTable();
-        $TableName = $Table->GetName();
-        $this->Columns[$TableName . ' ' . $Column->GetName()] = $Column;
-        $this->AddTable($Table);
+        $this->Columns[$Column->GetIdentifier()] = $Column;
+        $this->AddTable($Column->GetTable());
+    }
+    
+    final public function AddColumns(array $Columns) {
+        array_map([$this, 'AddColumn'], $Columns);
     }
     
     /**

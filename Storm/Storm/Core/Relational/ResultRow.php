@@ -4,23 +4,21 @@ namespace Storm\Core\Relational;
 
 class ResultRow extends ColumnData {
     private $Tables = array();
-    private $Columns = array();
     private $TableColumnsMap = array();
-    public function __construct(array $Columns, array $ColumnData = array(), $VerifiedData = false) {
+    public function __construct(array $Columns, array $ColumnData = array()) {
         foreach($Columns as $Column) {
             $Table = $Column->GetTable();
             $TableName = $Table->GetName();
             $ColumnIdentifier = $Column->GetIdentifier();
             
             $this->Tables[$TableName] = $Table;
-            $this->Columns[$ColumnIdentifier] = $Column;
             if(!isset($this->TableColumnsMap[$TableName])) {
                 $this->TableColumnsMap[$TableName] = array();
             }
             $this->TableColumnsMap[$TableName][$ColumnIdentifier] = true;
         }
         
-        parent::__construct($ColumnData, $VerifiedData);
+        parent::__construct($Columns, $ColumnData);
     }
     
     /**
@@ -32,13 +30,6 @@ class ResultRow extends ColumnData {
     
     final public function IsOf(Table $Table) {
         return isset($this->Tables[$Table->GetName()]);
-    }
-    protected function AddColumn($ColumnIdentifier, $Data) {
-        if(!isset($this->Columns[$ColumnIdentifier])) {
-            throw new \InvalidArgumentException('$Column must be a valid column of the tables: ' . 
-                    implode(', ', array_map(function ($Table) { return $Table->GetName(); }, $this->Tables)));
-        }
-        parent::AddColumn($ColumnIdentifier, $Data);
     }
     
     /**
@@ -64,6 +55,20 @@ class ResultRow extends ColumnData {
         $TableColumnData = array_intersect_key($ColumnData, $this->TableNameColumnMap[$Table->GetName()]);
         
         return new Row($Table, $TableColumnData, true);
+    }
+    
+    /**
+     * @return ResultRow
+     */
+    final public function GetDataFromColumns(array $Columns) {
+        $ResultRow = new ResultRow($Columns);
+        foreach($Columns as $Column) {
+            if(isset($this[$Column])) {
+                $ResultRow->SetColumn($Column, $this[$Column]);
+            }
+        }
+        
+        return $ResultRow;
     }
 }
 

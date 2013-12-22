@@ -4,9 +4,9 @@ namespace Storm\Core\Relational;
 
 final class Row extends TableColumnData {
     private $PrimaryKeyColumnNames;
-    public function __construct(Table $Table, array $RowData = array(), $DataVerified = false) {
+    public function __construct(Table $Table, array $RowData = array()) {
         $this->PrimaryKeyColumnNames = array_keys($Table->GetPrimaryKeyColumns());
-        parent::__construct($Table, $RowData, $DataVerified);
+        parent::__construct($Table, $RowData);
     }
     
     /**

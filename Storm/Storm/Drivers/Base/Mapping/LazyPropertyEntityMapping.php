@@ -19,28 +19,30 @@ class LazyPropertyEntityMapping extends PropertyEntityMapping {
         
         $this->ProxyGenerator = $ProxyGenerator;
     }
-
-    public function Revive(Mapping\RevivingContext $Context, Map $RowStateMap) {
-        $Rows = iterator_to_array($RowStateMap);
-        $RelatedEntitiesLoader = function ($Instance, $RelatedRowKey) use (&$Context, &$Rows) {
-            static $RelatedRows;
-            if($RelatedRows === null) {
-                $RelatedRows = $this->LoadRows($Context, $Rows);
+    
+    public function Revive(Mapping\RevivingContext $Context, Map $ResultRowStateMap) {
+        $ParentRows = iterator_to_array($ResultRowStateMap);
+        $RelatedEntitiesLoader = function ($Instance, $ParentRow) use (&$Context, &$ResultRowStateMap) {
+            static $ParentRelatedRowsMap;
+            if($ParentRelatedRowsMap === null) {
+                $RelatedRows = $this->LoadRelatedRows($Context, $ResultRowStateMap);
+                $ParentRelatedRowsMap = $this->GetRelation()->MapRelatedRows($ResultRowStateMap->GetInstances(), $RelatedRows);
             }
-            $RelatedRow = $RelatedRows[$RelatedRowKey];
+            $RelatedRow = $ParentRelatedRowsMap[$ParentRow];
             $RowInstanceMap = new Map();
             $RowInstanceMap[$RelatedRow] = $Instance;
             $Context->ReviveEntityInstances($RowInstanceMap);
         };
         
-        $RelatedEntityType = $this->GetRelatedEntityType($Context);
-        foreach($Rows as $Key => $Row) {
-            $EntityState = $RowStateMap[$Row];
-            $RelatedEntityLoader = function ($Instance) use (&$RelatedEntitiesLoader, $Key) {
-                $RelatedEntitiesLoader($Instance, $Key);
+        $RelatedEntityType = $this->GetEntityType();
+        $Property = $this->GetProperty();
+        foreach($ParentRows as $ParentRow) {
+            $State = $ResultRowStateMap[$ParentRow];
+            $RelatedEntityLoader = function ($Instance) use (&$RelatedEntitiesLoader, $ParentRow) {
+                $RelatedEntitiesLoader($Instance, $ParentRow);
             };
             
-            $EntityState[$this->GetProperty()] = 
+            $State[$Property] = 
                     $this->ProxyGenerator->GenerateProxy($RelatedEntityType, $RelatedEntityLoader);
         }
     }
@@ -48,8 +50,9 @@ class LazyPropertyEntityMapping extends PropertyEntityMapping {
     public function PersistRelations(Mapping\PersistingContext $Context, Mapping\TransactionalContext $TransactionalContext) {
         $RelatedEntity = $Context->GetState()[$this->GetProperty()];
         if($RelatedEntity instanceof Proxy\IEntityProxy) {
-            if(!$RelatedEntity->__IsLoaded())
+            if(!$RelatedEntity->__IsLoaded()) {
                 return;
+            }
         }
         return $TransactionalContext->PersistRelations($RelatedEntity);
     }

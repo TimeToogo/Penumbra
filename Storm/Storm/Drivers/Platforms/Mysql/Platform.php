@@ -14,6 +14,7 @@ final class Platform extends Relational\Platform {
                 new ExpressionMapper(),
                 new Columns\ColumnSet(),
                 new PrimaryKeys\KeyGeneratorSet(/* TODO */),
+                $ExpressionCompiler,
                 new Queries\RequestCompiler($ExpressionCompiler, $PredicateCompiler),
                 $PredicateCompiler,
                 new Queries\IdentifierEscaper(),
@@ -21,9 +22,7 @@ final class Platform extends Relational\Platform {
                         new Platforms\Development\Syncing\DatabaseSyncer
                                 (new Syncing\DatabaseBuilder(), new Syncing\DatabaseModifier()) : 
                         new Platforms\Production\Syncing\DatabaseSyncer(),
-                new Queries\QueryExecutor(),
-                new Relations\ToOneReviver(), 
-                new Relations\ToManyReviver());
+                new Queries\QueryExecutor());
     }
 }
 

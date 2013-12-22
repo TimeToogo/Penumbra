@@ -4,11 +4,15 @@ namespace Storm\Core\Containers;
 
 final class Map implements \IteratorAggregate, \ArrayAccess {
     private $IteratingStorage;
+    private $InverseIteratingStorage;
     private $Storage;
+    private $InversedStorage;
     
     public function __construct() {
         $this->IteratingStorage = new \SplObjectStorage();
+        $this->InverseIteratingStorage = new \SplObjectStorage();
         $this->Storage = new \SplObjectStorage();
+        $this->InversedStorage = new \SplObjectStorage();
     }
     
     public static function From(array $Instances, array $ToInstances) {
@@ -24,6 +28,14 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
         
         return $Map;
     }
+    
+    public function GetInstances() {
+        return iterator_to_array($this->IteratingStorage);
+    }
+    
+    public function GetToInstances() {
+        return iterator_to_array($this->InverseIteratingStorage);
+    }
 
     /**
      * @return Map
@@ -33,11 +45,11 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
             throw new \InvalidArgumentException('$Instance and $ToInstance must be valid object intances');
         
         $this->Unmap($Instance);
-        $this->Unmap($ToInstance);
         
         $this->IteratingStorage->attach($Instance);
+        $this->InverseIteratingStorage->attach($ToInstance);
         $this->Storage->attach($Instance, $ToInstance);
-        $this->Storage->attach($ToInstance, $Instance);
+        $this->InversedStorage->attach($ToInstance, $Instance);
         
         return $this;
     }
@@ -45,27 +57,43 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
     public function Unmap($Instance) {
         if(!is_object($Instance))
             return;
-        if(!$this->Storage->contains($Instance))
+        if(!$this->Storage->contains($Instance) && !$this->InversedStorage->contains($Instance))
             return;
         
-        $ToInstance = $this->Storage[$Instance];
-        $this->IteratingStorage->detach($Instance);
-        $this->IteratingStorage->detach($ToInstance);
-        $this->Storage->detach($Instance);
-        $this->Storage->detach($ToInstance);
+        if($this->Storage->contains($Instance)) {
+            $ToInstance = $this->Storage[$Instance];
+            
+            $this->Detach($Instance, $ToInstance);
+        }
+        
+        if($this->InversedStorage->contains($Instance)) {
+            $ToInstance = $Instance;
+            $Instance = $this->InversedStorage[$ToInstance];
+            
+            $this->Detach($Instance, $ToInstance);
+        }
     }
-
+    
+    private function Detach($Instance, $ToInstance) {
+        $this->Storage->detach($Instance);
+        $this->InversedStorage->detach($ToInstance);
+        $this->IteratingStorage->detach($Instance);
+        $this->InverseIteratingStorage->detach($ToInstance);
+    }
+    
     public function getIterator() {
         return $this->IteratingStorage;
     }
 
     public function offsetExists($Instance) {
-        return $this->Storage->contains($Instance);
+        return $this->Storage->contains($Instance) || $this->InversedStorage->contains($Instance);
     }
 
     public function offsetGet($Instance) {
         if($this->Storage->contains($Instance))
             return $this->Storage[$Instance];
+        else if($this->InversedStorage->contains($Instance))
+            return $this->InversedStorage[$Instance];
         else
             return null;
     }

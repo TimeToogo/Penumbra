@@ -1,6 +1,6 @@
 <?php
 
- namespace Storm\Drivers\Base\Relational\Expressions;
+namespace Storm\Drivers\Base\Relational\Expressions;
  
 class KeywordExpression extends Expression {
     private $Keyword;

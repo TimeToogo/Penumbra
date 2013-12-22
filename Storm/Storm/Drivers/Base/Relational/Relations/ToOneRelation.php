@@ -2,27 +2,37 @@
 
 namespace Storm\Drivers\Base\Relational\Relations;
 
+use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Relational\Constraints\Predicate;
+use \Storm\Drivers\Base\Relational\Constraints;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
-class ToOneRelation extends Relation implements Relational\IToOneRelation {
-    private $ForeignKey;
-    
+class ToOneRelation extends ToOneKeyedRelation {
     public function __construct(ForeignKey $ForeignKey) {
-        parent::__construct($ForeignKey->GetReferencedTable(), 
+        parent::__construct($ForeignKey, $ForeignKey->GetReferencedTable(), 
                 Relational\DependencyOrder::After, Relational\DependencyOrder::Before);
-        
-        $this->ForeignKey = $ForeignKey;
     }
     
-    /**
-     * @return ForeignKey
-     */
-    public function GetForeignKey() {
-        return $this->ForeignKey;
+    protected function MapParentRowToReferencedKey(ForeignKey $ForeinKey, 
+            Relational\ResultRow $ParentRow) {
+        $ParentKey = $ParentRow->GetDataFromColumns($ForeinKey->GetParentColumns());
+        $ReferencedKey = $ParentRow->GetDataFromColumns($ForeinKey->GetReferencedColumns());
+        $ForeinKey->MapParentKey($ParentKey, $ReferencedKey);
     }
-
+    
+    public function MapParentToRelatedRowsByKey(
+            Map $Map, array $ParentRows, array $RelatedRows, 
+            array $ParentColumns, array $ReferencedColumns) {
+        
+        $KeyedParentRows = $this->HashRowsByColumns($ParentRows, $ParentColumns);
+        $KeyedRelatedRows = $this->HashRowsByColumns($RelatedRows, $ReferencedColumns);
+        foreach($KeyedParentRows as $Hash => $KeyedParentRow) {
+            if(isset($KeyedRelatedRows[$Hash])) {
+                $Map->Map($KeyedParentRow, $KeyedRelatedRows[$Hash]);
+            }
+        }
+    }
+    
     public function Persist(Relational\Transaction $Transaction, Relational\Row $Row, Relational\Row $RelatedRow) {
         $Transaction->Persist($RelatedRow);
     }
@@ -30,7 +40,7 @@ class ToOneRelation extends Relation implements Relational\IToOneRelation {
     public function Discard(Relational\Transaction $Transaction, 
             Relational\PrimaryKey $PrimaryKey) {
         $RelatedPrimaryKey = $this->GetTable()->Row();
-        $this->ForeignKey->MapForeignKey($PrimaryKey, $RelatedPrimaryKey);
+        $this->ForeignKey->MapReferencedKey($PrimaryKey, $RelatedPrimaryKey);
         
         $Table = $RelatedPrimaryKey->GetTable();
         

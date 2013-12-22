@@ -2,6 +2,7 @@
 
 namespace Storm\Drivers\Base\Mapping;
 
+use \Storm\Core\Containers\Map;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 use \Storm\Core\Mapping;
@@ -22,6 +23,28 @@ abstract class PropertyRelationMapping extends PropertyMapping implements IPrope
     }
     
     public function AddToRelationalRequest(Mapping\DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest) { }
+    
+    final protected function LoadRelatedRows(Mapping\RevivingContext $Context, Map $ResultRowStateMap) {
+        $RelationalRequest = new Relational\Request(array(), true);
+        $DomainDatabaseMap = $Context->GetDomainDatabaseMap();
+        $this->Relation->AddToRequest($RelationalRequest, $ResultRowStateMap->GetInstances());
+        $DomainDatabaseMap->MapEntityToRelationalRequest($this->GetEntityType(), $RelationalRequest);
+        
+        return $DomainDatabaseMap->GetDatabase()->Load($RelationalRequest);
+    }
+    public function Revive(Mapping\RevivingContext $Context, Map $ResultRowStateMap) {
+        $RelatedRows = $this->LoadRelatedRows($Context, $ResultRowStateMap);
+        
+        $ParentRelatedRowsMap = $this->Relation->MapRelatedRows($ResultRowStateMap->GetInstances(), $RelatedRows);
+        $RevivedEntities = $Context->ReviveEntities($this->GetEntityType(), $RelatedRows);
+        $RelatedRowEntityMap = Map::From($RelatedRows, $RevivedEntities);
+        
+        $this->ReviveProperties($ResultRowStateMap, $ParentRelatedRowsMap, $RelatedRowEntityMap);
+    }
+    protected abstract function ReviveProperties(
+            Map $ResultRowStateMap,
+            Map $ParentRelatedRowsMap,
+            Map $RelatedRowEntityMap);
     
     /**
      * @return Relational\IRelation

@@ -13,6 +13,7 @@ class QueryBuilder {
     private $ParameterPlaceholder;
     private $Bindings;
     private $QueryString = '';
+    private $ExpressionCompiler;
     private $RequestCompiler;
     private $PredicateCompiler;
     private $IdentifierEscaper;
@@ -21,12 +22,14 @@ class QueryBuilder {
             IConnection $Connection,
             $ParameterPlaceholder,
             Bindings $Bindings,
+            IExpressionCompiler $ExpressionCompiler,
             IRequestCompiler $RequestCompiler,
             IPredicateCompiler $PredicateCompiler,
             IIdentifierEscaper $IdentifierEscaper) {
         $this->Connection = $Connection;
         $this->ParameterPlaceholder = $ParameterPlaceholder;
         $this->Bindings = $Bindings;
+        $this->ExpressionCompiler = $ExpressionCompiler;
         $this->RequestCompiler = $RequestCompiler;
         $this->PredicateCompiler = $PredicateCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
@@ -52,6 +55,13 @@ class QueryBuilder {
      */
     final public function GetIdentifierEscaper() {
         return $this->IdentifierEscaper;
+    }
+    
+    /**
+     * @return IExpressionCompiler
+     */
+    final public function GetExpressionCompiler() {
+        return $this->ExpressionCompiler;
     }
     
     /**
@@ -146,8 +156,9 @@ class QueryBuilder {
     private function GetColumnIdentifier($TableName, $ColumnName, Relational\Columns\Column $Column, $UseColumnFormat = true, $Alias = true) {
         $EscapedIdentifier = $this->IdentifierEscaper->Escape([$TableName, $ColumnName]);
         
-        if($UseColumnFormat) {        
-            $FullIdentifier = $this->ReplacePlaceholder($Column->GetDataType()->GetReviveFormat(), self::DefaultPlaceholder, $EscapedIdentifier);
+        if($UseColumnFormat) {
+            $this->ExpressionCompiler->Append($this, 
+                    $Column->GetDataType()->GetReviveExpression(Relational\Expressions\Expression::Column($Column)));            
         }
         else {
             $FullIdentifier = $EscapedIdentifier;
@@ -221,26 +232,22 @@ class QueryBuilder {
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $QueryPlaceholders);
     }
     
-    final public function AppendColumnData($QueryStringFormat, Relational\Columns\Column $Column, $Data, $ValuePlaceholder = self::DefaultPlaceholder) {     
-        $ColumnPlaceholder = $this->GetColumnPlaceholder($Column, $Data);
-        
-        $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $ColumnPlaceholder);
+    final public function AppendColumnData(Relational\Columns\Column $Column, $Value) {     
+        $this->ExpressionCompiler->Append($this, 
+                $Column->GetDataType()->GetPersistExpression(
+                        Relational\Expressions\Expression::Constant($Value)));
     }
     
-    final public function AppendAllColumnData($QueryStringFormat, \Storm\Core\Relational\ColumnData $Data, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {     
-        $QueryPlaceholders = array();
-        $Table = $Data->GetTable();
-        foreach($Data->GetColumnData() as $ColumnName => $Value) {
-            $QueryPlaceholders[] = $this->GetColumnPlaceholder($Table->GetColumn($ColumnName), $Value);
+    final public function AppendAllColumnData(\Storm\Core\Relational\ColumnData $Data, $Delimiter) {     
+        $First = true;
+        foreach($Data->GetColumnData() as $ColumnIdentifier => $Value) {
+            if($First) $First = false;
+            else
+                $this->QueryString .= $Delimiter;
+            
+            $Column = $Data->GetColumn($ColumnIdentifier);
+            $this->AppendColumnData($Column, $Value);
         }
-        
-        $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, implode($Delimiter, $QueryPlaceholders));
-    }
-    private function GetColumnPlaceholder(Relational\Columns\Column $Column, $Value) {
-        $DataType = $Column->GetDataType();
-        $this->Bindings->Bind($Value, $DataType->GetParameterType());
-        return $this->ReplacePlaceholder
-                ($DataType->GetPersistFormat(), self::DefaultPlaceholder, $this->ParameterPlaceholder);
     }
     
     // </editor-fold>

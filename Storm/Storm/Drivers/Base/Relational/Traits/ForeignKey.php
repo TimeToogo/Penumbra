@@ -5,6 +5,7 @@ namespace Storm\Drivers\Base\Relational\Traits;
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\RelationalTableTrait;
+use \Storm\Drivers\Base\Relational\Constraints\ForeignKeyPredicate;
 
 final class ForeignKeyMode {
     const NoAction = 0;
@@ -58,6 +59,14 @@ class ForeignKey extends RelationalTableTrait {
         return $this->ReferencedTable;
     }
     
+    final public function GetParentColumns() {
+        return $this->ReferencedColumnMap->GetInstances();
+    }
+    
+    final public function GetReferencedColumns() {
+        return $this->ReferencedColumnMap->GetToInstances();
+    }
+    
     /**
      * @return Map
      */
@@ -79,6 +88,15 @@ class ForeignKey extends RelationalTableTrait {
     final public function GetDeleteMode() {
         return $this->DeleteMode;
     }
+    
+    /**
+     * @return Constraints\Predicate
+     */
+    final public function GetConstraintPredicate() {
+        return new ForeignKeyPredicate($this);
+    }
+    
+    
 
     protected function IsRelationalTrait(RelationalTableTrait $OtherTrait) {
         if(!$this->ReferencedTable->Is($OtherTrait->ReferencedTable))
@@ -92,7 +110,7 @@ class ForeignKey extends RelationalTableTrait {
             count(array_diff_assoc($OtherTrait->ReferencedColumnNameMap, $this->ReferencedColumnNameMap)) === 0; 
     }
     
-    final public function MapPrimaryKey(Relational\ColumnData $PrimaryKey, Relational\ColumnData $ForeignKey) {
+    final public function MapParentKey(Relational\ColumnData $PrimaryKey, Relational\ColumnData $ForeignKey) {
         foreach($PrimaryKey as $ColumnName => $Data) {
             if(isset($this->PrimaryColumnNameMap[$ColumnName])) {
                 $PrimaryColumn = $this->PrimaryColumnNameMap[$ColumnName];
@@ -102,7 +120,7 @@ class ForeignKey extends RelationalTableTrait {
         }
     }
     
-    final public function MapForeignKey(Relational\ColumnData $ForeignKey, Relational\ColumnData $PrimaryKey) {
+    final public function MapReferencedKey(Relational\ColumnData $ForeignKey, Relational\ColumnData $PrimaryKey) {
         foreach($ForeignKey as $ColumnName => $Data) {
             if(isset($this->ForeignColumnNameMap[$ColumnName])) {
                 $ForeignColumn = $this->ForeignColumnNameMap[$ColumnName];

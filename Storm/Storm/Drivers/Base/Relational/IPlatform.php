@@ -25,6 +25,11 @@ interface IPlatform {
     public function GetKeyGeneratorSet();
     
     /**
+     * @return Queries\IExpressionCompiler
+     */
+    public function GetExpressionCompiler();
+    
+    /**
      * @return Queries\IRequestCompiler
      */
     public function GetRequestCompiler();
@@ -48,16 +53,6 @@ interface IPlatform {
      * @return Queries\IQueryExecutor
      */
     public function GetQueryExecutor();
-    
-    /**
-     * @return Relations\IToOneReviver
-     */
-    public function GetToOneRelationReviver();
-    
-    /**
-     * @return Relations\IToManyReviver
-     */
-    public function GetToManyRelationReviver();
 }
 
 ?>

@@ -26,48 +26,17 @@ abstract class PropertyEntityMapping extends PropertyRelationMapping implements 
         return $this->ToOneRelation;
     }
     
-    public function Revive(Mapping\RevivingContext $Context, Map $ResultRowStateMap) {
-        $RelationalRequest = new Relational\Request(array(), true);
-        $DomainDatabaseMap = $Context->GetDomainDatabaseMap();
-        $DomainDatabaseMap->MapEntityToRelationalRequest($this->GetEntityType(), $RelationalRequest);
-        $this->RevivalRequest($RelationalRequest, $Context, $ResultRowStateMap);
-        
-        $RelatedRows = $DomainDatabaseMap->GetDatabase()->Load($RelationalRequest);
-        $RevivedEntities = $Context->ReviveEntities($this->GetEntityType(), $RelatedRows);
-        
+    protected function ReviveProperties(
+            Map $ResultRowStateMap, 
+            Map $ParentRelatedRowsMap, 
+            Map $RelatedRowEntityMap) {
         $Property = $this->GetProperty();
         foreach($ResultRowStateMap as $ResultRow) {
-            $MappedPrimaryKey = $this->ToOneRelation->MapToRelatedPrimaryKey($ResultRow);
             $State = $ResultRowStateMap[$ResultRow];
-            $RevivedEntity = count($RevivedEntities) === 0 ? null : reset($RevivedEntities);
-            $MatchedForeignKeys = array_filter($ForeignKeys, function ($ForeignKey) use (&$RelatedPrimaryKey) { 
-                return $ForeignKey->Matches($RelatedPrimaryKey);
-            });
-            foreach($MatchedForeignKeys as $MatchedKey => $MatchedForeignKey) {
-                $RelatedRowOrdered[$MatchedKey] = $RelatedRow;
-                unset($ForeignKeys[$MatchedKey]);
-            }
-            $State[$Property] = $RevivedEntity;
+            $RelatedRow = $ParentRelatedRowsMap[$ResultRow];
+            $State[$Property] = isset($RelatedRowEntityMap[$RelatedRow]) ? 
+                    $RelatedRowEntityMap[$RelatedRow] : null;
         }
-    }
-    protected abstract function RevivalRequest(Relational\Request $RelationalRequest, Mapping\RevivingContext $Context, Map $ResultRowStateMap);
-    
-    
-    private function OrderRelatedRows(array $ForeignKeys, array $RelatedRows) {
-        $RelatedRowOrdered = array();
-        
-        foreach($RelatedRows as $RelatedRow) {
-            $RelatedPrimaryKey = $RelatedRow->GetPrimaryKey();
-            $MatchedForeignKeys = array_filter($ForeignKeys, function ($ForeignKey) use (&$RelatedPrimaryKey) { 
-                return $ForeignKey->Matches($RelatedPrimaryKey);
-            });
-            foreach($MatchedForeignKeys as $MatchedKey => $MatchedForeignKey) {
-                $RelatedRowOrdered[$MatchedKey] = $RelatedRow;
-                unset($ForeignKeys[$MatchedKey]);
-            }
-        }
-        
-        return $RelatedRowOrdered;
     }
     
     final public function Persist(Mapping\PersistingContext $Context, Mapping\TransactionalContext $TransactionalContext) {

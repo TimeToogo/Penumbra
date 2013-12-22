@@ -20,12 +20,12 @@ final class EagerPropertyEntityMapping extends PropertyEntityMapping {
                 $this->GetEntityType(),
                 $RelationalRequest);
         
-        $RelationalRequest->AddPredicate($this->GetToOneRelation()->GetRelationPredicate());
+        $this->GetToOneRelation()->AddToRequest($RelationalRequest);
     }
 
     public function Revive(Mapping\RevivingContext $Context, Map $RowStateMap) {
         $Rows = iterator_to_array($RowStateMap, false);
-        $RelatedEntities = $Context->ReviveEntities($Rows);
+        $RelatedEntities = $Context->ReviveEntities($this->GetEntityType(), $Rows);
         $Property = $this->GetProperty();
         foreach($Rows as $Key => $Row) {
             $EntityState = $RowStateMap[$Row];
