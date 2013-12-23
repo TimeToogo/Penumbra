@@ -26,21 +26,32 @@ interface IEntityRelationalMap {
     public function GetPropertyColumnMappings();
     
     /**
-     * @return Relational\IColumn[]
-     */
-    public function GetMappedColumn(Object\IProperty $Property);
-    
-    /**
-     * @return Object\IProperty[]
-     */
-    public function GetMappedProperty(Relational\IColumn $Column);
-    
-    /**
      * @return IPropertyRelationMapping[]
      */
     public function GetProperyRelationMappings();
     
-    public function AddToRelationalRequest(Relational\Request $Request);
+    /**
+     * @return Relational\IColumn
+     */
+    public function GetMappedColumn(Object\IProperty $Property);
+    
+    /**
+     * @return Object\IProperty
+     */
+    public function GetMappedProperty(Relational\IColumn $Column);
+    
+    /**
+     * @return Relational\IColumn[]
+     */
+    public function GetAllMappedColumns(array $Properties = null);
+    
+    /**
+     * @return Object\IProperty[]
+     */
+    public function GetAllMappedProperties(array $Columns = null);
+    
+    public function MapPropertyDataToColumnData(Object\PropertyData $PropertyData, Relational\ColumnData $ColumnData);
+    public function MapColumnDataToPropertyData(Relational\ColumnData $ColumnData, Object\PropertyData $PropertyData);
 }
 
 ?>

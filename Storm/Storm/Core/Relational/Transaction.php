@@ -43,6 +43,10 @@ final class Transaction {
         $this->PersistedRows[] = $Row;
     }
     
+    public function PersistAll(array $Rows) {
+        array_walk($Rows, [$this, 'Persist']);
+    }
+    
     public function Execute(Operation $Operation) {
         $this->Operations[] = $Operation;
     }

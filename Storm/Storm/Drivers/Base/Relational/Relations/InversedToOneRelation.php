@@ -17,6 +17,8 @@ class InversedToOneRelation extends ToOneKeyedRelation {
         $ParentKey = $ParentRow->GetDataFromColumns($ForeinKey->GetReferencedColumns());
         $ReferencedKey = $ParentRow->GetDataFromColumns($ForeinKey->GetParentColumns());
         $ForeinKey->MapReferencedKey($ParentKey, $ReferencedKey);
+        
+        return $ReferencedKey;
     }
     
     public function MapParentToRelatedRowsByKey(
@@ -38,7 +40,7 @@ class InversedToOneRelation extends ToOneKeyedRelation {
     public function GetForeignKey() {
         return $this->ForeignKey;
     }
-    public function Persist(Relational\Transaction $Transaction, Relational\Row $Row, Relational\Row $RelatedRow) {
+    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, Relational\Row $RelatedRow) {
         $Transaction->Persist($RelatedRow);
     }
 

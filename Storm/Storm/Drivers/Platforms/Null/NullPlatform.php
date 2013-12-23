@@ -11,8 +11,6 @@ final class NullPlatform implements Relational\IPlatform {
     private $IdentifierEscaper;
     private $DatabaseSyncer;
     private $QueryExecuter;
-    private $ToOneReviver;
-    private $ToManyReviver;
     
     public function __construct() {
         $this->Connection = new NullConnection();
@@ -21,8 +19,6 @@ final class NullPlatform implements Relational\IPlatform {
         $this->IdentifierEscaper = new NullIdentifierEscaper();
         $this->DatabaseSyncer = new NullDatabaseSyncer();
         $this->QueryExecuter = new NullQueryExecutor();
-        $this->ToOneReviver = new NullToOneReviver();
-        $this->ToManyReviver = new NullToOneReviver();
     }
 
     
@@ -50,13 +46,22 @@ final class NullPlatform implements Relational\IPlatform {
         return $this->QueryExecuter;
     }
 
-    public function GetToOneRelationReviver() {
-        return $this->ToOneReviver;
+    public function GetExpressionCompiler() {
+        
     }
-    
-    public function GetToManyRelationReviver() {
-        return $this->ToManyReviver;
+
+    public function GetExpressionMapper() {
+        
     }
+
+    public function GetPredicateCompiler() {
+        
+    }
+
+    public function GetRequestCompiler() {
+        
+    }
+
 }
 
 ?>

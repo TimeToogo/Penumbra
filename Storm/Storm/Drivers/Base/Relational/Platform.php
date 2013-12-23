@@ -46,15 +46,15 @@ class Platform implements IPlatform {
         return $this->Connection;
     }
     
-    public function GetExpressionMapper() {
+    final public function GetExpressionMapper() {
         return $this->ExpressionMapper;
     }
     
-    public function GetColumnSet() {
+    final public function GetColumnSet() {
         return $this->ColumnSet;
     }
     
-    public function GetKeyGeneratorSet() {
+    final public function GetKeyGeneratorSet() {
         return $this->KeyGeneratorSet;
     }
     

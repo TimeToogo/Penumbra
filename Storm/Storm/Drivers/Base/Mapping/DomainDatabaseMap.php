@@ -27,12 +27,12 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
         return $this->MappingConfiguration;
     }
     
-    final protected function MapExpression(Mapping\EntityRelationalMap $EntityRelationalMap, 
+    final protected function MapExpression(Mapping\IEntityRelationalMap $EntityRelationalMap, 
             O\Expression $Expression) {
         $ExpressionMapper = $this->GetDatabase()->GetPlatform()->GetExpressionMapper();
         switch ($Expression->GetType()) {
             case O\PropertyExpression::GetType():
-                return Expression::Column($EntityRelationalMap->GetMappedColumn($Expression->GetProperty()));
+                return Expression::ReviveColumn($EntityRelationalMap->GetMappedColumn($Expression->GetProperty()));
             
             case O\ConstantExpression::GetType():
                 return $ExpressionMapper->MapConstantExpression($Expression->GetValue());
@@ -76,6 +76,7 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
                 throw new Exception();
         }
     }
+    
 }
 
 ?>

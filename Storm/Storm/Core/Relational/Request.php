@@ -52,7 +52,12 @@ class Request {
     
     
     final public function IsConstrained() {
-        return count($this->Predicates) > 0;
+        foreach($this->Predicates as $Predicate) {
+            if(!$Predicate->IsEmpty())
+                return true;
+        }
+        
+        return false;
     }
     
     /**

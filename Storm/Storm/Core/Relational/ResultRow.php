@@ -48,11 +48,12 @@ class ResultRow extends ColumnData {
      * @return Row
      */
     final public function GetRow(Table $Table) {
-        if(!$this->IsOf($Table))
+        if(!$this->IsOf($Table)) {
             throw new \InvalidArgumentException('$Table must be a part of this row');
+        }
         
         $ColumnData = $this->GetColumnData();
-        $TableColumnData = array_intersect_key($ColumnData, $this->TableNameColumnMap[$Table->GetName()]);
+        $TableColumnData = array_intersect_key($ColumnData, $this->TableColumnsMap[$Table->GetName()]);
         
         return new Row($Table, $TableColumnData, true);
     }

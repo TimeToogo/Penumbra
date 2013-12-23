@@ -7,20 +7,22 @@ use \Storm\Drivers\Base\Relational;
 
 final class Platform extends Relational\Platform {
     public function __construct(Relational\Queries\IConnection $Connection, $DevelopmentMode) {
-        $ExpressionCompiler = new Queries\ExpressionCompiler();
-        $PredicateCompiler = new Queries\PredicateCompiler($ExpressionCompiler);
+        if($DevelopmentMode) {
+            $IdentifiersAreCaseSensitive = 
+                    ((int)$Connection->FetchValue('SELECT @@lower_case_table_names')) === 0;
+        }
         parent::__construct(
                 $Connection,
                 new ExpressionMapper(),
                 new Columns\ColumnSet(),
                 new PrimaryKeys\KeyGeneratorSet(/* TODO */),
-                $ExpressionCompiler,
-                new Queries\RequestCompiler($ExpressionCompiler, $PredicateCompiler),
-                $PredicateCompiler,
+                new Queries\ExpressionCompiler(new Queries\ExpressionOptimizer()),
+                new Queries\RequestCompiler(),
+                new Queries\PredicateCompiler(),
                 new Queries\IdentifierEscaper(),
                 $DevelopmentMode ? 
                         new Platforms\Development\Syncing\DatabaseSyncer
-                                (new Syncing\DatabaseBuilder(), new Syncing\DatabaseModifier()) : 
+                                (new Syncing\DatabaseBuilder(), new Syncing\DatabaseModifier(), $IdentifiersAreCaseSensitive) : 
                         new Platforms\Production\Syncing\DatabaseSyncer(),
                 new Queries\QueryExecutor());
     }

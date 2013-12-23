@@ -7,12 +7,12 @@ final class PrimaryKey extends TableColumnData {
         parent::__construct($Table, $PrimaryKeyData);
     }
     
-    protected function AddColumn($ColumnName, $Data) {
-        if(!$this->GetTable()->HasPrimaryKey($ColumnName)) {
+    protected function AddColumn(IColumn $Column, $Data) {
+        if(!$this->GetTable()->HasPrimaryKey($Column->GetName())) {
             throw new \InvalidArgumentException('$ColumnName must be a primary key column of ' . $this->GetTable()->GetName());
         }
         
-        parent::AddColumn($ColumnName, $Data);
+        parent::AddColumn($Column, $Data);
     }
 }
 

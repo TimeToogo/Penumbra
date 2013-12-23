@@ -4,7 +4,7 @@ namespace Storm\Drivers\Base\Relational\Constraints;
 
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
-use torm\Drivers\Base\Relational\Expressions\Operators\Binary;
+use \Storm\Drivers\Base\Relational\Expressions\Operators\Binary;
 
 class ForeignKeyPredicate extends Predicate {
     public function __construct(ForeignKey $ForeignKey) {

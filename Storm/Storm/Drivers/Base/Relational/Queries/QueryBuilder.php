@@ -6,6 +6,7 @@ use \Storm\Drivers\Base\Relational;
 use \Storm\Core\Relational\Request;
 use \Storm\Core\Relational\Operation;
 use \Storm\Core\Relational\Constraints\Predicate;
+use \Storm\Core\Relational\Expressions\Expression;
 
 class QueryBuilder {
     const DefaultPlaceholder = '#';
@@ -90,6 +91,21 @@ class QueryBuilder {
         $this->QueryString .= $QueryString;
     }
     
+    final public function AppendExpression(Expression $Expression) {
+        $this->ExpressionCompiler->Append($this, $Expression);
+    }
+    
+    final public function AppendExpressions(array $Expressions, $Delimiter) {
+        $First = true;
+        foreach ($Expressions as $Expression) {
+            if($First) $First = false;
+            else
+                $this->QueryString .= $Delimiter;
+            
+            $this->AppendExpression($Expression);
+        }
+    }
+    
     final public function AppendRequest(Request $Request) {
         $this->RequestCompiler->AppendRequest($this, $Request);
     }
@@ -111,64 +127,30 @@ class QueryBuilder {
     final public function AppendIdentifiers($QueryStringFormat, array $Identifiers, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
         $EscapedIdentifiers = $this->EscapeIdentifiers($Identifiers);
 
-        $this->AppendEscapedIdenitefiers($QueryStringFormat, $EscapedIdentifiers, $Delimiter, $ValuePlaceholder);
+        $this->AppendEscapedIdentifiers($QueryStringFormat, $EscapedIdentifiers, $Delimiter, $ValuePlaceholder);
     }
 
 
-    final public function AppendColumn($QueryStringFormat, 
-            Relational\Columns\Column $Column, $UseColumnFormat = true, $Alias = true, $ValuePlaceholder = self::DefaultPlaceholder) {
-        
-        $EscapedIdentifier = $this->GetColumnIdentifier($Column->GetTable()->GetName(), $Column->GetName(), $Column, 
-                $UseColumnFormat, $Alias);
+    final public function AppendColumn($QueryStringFormat, Relational\Columns\Column $Column, $Alias = null, $ValuePlaceholder = self::DefaultPlaceholder) {
+        $EscapedIdentifier = $this->GetColumnIdentifier($Column, $Alias);
         
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $EscapedIdentifier);
     }
-    
-    final public function AppendColumns($QueryStringFormat, array $Columns, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
-        $ColumnIdentifiers = $this->GetColumnIdentifiers($Columns);
 
-        $this->AppendEscapedIdenitefiers($QueryStringFormat, $ColumnIdentifiers, $Delimiter, $ValuePlaceholder);
-    }
-
-
-    final public function AppendTableColumns($QueryStringFormat, Relational\Table $Table, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
-        $ColumnIdentifiers = $this->GetColumnIdentifiers($Table->GetColumns());
-
-        $this->AppendEscapedIdenitefiers($QueryStringFormat, $ColumnIdentifiers, $Delimiter, $ValuePlaceholder);
-    }
-
-    private function AppendEscapedIdenitefiers($QueryStringFormat, array $Identifiers, $Delimiter, $ValuePlaceholder) {
+    private function AppendEscapedIdentifiers($QueryStringFormat, array $Identifiers, $Delimiter, $ValuePlaceholder) {
         $QueryIdentifiers = implode($Delimiter, $Identifiers);
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $QueryIdentifiers);
     }
     // </editor-fold>
     
-    // <editor-fold defaultstate="collapsed" desc="Identifier Helpers">
-    private function GetColumnIdentifiers(array $Columns) {
-        $Identifiers = array();
-        foreach ($Columns as $ColumnName => $Column) {
-            $Identifiers[] = $this->GetColumnIdentifier($Column->GetTable()->GetName(), $ColumnName, $Column);
-        }
-
-        return $Identifiers;
-    }
-    
-    private function GetColumnIdentifier($TableName, $ColumnName, Relational\Columns\Column $Column, $UseColumnFormat = true, $Alias = true) {
-        $EscapedIdentifier = $this->IdentifierEscaper->Escape([$TableName, $ColumnName]);
-        
-        if($UseColumnFormat) {
-            $this->ExpressionCompiler->Append($this, 
-                    $Column->GetDataType()->GetReviveExpression(Relational\Expressions\Expression::Column($Column)));            
-        }
-        else {
-            $FullIdentifier = $EscapedIdentifier;
+    // <editor-fold defaultstate="collapsed" desc="Identifier Helpers">    
+    private function GetColumnIdentifier(Relational\Columns\Column $Column, $Alias = null) {
+        $EscapedIdentifier = $this->IdentifierEscaper->Escape([$Column->GetTable()->GetName(), $Column->GetName()]);
+        if($Alias !== null) {
+            $EscapedIdentifier = $this->IdentifierEscaper->Alias($EscapedIdentifier, $Alias);
         }
         
-        if($Alias) {
-            $FullIdentifier = $this->IdentifierEscaper->Alias($FullIdentifier, $ColumnName);
-        }
-        
-        return $FullIdentifier;
+        return $EscapedIdentifier;
     }
 
     private function EscapeIdentifiers(array $Identifiers) {
@@ -234,7 +216,7 @@ class QueryBuilder {
     
     final public function AppendColumnData(Relational\Columns\Column $Column, $Value) {     
         $this->ExpressionCompiler->Append($this, 
-                $Column->GetDataType()->GetPersistExpression(
+                Relational\Expressions\Expression::PersistData($Column,
                         Relational\Expressions\Expression::Constant($Value)));
     }
     

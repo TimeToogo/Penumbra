@@ -15,16 +15,19 @@ final class EagerPropertyCollectionMapping extends PropertyCollectionMapping {
         parent::__construct($Property, $EntityType, $ToManyRelation);
     }
 
-    public function Revive(Mapping\RevivingContext $Context, Map $RowStateMap) {
-        $Rows = iterator_to_array($RowStateMap, false);
-        $RelatedRowsArray = $this->LoadRows($Context, $Rows);
+    public function Revive(Mapping\RevivingContext $Context, Map $ParentRowStateMap) {
+        $RelatedRows = $this->LoadRelatedRows($Context, $ParentRowStateMap);
+        $ParentRelatedRowArraysMap = $this->GetRelation()
+                ->MapRelatedRows($ParentRowStateMap->GetInstances(), $RelatedRows);
         
         $RelatedEntityType =  $this->GetEntityType();
-        foreach($Rows as $Key => $Row) {
-            $RelatedRows = $RelatedRowsArray[$Key];
+        $Property = $this->GetProperty();
+        foreach($ParentRelatedRowArraysMap as $ParentRow) {
+            $RelatedRows = $ParentRelatedRowArraysMap[$ParentRow];
             $RelatedEntities = $Context->ReviveEntities($RelatedEntityType, $RelatedRows);
-            $EntityState = $RowStateMap[$Row];
-            $EntityState[$this->GetProperty()] = new Collections\Collection($RelatedEntities, $RelatedEntityType);
+            
+            $State = $ParentRowStateMap[$ParentRow];
+            $State[$Property] = new Collections\Collection($RelatedEntities, $RelatedEntityType);
         }
     }
 }

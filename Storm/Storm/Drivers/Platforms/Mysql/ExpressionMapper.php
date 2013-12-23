@@ -3,14 +3,13 @@
 namespace Storm\Drivers\Platforms\Mysql;
 
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Relational\Expressions\IExpressionMapper;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Expressions as E;
 use \Storm\Core\Relational\Expressions as EE;
 use \Storm\Drivers\Base\Relational\Expressions\Operators as O;
 
-final class ExpressionMapper implements IExpressionMapper {
+final class ExpressionMapper extends E\ExpressionMapper {
     
     public function MapConstantExpression($Value) {
         if($Value instanceof \DateTime) {
@@ -98,7 +97,7 @@ final class ExpressionMapper implements IExpressionMapper {
             case O\Unary::PreIncrement:
                 return new E\BinaryOperationExpression(
                         new EE\ConstantExpression(1), 
-                        O\Binary::Subtraction, 
+                        O\Binary::Addition, 
                         $OperandExpression);
             
             case O\Unary::PreDecrement:
@@ -228,10 +227,9 @@ final class ExpressionMapper implements IExpressionMapper {
                 if(isset($ArgumentExpressions[1])) {
                     unset($MysqlArgumentExpressions[1]);
                     if($ArgumentExpressions[1]) {
-                        return 
-                        new E\FunctionCallExpression('UNHEX', [
-                            new E\FunctionCallExpression
-                                    ($MysqlFunctionName, $MysqlArgumentExpressions)]);
+                        return new E\FunctionCallExpression('UNHEX', [
+                                new E\FunctionCallExpression
+                                        ($MysqlFunctionName, $MysqlArgumentExpressions)]);
                     }
                 }
                 break;

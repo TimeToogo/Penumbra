@@ -27,7 +27,7 @@ abstract class PropertyRelationMapping extends PropertyMapping implements IPrope
     final protected function LoadRelatedRows(Mapping\RevivingContext $Context, Map $ResultRowStateMap) {
         $RelationalRequest = new Relational\Request(array(), true);
         $DomainDatabaseMap = $Context->GetDomainDatabaseMap();
-        $this->Relation->AddToRequest($RelationalRequest, $ResultRowStateMap->GetInstances());
+        $this->Relation->AddParentPredicateToRequest($RelationalRequest, $ResultRowStateMap->GetInstances());
         $DomainDatabaseMap->MapEntityToRelationalRequest($this->GetEntityType(), $RelationalRequest);
         
         return $DomainDatabaseMap->GetDatabase()->Load($RelationalRequest);

@@ -3,8 +3,24 @@
 namespace Storm\Drivers\Base\Relational\Expressions;
 
 use \Storm\Core\Relational\Expressions;
+use \Storm\Drivers\Base\Relational\Columns\Column;
 
 abstract class Expression extends Expressions\Expression {
+    
+    /**
+     * @return ReviveColumnExpression
+     */
+    public static function ReviveColumn(Column $Column) {
+        return new ReviveColumnExpression($Column);
+    }
+    
+    /**
+     * @return PersistDataExpression
+     */
+    public static function PersistData(Column $Column, parent $ValueExpression) {
+        return new PersistDataExpression($Column, $ValueExpression);
+    }
+    
     /**
      * @return BinaryOperationExpression
      */

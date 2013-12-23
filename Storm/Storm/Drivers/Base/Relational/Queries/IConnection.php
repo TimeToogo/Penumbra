@@ -29,18 +29,16 @@ interface IConnection {
      * @return IQuery
      */
     public function Prepare($QueryString, Bindings $Bindings = null);
+    /**
+     * @return IQuery
+     */
     public function Execute($QueryString, Bindings $Bindings = null);
     public function FetchValue($QueryString, Bindings $Bindings = null);
     
     /**
-     * @return Relational\Row[]
+     * @return Relational\ResultRow[]
      */
-    public function LoadRows(Relational\Table $Table, IQuery $Query);
-    
-    /**
-     * @return JoinedRow[]
-     */
-    public function LoadJoinedRows(array $JoinedTables, IQuery $Query);
+    public function LoadResultRows(array $Columns, IQuery $Query);
     
     public function Disconnect();
 }

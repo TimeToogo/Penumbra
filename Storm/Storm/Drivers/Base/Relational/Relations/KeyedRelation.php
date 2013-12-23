@@ -4,6 +4,7 @@ namespace Storm\Drivers\Base\Relational\Relations;
 
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Relational\Constraints;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
 abstract class KeyedRelation extends Relation {
@@ -39,7 +40,7 @@ abstract class KeyedRelation extends Relation {
         $ParentColumns = $this->ForeignKey->GetParentColumns();
         $ReferencedColumns = $this->ForeignKey->GetReferencedColumns();
         foreach($ParentRows as $ParentRow) {
-            $ReferencedKey = $this->MapParentKey($this->ForeignKey, $ParentRow);
+            $ReferencedKey = $this->MapParentRowToReferencedKey($this->ForeignKey, $ParentRow);
             
             $RuleGroup->AddRuleGroup(
                     Constraints\RuleGroup::Matches($ReferencedKey));

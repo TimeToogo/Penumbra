@@ -47,14 +47,6 @@ class Connection implements Queries\IConnection {
     public function IsInTransaction() {
         return $this->Connection->IsInTransaction();
     }
-
-    public function LoadRows(Relational\Table $Table, Queries\IQuery $Query) {
-        return $this->Connection->LoadRows($Table, $Query);
-    }
-    
-    public function LoadJoinedRows(array $JoinedTables, Queries\IQuery $Query) {
-        return $this->Connection->LoadJoinedRows($JoinedTables, $Query);
-    }
     
     public function Prepare($QueryString, Queries\Bindings $Bindings = null) {
         $this->Logger->Log('Preparing query: ' . $QueryString);
@@ -87,6 +79,14 @@ class Connection implements Queries\IConnection {
 
     public function SetRequestCompiler(Queries\IRequestCompiler $RequestCompiler) {
         return $this->Connection->SetRequestCompiler($RequestCompiler);
+    }
+
+    public function SetExpressionCompiler(Queries\IExpressionCompiler $ExpressionCompiler) {
+        return $this->Connection->SetExpressionCompiler($ExpressionCompiler);
+    }
+
+    public function LoadResultRows(array $Columns, Queries\IQuery $Query) {
+        return $this->Connection->LoadResultRows($Columns, $Query);
     }
 
 }

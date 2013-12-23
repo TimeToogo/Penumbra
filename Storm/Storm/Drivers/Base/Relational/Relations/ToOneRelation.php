@@ -18,6 +18,8 @@ class ToOneRelation extends ToOneKeyedRelation {
         $ParentKey = $ParentRow->GetDataFromColumns($ForeinKey->GetParentColumns());
         $ReferencedKey = $ParentRow->GetDataFromColumns($ForeinKey->GetReferencedColumns());
         $ForeinKey->MapParentKey($ParentKey, $ReferencedKey);
+        
+        return $ReferencedKey;
     }
     
     public function MapParentToRelatedRowsByKey(
@@ -33,7 +35,7 @@ class ToOneRelation extends ToOneKeyedRelation {
         }
     }
     
-    public function Persist(Relational\Transaction $Transaction, Relational\Row $Row, Relational\Row $RelatedRow) {
+    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, Relational\Row $RelatedRow) {
         $Transaction->Persist($RelatedRow);
     }
 

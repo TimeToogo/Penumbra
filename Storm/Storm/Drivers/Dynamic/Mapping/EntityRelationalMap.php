@@ -13,11 +13,9 @@ class EntityRelationalMap extends Mapping\EntityRelationalMap {
     private $PropertyMappings;
     
     public function __construct(
-            Object\EntityMap $EntityMap, 
-            Relational\Table $Table, 
+            Object\EntityMap $EntityMap,
             array $PropertyMappings) {
         $this->EntityType = $EntityMap;
-        $this->Table = $Table;
         $this->PropertyMappings = $PropertyMappings;
         
         parent::__construct();
@@ -32,7 +30,7 @@ class EntityRelationalMap extends Mapping\EntityRelationalMap {
     }
     
     protected function RegisterPropertyMappings(Registrar $Registrar, 
-            Object\EntityMap $EntityMap, Relational\Table $Table) {
+            Object\EntityMap $EntityMap, Relational\Database $Database) {
         $Registrar->RegisterAll($this->PropertyMappings);
     }
 }

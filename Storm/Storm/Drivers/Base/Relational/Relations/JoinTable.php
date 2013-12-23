@@ -123,33 +123,23 @@ abstract class JoinTable extends Base\Relational\Table {
     }
     
     /**
-     * @param Relational\PrimaryKey $PrimaryKey
-     * @param Relational\PrimaryKey $RelatedPrimaryKey
-     * @return Relational\PrimaryKey
+     * @param Relational\ColumnData $PrimaryKey1
+     * @param Relational\ColumnData $PrimaryKey2
+     * @return Relational\ColumnData
      */
-    final public function JoinRow(Relational\PrimaryKey $PrimaryKey, Relational\PrimaryKey $RelatedPrimaryKey) {
-        //TODO: error messages
-        if(!$PrimaryKey->GetTable()->Is($this->Table1) && !$PrimaryKey->GetTable()->Is($this->Table2))
-            throw new \InvalidArgumentException;
-        if(!$RelatedPrimaryKey->GetTable()->Is($this->Table1) && !$RelatedPrimaryKey->GetTable()->Is($this->Table2))
-            throw new \InvalidArgumentException;
-        if($PrimaryKey->GetTable()->Is($RelatedPrimaryKey->GetTable()))
-            throw new \InvalidArgumentException;
-        
+    final public function JoinRow(Relational\ColumnData $PrimaryKey1, Relational\ColumnData $PrimaryKey2) {
         $Row = $this->Row();
         
-        $Table = $PrimaryKey->GetTable();
-        $ForeignKeyMap = $this->GetForeignKey($Table)->GetReferencedColumnMap();
-        foreach($PrimaryKey as $ColumnName => $Data) {
-            $PrimaryColumn = $Table->GetColumn($ColumnName);
-            $Row[$ForeignKeyMap[$PrimaryColumn]] = $Data;
+        $ForeignKey1Map = $this->ForeignKey1->GetReferencedColumnMap();
+        foreach($ForeignKey1Map as $ParentColumn) {
+            $ReferencedColumn = $ForeignKey1Map[$ParentColumn];
+            $Row[$ParentColumn] = $PrimaryKey1[$ReferencedColumn];
         }
         
-        $RelatedTable = $RelatedPrimaryKey->GetTable();
-        $RelatedForeignKeyMap = $this->GetForeignKey($RelatedTable)->GetReferencedColumnMap();
-        foreach($RelatedPrimaryKey as $ColumnName => $Data) {
-            $PrimaryColumn = $RelatedTable->GetColumn($ColumnName);
-            $Row[$RelatedForeignKeyMap[$PrimaryColumn]] = $Data;
+        $ForeignKey2Map = $this->ForeignKey2->GetReferencedColumnMap();
+        foreach($ForeignKey2Map as $ParentColumn) {
+            $ReferencedColumn = $ForeignKey2Map[$ParentColumn];
+            $Row[$ParentColumn] = $PrimaryKey2[$ReferencedColumn];
         }
         
         return $Row;

@@ -15,10 +15,12 @@ final class NullConnection implements Relational\Queries\IConnection {
     public function Disconnect() { }
     public function Escape($Value, $ParameterType) { }
     public function GetLastInsertIncrement() { }
-    public function LoadRows(\Storm\Core\Relational\Table $Table, Relational\Queries\IQuery $Query) { }
+    public function LoadResultRows(array $Columns, Relational\Queries\IQuery $Query) { }
     public function QueryBuilder(Relational\Queries\Bindings $Bindings = null) { }
     public function SetIdentifierEscaper(Relational\Queries\IIdentifierEscaper $IdentifierEscaper) { }
-    public function LoadJoinedRows(array $JoinedTables, Relational\Queries\IQuery $Query) { }
+    public function SetExpressionCompiler(Relational\Queries\IExpressionCompiler $ExpressionCompiler) { }
+    public function SetPredicateCompiler(Relational\Queries\IPredicateCompiler $PredicateCompiler) { }
+    public function SetRequestCompiler(Relational\Queries\IRequestCompiler $RequestCompiler) { }
 }
 
 ?>

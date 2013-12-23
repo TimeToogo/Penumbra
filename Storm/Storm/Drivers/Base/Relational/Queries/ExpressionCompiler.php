@@ -7,8 +7,21 @@ use \Storm\Drivers\Base\Relational\Expressions as E;
 use \Storm\Core\Relational\Expressions\Expression;
 
 abstract class ExpressionCompiler implements IExpressionCompiler {
+    private $ExpressionOptimizer;
+    public function __construct(IExpressionOptimizer $ExpressionOptimizer) {
+        $this->ExpressionOptimizer = $ExpressionOptimizer;
+    }
+    
     final public function Append(QueryBuilder $QueryBuilder, Expression $Expression) {
+        $Expression = $this->ExpressionOptimizer->Optimize($Expression);
+        
         switch ($Expression->GetType()) {
+            case E\ReviveColumnExpression::GetType():
+                return $this->Append($QueryBuilder, $Expression->GetReviveExpression());
+                
+            case E\PersistDataExpression::GetType():
+                return $this->Append($QueryBuilder, $Expression->GetPersistExpression());
+                
             case CoreE\ColumnExpression::GetType():
                 return $this->AppendColumn($QueryBuilder, $Expression);
                 
@@ -37,12 +50,13 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
                 return $this->AppendList($QueryBuilder, $Expression);
 
             default:
-                throw new Exception();
+                throw new \Exception();
         }
     }
     
     protected function AppendColumn(QueryBuilder $QueryBuilder, CoreE\ColumnExpression $Expression) {
-        $QueryBuilder->AppendColumn('#', $Expression->GetTable(), $Expression->GetColumn(), true, false);
+        $Column = $Expression->GetColumn();
+        $QueryBuilder->AppendColumn('#', $Column);
     }
 
     protected function AppendConstant(QueryBuilder $QueryBuilder, CoreE\ConstantExpression $Expression) {

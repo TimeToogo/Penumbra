@@ -1,18 +1,27 @@
 <?php
 
-namespace Storm\Drivers\Platforms\Mysql;
+namespace Storm\Drivers\Platforms\Mysql\Queries;
 
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
-use \Storm\Drivers\Platforms\Mysql\Queries\RequestCompiler;
 use \Storm\Drivers\Base\Relational\Requests;
+use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
 class QueryExecutor extends Queries\QueryExecutor {
       
     protected function SelectQuery(QueryBuilder $QueryBuilder, Relational\Request $Request) {
-        $QueryBuilder->AppendColumns('SELECT # ', $Request->GetColumns(), ', ');
+        $QueryBuilder->Append('SELECT ');
+        $First = true;
+        foreach($Request->GetColumns() as $Column) {
+            if($First) $First = false;
+            else
+                $QueryBuilder->Append (', ');
+            
+            $QueryBuilder->AppendExpression(Expression::ReviveColumn($Column));
+            $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetIdentifier()]);
+        }
         $QueryBuilder->AppendIdentifiers('FROM # ', array_keys($Request->GetTables()), ', ');
     }
     
@@ -39,7 +48,8 @@ class QueryExecutor extends Queries\QueryExecutor {
         
         $QueryBuilder = $Connection->QueryBuilder();
         
-        $ColumnNames = array_keys($Table->GetColumns());
+        $Columns = $Table->GetColumns();
+        $ColumnNames = array_keys($Columns);
         $TableName = $Table->GetName();
         $Identifiers = array();
         foreach($ColumnNames as $ColumnName) {
@@ -56,7 +66,19 @@ class QueryExecutor extends Queries\QueryExecutor {
                 $QueryBuilder->Append(', ');
             
             $QueryBuilder->Append('(');
-            $QueryBuilder->AppendAllColumnData($Row, ',');
+            $First1 = true;
+            foreach($Columns as $Column) {
+                if($First1) $First1 = false;
+                else
+                    $QueryBuilder->Append(', ');
+                
+                if(isset($Row[$Column])) {
+                    $QueryBuilder->AppendColumnData($Column, $Row[$Column]);
+                }
+                else {
+                    $QueryBuilder->Append('DEFAULT');
+                }
+            }
             $QueryBuilder->Append(')');
         }
         

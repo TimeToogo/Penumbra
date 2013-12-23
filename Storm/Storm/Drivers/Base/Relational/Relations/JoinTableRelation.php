@@ -4,7 +4,7 @@ namespace Storm\Drivers\Base\Relational\Relations;
 
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Relational\Constraints\Predicate;
+use \Storm\Drivers\Base\Relational\Constraints;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
 class JoinTableRelation extends Relation implements Relational\IToManyRelation {
@@ -60,6 +60,7 @@ class JoinTableRelation extends Relation implements Relational\IToManyRelation {
     public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows) {
         $Request->AddTable($this->JoinTable);
         $Request->AddColumns($this->OtherForeignKey->GetParentColumns());
+        $Request->AddPredicate($this->ForeignKey->GetConstraintPredicate());
         
         $Predicate = new Constraints\Predicate();
         $RuleGroup = Constraints\RuleGroup::Any();
@@ -83,7 +84,7 @@ class JoinTableRelation extends Relation implements Relational\IToManyRelation {
         $ParentKeys = $this->OtherForeignKey->GetReferencedColumns();
         
         foreach($RelatedRows as $RelatedRow) {
-            $Hash = $RelatedRow->GetDataFromColumns($OtherJoinTableKeys);
+            $Hash = $RelatedRow->GetDataFromColumns($OtherJoinTableKeys)->Hash();
             if(!isset($GroupedRelatedRows[$Hash])) {
                 $GroupedRelatedRows[$Hash] = array();
             }
@@ -91,7 +92,7 @@ class JoinTableRelation extends Relation implements Relational\IToManyRelation {
         }
         
         foreach($ParentRows as $ParentRow) {
-            $Hash = $ParentRow->GetDataFromColumns($ParentKeys);
+            $Hash = $ParentRow->GetDataFromColumns($ParentKeys)->Hash();
             if(!isset($GroupedRelatedRows[$Hash])) {
                 $Map->Map($ParentRow, new \ArrayObject(array()));
             }
@@ -101,15 +102,17 @@ class JoinTableRelation extends Relation implements Relational\IToManyRelation {
         }
     }
 
-    public function Persist(Relational\Transaction $Transaction, Relational\Row $Row, 
+    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, 
             array $PersistedRelatedRows, array $DiscardedPrimaryKeys) {
         
-        $PrimaryKey = $Row->GetPrimaryKey();
         foreach($PersistedRelatedRows as $RelatedRow) {
-            $Transaction->Persist($RelatedRow);
-            
-            $RelatedPrimaryKey = $RelatedRow->GetPrimaryKey();
-            $JoinRow = $this->JoinTable->JoinRow($PrimaryKey, $RelatedPrimaryKey);
+            $Transaction->PersistAll($RelatedRow->GetRows());
+            if($this->IsTableTwo) {
+                $JoinRow = $this->JoinTable->JoinRow($ParentData, $RelatedRow);
+            }
+            else {
+                $JoinRow = $this->JoinTable->JoinRow($RelatedRow, $ParentData);                
+            }
             $Transaction->Persist($JoinRow);
         }
         foreach($DiscardedPrimaryKeys as $PrimaryKey) {
@@ -128,7 +131,7 @@ class JoinTableRelation extends Relation implements Relational\IToManyRelation {
         $ForeignKey->MapParentKey($PrimaryKey, $ForeignKeyData);
 
         $Request = new Relational\Request($this->JoinTable, false);
-        $Predicate = Predicate::On($this->JoinTable)
+        $Predicate = Constraints\Predicate::On($this->JoinTable)
                 ->Matches($ForeignKeyData);
         $Request->AddPredicate($Predicate);
         

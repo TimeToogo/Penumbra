@@ -7,11 +7,6 @@ use \Storm\Core\Relational\Constraints\RuleGroup;
 use \Storm\Core\Relational\Constraints\Rule;
 
 abstract class PredicateCompiler implements IPredicateCompiler {
-    private $ExpressionCompiler;
-    public function __construct(IExpressionCompiler $ExpressionCompiler) {
-        $this->ExpressionCompiler = $ExpressionCompiler;
-    }
-
     final public function Append(QueryBuilder $QueryBuilder, Predicate $Predicate) {
         $this->AppendRuleGroups($QueryBuilder, $Predicate->GetRuleGroups());
     }
@@ -31,7 +26,7 @@ abstract class PredicateCompiler implements IPredicateCompiler {
     protected abstract function AppendOrRules(QueryBuilder $QueryBuilder, array $RuleGroups, array $Rules);
     
     final protected function AppendRule(QueryBuilder $QueryBuilder, Rule $Rule) {
-        $this->ExpressionCompiler->Append($QueryBuilder, $Rule->GetExpression());
+        $QueryBuilder->AppendExpression($Rule->GetExpression());
     }
 }
 

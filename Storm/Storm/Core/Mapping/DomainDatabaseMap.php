@@ -147,7 +147,7 @@ abstract class DomainDatabaseMap {
     final public function MapRequest(Object\IRequest $ObjectRequest) {
         $EntityRelationalMap = $this->VerifyRelationMap($ObjectRequest->GetEntityType());
         
-        $RelationalRequest = new Relational\Request($ObjectRequest->IsSingleEntity());
+        $RelationalRequest = new Relational\Request(array(), $ObjectRequest->IsSingleEntity());
         $this->MapPropetiesToRelationalRequest($EntityRelationalMap, $RelationalRequest, $ObjectRequest->GetProperties());
         
         $this->MapRequestData($EntityRelationalMap, $ObjectRequest, $RelationalRequest);
@@ -319,13 +319,13 @@ abstract class DomainDatabaseMap {
      * @param Object\State $State
      */
     final public function PersistState(TransactionalContext $TransactionalContext, Object\State $State) {
-        $Row = $this->PersistStateRelations($TransactionalContext, $State);
-        $TransactionalContext->GetTransaction()->Persist($Row);
+        $Rows = $this->PersistStateRelations($TransactionalContext, $State);
+        $TransactionalContext->GetTransaction()->PersistAll($Rows);
     }
 
     /**
      * @internal
-     * @return Relational\Row
+     * @return Relational\Row[]
      */
     final public function PersistEntityRelations(TransactionalContext $TransactionalContext, $Entity) {
         $State = $this->Domain->State($Entity);
@@ -336,17 +336,17 @@ abstract class DomainDatabaseMap {
      * @internal
      * @param Relational\Transaction $Transaction
      * @param Object\State $State
-     * @return Relational\Row
+     * @return Relational\ResultRow
      */
     final public function PersistStateRelations(TransactionalContext $TransactionalContext, Object\State $State) {
         $EntityRelationalMap = $this->VerifyRelationMap($State->GetEntityType());
-        $Row = $EntityRelationalMap->GetTable()->Row();
-        $Context = new PersistingContext($this, $State, $Row);
+        $ColumnData = new Relational\ResultRow($EntityRelationalMap->GetAllMappedColumns());
+        $Context = new PersistingContext($this, $State, $ColumnData);
         foreach ($EntityRelationalMap->GetPropertyMappings() as $Mapping) {
             $Mapping->Persist($Context, $TransactionalContext);
         }
 
-        return $Row;
+        return $ColumnData;
     }
 
     /**
@@ -396,7 +396,7 @@ abstract class DomainDatabaseMap {
         $TransactionalContext = new TransactionalContext($this, $Transaction);
         foreach($UnitOfWork->GetPersistedEntityStates() as $PersistedEntityState) {
             $PersistedRow = $TransactionalContext->PersistStateRelations($PersistedEntityState);
-            $Transaction->Persist($PersistedRow);
+            $Transaction->PersistAll($PersistedRow->GetRows());
         }
         foreach($UnitOfWork->GetOperations() as $Operation) {
             $Transaction->Execute($this->MapOperation($Operation));
@@ -424,8 +424,19 @@ abstract class DomainDatabaseMap {
             });
             
             $EntityRelationalMap = $this->GetRelationMap($EntityType);
-            $Table = $EntityRelationalMap->GetTable();
             $EntityMap = $EntityRelationalMap->GetEntityMap();
+            
+            $IdentityProperties = $EntityMap->GetIdentityProperties();
+            $PrimaryKeyColumns = $EntityRelationalMap->GetAllMappedColumns($IdentityProperties);
+            $Table = null;
+            foreach($PrimaryKeyColumns as $Column) {
+                if($Table === null) {
+                    $Table = $Column->GetTable();
+                }
+                else if(!$Column->GetTable()->Is($Table)) {
+                    throw new Exception('Identity properties cannot map to columns across multiple tables');
+                }
+            }
             
             $UnidentifiableEntities = $this->GetUnidentifiable($EntityMap, $Entities);
             
