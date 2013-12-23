@@ -1,0 +1,5 @@
+Options +FollowSymlinks
+RewriteEngine on
+
+RewriteCond $1 !^(Bootstrapper\.php)
+RewriteRule ^(.*)$ Bootstrapper.php/$1 [L]

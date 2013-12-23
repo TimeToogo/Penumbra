@@ -1,0 +1,86 @@
+<?php
+
+namespace StormTests;
+
+date_default_timezone_set('Australia/Melbourne');
+
+ini_set('display_errors', 'On');
+error_reporting(-1);
+set_time_limit(30);
+
+define('DIRECTORY_SEPERATOR', '/');
+define('BASE_PATH', str_replace('\\', DIRECTORY_SEPERATOR, __DIR__) . DIRECTORY_SEPERATOR);
+define('ROOT_NAMESPACE', __NAMESPACE__);
+
+$GLOBALS['LoadCount'] = 0;
+$GLOBALS['LoadList'] = array();
+
+function autoload($ClassName) {
+    $FullClass = '\\' . $ClassName;
+    if(class_exists($FullClass) || interface_exists($FullClass))
+        return;
+    
+    $ClassName = str_replace(ROOT_NAMESPACE . '\\', '', $ClassName);
+    
+    $FilePath = BASE_PATH;
+    $FilePath .= str_replace('\\', DIRECTORY_SEPERATOR, $ClassName) . '.php';
+    
+    if(file_exists($FilePath)) {
+        require_once $FilePath;
+        
+        $GLOBALS['LoadCount']++;
+        $GLOBALS['LoadList'][] = $FilePath;
+    }
+}
+spl_autoload_register(__NAMESPACE__ . '\autoload');
+
+function ShowTests() {
+    foreach(scandir(BASE_PATH) as $Directory) {
+        if ($Directory === '.' || $Directory === '..') continue;
+        
+        if(is_dir($Directory)) {
+            echo '<a href=\'' . explode('?', $_SERVER["REQUEST_URI"])[0] . '?Test=' . urlencode($Directory) . '\'>' . $Directory . '</a>';
+            echo '<br />';
+        }
+    }
+}
+
+$Success = false;
+if(isset($_GET['Test'])) {
+    $TestDir = $_GET['Test'];
+    
+    $TestFile = BASE_PATH . $TestDir . DIRECTORY_SEPERATOR . 'Test.php';
+    var_dump($TestDir);
+    if(file_exists($TestFile)) {
+        var_dump('Running Test From Dir: ' . $TestDir);
+        $TestInstance = require_once $TestFile;
+        if($TestInstance instanceof IStormTest)
+        {
+            require_once 'UBench.php';
+            require_once '../StormLoader.php';
+            
+            $Benchmark = new \Ubench();
+            
+            $Benchmark->start();
+            $Storm = $TestInstance->GetStorm();
+            $Benchmark->end();
+            
+            var_dump('Storm');
+            var_dump($Benchmark->getTime());
+            var_dump($Benchmark->getMemoryPeak());
+            
+            $Benchmark->start();
+            $Result = $TestInstance->Run($Storm);
+            $Benchmark->end();
+            
+            var_dump('Test');
+            var_dump($Benchmark->getTime());
+            var_dump($Benchmark->getMemoryPeak());
+            $Success = true;
+        }
+    }
+}
+if(!$Success)
+    ShowTests();
+
+?>

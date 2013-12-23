@@ -9,7 +9,7 @@ use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
 class ToManyRelation extends KeyedRelation implements Relational\IToManyRelation {
     public function __construct(Relational\Table $RelatedTable, ForeignKey $ForeignKey) {
-        parent::__construct($RelatedTable, $ForeignKey,
+        parent::__construct($ForeignKey, $RelatedTable,
                 Relational\DependencyOrder::Before, Relational\DependencyOrder::Before);
     }
     
@@ -18,6 +18,8 @@ class ToManyRelation extends KeyedRelation implements Relational\IToManyRelation
         $ParentKey = $ParentRow->GetDataFromColumns($ForeinKey->GetReferencedColumns());
         $ReferencedKey = $ParentRow->GetDataFromColumns($ForeinKey->GetParentColumns());
         $ForeinKey->MapReferencedKey($ParentKey, $ReferencedKey);
+        
+        return $ReferencedKey;
     }
     
     protected function MapParentToRelatedRowsByKey(
@@ -25,7 +27,7 @@ class ToManyRelation extends KeyedRelation implements Relational\IToManyRelation
             array $ParentColumns, array $ReferencedColumns) {
         $GroupedRelatedRows = array();
         foreach($RelatedRows as $RelatedRow) {
-            $Hash = $RelatedRow->GetDataFromColumns($ParentColumns);
+            $Hash = $RelatedRow->GetDataFromColumns($ParentColumns)->Hash();
             if(!isset($GroupedRelatedRows[$Hash])) {
                 $GroupedRelatedRows[$Hash] = array();
             }
@@ -33,7 +35,7 @@ class ToManyRelation extends KeyedRelation implements Relational\IToManyRelation
         }
         
         foreach($ParentRows as $ParentRow) {
-            $Hash = $ParentRow->GetDataFromColumns($ReferencedColumns);
+            $Hash = $ParentRow->GetDataFromColumns($ReferencedColumns)->Hash();
             if(!isset($GroupedRelatedRows[$Hash])) {
                 $Map->Map($ParentRow, new \ArrayObject(array()));
             }
@@ -43,9 +45,9 @@ class ToManyRelation extends KeyedRelation implements Relational\IToManyRelation
         }
     }
     
-    public function Persist(Relational\Transaction $Transaction, Relational\Row $Row, array $PersistedRelatedRows, array $DiscardedPrimaryKeys) {
+    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, array $PersistedRelatedRows, array $DiscardedPrimaryKeys) {
         foreach($PersistedRelatedRows as $PersistedRelatedRow) {
-            $Transaction->Persist($PersistedRelatedRow);
+            $Transaction->PersistAll($PersistedRelatedRow->GetRows());
         }
         foreach($DiscardedPrimaryKeys as $DiscardedPrimaryKey) {
             $Transaction->Discard($DiscardedPrimaryKey);

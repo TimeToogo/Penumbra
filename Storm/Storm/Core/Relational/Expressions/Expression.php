@@ -6,9 +6,6 @@ use \Storm\Core\Relational;
 
 abstract class Expression {
     use \Storm\Core\Helpers\Type;
-    public function __construct() {
-        
-    }
     
     /**
      * @return ColumnExpression

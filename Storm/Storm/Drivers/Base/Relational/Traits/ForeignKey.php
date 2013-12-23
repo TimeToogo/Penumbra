@@ -19,8 +19,8 @@ class ForeignKey extends RelationalTableTrait {
     private $ReferencedTable;
     private $ReferencedColumnMap;
     private $ReferencedColumnNameMap = array();
-    private $PrimaryColumnNameMap = array();
-    private $ForeignColumnNameMap = array();
+    private $PrimaryColumnIdentifierMap = array();
+    private $ForeignColumnIdentifierMap = array();
     
     private $UpdateMode;
     private $DeleteMode;
@@ -36,10 +36,10 @@ class ForeignKey extends RelationalTableTrait {
         $this->ReferencedTable = $ReferencedTable;
         $this->ReferencedColumnMap = $ReferencedColumnMap;
         foreach($ReferencedColumnMap as $PrimaryColumn) {
-            $this->PrimaryColumnNameMap[$PrimaryColumn->GetName()] = $PrimaryColumn;
+            $this->PrimaryColumnIdentifierMap[$PrimaryColumn->GetIdentifier()] = $PrimaryColumn;
             
             $ForeignColumn = $ReferencedColumnMap[$PrimaryColumn];
-            $this->ForeignColumnNameMap[$ForeignColumn->GetName()] = $ForeignColumn;
+            $this->ForeignColumnIdentifierMap[$ForeignColumn->GetIdentifier()] = $ForeignColumn;
             
             $this->ReferencedColumnNameMap[$PrimaryColumn->GetName()] = $ForeignColumn->GetName();
         }
@@ -111,9 +111,9 @@ class ForeignKey extends RelationalTableTrait {
     }
     
     final public function MapParentKey(Relational\ColumnData $PrimaryKey, Relational\ColumnData $ForeignKey) {
-        foreach($PrimaryKey as $ColumnName => $Data) {
-            if(isset($this->PrimaryColumnNameMap[$ColumnName])) {
-                $PrimaryColumn = $this->PrimaryColumnNameMap[$ColumnName];
+        foreach($PrimaryKey as $ColumnIdentifer => $Data) {
+            if(isset($this->PrimaryColumnIdentifierMap[$ColumnIdentifer])) {
+                $PrimaryColumn = $this->PrimaryColumnIdentifierMap[$ColumnIdentifer];
                 $ForeignColumn = $this->ReferencedColumnMap[$PrimaryColumn];
                 $ForeignKey[$ForeignColumn] = $Data;
             }
@@ -121,9 +121,9 @@ class ForeignKey extends RelationalTableTrait {
     }
     
     final public function MapReferencedKey(Relational\ColumnData $ForeignKey, Relational\ColumnData $PrimaryKey) {
-        foreach($ForeignKey as $ColumnName => $Data) {
-            if(isset($this->ForeignColumnNameMap[$ColumnName])) {
-                $ForeignColumn = $this->ForeignColumnNameMap[$ColumnName];
+        foreach($ForeignKey as $ColumnIdentifer => $Data) {
+            if(isset($this->ForeignColumnIdentifierMap[$ColumnIdentifer])) {
+                $ForeignColumn = $this->ForeignColumnIdentifierMap[$ColumnIdentifer];
                 $PrimaryColumn = $this->ReferencedColumnMap[$ForeignColumn];
                 $PrimaryKey[$PrimaryColumn] = $Data;
             }

@@ -7,13 +7,13 @@ use \Storm\Core\Relational;
 
 final class PersistingContext extends MappingContext {
     private $State;
-    private $Row;
+    private $ResultRow;
     
-    public function __construct(DomainDatabaseMap $DomainDatabaseMap, Object\State $State, Relational\Row $Row) {
+    public function __construct(DomainDatabaseMap $DomainDatabaseMap, Object\State $State, Relational\ResultRow $ResultRow) {
         parent::__construct($DomainDatabaseMap);
         
         $this->State = $State;
-        $this->Row = $Row;
+        $this->ResultRow = $ResultRow;
     }
     
     /**
@@ -24,10 +24,10 @@ final class PersistingContext extends MappingContext {
     }
     
     /**
-     * @return Relational\Row
+     * @return Relational\ResultRow
      */
-    public function GetRow() {
-        return $this->Row;
+    public function GetColumnData() {
+        return $this->ResultRow;
     }
 }
 

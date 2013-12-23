@@ -8,10 +8,6 @@ use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Core\Relational\Constraints;
 
 final class PredicateCompiler extends Queries\PredicateCompiler {
-    public function __construct(Queries\IExpressionCompiler $ExpressionCompiler) {
-        parent::__construct($ExpressionCompiler);
-    }
-    
     protected function AppendRuleGroups(QueryBuilder $QueryBuilder, array $RuleGroups) {
         $First = true;
         foreach($RuleGroups as $RuleGroup) {

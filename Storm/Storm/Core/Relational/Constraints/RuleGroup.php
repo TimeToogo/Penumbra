@@ -30,6 +30,18 @@ class RuleGroup {
         $this->RuleGroups[] = $RuleGroup;
     }
     
+    final public function IsEmpty() {
+        if(count($this->Rules) > 0)
+            return false;
+        
+        foreach($this->RuleGroups as $RuleGroup) {
+            if(!$RuleGroup->IsEmpty())
+                return false;
+        }
+        
+        return true;
+    }
+    
     final public function IsAllRequired() {
         return $this->IsAllRequired;
     }

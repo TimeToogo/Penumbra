@@ -41,11 +41,12 @@ abstract class PropertyEntityMapping extends PropertyRelationMapping implements 
     
     final public function Persist(Mapping\PersistingContext $Context, Mapping\TransactionalContext $TransactionalContext) {
         $RelatedRow = $this->PersistRelations($Context, $TransactionalContext);
-        if($RelatedRow !== null)
-            $this->ToOneRelation->Persist($TransactionalContext->GetTransaction(), $Context->GetRow(), $RelatedRow);
+        if($RelatedRow) {
+            $this->ToOneRelation->Persist($TransactionalContext->GetTransaction(), $Context->GetColumnData(), $RelatedRow->GetRow($this->ToOneRelation->GetTable()));
+        }
     }
     /**
-     * @return Relational\Row
+     * @return Relational\ResultRow
      */
     public abstract function PersistRelations(Mapping\PersistingContext $Context, Mapping\TransactionalContext $TransactionalContext);
     

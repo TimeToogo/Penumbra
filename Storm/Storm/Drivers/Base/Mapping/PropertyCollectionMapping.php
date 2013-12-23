@@ -26,10 +26,6 @@ abstract class PropertyCollectionMapping extends PropertyRelationMapping impleme
         return $this->ToManyRelation;
     }
     
-    final protected function LoadRows(Mapping\RevivingContext $Context, array $Rows) {
-        return $Context->LoadToManyRelationRows($this->ToManyRelation, $Rows);
-    }
-    
     protected function ReviveProperties(
             Map $ResultRowStateMap, 
             Map $ParentRelatedRowsMap, 
@@ -55,16 +51,14 @@ abstract class PropertyCollectionMapping extends PropertyRelationMapping impleme
         }
         if(!$RelatedEntityCollection->__IsAltered())
             return;
-        
-        $Row = $Context->GetRow();
-        
+                
         $PersistedRelatedRows = 
                 $TransactionalContext->PersistAllRelations(iterator_to_array($RelatedEntityCollection));
         
         $RemovedEntities = $RelatedEntityCollection->__GetRemovedEntities();
         $DiscardedRelatedPrimaryKeys = $TransactionalContext->DiscardAllRelations($RemovedEntities);
         
-        $this->ToManyRelation->Persist($TransactionalContext->GetTransaction(), $Row, $PersistedRelatedRows, $DiscardedRelatedPrimaryKeys);
+        $this->ToManyRelation->Persist($TransactionalContext->GetTransaction(), $Context->GetColumnData(), $PersistedRelatedRows, $DiscardedRelatedPrimaryKeys);
     }
     
     public function Discard(Mapping\DiscardingContext $Context, Mapping\TransactionalContext $TransactionalContext) {

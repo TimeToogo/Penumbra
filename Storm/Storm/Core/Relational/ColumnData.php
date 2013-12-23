@@ -22,10 +22,11 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
     
     final public function SetColumn(IColumn $Column, $Data) {
-        $this->AddColumn($Column->GetIdentifier(), $Data);
+        $this->AddColumn($Column, $Data);
     }
     
-    protected function AddColumn($ColumnIdentifier, $Data) {
+    protected function AddColumn(IColumn $Column, $Data) {
+        $ColumnIdentifier = $Column->GetIdentifier();
         if(!isset($this->Columns[$ColumnIdentifier])) {
             throw new \InvalidArgumentException('$Column must be one of: ' . 
                     implode(', ', array_keys($this->Columns)));

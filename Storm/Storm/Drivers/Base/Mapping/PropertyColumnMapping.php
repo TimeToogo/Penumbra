@@ -4,6 +4,7 @@ namespace Storm\Drivers\Base\Mapping;
 
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Mapping;
+use \Storm\Core\Mapping\IPropertyColumnMapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
@@ -25,7 +26,7 @@ final class PropertyColumnMapping extends PropertyMapping implements IPropertyCo
         return $this->Column;
     }
     
-    public function RelationalRequest(Relational\Request $RelationalRequest) {
+    public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
         $RelationalRequest->AddColumn($this->Column);
     }
 
@@ -40,7 +41,7 @@ final class PropertyColumnMapping extends PropertyMapping implements IPropertyCo
 
     public function Persist(Mapping\PersistingContext $Context, Mapping\TransactionalContext $TransactionalContext) {
         $PropertyValue = $Context->GetState()[$this->GetProperty()];
-        $this->GetColumn()->Store($Context->GetRow(), $PropertyValue);
+        $this->Column->Store($Context->GetColumnData($this->Column->GetTable()), $PropertyValue);
     }
 
     public function Discard(Mapping\DiscardingContext $Context, Mapping\TransactionalContext $TransactionalContext) { }

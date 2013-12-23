@@ -4,6 +4,8 @@ namespace Storm\Drivers\Platforms\Mysql\Columns\DataTypes;
 
 use \Storm\Drivers\Base\Relational\Columns;
 use \Storm\Drivers\Base\Relational\Queries\ParameterType;
+use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
 abstract class TimestampedDataType extends Columns\DataType {
     public function __construct($DataType) {
@@ -12,11 +14,11 @@ abstract class TimestampedDataType extends Columns\DataType {
                 ParameterType::Integer);
     }
     
-    public function GetReviveExpression(Expression $Expression) {
+    public function GetReviveExpression(CoreExpression $Expression) {
         return Expression::FunctionCall('UNIX_TIMESTAMP', Expression::ValueList([$Expression]));
     }
     
-    public function GetPersistExpression(Expression $Expression) {
+    public function GetPersistExpression(CoreExpression $Expression) {
         return Expression::FunctionCall('FROM_UNIXTIME', Expression::ValueList([$Expression]));
     }
     

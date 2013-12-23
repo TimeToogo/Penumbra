@@ -12,7 +12,7 @@ abstract class QueryExecutor implements IQueryExecutor {
         $this->SelectQuery($QueryBuilder, $Request);
         $QueryBuilder->AppendRequest($Request);
         
-        return $Connection->LoadRows($Request->GetTables(), $QueryBuilder->Build());
+        return $Connection->LoadResultRows($Request->GetColumns(), $QueryBuilder->Build());
     }
     protected abstract function SelectQuery(QueryBuilder $QueryBuilder, Relational\Request $Request);
     
@@ -38,6 +38,7 @@ abstract class QueryExecutor implements IQueryExecutor {
                         return $Table->GetName();
                     }, $TablesOrderedByPersistingDependency), 
                     $TablesOrderedByPersistingDependency);
+                    
             $this->ExecuteCommit($Connection, $Tables, $DiscardedRequests, $DiscardedPrimaryKeys, $Operations, $PersistedRowGroups);
             
             $Connection->CommitTransaction();
@@ -62,7 +63,7 @@ abstract class QueryExecutor implements IQueryExecutor {
     private function GroupRowsByTable(array $Rows) {
         $GroupedRows = array();
         foreach($Rows as $Row) {
-            $TableName = $Row->GetTables()->GetName();
+            $TableName = $Row->GetTable()->GetName();
             if(!isset($GroupedRows[$TableName])) {
                 $GroupedRows[$TableName] = array();
             }
@@ -77,7 +78,7 @@ abstract class QueryExecutor implements IQueryExecutor {
         $OrderedObjects = array();
         foreach($OrderedTables as $Table) {
             foreach ($ObjectsWithTable as $Key => $ObjectWithTable) {
-                if($ObjectWithTable->GetTables()->Is($Table)) {
+                if($ObjectWithTable->GetTable()->Is($Table)) {
                     $OrderedObjects[$Key] = $ObjectWithTable;
                     unset($ObjectsWithTable[$Key]);
                 }

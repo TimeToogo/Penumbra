@@ -6,13 +6,7 @@ use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
-class RequestCompiler  extends Queries\RequestCompiler {
-    public function __construct(
-            Queries\IExpressionCompiler $ExpressionCompiler, 
-            Queries\IPredicateCompiler $PredicateCompiler) {
-        parent::__construct($ExpressionCompiler, $PredicateCompiler);
-    }
-    
+class RequestCompiler  extends Queries\RequestCompiler {    
     protected function AppendOperationStatement(QueryBuilder $QueryBuilder, Relational\Operation $Operation) {
         $QueryBuilder->AppendIdentifier('UPDATE # ', [$Operation->GetTables()->GetName()]);
     }
@@ -28,7 +22,7 @@ class RequestCompiler  extends Queries\RequestCompiler {
         }
     }
     
-    protected function AppendPredicates(QueryBuilder $QueryBuilder, Relational\Table $Table, array $Predicates) {
+    protected function AppendPredicates(QueryBuilder $QueryBuilder, array $Predicates) {
         $QueryBuilder->Append(' WHERE TRUE AND ');
         $QueryBuilder->Append('(');
         $First = true;
@@ -42,7 +36,7 @@ class RequestCompiler  extends Queries\RequestCompiler {
         $QueryBuilder->Append(')');
     }
 
-    protected function AppendOrderedColumns(QueryBuilder $QueryBuilder, Relational\Table $Table, \SplObjectStorage $ColumnAscendingMap) {
+    protected function AppendOrderedColumns(QueryBuilder $QueryBuilder, \SplObjectStorage $ColumnAscendingMap) {
         $QueryBuilder->Append(' ORDER BY ');
         $First = true;
         foreach($ColumnAscendingMap as $Column) {
@@ -52,7 +46,7 @@ class RequestCompiler  extends Queries\RequestCompiler {
 
             $Ascending = $ColumnAscendingMap[$Column];
             $Direction = $Ascending ? 'ASC' : 'DESC';
-            $QueryBuilder->AppendIdentifier('# ' . $Direction, [$Table->GetName(), $Column->GetName()]);
+            $QueryBuilder->AppendColumn('# ' . $Direction, $Column);
         }
     }
 

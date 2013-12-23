@@ -11,6 +11,7 @@ abstract class EntityMap implements \IteratorAggregate {
     
     private $EntityType;
     private $Properties = array();
+    private $IdentityProperties = array();
     
     public function __construct() {
         $this->EntityType = $this->EntityType();
@@ -26,6 +27,8 @@ abstract class EntityMap implements \IteratorAggregate {
     
     final protected function AddProperty(IProperty $Property) {
         $this->Properties[$Property->GetName()] = $Property;
+        if($Property->IsIdentity())
+            $this->IdentityProperties[$Property->GetName()]  = $Property;
     }
     
     private function VerifyEntity($Entity) {
@@ -38,14 +41,18 @@ abstract class EntityMap implements \IteratorAggregate {
     }
     
     final public function HasIdentityProperty($Name) {
-        if(!isset($this->Properties[$Name]))
-            return false;
-        else 
-            return $this->GetProperty($Name)->IsIdentity();
+        return isset($this->IdentityProperties[$Name]);
     }
     
     final public function GetProperty($Name) {
         return $this->HasProperty($Name) ? $this->Properties[$Name] : null;
+    }
+    
+    /**
+     * @return IProperty[]
+     */
+    final public function GetIdentityProperties() {
+        return $this->IdentityProperties;
     }
     
     /**

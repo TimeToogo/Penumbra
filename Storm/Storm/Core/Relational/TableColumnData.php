@@ -17,13 +17,6 @@ abstract class TableColumnData extends ColumnData {
         return $this->Table;
     }
     
-    protected function AddColumn($ColumnName, $Data) {
-        if(!$this->Table->HasColumn($ColumnName))
-            throw new \InvalidArgumentException('$ColumnOrColumnName must be a column of table ' . $this->Table->GetName());
-        
-        parent::AddColumn($ColumnName, $Data);
-    }
-    
     final public function Matches(ColumnData $Data) {
         if(!$this->Table->Is($Data->Table))
             return false;

@@ -22,7 +22,7 @@ abstract class Database {
         foreach($Tables as $Key => $Table) {
             $Table->InitializeStructure($this);
             
-            unset($this->Tables[$Key]);
+            unset($Tables[$Key]);
             $Tables[$Table->GetName()] = $Table;
         }
         

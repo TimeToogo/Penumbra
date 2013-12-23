@@ -8,15 +8,7 @@ use \Storm\Core\Relational\Operation;
 use \Storm\Core\Object\Constraints\Predicate;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
-abstract class RequestCompiler implements IRequestCompiler {
-    private $ExpressionCompiler;
-    private $PredicateCompiler;
-    public function __construct(IExpressionCompiler $ExpressionCompiler, 
-            IPredicateCompiler $PredicateCompiler) {
-        $this->ExpressionCompiler = $ExpressionCompiler;
-        $this->PredicateCompiler = $PredicateCompiler;
-    }
-    
+abstract class RequestCompiler implements IRequestCompiler {    
     final public function AppendOperation(QueryBuilder $QueryBuilder, Operation $Operation) {
         $this->AppendOperationStatement($QueryBuilder, $Operation);
         $this->AppendOperationExpressions($QueryBuilder, $Operation->GetExpressions());
@@ -27,29 +19,28 @@ abstract class RequestCompiler implements IRequestCompiler {
     protected abstract function AppendOperationExpressions(QueryBuilder $QueryBuilder, array $Expressions);
     
     final protected function AppendOperationExpression(QueryBuilder $QueryBuilder, Expression $Expression) {
-        $this->ExpressionCompiler->Append($QueryBuilder, $Expression);
+        $QueryBuilder->AppendExpression($Expression);
     }
     
     final public function AppendRequest(QueryBuilder $QueryBuilder, Request $Request) {
-        $Table = $Request->GetTables();
         if($Request->IsConstrained()) {
-            $this->AppendPredicates($QueryBuilder, $Table, $Request->GetPredicates());
+            $this->AppendPredicates($QueryBuilder, $Request->GetPredicates());
         }
         if($Request->IsOrdered()) {
-            $this->AppendOrderedColumns($QueryBuilder, $Table, $Request->GetOrderedColumnsAscendingMap());
+            $this->AppendOrderedColumns($QueryBuilder, $Request->GetOrderedColumnsAscendingMap());
         }
         if($Request->IsRanged()) {
             $this->AppendRange($QueryBuilder, $Request->GetRangeOffset(), $Request->GetRangeAmount());
         }
     }
     
-    protected abstract function AppendPredicates(QueryBuilder $QueryBuilder, Relational\Table $Table, array $Predicates);
+    protected abstract function AppendPredicates(QueryBuilder $QueryBuilder, array $Predicates);
     
     final protected function AppendPredicate(QueryBuilder $QueryBuilder, Predicate $Predicate) {
-        $this->PredicateCompiler->Append($QueryBuilder, $Predicate);
+        $QueryBuilder->AppendPredicate($Predicate);
     }
     
-    protected abstract function AppendOrderedColumns(QueryBuilder $QueryBuilder, Relational\Table $Table, \SplObjectStorage $ColumnAscendingMap);
+    protected abstract function AppendOrderedColumns(QueryBuilder $QueryBuilder, \SplObjectStorage $ColumnAscendingMap);
     
     protected abstract function AppendRange(QueryBuilder $QueryBuilder, $Offset, $Limit);
 }

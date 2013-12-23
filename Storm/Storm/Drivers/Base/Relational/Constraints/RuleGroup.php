@@ -18,7 +18,7 @@ class RuleGroup extends \Storm\Core\Relational\Constraints\RuleGroup {
                     Expression::BinaryOperation(
                             Expression::Column($Column), 
                             Binary::Equality,
-                            Expression::Constant($Value)));
+                            Expression::PersistData($Column, Expression::Constant($Value))));
         }
         
         return RuleGroup::All($Rules);

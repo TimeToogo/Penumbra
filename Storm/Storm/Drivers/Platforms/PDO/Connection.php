@@ -78,21 +78,11 @@ class Connection extends Queries\Connection {
         return new Query($this->PDO->prepare($QueryString), $Bindings);
     }
     
-    public function LoadRows(Relational\Table $Table, Queries\IQuery $Query) {
+    public function LoadResultRows(array $Columns, Queries\IQuery $Query) {
         $Query->Execute();
         $Rows = array();
         while($RowData = $Query->FetchRow()) {
-            $Rows[] = new Relational\Row($Table, $RowData, true);
-        }
-        
-        return $Rows;
-    }
-    
-    public function LoadJoinedRows(array $JoinedTables, Queries\IQuery $Query) {
-        $Query->Execute();
-        $Rows = array();
-        while($RowData = $Query->FetchRow()) {
-            $Rows[] = new \Storm\Drivers\Base\Relational\JoinedRow($JoinedTables, $RowData, true);
+            $Rows[] = new Relational\ResultRow($Columns, $RowData, true);
         }
         
         return $Rows;

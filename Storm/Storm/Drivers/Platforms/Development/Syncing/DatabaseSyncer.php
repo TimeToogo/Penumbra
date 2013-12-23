@@ -8,14 +8,16 @@ use \Storm\Drivers\Base\Relational\Syncing\IDatabaseBuilder;
 use \Storm\Drivers\Base\Relational\Syncing\IDatabaseModifier;
 
 final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
+    private $IdentifiersAreCaseSenstive;
     private $DropUnspecifiedTables;
     private $DropUnspecifiedColumns;
     
     public function __construct(
             IDatabaseBuilder $Builder, IDatabaseModifier $Modifier,
-            $DropUnspecifiedTables = false, $DropUnspecifiedColumns = false) {
+            $IdentifiersAreCaseSenstive = true, $DropUnspecifiedTables = false, $DropUnspecifiedColumns = false) {
         parent::__construct($Builder, $Modifier);
         
+        $this->IdentifiersAreCaseSenstive = $IdentifiersAreCaseSenstive;
         $this->DropUnspecifiedTables = $DropUnspecifiedTables;
         $this->DropUnspecifiedColumns = $DropUnspecifiedColumns;
     }
@@ -28,12 +30,20 @@ final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
          $CurrentDatabase = $Builder->Build($Connection);
          
          $this->DropRelationalTraits($Connection, $Modifier, $CurrentDatabase);
-         foreach($Database->GetTables() as $Table) {
-             $this->SyncTable($Connection, $Modifier, $Table, $CurrentDatabase->GetTable($Table->GetName()), $CurrentDatabase);
+         $Tables = $Database->GetTables();
+         $CurrentTables = $CurrentDatabase->GetTables();
+         
+         if(!$this->IdentifiersAreCaseSenstive) {
+             $Tables = array_change_key_case($Tables);
+             $CurrentTables = array_change_key_case($CurrentTables);
          }
-         foreach($CurrentDatabase->GetTables() as $CurrentTable) {
-             if(!$Database->HasTable($CurrentTable->GetName())) {
-                 $this->SyncTable($Connection, $Modifier, null, $CurrentTable, $CurrentDatabase);
+         
+         foreach($Tables as $TableName => $Table) {
+             $this->SyncTable($Connection, $Modifier, $Table, isset($CurrentTables[$TableName]) ? $CurrentTables[$TableName] : null);
+         }
+         foreach($CurrentDatabase->GetTables() as $TableName => $CurrentTable) {
+             if(!isset($CurrentTables[$TableName])) {
+                 $this->SyncTable($Connection, $Modifier, null, $CurrentTable);
              }
          }
          $this->AddRelationalTraits($Connection, $Modifier, $Database);

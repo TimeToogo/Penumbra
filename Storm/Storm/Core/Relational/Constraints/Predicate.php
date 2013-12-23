@@ -15,6 +15,15 @@ class Predicate {
         }
     }
     
+    public function IsEmpty() {
+        foreach($this->RuleGroups as $RuleGroup) {
+            if(!$RuleGroup->IsEmpty())
+                return false;
+        } 
+        
+        return true;
+    }
+    
     public function AddRules(RuleGroup $Rules) {
         $this->VerifyRules($Rules);
         

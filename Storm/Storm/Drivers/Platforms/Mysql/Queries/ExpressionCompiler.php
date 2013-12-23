@@ -91,14 +91,16 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
     protected function AppendFunctionCall(QueryBuilder $QueryBuilder, E\FunctionCallExpression $Expression) {
         $QueryBuilder->Append($Expression->GetName());
         
+        $QueryBuilder->Append('(');
         $First = true;
-        foreach ($Expression->GetArgumentValueExpressions() as $ArgumentExpression) {
+        foreach ($Expression->GetArgumentValueListExpression()->GetValueExpressions() as $ArgumentExpression) {
             if($First) $First = false;
             else
                 $QueryBuilder->Append(', ');
             
             $this->Append($QueryBuilder, $ArgumentExpression);
         }
+        $QueryBuilder->Append(')');
     }
 
     protected function AppendList(QueryBuilder $QueryBuilder, E\ValueListExpression $Expression) {

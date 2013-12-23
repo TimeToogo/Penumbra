@@ -16,7 +16,6 @@ interface IExpressionMapper {
      * @return Expression
      */
     public function MapAssignmentExpression(
-            Relational\Table $Table,
             Relational\IColumn $Column, 
             $AssignmentOperator, 
             Expression $ValueExpression);

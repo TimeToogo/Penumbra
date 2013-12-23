@@ -4,6 +4,7 @@ namespace Storm\Drivers\Platforms\Mysql\Columns\DataTypes;
 
 use \Storm\Drivers\Base\Relational\Columns;
 use \Storm\Drivers\Base\Relational\Queries\ParameterType;
+use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
 class HexedBinaryDataType extends Columns\DataType {
@@ -13,11 +14,11 @@ class HexedBinaryDataType extends Columns\DataType {
                 ParameterType::String);
     }
     
-    public function GetReviveExpression(Expression $Expression) {
+    public function GetReviveExpression(CoreExpression $Expression) {
         return Expression::FunctionCall('HEX', Expression::ValueList([$Expression]));
     }
     
-    public function GetPersistExpression(Expression $Expression) {
+    public function GetPersistExpression(CoreExpression $Expression) {
         return Expression::FunctionCall('UNHEX', Expression::ValueList([$Expression]));
     }
 }

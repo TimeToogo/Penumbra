@@ -60,7 +60,9 @@ abstract class Table {
 
     final protected function AddColum(IColumn $Column) {
         if($Column->HasTable()) {
-            throw new Exception('Column belongs to another table');
+            if(!$Column->GetTable()->Is($this)) {
+                throw new \Exception('Column belongs to another table');
+            }
         }
         $Column->SetTable($this);
         
@@ -135,7 +137,7 @@ abstract class Table {
     
     private function GetDepedencyOrderBetweenInternal($ForPersising, Table $OtherTable, $Reversed = false) {
         foreach($this->AllRelations as $Relation) {
-            if($Relation->GetTables()->Is($OtherTable)) {
+            if($Relation->GetTable()->Is($OtherTable)) {
                 if($ForPersising)
                     return $Relation->GetPersistingDependencyOrder();
                 else

@@ -22,7 +22,7 @@ abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
         parent::__construct();
     }
     
-    protected abstract function InitializeMappings(Object\EntityMap $EntityMap, Relational\Table $Table);
+    protected abstract function InitializeMappings(Object\EntityMap $EntityMap, Relational\Database $Database);
     
     protected function OnInitialize(\Storm\Core\Mapping\DomainDatabaseMap $DomainDatabaseMap) {
         parent::OnInitialize($DomainDatabaseMap);
@@ -40,9 +40,9 @@ abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
     }
     
     final protected function RegisterPropertyMappings(Registrar $Registrar, 
-            Object\EntityMap $EntityMap, Relational\Table $Table) {
+            Object\EntityMap $EntityMap, Relational\Database $Database) {
         $this->PropertyMappings = array();
-        $this->InitializeMappings($EntityMap, $Table);
+        $this->InitializeMappings($EntityMap, $Database);
         $Registrar->RegisterAll($this->PropertyMappings);
     }
 }
@@ -78,35 +78,35 @@ final class FluentPropertyMapping {
         $Callback(new Mapping\PropertyColumnMapping($this->Property, $Column));
     }
     
-    public function ToEntity(Relational\IToOneRelation $ToOneRelation, $LoadingMode = null) {
+    public function ToEntity($EntityType, Relational\IToOneRelation $ToOneRelation, $LoadingMode = null) {
         $Callback = $this->PropertyMappingCallback;
-        $Callback($this->MakeToEntityMapping($ToOneRelation, $this->GetLoadingMode($LoadingMode)));
+        $Callback($this->MakeToEntityMapping($EntityType, $ToOneRelation, $this->GetLoadingMode($LoadingMode)));
     }
-    private function MakeToEntityMapping(Relational\IToOneRelation  $ToOneRelation, $LoadingMode) {
+    private function MakeToEntityMapping($EntityType, Relational\IToOneRelation  $ToOneRelation, $LoadingMode) {
         switch ($LoadingMode) {
             case LoadingMode::Eager:
-                return new Mapping\EagerPropertyEntityMapping($this->Property, $ToOneRelation);
+                return new Mapping\EagerPropertyEntityMapping($this->Property, $EntityType, $ToOneRelation);
             case LoadingMode::Lazy:
-                return new Mapping\LazyPropertyEntityMapping($this->Property, $ToOneRelation, $this->ProxyGenerator);
+                return new Mapping\LazyPropertyEntityMapping($this->Property, $EntityType, $ToOneRelation, $this->ProxyGenerator);
             case LoadingMode::Eager:
-                return new Mapping\ExtraLazyPropertyEntityMapping($this->Property, $ToOneRelation, $this->ProxyGenerator);
+                return new Mapping\ExtraLazyPropertyEntityMapping($this->Property, $EntityType, $ToOneRelation, $this->ProxyGenerator);
             default:
                 throw new \InvalidArgumentException('Unsupported loading mode');
         }
     }
     
-    public function ToCollection(Relational\IToManyRelation $ToManyRelation, $LoadingMode = null) {
+    public function ToCollection($EntityType, Relational\IToManyRelation $ToManyRelation, $LoadingMode = null) {
         $Callback = $this->PropertyMappingCallback;
-        $Callback($this->MakeToCollectionMapping($ToManyRelation, $this->GetLoadingMode($LoadingMode)));
+        $Callback($this->MakeToCollectionMapping($EntityType, $ToManyRelation, $this->GetLoadingMode($LoadingMode)));
     }
-    private function MakeToCollectionMapping(Relational\IToManyRelation $ToManyRelation, $LoadingMode) {
+    private function MakeToCollectionMapping($EntityType, Relational\IToManyRelation $ToManyRelation, $LoadingMode) {
         switch ($LoadingMode) {
             case LoadingMode::Eager:
-                return new Mapping\EagerPropertyCollectionMapping($this->Property, $ToManyRelation);
+                return new Mapping\EagerPropertyCollectionMapping($this->Property, $EntityType, $ToManyRelation);
             case LoadingMode::Lazy:
-                return new Mapping\LazyPropertyCollectionMapping($this->Property, $ToManyRelation, $this->ProxyGenerator);
+                return new Mapping\LazyPropertyCollectionMapping($this->Property, $EntityType, $ToManyRelation, $this->ProxyGenerator);
             case LoadingMode::Eager:
-                return new Mapping\ExtraLazyPropertyCollectionMapping($this->Property, $ToManyRelation, $this->ProxyGenerator);
+                return new Mapping\ExtraLazyPropertyCollectionMapping($this->Property, $EntityType, $ToManyRelation, $this->ProxyGenerator);
             default:
                 throw new \InvalidArgumentException('Unsupported loading mode');
         }

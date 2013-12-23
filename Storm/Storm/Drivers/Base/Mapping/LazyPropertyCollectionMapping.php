@@ -25,7 +25,7 @@ final class LazyPropertyCollectionMapping extends PropertyCollectionMapping {
                         ->MapRelatedRows($ResultRowStateMap->GetInstances(), $RelatedRows);
             }
             
-            return $Context->ReviveEntities($EntityType, $ParentRelatedRowArraysMap[$ParentRow]);
+            return $Context->ReviveEntities($EntityType, $ParentRelatedRowArraysMap[$ParentRow]->getArrayCopy());
         };
         
         $Property = $this->GetProperty();
@@ -33,8 +33,8 @@ final class LazyPropertyCollectionMapping extends PropertyCollectionMapping {
             $RelatedEntitiesLoader = function () use (&$RelatedEntitiesArrayLoader, $ResultRow) {
                 return $RelatedEntitiesArrayLoader($ResultRow);
             };
-            $EntityState = $ResultRowStateMap[$ResultRow];
-            $EntityState[$Property] = new Collections\LazyCollection($RelatedEntitiesLoader, $EntityType);
+            $State = $ResultRowStateMap[$ResultRow];
+            $State[$Property] = new Collections\LazyCollection($RelatedEntitiesLoader, $EntityType);
         }
     }
 }
