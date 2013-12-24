@@ -6,8 +6,8 @@ use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 
 class CastingDataType extends DataType {
     private $CastType;
-    public function __construct($DataType, $CastType, array $Parameters = array(), $Extra = null, $PersistFormat = '#', $ReviveFormat = '#', $ParameterType = ParameterType::String){
-        parent::__construct($DataType, $Parameters, $Extra, $PersistFormat, $ReviveFormat, $ParameterType);
+    public function __construct($DataType, $CastType, array $Parameters = array(), $Extra = null, $ParameterType = ParameterType::String){
+        parent::__construct($DataType, $Parameters, $Extra, $ParameterType);
         
         $this->CastType = $CastType;
     }

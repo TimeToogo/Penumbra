@@ -42,7 +42,8 @@ class Posts extends Relational\Table {
 
     protected function CreateRelationalStructure(Database $Database) {
         $this->BlogForeignKey = new Traits\ForeignKey('BlogForeignKey', $Database->Blogs, 
-                Map::From([$this->BlogId], [$Database->Blogs->Id]));
+                Map::From([$this->BlogId], [$Database->Blogs->Id]),
+                Traits\ForeignKeyMode::Cascade, Traits\ForeignKeyMode::Cascade);
     }
     
     public $Blog;

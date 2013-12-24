@@ -24,28 +24,28 @@ final class TransactionalContext extends MappingContext {
         return $this->Transaction;
     }
     
-    final public function PersistStateRelations(Object\State $State) {
+    final public function PersistState(Object\State $State) {
         $EntityHash = $State->GetIdentity()->Hash();
         if(isset($this->PersistedEntities[$EntityHash]))
             return;
         
         $this->PersistedEntities[$EntityHash] = true;
-        return $this->GetDomainDatabaseMap()->PersistStateRelations($this, $State);
+        return $this->GetDomainDatabaseMap()->PersistState($this, $State);
     }
     
-    final public function PersistRelations($Entity) {
+    final public function Persist($Entity) {
         $DomainDatabaseMap = $this->GetDomainDatabaseMap();
         $DomainDatabaseMap->EnsureIdentifiable([$Entity]);
-        return $this->PersistStateRelations($DomainDatabaseMap->GetDomain()->State($Entity));
+        return $this->PersistState($DomainDatabaseMap->GetDomain()->State($Entity));
     }
     
-    final public function PersistAllRelations(array $Entities) {
+    final public function PersistAll(array $Entities) {
         $DomainDatabaseMap = $this->GetDomainDatabaseMap();
         $DomainDatabaseMap->EnsureIdentifiable($Entities);
         $Domain = $DomainDatabaseMap->GetDomain();
         $Rows = array();
         foreach($Entities as $Key => $Entity) {
-            $Row = $this->PersistStateRelations($Domain->State($Entity));
+            $Row = $this->PersistState($Domain->State($Entity));
             if($Row !== null)
                 $Rows[$Key] = $Row;
         }
@@ -53,30 +53,30 @@ final class TransactionalContext extends MappingContext {
         return $Rows;
     }
     
-    final public function DiscardIdentityRelations(Object\Identity $Identity) {
+    final public function DiscardIdentity(Object\Identity $Identity) {
         $EntityHash = $Identity->Hash();
         if(isset($this->DiscardedEntities[$EntityHash]))
             return;
         
         $this->DiscardedEntities[$EntityHash] = true;
-        return $this->GetDomainDatabaseMap()->DiscardIdentityRelations($this, $Identity);
+        return $this->GetDomainDatabaseMap()->DiscardIdentity($this, $Identity);
     }
     
-    final public function DiscardRelations($Entity) {
+    final public function Discard($Entity) {
         $DomainDatabaseMap = $this->GetDomainDatabaseMap();
         if(!$DomainDatabaseMap->IsIdenitifiable($Entity))
             return;
         else
-            return $this->DiscardIdentityRelations($DomainDatabaseMap->GetDomain()->Identity($Entity));
+            return $this->DiscardIdentity($DomainDatabaseMap->GetDomain()->Identity($Entity));
     }
     
-    final public function DiscardAllRelations(array $Entities) {
+    final public function DiscardAll(array $Entities) {
         $DomainDatabaseMap = $this->GetDomainDatabaseMap();
         $Domain = $DomainDatabaseMap->GetDomain();
         $PrimaryKeys = array();
         foreach($Entities as $Key => $Entity) {
             if($DomainDatabaseMap->IsIdenitifiable($Entity)) {
-                $PrimaryKey = $this->DiscardIdentityRelations($Domain->Identity($Entity));
+                $PrimaryKey = $this->DiscardIdentity($Domain->Identity($Entity));
                 if($PrimaryKey !== null)
                     $PrimaryKeys[$Key] = $PrimaryKey;
             }

@@ -84,3 +84,10 @@ if(!$Success)
     ShowTests();
 
 ?>
+<style>
+    body, html {
+        width: calc(100% - 20px);
+        margin: 10px;
+        word-wrap:break-word;
+    }
+</style>

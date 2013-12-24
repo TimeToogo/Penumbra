@@ -41,7 +41,7 @@ class InversedToOneRelation extends ToOneKeyedRelation {
         return $this->ForeignKey;
     }
     public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, Relational\Row $RelatedRow) {
-        $Transaction->Persist($RelatedRow);
+        
     }
 
     public function Discard(Relational\Transaction $Transaction, Relational\PrimaryKey $PrimaryKey) {

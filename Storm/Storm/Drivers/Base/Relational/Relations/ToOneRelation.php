@@ -36,7 +36,7 @@ class ToOneRelation extends ToOneKeyedRelation {
     }
     
     public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, Relational\Row $RelatedRow) {
-        $Transaction->Persist($RelatedRow);
+        
     }
 
     public function Discard(Relational\Transaction $Transaction, 

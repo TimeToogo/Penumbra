@@ -314,49 +314,32 @@ abstract class DomainDatabaseMap {
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Entity Persistence Helpers">
-    /**
-     * @internal
-     * @param Object\State $State
-     */
-    final public function PersistState(TransactionalContext $TransactionalContext, Object\State $State) {
-        $Rows = $this->PersistStateRelations($TransactionalContext, $State);
-        $TransactionalContext->GetTransaction()->PersistAll($Rows);
-    }
 
     /**
      * @internal
      * @return Relational\Row[]
      */
-    final public function PersistEntityRelations(TransactionalContext $TransactionalContext, $Entity) {
+    final public function PersistEntity(TransactionalContext $TransactionalContext, $Entity) {
         $State = $this->Domain->State($Entity);
-        return $this->PersistStateRelations($TransactionalContext, $State);
+        return $this->PersistState($TransactionalContext, $State);
     }
 
     /**
      * @internal
      * @param Relational\Transaction $Transaction
      * @param Object\State $State
-     * @return Relational\ResultRow
+     * @return Relational\ColumnData
      */
-    final public function PersistStateRelations(TransactionalContext $TransactionalContext, Object\State $State) {
+    final public function PersistState(TransactionalContext $TransactionalContext, Object\State $State) {
         $EntityRelationalMap = $this->VerifyRelationMap($State->GetEntityType());
         $ColumnData = new Relational\ResultRow($EntityRelationalMap->GetAllMappedColumns());
         $Context = new PersistingContext($this, $State, $ColumnData);
         foreach ($EntityRelationalMap->GetPropertyMappings() as $Mapping) {
             $Mapping->Persist($Context, $TransactionalContext);
         }
+        $TransactionalContext->GetTransaction()->PersistAll($ColumnData->GetRows());
 
         return $ColumnData;
-    }
-
-    /**
-     * @internal
-     * @param Relational\Transaction $Transaction
-     * @param Object\Identity $Identity
-     */
-    final public function DiscardIdentity(TransactionalContext $TransactionalContext, Object\Identity $Identity) {
-        $PrimaryKey = $this->DiscardIdentityRelations($TransactionalContext, $Identity);
-        $TransactionalContext->GetTransaction()->Discard($PrimaryKey);
     }
 
     /**
@@ -365,9 +348,9 @@ abstract class DomainDatabaseMap {
      * @param object $Entity
      * @return Relational\PrimaryKey
      */
-    final public function DiscardEntityRelations(TransactionalContext $TransactionalContext, $Entity) {
+    final public function DiscardEntity(TransactionalContext $TransactionalContext, $Entity) {
         $Identity = $this->Domain->Identity($Entity);
-        return $this->DiscardIdentityRelations($TransactionalContext, $Identity);
+        return $this->DiscardIdentity($TransactionalContext, $Identity);
     }
 
 
@@ -377,8 +360,8 @@ abstract class DomainDatabaseMap {
      * @param Object\Identity $Identity
      * @return Relational\PrimaryKey
      */
-    final public function DiscardIdentityRelations(TransactionalContext $TransactionalContext, Object\Identity $Identity) {
-        $EntityRelationalMap = $this->VerifyRelationMap($Identity->GetEntityType());
+    final public function DiscardIdentity(TransactionalContext $TransactionalContext, Object\Identity $Identity) {
+        /*$EntityRelationalMap = $this->VerifyRelationMap($Identity->GetEntityType());
         $PrimaryKey = $EntityRelationalMap->GetTable()->PrimaryKey();
         $EntityRelationalMap->MapPropertyDataToColumnData($Identity, $PrimaryKey);
         $Context = new DiscardingContext($this, $Identity, $PrimaryKey);
@@ -386,23 +369,23 @@ abstract class DomainDatabaseMap {
         foreach ($EntityRelationalMap->GetPropertyMappings() as $Mapping) {
             $Mapping->Discard($Context, $TransactionalContext);
         }
+        $TransactionalContext->GetTransaction()->Discard($PrimaryKey);
 
-
-        return $PrimaryKey;
+        return $PrimaryKey;*/
     }
 
 
     private function MapUnitOfWorkToTransaction(Object\UnitOfWork $UnitOfWork, Relational\Transaction $Transaction) {
         $TransactionalContext = new TransactionalContext($this, $Transaction);
         foreach($UnitOfWork->GetPersistedEntityStates() as $PersistedEntityState) {
-            $PersistedRow = $TransactionalContext->PersistStateRelations($PersistedEntityState);
+            $PersistedRow = $TransactionalContext->PersistState($PersistedEntityState);
             $Transaction->PersistAll($PersistedRow->GetRows());
         }
         foreach($UnitOfWork->GetOperations() as $Operation) {
             $Transaction->Execute($this->MapOperation($Operation));
         }
         foreach($UnitOfWork->GetDiscardedIdentities() as $DiscardedIdentity) {
-            $DiscardedPrimaryKey = $TransactionalContext->DiscardIdentityRelations($DiscardedIdentity);
+            $DiscardedPrimaryKey = $TransactionalContext->DiscardIdentity($DiscardedIdentity);
             $Transaction->Discard($DiscardedPrimaryKey);
         }
         foreach($UnitOfWork->GetDiscardedRequests() as $DiscardedRequest) {

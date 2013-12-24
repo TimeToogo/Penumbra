@@ -20,7 +20,7 @@ class BigIntDataType extends IntDataType {
     }
     
     public function ToPropertyValue($PersistedValue) {
-        return self::$Is64BitPHP ? (int)$PersistedValue : $PropertyValue;
+        return self::$Is64BitPHP ? (int)$PersistedValue : $PersistedValue;
     }
 }
 

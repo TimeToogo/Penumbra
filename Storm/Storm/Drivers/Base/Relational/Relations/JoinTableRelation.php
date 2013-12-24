@@ -106,7 +106,6 @@ class JoinTableRelation extends Relation implements Relational\IToManyRelation {
             array $PersistedRelatedRows, array $DiscardedPrimaryKeys) {
         
         foreach($PersistedRelatedRows as $RelatedRow) {
-            $Transaction->PersistAll($RelatedRow->GetRows());
             if($this->IsTableTwo) {
                 $JoinRow = $this->JoinTable->JoinRow($ParentData, $RelatedRow);
             }

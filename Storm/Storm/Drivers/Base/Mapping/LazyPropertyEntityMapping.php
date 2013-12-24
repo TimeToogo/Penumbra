@@ -54,12 +54,12 @@ class LazyPropertyEntityMapping extends PropertyEntityMapping {
                 return;
             }
         }
-        return $TransactionalContext->PersistRelations($RelatedEntity);
+        return $TransactionalContext->Persist($RelatedEntity);
     }
     
     public function DiscardRelations(Mapping\DiscardingContext $Context, Mapping\TransactionalContext $TransactionalContext) {
         $RelatedEntity = $Context->GetPropertyData()[$this->GetProperty()];
-        return $TransactionalContext->DiscardRelations($Context->GetTransaction(), $RelatedEntity);
+        return $TransactionalContext->Discard($Context->GetTransaction(), $RelatedEntity);
     }
 }
 

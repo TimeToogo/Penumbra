@@ -46,12 +46,7 @@ class ToManyRelation extends KeyedRelation implements Relational\IToManyRelation
     }
     
     public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, array $PersistedRelatedRows, array $DiscardedPrimaryKeys) {
-        foreach($PersistedRelatedRows as $PersistedRelatedRow) {
-            $Transaction->PersistAll($PersistedRelatedRow->GetRows());
-        }
-        foreach($DiscardedPrimaryKeys as $DiscardedPrimaryKey) {
-            $Transaction->Discard($DiscardedPrimaryKey);
-        }
+        
     }
     
     public function Discard(Relational\Transaction $Transaction, Relational\PrimaryKey $PrimaryKey) {

@@ -53,10 +53,10 @@ abstract class PropertyCollectionMapping extends PropertyRelationMapping impleme
             return;
                 
         $PersistedRelatedRows = 
-                $TransactionalContext->PersistAllRelations(iterator_to_array($RelatedEntityCollection));
+                $TransactionalContext->PersistAll($RelatedEntityCollection->ToArray());
         
         $RemovedEntities = $RelatedEntityCollection->__GetRemovedEntities();
-        $DiscardedRelatedPrimaryKeys = $TransactionalContext->DiscardAllRelations($RemovedEntities);
+        $DiscardedRelatedPrimaryKeys = $TransactionalContext->DiscardAll($RemovedEntities);
         
         $this->ToManyRelation->Persist($TransactionalContext->GetTransaction(), $Context->GetColumnData(), $PersistedRelatedRows, $DiscardedRelatedPrimaryKeys);
     }
@@ -68,7 +68,7 @@ abstract class PropertyCollectionMapping extends PropertyRelationMapping impleme
             throw new Exception;
         }
         $OrginalEntities = $RelatedEntityCollection->__GetOriginalEntities();
-        $DiscardedPrimaryKeys = $TransactionalContext->DiscardAllRelations($OrginalEntities);
+        $DiscardedPrimaryKeys = $TransactionalContext->DiscardAll($OrginalEntities);
         $this->ToManyRelation->Discard($TransactionalContext->GetTransaction(), $Context->GetPrimaryKey(), $DiscardedPrimaryKeys);
     }
 }

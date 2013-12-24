@@ -7,9 +7,11 @@ use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
-class TimeDataType extends Columns\CastingDataType {
+class TimeDataType extends Columns\FunctionCallDataType {
     public function __construct() {
-        parent::__construct('TIME', 'int', [], '', 
+        parent::__construct(
+                'TIME_TO_SEC', 'SEC_TO_TIME',
+                'TIME', [], null, 
                 ParameterType::Integer);
     }
     

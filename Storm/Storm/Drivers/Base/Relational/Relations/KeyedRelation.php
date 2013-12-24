@@ -37,8 +37,7 @@ abstract class KeyedRelation extends Relation {
     public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows = null) {
         $Predicate = new Constraints\Predicate();
         $RuleGroup = Constraints\RuleGroup::Any();
-        $ParentColumns = $this->ForeignKey->GetParentColumns();
-        $ReferencedColumns = $this->ForeignKey->GetReferencedColumns();
+        
         foreach($ParentRows as $ParentRow) {
             $ReferencedKey = $this->MapParentRowToReferencedKey($this->ForeignKey, $ParentRow);
             

@@ -35,12 +35,12 @@ final class EagerPropertyEntityMapping extends PropertyEntityMapping {
 
     public function PersistRelations(Mapping\PersistingContext $Context, Mapping\TransactionalContext $TransactionalContext) {
         $RelatedEntity = $Context->GetState()[$this->GetProperty()];
-        return $TransactionalContext->PersistRelations($RelatedEntity);
+        return $TransactionalContext->Persist($RelatedEntity);
     }
     
     public function DiscardRelations(Mapping\DiscardingContext $Context, Mapping\TransactionalContext $TransactionalContext) {
         $RelatedEntity = $Context->GetPropertyData()[$this->GetProperty()];
-        return $TransactionalContext->DiscardRelations($RelatedEntity);
+        return $TransactionalContext->Discard($RelatedEntity);
     }
 }
 
