@@ -8,9 +8,9 @@ interface IPropertyColumnMapping extends IPropertyMapping {
     const IPropertyColumnMappingType = __CLASS__;
     
     /**
-     * @return Relational\IColumn
+     * @return Relational\IColumn[]
      */
-    public function GetColumn();
+    public function GetColumns();
     
     /**
      * @return Object\IProperty

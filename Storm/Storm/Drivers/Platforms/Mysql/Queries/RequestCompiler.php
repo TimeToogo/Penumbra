@@ -7,7 +7,7 @@ use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
 class RequestCompiler  extends Queries\RequestCompiler {    
-    protected function AppendOperationStatement(QueryBuilder $QueryBuilder, Relational\Operation $Operation) {
+    protected function AppendOperationStatement(QueryBuilder $QueryBuilder, Relational\Procedure $Operation) {
         $QueryBuilder->AppendIdentifier('UPDATE # ', [$Operation->GetTables()->GetName()]);
     }
     

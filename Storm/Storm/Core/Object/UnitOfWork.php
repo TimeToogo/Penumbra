@@ -2,40 +2,55 @@
 
 namespace Storm\Core\Object;
 
+/*
+ * TODO: make the order of operations relavent
+ */
 final class UnitOfWork {
-    private $PersistedEntityStates = array();
-    private $Operations = array();
+    private $Domain;
+    private $PersistedStates = array();
+    private $Procedures = array();
     private $DiscardedIdentities = array();
     private $DiscardedRequests = array();
     
-    public function __construct() {
+    public function __construct(Domain $Domain) {
+        $this->Domain = $Domain;
     }
     
-    public function Persist(State $EntityState) {
-        $this->PersistedEntityStates[] = $EntityState;
+    public function Persist($Entity) {
+        $Hash = spl_object_hash($Entity);
+        if(isset($this->PersistedStates[$Hash]))
+            return;
+        
+        $this->PersistedStates[$Hash] = $this->Domain->State($Entity);
+        $this->Domain->Persist($Entity, $this);
     }
-    public function Execute(IOperation $Operation) {
-        $this->Operations[] = $Operation;
+    public function Execute(IProcedure $Procedure) {
+        $this->Procedures[] = $Procedure;
     }
-    public function Discard(Identity $Identity) {
-        $this->DiscardedIdentities[] = $Identity;
+    public function Discard($Entity) {
+        $Hash = spl_object_hash($Entity);
+        if(isset($this->DiscardedIdentities[$Hash]))
+            return;
+        
+        $this->DiscardedIdentities[spl_object_hash($Entity)] = $this->Domain->Identity($Entity);
+        $this->Domain->Discard($Entity, $this);
     }
     public function DiscardWhere(IRequest $Request) {
-        $this->DiscardedRequests[] = $Identity;
+        $this->DiscardedRequests[spl_object_hash($Request)] = $Request;
     }
     
     /**
      * @return State[]
      */
-    public function GetPersistedEntityStates() {
-        return $this->PersistedEntityStates;
+    public function GetPersistedStates() {
+        return $this->PersistedStates;
     }
     
     /**
-     * @return IOperation[]
+     * @return IProcedure[]
      */
-    public function GetOperations() {
-        return $this->Operations;
+    public function GetProcedures() {
+        return $this->Procedures;
     }
     
     /**

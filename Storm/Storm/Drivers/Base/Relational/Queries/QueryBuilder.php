@@ -4,7 +4,7 @@ namespace Storm\Drivers\Base\Relational\Queries;
 
 use \Storm\Drivers\Base\Relational;
 use \Storm\Core\Relational\Request;
-use \Storm\Core\Relational\Operation;
+use \Storm\Core\Relational\Procedure;
 use \Storm\Core\Relational\Constraints\Predicate;
 use \Storm\Core\Relational\Expressions\Expression;
 
@@ -110,7 +110,7 @@ class QueryBuilder {
         $this->RequestCompiler->AppendRequest($this, $Request);
     }
     
-    final public function AppendOperation(Operation $Operation) {
+    final public function AppendOperation(Procedure $Operation) {
         $this->RequestCompiler->AppendOperation($this, $Operation);
     }
     

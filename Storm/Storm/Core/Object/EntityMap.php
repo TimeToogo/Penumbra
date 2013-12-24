@@ -10,7 +10,13 @@ abstract class EntityMap implements \IteratorAggregate {
     use \Storm\Core\Helpers\Type;   
     
     private $EntityType;
+    /**
+     * @var IProperty[] 
+     */
     private $Properties = array();
+    /**
+     * @var IProperty[] 
+     */
     private $IdentityProperties = array();
     
     public function __construct() {
@@ -107,19 +113,24 @@ abstract class EntityMap implements \IteratorAggregate {
         }
     }
     
-    final public function State($Entity = null) {
+    final public function State($Entity = null, UnitOfWork $UnitOfWork = null) {
         if($Entity === null)
             return new State($this);
         
         $this->VerifyEntity($Entity);
         
-        $EntityState = new State($this);
+        $State = new State($this);
         foreach($this->Properties as $Property) {
-            if($Property->CanGetValue())
-                $EntityState[$Property] = $Property->GetValue($Entity);
+            $Property->Persist($UnitOfWork, $State, $Entity);
         }
         
-        return $EntityState;
+        return $State;
+    }
+    
+    final public function Apply($Entity, PropertyData $PropertyData) {
+        foreach($PropertyData as $PropertyName => $Value) {
+            $this->Properties[$PropertyName]->Revive($Entity, $Value);
+        }
     }
     
     final public function ReviveEntities(array $EntityStates) {
@@ -143,25 +154,23 @@ abstract class EntityMap implements \IteratorAggregate {
     
     private function LoadEntity(State $State, $Instance) {
         foreach($this->Properties as $Property) {
-            if($Property->CanSetValue() && isset($State[$Property])) {
+            if(isset($State[$Property])) {
                 $Value = $State[$Property];
-                $Property->SetValue($Instance, $Value);
+                $Property->Revive($Instance, $Value);
             }
         }
     }
     
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
-        $this->VerifyEntity($Entity);
-        
-        $EntityState = $this->State($Entity);
-        $UnitOfWork->Persist($EntityState);
+        foreach($this->Properties as $Property) {
+            $Property->Persist($UnitOfWork, $Entity);
+        }
     }
 
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
-        $this->VerifyEntity($Entity);
-        
-        $Identity = $this->Identity($Entity);
-        $UnitOfWork->Discard($Identity);
+        foreach($this->Properties as $Property) {
+            $Property->Discard($UnitOfWork, $Entity);
+        }
     }
     
     final public function DiscardWhere(UnitOfWork $UnitOfWork, IRequest $Request) {

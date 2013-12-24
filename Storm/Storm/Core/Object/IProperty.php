@@ -7,12 +7,17 @@ interface IProperty {
     
     public function GetName();
     public function IsIdentity();
+    /**
+     * @return EntityMap
+     */
+    public function GetEntityMap();
+    public function HasEntityMap();
+    public function SetEntityMap(EntityMap $EntityMap = null);
     
-    public function ValidPropertyOf($EntityType);
-    public function CanGetValue();
-    public function &GetValue($Entity);
-    public function CanSetValue();
-    public function SetValue($Entity, &$Value);
+    public function State(State $State, $Entity);
+    public function Persist(UnitOfWork $UnitOfWork, $Entity);
+    public function Discard(UnitOfWork $UnitOfWork, $Entity);
+    public function Revive($Entity, &$Value);
 }
 
 ?>

@@ -4,7 +4,7 @@ namespace Storm\Core\Relational;
 
 use \Storm\Core\Relational\Expressions\Expression;
 
-class Operation extends Request {
+class Procedure extends Request {
     private $Expressions;
     
     public function __construct(array $Tables, $IsSingleRow) {

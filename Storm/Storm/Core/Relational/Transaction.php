@@ -4,12 +4,13 @@ namespace Storm\Core\Relational;
 
 final class Transaction {
     private $PersistedRows = array();
-    private $Operations = array();
+    private $Procedures = array();
     private $DiscardedPrimaryKeys = array();
     private $DiscardedRequests = array();
     
     public function __construct() {
     }
+    
     
     /**
      * @return Row[]
@@ -19,10 +20,10 @@ final class Transaction {
     }
     
     /**
-     * @return Operation[]
+     * @return Procedure[]
      */
-    public function GetOperations() {
-        return $this->Operations;
+    public function GetProcedures() {
+        return $this->Procedures;
     }
     
     /**
@@ -47,8 +48,8 @@ final class Transaction {
         array_walk($Rows, [$this, 'Persist']);
     }
     
-    public function Execute(Operation $Operation) {
-        $this->Operations[] = $Operation;
+    public function Execute(Procedure $Procedure) {
+        $this->Procedures[] = $Procedure;
     }
     
     public function Discard(PrimaryKey $PrimaryKey) {

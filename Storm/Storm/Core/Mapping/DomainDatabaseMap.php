@@ -97,23 +97,11 @@ abstract class DomainDatabaseMap {
         else {
             return $RevivedEntities;
         }
-    } 
-    
-    final public function Persist(array $Entities) {
-        $this->Commit($Entities);
     }
     
-    final public function Discard(array $Entities) {
-        $this->Commit(array(), $Entities);
-    }
-    
-    final public function Commit(
-            array $PersistedEntities = array(), 
-            array $DiscardedEntities = array(), 
-            array $DiscardedRequests = array()) {
-        
-        $this->EnsureIdentifiable($PersistedEntities);
-        $this->VerifyIdentifiable($DiscardedEntities);
+    final public function Commit(Object\UnitOfWork $UnitOfWork) {
+        $this->EnsureIdentifiable($UnitOfWork->GetPersistedStates());
+        $this->VerifyIdentifiable($UnitOfWork->GetDiscardedIdentities());
         
         $UnitOfWork = $this->Domain->BuildUnitOfWork($PersistedEntities, $DiscardedEntities, $DiscardedRequests);
         
@@ -126,11 +114,11 @@ abstract class DomainDatabaseMap {
     // <editor-fold defaultstate="collapsed" desc="Request and Operation mappers">
     /**
      * @param Object\IRequest $ObjectOperation
-     * @return Relational\Operation
+     * @return Relational\Procedure
      */
-    final public function MapOperation(Object\IOperation $ObjectOperation) {
+    final public function MapOperation(Object\IProcedure $ObjectOperation) {
         $EntityRelationalMap = $this->VerifyRelationMap($ObjectOperation->GetEntityType());
-        $RelationalOperation = new Relational\Operation([$EntityRelationalMap->GetTable()], $ObjectOperation->IsSingleEntity());
+        $RelationalOperation = new Relational\Procedure([$EntityRelationalMap->GetTable()], $ObjectOperation->IsSingleEntity());
         
         $this->MapRequestData($EntityRelationalMap, $ObjectOperation, $RelationalOperation);
         foreach($ObjectOperation->GetExpressions() as $Expression) {
@@ -377,11 +365,11 @@ abstract class DomainDatabaseMap {
 
     private function MapUnitOfWorkToTransaction(Object\UnitOfWork $UnitOfWork, Relational\Transaction $Transaction) {
         $TransactionalContext = new TransactionalContext($this, $Transaction);
-        foreach($UnitOfWork->GetPersistedEntityStates() as $PersistedEntityState) {
+        foreach($UnitOfWork->GetPersistedStates() as $PersistedEntityState) {
             $PersistedRow = $TransactionalContext->PersistState($PersistedEntityState);
             $Transaction->PersistAll($PersistedRow->GetRows());
         }
-        foreach($UnitOfWork->GetOperations() as $Operation) {
+        foreach($UnitOfWork->GetProcedures() as $Operation) {
             $Transaction->Execute($this->MapOperation($Operation));
         }
         foreach($UnitOfWork->GetDiscardedIdentities() as $DiscardedIdentity) {
@@ -401,10 +389,11 @@ abstract class DomainDatabaseMap {
         
         $EntityTypes = array_unique(array_map('get_class', $Entities));
         foreach ($EntityTypes as $EntityType) {
-            $EntitiesOfType = array_filter($Entities, function ($Entity) use($EntityType) 
+            $EntitiesOfType = array_filter($Entities, 
+                    function ($Entity) use($EntityType) 
                     {
-                return $Entity instanceof $EntityType;
-            });
+                        return $Entity instanceof $EntityType;
+                    });
             
             $EntityRelationalMap = $this->GetRelationMap($EntityType);
             $EntityMap = $EntityRelationalMap->GetEntityMap();
@@ -421,7 +410,7 @@ abstract class DomainDatabaseMap {
                 }
             }
             
-            $UnidentifiableEntities = $this->GetUnidentifiable($EntityMap, $Entities);
+            $UnidentifiableEntities = $this->GetUnidentifiable($EntityMap, $EntitiesOfType);
             
             $NewPrimaryKeys = $this->Database->GeneratePrimaryKeys($Table, count($UnidentifiableEntities));
             

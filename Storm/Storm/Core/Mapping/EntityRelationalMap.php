@@ -15,7 +15,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     private $EntityMap;
     private $PropertyMappings = array();
     private $PropertyColumnMappings = array();
-    private $PropertyColumnMap;
+    private $PropertyColumnsMap;
     private $PropertyRelationMappings = array();
     
     public function __construct() {
@@ -32,7 +32,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         $Registrar = new Registrar(IPropertyMapping::IPropertyMappingType);
         $this->RegisterPropertyMappings($Registrar, $this->EntityMap, $DomainDatabaseMap->GetDatabase());
         
-        $this->PropertyColumnMap = new Map();
+        $this->PropertyColumnsMap = new Map();
         foreach($Registrar->GetRegistered() as $PropertyMapping) {
             $this->AddPropertyMapping($PropertyMapping);
         }
@@ -49,7 +49,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         $ProperyName = $PropertyMapping->GetProperty()->GetName();
         if($PropertyMapping instanceof IPropertyColumnMapping) {
             $this->PropertyColumnMappings[$ProperyName] = $PropertyMapping;
-            $this->PropertyColumnMap->Map($PropertyMapping->GetProperty(), $PropertyMapping->GetColumn()); 
+            $this->PropertyColumnsMap->Map($PropertyMapping->GetProperty(), $PropertyMapping->GetColumns()); 
         }
         else if($PropertyMapping instanceof IPropertyRelationMapping) {
             $this->PropertyRelationMappings[$ProperyName] = $PropertyMapping;
@@ -81,8 +81,8 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     }
     
     final public function GetMappedColumn(IProperty $Property) {
-        if(isset($this->PropertyColumnMap[$Property])) {
-            return $this->PropertyColumnMap[$Property];
+        if(isset($this->PropertyColumnsMap[$Property])) {
+            return $this->PropertyColumnsMap[$Property];
         }
         else {
             throw new \Storm\Core\Exceptions\UnmappedPropertyException();
@@ -90,8 +90,8 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     }
     
     final public function GetMappedProperty(IColumn $Column) {
-        if(isset($this->PropertyColumnMap[$Column])) {
-            return $this->PropertyColumnMap[$Column];
+        if(isset($this->PropertyColumnsMap[$Column])) {
+            return $this->PropertyColumnsMap[$Column];
         }
         else {
             throw new \Storm\Core\Exceptions\UnmappedPropertyException();
@@ -100,14 +100,14 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     
     final public function GetAllMappedColumns(array $Properties = null) {
         if($Properties === null) {
-            return $this->PropertyColumnMap->GetToInstances();
+            return $this->PropertyColumnsMap->GetToInstances();
         }
         return array_map([$this, 'GetMappedColumn'], $Properties);
     }
     
     final public function GetAllMappedProperties(array $Columns = null) {
         if($Columns === null) {
-            return $this->PropertyColumnMap->GetInstances();
+            return $this->PropertyColumnsMap->GetInstances();
         }
         return array_map([$this, 'GetMappedProperty'], $Columns);
     }
@@ -117,16 +117,19 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         foreach($this->GetPropertyColumnMappings() as $Mapping) {
             $Property = $Mapping->GetProperty();
             if(isset($PropertyData[$Property])) {
-                $Mapping->GetColumn()->Store($ColumnData, $PropertyData[$Property]);
+                $Column = $Mapping->GetColumn();
+                $Value =  $PropertyData[$Property];
+                $Column->Store($ColumnData, $Value);
             }
         }
     }
     
     final public function MapColumnDataToPropertyData(Relational\ColumnData $ColumnData, Object\PropertyData $PropertyData) {
         foreach($this->GetPropertyColumnMappings() as $Mapping) {
-            $Column = $Mapping->GetColumn();
+            $Column = $Mapping->GetColumns();
+            $Property =  $Mapping->GetProperty();
             if(isset($ColumnData[$Column])) {
-                $PropertyData[$Mapping->GetProperty()] = $Column->Retrieve($ColumnData);
+               $PropertyData[$Property] = $Column->Retrieve($ColumnData);
             }
         }
     }

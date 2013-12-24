@@ -83,6 +83,18 @@ abstract class Domain {
         return $this->VerifyEntity($Entity)->State($Entity);
     }
     
+    final public function Persist($Entity, UnitOfWork $UnitOfWork) {
+        return $this->VerifyEntity($Entity)->Persist($Entity, $UnitOfWork);
+    }
+    
+    final public function Discard($Entity, UnitOfWork $UnitOfWork) {
+        return $this->VerifyEntity($Entity)->Persist($Entity, $UnitOfWork);
+    }
+    
+    final public function Apply($Entity, PropertyData $PropertyData) {
+        return $this->VerifyEntity($Entity)->Apply($Entity, $PropertyData);
+    }
+    
     final public function ReviveEntities($EntityType, array $States) {
         $EntityMap = $this->GetEntityMap($EntityType);
         
@@ -95,14 +107,6 @@ abstract class Domain {
         return $EntityMap->ReviveEntityInstances($StateInstanceMap);
     }
     
-    final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
-        $this->VerifyEntity($Entity)->Persist($UnitOfWork, $Entity);
-    }
-    
-    final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
-        $this->VerifyEntity($Entity)->Discard($UnitOfWork, $Entity);
-    }
-    
     final public function DiscardWhere(UnitOfWork $UnitOfWork, IRequest $Request) {
         $this->GetEntityMap($Request->GetEntityType())->DiscardWhere($UnitOfWork, $Request);
     }
@@ -111,18 +115,24 @@ abstract class Domain {
     /**
      * @return UnitOfWork
      */
-    final public function BuildUnitOfWork(array $PersistanceEntities = array(), 
-            array $DiscardationEntities = array(), array $DiscardedRequests = array()) {
-        $UnitOfWork = new UnitOfWork();
+    final public function BuildUnitOfWork(
+            array $EntitiesToPersist = array(),
+            array $OperationsToExecute = array(),
+            array $EntitiesToDiscard = array(), 
+            array $RequestsToDiscard = array()) {
+        $UnitOfWork = new UnitOfWork($this);
         
-        foreach($PersistanceEntities as $Entity) {
-            $this->Persist($UnitOfWork, $Entity);
+        foreach($EntitiesToPersist as $Entity) {
+            $UnitOfWork->Persist($Entity);
         }
-        foreach($DiscardationEntities as $Entity) {
-            $this->Discard($UnitOfWork, $Entity);
+        foreach($OperationsToExecute as $Operation) {
+            $UnitOfWork->Execute($Operation);
         }
-        foreach($DiscardedRequests as $Request) {
-            $this->DiscardWhere($UnitOfWork, $Request);
+        foreach($EntitiesToDiscard as $Entity) {
+            $UnitOfWork->Discard($Entity);
+        }
+        foreach($RequestsToDiscard as $Request) {
+            $UnitOfWork->DiscardWhere($Request);
         }
         
         return $UnitOfWork;

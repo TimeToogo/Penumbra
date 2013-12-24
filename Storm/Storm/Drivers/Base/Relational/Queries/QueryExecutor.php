@@ -28,7 +28,7 @@ abstract class QueryExecutor implements IQueryExecutor {
             
             $DiscardedPrimaryKeys = $this->OrderByTableDependency($Transaction->GetDiscardedPrimaryKeys(), $TablesOrderedByDiscardingDependency);
             
-            $Operations = $this->OrderByTableDependency($Transaction->GetOperations(), $TablesOrderedByPersistingDependency);
+            $Operations = $this->OrderByTableDependency($Transaction->GetProcedures(), $TablesOrderedByPersistingDependency);
             
             $PersistedRows = $this->OrderByTableDependency($Transaction->GetPersistedRows(), $TablesOrderedByPersistingDependency);
             $PersistedRowGroups = $this->GroupRowsByTable($PersistedRows);
@@ -56,8 +56,8 @@ abstract class QueryExecutor implements IQueryExecutor {
             array &$DiscardedRequests, array &$DiscardedPrimaryKeys, array $Operations, array &$PersistedRowGroups);
     
     
-    final protected function AppendOperation(QueryBuilder $QueryBuilder, Relational\Operation $Operation) {
-        $this->RequestCompiler->AppendOperation($QueryBuilder, $Operation);
+    final protected function AppendProcedure(QueryBuilder $QueryBuilder, Relational\Procedure $Operation) {
+        $this->RequestCompiler->AppendProcedure($QueryBuilder, $Operation);
     }
     
     private function GroupRowsByTable(array $Rows) {

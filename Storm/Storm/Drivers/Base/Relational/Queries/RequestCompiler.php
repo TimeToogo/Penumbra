@@ -4,17 +4,17 @@ namespace Storm\Drivers\Base\Relational\Queries;
 
 use \Storm\Core\Relational;
 use \Storm\Core\Relational\Request;
-use \Storm\Core\Relational\Operation;
+use \Storm\Core\Relational\Procedure;
 use \Storm\Core\Object\Constraints\Predicate;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
 abstract class RequestCompiler implements IRequestCompiler {    
-    final public function AppendOperation(QueryBuilder $QueryBuilder, Operation $Operation) {
+    final public function AppendOperation(QueryBuilder $QueryBuilder, Procedure $Operation) {
         $this->AppendOperationStatement($QueryBuilder, $Operation);
         $this->AppendOperationExpressions($QueryBuilder, $Operation->GetExpressions());
         $this->AppendRequest($QueryBuilder, $Operation);
     }
-    protected abstract function AppendOperationStatement(QueryBuilder $QueryBuilder, Operation $Operation);
+    protected abstract function AppendOperationStatement(QueryBuilder $QueryBuilder, Procedure $Operation);
     
     protected abstract function AppendOperationExpressions(QueryBuilder $QueryBuilder, array $Expressions);
     
