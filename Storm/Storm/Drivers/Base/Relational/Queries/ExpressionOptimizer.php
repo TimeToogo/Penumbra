@@ -17,17 +17,17 @@ use \Storm\Drivers\Base\Relational\Expressions\PersistDataExpression;
 abstract class ExpressionOptimizer implements IExpressionOptimizer {
     
     public function Optimize(CoreExpression $Expression) {
-        switch ($Expression->GetType()) {
-            case SetExpression::GetType():
+        switch (true) {
+            case $Expression instanceof SetExpression:
                 return $this->OptimizeSetExpression($Expression);
                 
-            case BinaryOperationExpression::GetType():
+            case $Expression instanceof BinaryOperationExpression:
                 return $this->OptimizeBinaryOperationExpression($Expression);
             
-            case UnaryOperationExpression::GetType():
+            case $Expression instanceof UnaryOperationExpression:
                 return $this->OptimizeUnaryOperationExpression($Expression);
             
-            case FunctionCallExpression::GetType():
+            case $Expression instanceof FunctionCallExpression:
                 return $this->OptimizeFunctionCallExpression($Expression);
             
             default:

@@ -15,38 +15,38 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
     final public function Append(QueryBuilder $QueryBuilder, Expression $Expression) {
         $Expression = $this->ExpressionOptimizer->Optimize($Expression);
         
-        switch ($Expression->GetType()) {
-            case E\ReviveColumnExpression::GetType():
+        switch (true) {
+            case $Expression instanceof E\ReviveColumnExpression:
                 return $this->Append($QueryBuilder, $Expression->GetReviveExpression());
                 
-            case E\PersistDataExpression::GetType():
+            case $Expression instanceof E\PersistDataExpression:
                 return $this->Append($QueryBuilder, $Expression->GetPersistExpression());
                 
-            case CoreE\ColumnExpression::GetType():
+            case $Expression instanceof CoreE\ColumnExpression:
                 return $this->AppendColumn($QueryBuilder, $Expression);
                 
-            case CoreE\ConstantExpression::GetType():
+            case $Expression instanceof CoreE\ConstantExpression:
                 return $this->AppendConstant($QueryBuilder, $Expression);
                 
-            case E\SetExpression::GetType():
+            case $Expression instanceof E\SetExpression:
                 return $this->AppendSet($QueryBuilder, $Expression);
                 
-            case E\BinaryOperationExpression::GetType():
+            case $Expression instanceof E\BinaryOperationExpression:
                 return $this->AppendBinaryOperation($QueryBuilder, $Expression);
                 
-            case E\UnaryOperationExpression::GetType():
+            case $Expression instanceof E\UnaryOperationExpression:
                 return $this->AppendUnaryOperation($QueryBuilder, $Expression);
                 
-            case E\CastExpression::GetType():
+            case $Expression instanceof E\CastExpression:
                 return $this->AppendCast($QueryBuilder, $Expression);
                 
-            case E\FunctionCallExpression::GetType():
+            case $Expression instanceof E\FunctionCallExpression:
                 return $this->AppendFunctionCall($QueryBuilder, $Expression);
                 
-            case E\KeywordExpression::GetType():
+            case $Expression instanceof E\KeywordExpression:
                 return $this->AppendKeyword($QueryBuilder, $Expression);
                                 
-            case E\ValueListExpression::GetType():
+            case $Expression instanceof E\ValueListExpression:
                 return $this->AppendList($QueryBuilder, $Expression);
 
             default:

@@ -12,7 +12,7 @@ abstract class SingleKeyGenerator extends KeyGenerator {
         if(count($PrimaryKeyColumns) !== 1)
             throw new \InvalidArgumentException('Can only generate a single primary key');
         
-        $this->FillSinglePrimaryKeys($Connection, $Table, $PrimaryKeys, $Column);
+        $this->FillSinglePrimaryKeys($Connection, $Table, $PrimaryKeys, reset($PrimaryKeyColumns));
     }
     protected abstract function FillSinglePrimaryKeys(IConnection $Connection, Relational\Table $Table, 
             array $PrimaryKeys, Column $Column);

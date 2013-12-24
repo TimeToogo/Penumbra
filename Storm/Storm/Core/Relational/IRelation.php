@@ -19,8 +19,9 @@ interface IRelation {
     
     public function AddConstraintPredicateToRequest(Request $Request);
     public function AddParentPredicateToRequest(Request $Request, array $ParentRows);
+    
     /**
-     * @return Map
+     * @return Map 
      */
     public function MapRelatedRows(array $ParentRows, array $RelatedRows);
 }

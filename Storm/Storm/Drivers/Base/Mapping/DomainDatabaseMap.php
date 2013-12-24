@@ -30,42 +30,42 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
     final protected function MapExpression(Mapping\IEntityRelationalMap $EntityRelationalMap, 
             O\Expression $Expression) {
         $ExpressionMapper = $this->GetDatabase()->GetPlatform()->GetExpressionMapper();
-        switch ($Expression->GetType()) {
-            case O\PropertyExpression::GetType():
+        switch (true) {
+            case $Expression instanceof O\PropertyExpression:
                 return Expression::ReviveColumn($EntityRelationalMap->GetMappedColumn($Expression->GetProperty()));
             
-            case O\ConstantExpression::GetType():
+            case $Expression instanceof O\ConstantExpression:
                 return $ExpressionMapper->MapConstantExpression($Expression->GetValue());
             
-            case O\ArrayExpression::GetType():
+            case $Expression instanceof O\ArrayExpression:
                 return Expression::ValueList(array_map(
                         function($Expression) use (&$EntityRelationalMap) {
                             return $this->MapExpression($EntityRelationalMap, $Expression);
                         }, $Expression->GetValueExpressions()));
             
-            case O\AssignmentExpression::GetType():
+            case $Expression instanceof O\AssignmentExpression:
                 return $ExpressionMapper->MapAssignmentExpression(
                         $EntityRelationalMap->GetMappedColumn($Expression->GetProperty()), 
                         $this->OperatorMapper->MapAssignmentOperator($ExpressionMapper->GetOperator()), 
                         $this->MapExpression($EntityRelationalMap, $ExpressionMapper->GetRightOperandExpression()));
             
-            case O\BinaryOperationExpression::GetType():
+            case $Expression instanceof O\BinaryOperationExpression:
                 return $ExpressionMapper->MapBinaryOperationExpression(
                         $this->MapExpression($EntityRelationalMap, $Expression->GetLeftOperandExpression()), 
                         $this->OperatorMapper->MapBinaryOperator($Expression->GetOperator()), 
                         $this->MapExpression($EntityRelationalMap, $Expression->GetRightOperandExpression()));
             
-            case O\UnaryOperationExpression::GetType():
+            case $Expression instanceof O\UnaryOperationExpression:
                 return $ExpressionMapper->MapUnaryOperationExpression(
                         $this->OperatorMapper->MapUnaryOperator($Expression->GetExpression()), 
                         $this->MapExpression($EntityRelationalMap, $Expression->GetOperandExpression()));
             
-            case O\CastExpression::GetType():
+            case $Expression instanceof O\CastExpression:
                 return $ExpressionMapper->MapCastExpression(
                         $this->OperatorMapper->MapCastOperator($Expression->GetCastType()),
                         $this->MapExpression($EntityRelationalMap, $Expression->GetCastValueExpression()));
             
-            case O\FunctionCallExpression::GetType():
+            case $Expression instanceof O\FunctionCallExpression:
                 return $ExpressionMapper->MapFunctionCallExpression(
                         $Expression->GetName(),
                         array_map(function($Expression) use (&$EntityRelationalMap) {

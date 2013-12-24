@@ -20,7 +20,7 @@ class BloggingDatabase extends Relational\Database {
     }
 
     protected function Platform() {
-        $Development = 1;
+        $Development = 0;
         
         if($Development > 0) {
             return new Platforms\Mysql\Platform(

@@ -35,11 +35,17 @@ abstract class Relation implements Relational\IRelation {
     
     final public function MapRelatedRows(array $ParentRows, array $RelatedRows) {
         $Map = new Map();
-        $this->MapParentToRelatedRows($Map, $ParentRows, $RelatedRows);
+        if(count($ParentRows) === 1) {
+            $Map->Map(reset($ParentRows), new \ArrayObject($RelatedRows));
+        } 
+        else {
+            $this->MapParentToRelatedRows($Map, $ParentRows, $RelatedRows);
+        }
         
         return $Map;
     }
     protected abstract function MapParentToRelatedRows(Map $Map, array $ParentRows, array $RelatedRows);
+
 }
 
 ?>

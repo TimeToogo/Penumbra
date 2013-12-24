@@ -59,8 +59,10 @@ class JoinTableRelation extends Relation implements Relational\IToManyRelation {
     
     public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows) {
         $Request->AddTable($this->JoinTable);
-        $Request->AddColumns($this->OtherForeignKey->GetParentColumns());
         $Request->AddPredicate($this->ForeignKey->GetConstraintPredicate());
+        if(count($ParentRows) > 1) {
+            $Request->AddColumns($this->OtherForeignKey->GetParentColumns());
+        }
         
         $Predicate = new Constraints\Predicate();
         $RuleGroup = Constraints\RuleGroup::Any();

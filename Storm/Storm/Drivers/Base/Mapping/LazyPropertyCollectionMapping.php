@@ -7,7 +7,7 @@ use \Storm\Core\Mapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
-final class LazyPropertyCollectionMapping extends PropertyCollectionMapping {
+class LazyPropertyCollectionMapping extends PropertyCollectionMapping {
     public function __construct(
             Object\IProperty $Property,
             $EntityType, 

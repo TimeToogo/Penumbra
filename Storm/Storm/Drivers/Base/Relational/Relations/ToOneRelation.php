@@ -30,7 +30,10 @@ class ToOneRelation extends ToOneKeyedRelation {
         $KeyedRelatedRows = $this->HashRowsByColumns($RelatedRows, $ReferencedColumns);
         foreach($KeyedParentRows as $Hash => $KeyedParentRow) {
             if(isset($KeyedRelatedRows[$Hash])) {
-                $Map->Map($KeyedParentRow, $KeyedRelatedRows[$Hash]);
+                $Map->Map($KeyedParentRow, new \ArrayObject([$KeyedRelatedRows[$Hash]]));
+            }
+            else {
+                $Map->Map($KeyedParentRow, new \ArrayObject([]));
             }
         }
     }

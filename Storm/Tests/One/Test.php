@@ -21,8 +21,7 @@ class Test implements \StormTests\IStormTest {
     public function Run(Storm $BloggingStorm) {        
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         
-        
-        $Action = self::Retreive;
+        $Action = self::Persist;
         $Amount = 1;
         
         $Last;

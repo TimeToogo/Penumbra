@@ -88,7 +88,7 @@ final class FluentPropertyMapping {
                 return new Mapping\EagerPropertyEntityMapping($this->Property, $EntityType, $ToOneRelation);
             case LoadingMode::Lazy:
                 return new Mapping\LazyPropertyEntityMapping($this->Property, $EntityType, $ToOneRelation, $this->ProxyGenerator);
-            case LoadingMode::Eager:
+            case LoadingMode::ExtraLazy:
                 return new Mapping\ExtraLazyPropertyEntityMapping($this->Property, $EntityType, $ToOneRelation, $this->ProxyGenerator);
             default:
                 throw new \InvalidArgumentException('Unsupported loading mode');
@@ -105,7 +105,7 @@ final class FluentPropertyMapping {
                 return new Mapping\EagerPropertyCollectionMapping($this->Property, $EntityType, $ToManyRelation);
             case LoadingMode::Lazy:
                 return new Mapping\LazyPropertyCollectionMapping($this->Property, $EntityType, $ToManyRelation, $this->ProxyGenerator);
-            case LoadingMode::Eager:
+            case LoadingMode::ExtraLazy:
                 return new Mapping\ExtraLazyPropertyCollectionMapping($this->Property, $EntityType, $ToManyRelation, $this->ProxyGenerator);
             default:
                 throw new \InvalidArgumentException('Unsupported loading mode');

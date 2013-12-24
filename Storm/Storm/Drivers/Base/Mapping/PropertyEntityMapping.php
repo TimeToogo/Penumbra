@@ -34,8 +34,8 @@ abstract class PropertyEntityMapping extends PropertyRelationMapping implements 
         foreach($ResultRowStateMap as $ResultRow) {
             $State = $ResultRowStateMap[$ResultRow];
             $RelatedRow = $ParentRelatedRowsMap[$ResultRow];
-            $State[$Property] = isset($RelatedRowEntityMap[$RelatedRow]) ? 
-                    $RelatedRowEntityMap[$RelatedRow] : null;
+            $State[$Property] = count($RelatedRowEntityMap[$RelatedRow]) > 0 ? 
+                    reset($RelatedRowEntityMap[$RelatedRow]) : null;
         }
     }
     
