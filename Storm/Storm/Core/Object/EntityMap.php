@@ -15,7 +15,7 @@ abstract class EntityMap implements \IteratorAggregate {
      */
     private $Properties = array();
     /**
-     * @var IProperty[] 
+     * @var IIdentityProperty[] 
      */
     private $IdentityProperties = array();
     
@@ -33,8 +33,8 @@ abstract class EntityMap implements \IteratorAggregate {
     
     final protected function AddProperty(IProperty $Property) {
         $this->Properties[$Property->GetName()] = $Property;
-        if($Property->IsIdentity())
-            $this->IdentityProperties[$Property->GetName()]  = $Property;
+        if($Property instanceof IIdentityProperty)
+            $this->IdentityProperties[$Identity->GetName()] = $Identity;
     }
     
     private function VerifyEntity($Entity) {
@@ -55,7 +55,7 @@ abstract class EntityMap implements \IteratorAggregate {
     }
     
     /**
-     * @return IProperty[]
+     * @return IIdentityProperty[]
      */
     final public function GetIdentityProperties() {
         return $this->IdentityProperties;
@@ -71,11 +71,9 @@ abstract class EntityMap implements \IteratorAggregate {
     protected abstract function ConstructEntity();
     
     final public function HasIdentity($Entity) {
-        foreach($this->Properties as $Property) {
-            if($Property->CanGetValue() && $Property->IsIdentity()) {
-                if($Property->GetValue($Entity) !== null) {
-                    return true;
-                }
+        foreach($this->Identity($Entity) as $Value) {
+            if($Value !== null) {
+                return true;
             }
         }
         return false;
@@ -92,25 +90,11 @@ abstract class EntityMap implements \IteratorAggregate {
         $this->VerifyEntity($Entity);
         
         $Identity = new Identity($this);
-        foreach($this->Properties as $Property) {
-            if($Property->CanGetValue() && $Property->IsIdentity())
-                $Identity[$Property] = $Property->GetValue($Identity);
+        foreach($this->IdentityProperties as $IdentityProperty) {
+            $IdentityProperty->Identity($Identity, $Entity);
         }
         
         return $Identity;
-    }
-    
-    final public function SetIdentity($Entity, Identity $Identity) {
-        $this->VerifyEntity($Entity);
-        if($Identity->GetEntityMap() !== $this)
-            throw new \InvalidArgumentException('$Identity must be of this EntityMap');
-        
-        foreach($this->Properties as $Property) {
-            if($Property->CanSetValue() && $Property->IsIdentity() && isset($Identity[$Property])) {
-                $Value = $Identity[$Property];
-                $Property->SetValue($Entity, $Value);
-            }
-        }
     }
     
     final public function State($Entity = null, UnitOfWork $UnitOfWork = null) {

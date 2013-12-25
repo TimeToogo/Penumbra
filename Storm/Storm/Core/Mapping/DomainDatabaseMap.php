@@ -182,7 +182,10 @@ abstract class DomainDatabaseMap {
             $PropertyAscendingMap = $ObjectRequest->GetOrderedPropertiesAscendingMap();
             foreach ($PropertyAscendingMap as $Property) {
                 $Ascending = $PropertyAscendingMap[$Property];
-                $RelationalRequest->AddOrderByColumn($EntityRelationalMap->GetMappedColumn($Property), $Ascending);
+                $Columns = $EntityRelationalMap->GetMappedColumns($Property);
+                foreach($Columns as $Column) {
+                    $RelationalRequest->AddOrderByColumn($Column, $Ascending);
+                }
             }
         }
         if ($ObjectRequest->IsRanged()) {
@@ -429,7 +432,7 @@ abstract class DomainDatabaseMap {
             $Count = 0;
             $NewIdentities = array_values($NewIdentities);
             foreach ($UnidentifiableEntities as $Entity) {
-                $EntityMap->SetIdentity($Entity, $NewIdentities[$Count]);
+                $EntityMap->Apply($Entity, $NewIdentities[$Count]);
                 $Count++;
             }
         }

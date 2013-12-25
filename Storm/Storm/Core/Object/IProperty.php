@@ -6,7 +6,6 @@ interface IProperty {
     const IPropertyType = __CLASS__;
     
     public function GetName();
-    public function IsIdentity();
     /**
      * @return EntityMap
      */

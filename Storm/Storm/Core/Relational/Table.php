@@ -8,7 +8,13 @@ abstract class Table {
     use \Storm\Core\Helpers\Type;
     
     private $Name;
+    /**
+     * @var IColumn[]
+     */
     private $Columns;
+    /**
+     * @var IPrimaryKeyColumns[]
+     */
     private $PrimaryKeyColumns;
     private $ToOneRelations;
     private $ToManyRelations;
@@ -67,7 +73,9 @@ abstract class Table {
         $Column->SetTable($this);
         
         $this->Columns[$Column->GetName()] = $Column;
-    }
+        if($Column instanceof IPrimaryKeyColumn)
+            $this->PrimaryKeyColumns[$Column->GetName()] = $Column;
+     }
     
     final public function GetName() {
         return $this->Name;
@@ -77,12 +85,8 @@ abstract class Table {
         return isset($this->Columns[$Name]);
     }
     final public function HasPrimaryKey($Name) {
-        if(!isset($this->Columns[$Name]))
-            return false;
-        else
-            return $this->ColumnIsPrimaryKey($this->Columns[$Name]);
+        return isset($this->PrimaryKeyColumns[$Name]);
     }
-    protected abstract function ColumnIsPrimaryKey(IColumn $Column);
     /**
      * @param string $Name
      * @return IColumn
@@ -100,10 +104,6 @@ abstract class Table {
      * @return IColumn[]
      */
     final public function GetPrimaryKeyColumns() {
-        if(!isset($this->PrimaryKeyColumns)) {
-            $this->PrimaryKeyColumns = array_filter($this->Columns, 
-                    function (IColumn $Column) { return $this->ColumnIsPrimaryKey($Column); });
-        }
         return $this->PrimaryKeyColumns;
     }
     

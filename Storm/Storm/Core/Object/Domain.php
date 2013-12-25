@@ -67,12 +67,8 @@ abstract class Domain {
         return $this->VerifyEntity($Entity)->Identity($Entity);
     }
     
-    /**
-     * @param object $Entity
-     * @return Identity
-     */
-    final public function SetIdentity($Entity, Identity $Identity) {
-        return $this->VerifyEntity($Entity)->SetIdentity($Identity);
+    final public function Apply($Entity, PropertyData $PropertyData) {
+        return $this->VerifyEntity($Entity)->Apply($Entity, $PropertyData);
     }
     
     /**
@@ -89,10 +85,6 @@ abstract class Domain {
     
     final public function Discard($Entity, UnitOfWork $UnitOfWork) {
         return $this->VerifyEntity($Entity)->Persist($Entity, $UnitOfWork);
-    }
-    
-    final public function Apply($Entity, PropertyData $PropertyData) {
-        return $this->VerifyEntity($Entity)->Apply($Entity, $PropertyData);
     }
     
     final public function ReviveEntities($EntityType, array $States) {

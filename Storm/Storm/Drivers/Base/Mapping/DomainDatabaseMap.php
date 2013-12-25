@@ -31,8 +31,8 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
             O\Expression $Expression) {
         $ExpressionMapper = $this->GetDatabase()->GetPlatform()->GetExpressionMapper();
         switch (true) {
-            case $Expression instanceof O\PropertyExpression:
-                return Expression::ReviveColumn($EntityRelationalMap->GetMappedColumn($Expression->GetProperty()));
+            case $Expression instanceof O\PropertyExpression://TODO
+                return Expression::ReviveColumn($EntityRelationalMap->GetMappedColumns($Expression->GetProperty()));
             
             case $Expression instanceof O\ConstantExpression:
                 return $ExpressionMapper->MapConstantExpression($Expression->GetValue());
@@ -45,7 +45,7 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
             
             case $Expression instanceof O\AssignmentExpression:
                 return $ExpressionMapper->MapAssignmentExpression(
-                        $EntityRelationalMap->GetMappedColumn($Expression->GetProperty()), 
+                        $EntityRelationalMap->GetMappedColumns($Expression->GetProperty()), 
                         $this->OperatorMapper->MapAssignmentOperator($ExpressionMapper->GetOperator()), 
                         $this->MapExpression($EntityRelationalMap, $ExpressionMapper->GetRightOperandExpression()));
             

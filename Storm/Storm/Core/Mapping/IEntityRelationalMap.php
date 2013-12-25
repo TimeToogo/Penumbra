@@ -16,9 +16,19 @@ interface IEntityRelationalMap {
     public function GetEntityMap();
     
     /**
+     * @return Relational\Table
+     */
+    public function GetPrimaryKeyTable();
+    
+    /**
      * @return IPropertyMapping[]
      */
     public function GetPropertyMappings();
+    
+    /**
+     * @return IIdentityPrimaryKeyMapping[]
+     */
+    public function GetIdentityPrimaryKeyMappings();
     
     /**
      * @return IPropertyColumnMapping[]
@@ -31,14 +41,14 @@ interface IEntityRelationalMap {
     public function GetProperyRelationMappings();
     
     /**
-     * @return Relational\IColumn
+     * @return Relational\IColumn[]
      */
-    public function GetMappedColumn(Object\IProperty $Property);
+    public function GetMappedColumns(Object\IProperty $Property);
     
     /**
-     * @return Object\IProperty
+     * @return Object\IProperty[]
      */
-    public function GetMappedProperty(Relational\IColumn $Column);
+    public function GetMappedProperties(Relational\IColumn $Column);
     
     /**
      * @return Relational\IColumn[]
