@@ -3,6 +3,7 @@
 namespace Storm\Core\Mapping;
 
 use \Storm\Core\Containers\Map;
+use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 
@@ -11,10 +12,11 @@ final class RevivingContext extends MappingContext {
         parent::__construct($DomainDatabaseMap);
     }
     
-    public function ReviveEntities($EntityType, array $RelatedRows) {
-        $Entities = $this->GetDomainDatabaseMap()->ReviveEntities($EntityType, $this, $RelatedRows);
-        
-        return $Entities;
+    /**
+     * @return Object\RevivalData[]
+     */
+    public function MapRowsToRevivalData($EntityType, array $RelatedRows) {
+        return $this->GetDomainDatabaseMap()->MapRowsToRevivalData($EntityType, $this, $RelatedRows);
     }
     
     public function ReviveEntityInstances(Map $RowInstanceMap) {

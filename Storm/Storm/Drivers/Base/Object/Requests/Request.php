@@ -44,7 +44,7 @@ class Request implements Object\IRequest {
     }
     
     final public function AddProperty(Object\IProperty $Property) {
-        $this->Properties[$Property->GetName()] = $Property;
+        $this->Properties[$Property->GetIdentifier()] = $Property;
     }
     
     /**

@@ -21,6 +21,7 @@ abstract class Domain {
     protected abstract function RegisterEntityMaps(Registrar $Registrar);
     
     final protected function AddEntityMap(EntityMap $EntityMap) {
+        $EntityMap->InititalizeProperties($this);
         $this->EntityMaps[$EntityMap->GetEntityType()] = $EntityMap;
     }
     
@@ -44,11 +45,13 @@ abstract class Domain {
      * @return EntityMap
      */
     private function VerifyEntity($Entity) {
-        $EntityType = get_class($Entity);
-        if(!$this->HasEntityMap($EntityType))
-            throw new \Storm\Core\Exceptions\UnmappedEntityException($EntityType);
-        else
-            return $this->GetEntityMap($EntityType);
+        $EntityTypes = array_reverse(array_merge([get_class($Entity)], class_parents($Entity, false)));
+        foreach($EntityTypes as $EntityType) {
+            if(isset($this->EntityMaps[$EntityType])) {
+                return $this->EntityMaps[$EntityType];
+            }
+        }           
+        throw new \Storm\Core\Exceptions\UnmappedEntityException($EntityType);
     }
     
     /**
@@ -57,6 +60,17 @@ abstract class Domain {
      */
     final public function HasIdentity($Entity) {
         return $this->VerifyEntity($Entity)->HasIdentity($Entity);
+    }
+    
+    final public function ShareIdentity($Entity, $OtherEntity) {
+        $EntityMap = $this->VerifyEntity($Entity);
+        $EntityType = $EntityMap->GetEntityType();
+        if(!($OtherEntity instanceof $EntityType)) {
+            return false;
+        }
+        else {
+            return $EntityMap->Identity($Entity)->Matches($EntityMap->Identity($OtherEntity));
+        }
     }
     
     /**
@@ -68,9 +82,20 @@ abstract class Domain {
     }
     
     final public function Apply($Entity, PropertyData $PropertyData) {
-        return $this->VerifyEntity($Entity)->Apply($Entity, $PropertyData);
+        return $this->VerifyEntity($Entity)->Apply($this, $Entity, $PropertyData);
     }
     
+    
+    /**
+     * @param object $Entity
+     * @return Relationship
+     */
+    final public function Relationship($ParentEntity, $ChildEntity) {
+        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($Entity);
+        $ChildIdentity = $this->VerifyEntity($ChildEntity)->Identity($ChildEntity);
+        
+        return new Relationship($ParentIdentity, $ChildIdentity);
+    }
     /**
      * @param object $Entity
      * @return State
@@ -79,30 +104,32 @@ abstract class Domain {
         return $this->VerifyEntity($Entity)->State($Entity);
     }
     
-    final public function Persist($Entity, UnitOfWork $UnitOfWork) {
-        return $this->VerifyEntity($Entity)->Persist($Entity, $UnitOfWork);
+    final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
+        return $this->VerifyEntity($Entity)->Persist($UnitOfWork, $Entity);
     }
     
-    final public function Discard($Entity, UnitOfWork $UnitOfWork) {
-        return $this->VerifyEntity($Entity)->Persist($Entity, $UnitOfWork);
+    final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
+        return $this->VerifyEntity($Entity)->Discard($UnitOfWork, $Entity);
     }
     
-    final public function ReviveEntities($EntityType, array $States) {
+    final public function ReviveEntities($EntityType, array $RevivalData) {
+        if(count($RevivalData) === 0) {
+            return array();
+        }
         $EntityMap = $this->GetEntityMap($EntityType);
         
-        return $EntityMap->ReviveEntities($States);
+        return $EntityMap->ReviveEntities($this, $RevivalData);
     }
     
     final public function ReviveEntityInstances($EntityType, Map $StateInstanceMap) {
         $EntityMap = $this->GetEntityMap($EntityType);
         
-        return $EntityMap->ReviveEntityInstances($StateInstanceMap);
+        return $EntityMap->ReviveEntityInstances($this, $StateInstanceMap);
     }
     
     final public function DiscardWhere(UnitOfWork $UnitOfWork, IRequest $Request) {
         $this->GetEntityMap($Request->GetEntityType())->DiscardWhere($UnitOfWork, $Request);
     }
-    
     
     /**
      * @return UnitOfWork

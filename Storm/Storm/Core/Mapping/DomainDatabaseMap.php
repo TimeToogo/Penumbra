@@ -8,8 +8,17 @@ use \Storm\Core\Containers\Registrar;
 use \Storm\Core\Containers\Map;
 
 abstract class DomainDatabaseMap {
+    /**
+     * @var Object\Domain
+     */
     private $Domain;
+    /**
+     * @var Relational\Database
+     */
     private $Database;
+    /**
+     * @var IEntityRelationalMap[] 
+     */
     private $EntityRelationMaps = array();
     
     public function __construct() {
@@ -88,6 +97,7 @@ abstract class DomainDatabaseMap {
         $RelationalRequest = $this->MapRequest($ObjectRequest);
         $Rows = $this->Database->Load($RelationalRequest);
         
+        $this->ReviveEntities($EntityType, $Rows);
         $Context = new RevivingContext($this);
         $RevivedEntities = $Context->ReviveEntities($EntityType, $Rows);
         
@@ -100,10 +110,8 @@ abstract class DomainDatabaseMap {
     }
     
     final public function Commit(Object\UnitOfWork $UnitOfWork) {
-        $this->EnsureIdentifiable($UnitOfWork->GetPersistedStates());
+        $this->EnsureIdentifiable($UnitOfWork->GetPersistedData());
         $this->VerifyIdentifiable($UnitOfWork->GetDiscardedIdentities());
-        
-        $UnitOfWork = $this->Domain->BuildUnitOfWork($PersistedEntities, $DiscardedEntities, $DiscardedRequests);
         
         $Transaction = new Relational\Transaction();
         $this->MapUnitOfWorkToTransaction($UnitOfWork, $Transaction);
@@ -113,19 +121,19 @@ abstract class DomainDatabaseMap {
     
     // <editor-fold defaultstate="collapsed" desc="Request and Operation mappers">
     /**
-     * @param Object\IRequest $ObjectOperation
+     * @param Object\IRequest $ObjectProcedure
      * @return Relational\Procedure
      */
-    final public function MapOperation(Object\IProcedure $ObjectOperation) {
-        $EntityRelationalMap = $this->VerifyRelationMap($ObjectOperation->GetEntityType());
-        $RelationalOperation = new Relational\Procedure([$EntityRelationalMap->GetTable()], $ObjectOperation->IsSingleEntity());
+    final public function MapProcedure(Object\IProcedure $ObjectProcedure) {
+        $EntityRelationalMap = $this->VerifyRelationMap($ObjectProcedure->GetEntityType());
+        $RelationalProcedure = new Relational\Procedure([$EntityRelationalMap->GetTable()], $ObjectProcedure->IsSingleEntity());
         
-        $this->MapRequestData($EntityRelationalMap, $ObjectOperation, $RelationalOperation);
-        foreach($ObjectOperation->GetExpressions() as $Expression) {
-            $RelationalOperation->AddExpression($this->MapExpression($EntityRelationalMap, $Expression));
+        $this->MapRequestData($EntityRelationalMap, $ObjectProcedure, $RelationalProcedure);
+        foreach($ObjectProcedure->GetExpressions() as $Expression) {
+            $RelationalProcedure->AddExpression($this->MapExpression($EntityRelationalMap, $Expression));
         }
         
-        return $RelationalOperation;
+        return $RelationalProcedure;
     }
     
     /**
@@ -158,15 +166,16 @@ abstract class DomainDatabaseMap {
         
         $PropertyColumnMappings = $EntityRelationalMap->GetPropertyColumnMappings();
         $PropertyRelationMappings = $EntityRelationalMap->GetProperyRelationMappings();
-        foreach($Properties as $PropertyName => $Property) {
-            if(isset($PropertyColumnMappings[$PropertyName])) {
-                $PropertyColumnMappings[$PropertyName]->AddToRelationalRequest($RelationalRequest);
+        foreach($Properties as $PropertyIdentifier => $Property) {
+            if(isset($PropertyColumnMappings[$PropertyIdentifier])) {
+                $PropertyColumnMappings[$PropertyIdentifier]->AddToRelationalRequest($RelationalRequest);
             }
-            else if(isset($PropertyRelationMappings[$PropertyName])) {
-                $PropertyRelationMappings[$PropertyName]->AddToRelationalRequest($this, $RelationalRequest);
+            else if(isset($PropertyRelationMappings[$PropertyIdentifier])) {
+                $PropertyRelationMappings[$PropertyIdentifier]->AddToRelationalRequest($this, $RelationalRequest);
             }
-            else
+            else {
                 throw new \Storm\Core\Exceptions\UnmappedPropertyException();
+            }
         }
     }
 
@@ -248,28 +257,34 @@ abstract class DomainDatabaseMap {
     /**
      * @internal
      * @param Relational\Row[] $Rows
+     * @return Object\RevivalData[]
+     */
+    final public function MapRowsToRevivalData($EntityType, RevivingContext $Context, array $Rows) {
+        if (count($Rows) === 0) {
+            return array();
+        }
+        $EntityRelationalMap = $this->EntityRelationMaps[$EntityType];
+
+        $ResultRowRevivalDataMap = new Map();
+        $EntityMap = $EntityRelationalMap->GetEntityMap();
+        foreach ($Rows as $ResultRow) {
+            $ResultRowRevivalDataMap[$ResultRow] = $EntityMap->RevivalData();
+        }
+        $EntityRelationalMap->Revive($Context, $ResultRowRevivalDataMap);
+        $RevivalDataArray = $ResultRowRevivalDataMap->GetToInstances();
+        
+        return $RevivalDataArray;
+    }
+    
+    /**
+     * @internal
+     * @param Relational\Row[] $Rows
      * @return object[]
      */
     final public function ReviveEntities($EntityType, RevivingContext $Context, array $Rows) {
-        if (count($Rows) === 0)
-            return array();
-        $EntityRelationalMap = $this->EntityRelationMaps[$EntityType];
-
-        $RowStateMap = new Map();
-        $EntityMap = $EntityRelationalMap->GetEntityMap();
-        foreach ($Rows as $Row) {
-            $RowStateMap[$Row] = $EntityMap->State();
-        }
-        foreach ($EntityRelationalMap->GetPropertyMappings() as $Mapping) {
-            $Mapping->Revive($Context, $RowStateMap);
-        }
-        $EntityStates = array();
-        foreach ($RowStateMap as $Row) {
-            $EntityStates[] = $RowStateMap[$Row];
-        }
-        return $EntityRelationalMap->GetEntityMap()->ReviveEntities($EntityStates);
+        $RevivalDataArray = $this->MapRowsToRevivalData($EntityType, $Context, $Rows);
+        return $EntityRelationalMap->GetEntityMap()->ReviveEntities($RevivalDataArray);
     }
-
 
     /**
      * @internal
@@ -291,9 +306,7 @@ abstract class DomainDatabaseMap {
         foreach ($RowInstanceMap as $Row) {
             $RowStateMap[$Row] = $EntityMap->State();
         }
-        foreach ($EntityRelationalMap->GetPropertyMappings() as $Mapping) {
-            $Mapping->Revive($Context, $RowStateMap);
-        }
+        $EntityRelationalMap->Revive($Context, $RowStateMap);
         $StateInstanceMap = new Map();
         foreach ($RowStateMap as $Row) {
             $State = $RowStateMap[$Row];
@@ -311,7 +324,7 @@ abstract class DomainDatabaseMap {
      * @return Relational\Row[]
      */
     final public function PersistEntity(TransactionalContext $TransactionalContext, $Entity) {
-        $State = $this->Domain->State($Entity);
+        $State = $this->Domain->Store($Entity);
         return $this->PersistState($TransactionalContext, $State);
     }
 
@@ -323,7 +336,7 @@ abstract class DomainDatabaseMap {
      */
     final public function PersistState(TransactionalContext $TransactionalContext, Object\State $State) {
         $EntityRelationalMap = $this->VerifyRelationMap($State->GetEntityType());
-        $ColumnData = new Relational\ResultRow($EntityRelationalMap->GetAllMappedColumns());
+        $ColumnData = new Relational\ResultRow($EntityRelationalMap->GetAllMappedReviveColumns());
         $Context = new PersistingContext($this, $State, $ColumnData);
         foreach ($EntityRelationalMap->GetPropertyMappings() as $Mapping) {
             $Mapping->Persist($Context, $TransactionalContext);
@@ -368,12 +381,12 @@ abstract class DomainDatabaseMap {
 
     private function MapUnitOfWorkToTransaction(Object\UnitOfWork $UnitOfWork, Relational\Transaction $Transaction) {
         $TransactionalContext = new TransactionalContext($this, $Transaction);
-        foreach($UnitOfWork->GetPersistedStates() as $PersistedEntityState) {
+        foreach($UnitOfWork->GeGetPersistedData as $PersistedEntityState) {
             $PersistedRow = $TransactionalContext->PersistState($PersistedEntityState);
             $Transaction->PersistAll($PersistedRow->GetRows());
         }
         foreach($UnitOfWork->GetProcedures() as $Operation) {
-            $Transaction->Execute($this->MapOperation($Operation));
+            $Transaction->Execute($this->MapProcedure($Operation));
         }
         foreach($UnitOfWork->GetDiscardedIdentities() as $DiscardedIdentity) {
             $DiscardedPrimaryKey = $TransactionalContext->DiscardIdentity($DiscardedIdentity);
@@ -402,7 +415,7 @@ abstract class DomainDatabaseMap {
             $EntityMap = $EntityRelationalMap->GetEntityMap();
             
             $IdentityProperties = $EntityMap->GetIdentityProperties();
-            $PrimaryKeyColumns = $EntityRelationalMap->GetAllMappedColumns($IdentityProperties);
+            $PrimaryKeyColumns = $EntityRelationalMap->GetAllMappedReviveColumns($IdentityProperties);
             $Table = null;
             foreach($PrimaryKeyColumns as $Column) {
                 if($Table === null) {

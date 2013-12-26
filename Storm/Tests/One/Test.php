@@ -61,7 +61,7 @@ class Test implements \StormTests\IStormTest {
                 });
             }
             $Identity = $BlogMap->Identity();
-            $Identity->SetProperty('Id', $Id);
+            $Identity->SetProperty($BlogMap->Id, $Id);
             
             
             $RevivedBlog = $BlogRepository->Load(new Requests\IdentityRequest($Identity));

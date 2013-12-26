@@ -5,14 +5,14 @@ namespace Storm\Drivers\Base\Mapping;
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Mapping;
 use \Storm\Core\Object;
+use Storm\Drivers\Base\Object\Properties\Property;
 use \Storm\Core\Relational;
 
 abstract class PropertyCollectionMapping extends PropertyRelationMapping implements IPropertyCollectionMapping {
     private $ToManyRelation;
     
     public function __construct( 
-            Object\IProperty $Property, 
-            $EntityType,
+            Object\IProperty $Property,
             Relational\IToManyRelation $ToManyRelation) {
         parent::__construct($Property, $EntityType, $ToManyRelation);
         
@@ -27,49 +27,27 @@ abstract class PropertyCollectionMapping extends PropertyRelationMapping impleme
     }
     
     protected function ReviveProperties(
-            Map $ResultRowStateMap, 
+            Map $ParentRowRevivalDataMap, 
             Map $ParentRelatedRowsMap, 
-            Map $RelatedRowEntityMap) {
+            Map $RelatedRowRevivalDataMap) {
         $Property = $this->GetProperty();
-        $EntityType = $this->GetEntityType();
-        foreach($ResultRowStateMap as $ResultRow) {
-            $State = $RelatedRowEntityMap[$ResultRow];
-            $RelatedRows = $ParentRelatedRowsMap[$ResultRow];
-            $Entities = array();
+        foreach($ParentRowRevivalDataMap as $ParentRow) {
+            $RevivalData = $RelatedRowRevivalDataMap[$ParentRow];
+            $RelatedRows = $ParentRelatedRowsMap[$ParentRow];
+            $RevivalDataArray = array();
             foreach($RelatedRows as $RelatedRow) {
-                $Entities[] = $RelatedRowEntityMap[$RelatedRow];
+                $RevivalDataArray[] = $RelatedRow;
             }
-            $State[$Property] = new Collections\Collection($Entities, $EntityType);
+            $RevivalData[$Property] = $RevivalDataArray;
         }
     }
     
     public function Persist(Mapping\PersistingContext $Context, Mapping\TransactionalContext $TransactionalContext) {
-        $RelatedEntityCollection = $Context->GetState()[$this->GetProperty()];
-        if(!($RelatedEntityCollection instanceof Collections\ICollection)) {
-            //TODO: ERROR
-            throw new Exception;
-        }
-        if(!$RelatedEntityCollection->__IsAltered())
-            return;
-                
-        $PersistedRelatedRows = 
-                $TransactionalContext->PersistAll($RelatedEntityCollection->ToArray());
         
-        $RemovedEntities = $RelatedEntityCollection->__GetRemovedEntities();
-        $DiscardedRelatedPrimaryKeys = $TransactionalContext->DiscardAll($RemovedEntities);
-        
-        $this->ToManyRelation->Persist($TransactionalContext->GetTransaction(), $Context->GetColumnData(), $PersistedRelatedRows, $DiscardedRelatedPrimaryKeys);
     }
     
     public function Discard(Mapping\DiscardingContext $Context, Mapping\TransactionalContext $TransactionalContext) {
-        $RelatedEntityCollection = $Context->Get()[$this->GetProperty()];
-        if(!($RelatedEntityCollection instanceof Collections\ICollection)) {
-            //TODO: ERROR
-            throw new Exception;
-        }
-        $OrginalEntities = $RelatedEntityCollection->__GetOriginalEntities();
-        $DiscardedPrimaryKeys = $TransactionalContext->DiscardAll($OrginalEntities);
-        $this->ToManyRelation->Discard($TransactionalContext->GetTransaction(), $Context->GetPrimaryKey(), $DiscardedPrimaryKeys);
+        
     }
 }
 

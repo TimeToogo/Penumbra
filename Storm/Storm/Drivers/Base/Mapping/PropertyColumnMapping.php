@@ -19,29 +19,31 @@ final class PropertyColumnMapping extends PropertyMapping implements IPropertyCo
         $this->Column = $Column;
     }
     
-    /**
-     * @return Relational\IColumn
-     */
-    public function GetColumn() {
-        return $this->Column;
+    public function GetPersistColumns() {
+        return [$this->Column];
+    }
+    
+    public function GetReviveColumns() {
+        return [$this->Column];
     }
     
     public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
-        $RelationalRequest->AddColumn($this->Column);
+        $RelationalRequest->AddColumns($this->GetReviveColumns());
     }
 
-    public function Revive(Mapping\RevivingContext $Context, Map $RowStateMap) {
+    public function Revive(Map $ResultRowRevivalDataMap) {
         $Property = $this->GetProperty();
-        foreach($RowStateMap as $Row) {
-            $State = $RowStateMap[$Row];
-            $PropertyValue = $this->Column->Retrieve($Row);
-            $State[$Property] = $PropertyValue;
+        foreach($ResultRowRevivalDataMap as $Row) {
+            $RevivalData = $ResultRowRevivalDataMap[$Row];
+            $RevivalValue = $this->Column->Retrieve($Row);
+            $RevivalData[$Property] = $RevivalValue;
         }
     }
 
     public function Persist(Mapping\PersistingContext $Context, Mapping\TransactionalContext $TransactionalContext) {
+        
         $PropertyValue = $Context->GetState()[$this->GetProperty()];
-        $this->Column->Store($Context->GetColumnData($this->Column->GetTable()), $PropertyValue);
+        $this->Column->Store($Context->GetColumnData(), $PropertyValue);
     }
 
     public function Discard(Mapping\DiscardingContext $Context, Mapping\TransactionalContext $TransactionalContext) { }

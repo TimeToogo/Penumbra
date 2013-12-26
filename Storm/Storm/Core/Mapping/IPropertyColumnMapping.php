@@ -8,10 +8,16 @@ interface IPropertyColumnMapping extends IPropertyMapping {
     const IPropertyColumnMappingType = __CLASS__;
     
     /**
-     * @return Relational\IColumn
+     * @return Relational\IColumn[]
      */
-    public function GetColumn();
+    public function GetReviveColumns();
     
+    /**
+     * @return Relational\IColumn[]
+     */
+    public function GetPersistColumns();
+    
+    public function Revive(Map $ResultRowStateMap);
     public function AddToRelationalRequest(Relational\Request $RelationalRequest);
 }
 

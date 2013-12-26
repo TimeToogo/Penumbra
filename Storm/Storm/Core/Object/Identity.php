@@ -7,16 +7,11 @@ final class Identity extends PropertyData {
         parent::__construct($EntityMap, $IdentityData);
     }
     
-    protected function AddProperty($PropertyName, $Data) {
-        if(!$this->GetEntityMap()->HasIdentityProperty($PropertyName))
+    protected function AddProperty($PropertyIdentifier, $Data) {
+        if(!$this->GetEntityMap()->HasIdentityProperty($PropertyIdentifier))
             throw new \InvalidArgumentException('$PropertyName must be a valid Identity property of ' . get_class($this->GetEntityMap()));
         
-        parent::AddProperty($PropertyName, $Data);
-    }
-    
-    public function Is(self $OtherIdentity) {
-        return $this->GetEntityType() === $OtherIdentity->GetEntityType()
-                && $this->GetPropertyData() === $OtherIdentity->GetPropertyData();
+        parent::AddProperty($PropertyIdentifier, $Data);
     }
     
     public function Hash() {

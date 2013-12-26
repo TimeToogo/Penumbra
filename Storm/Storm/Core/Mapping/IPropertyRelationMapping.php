@@ -9,12 +9,13 @@ interface IPropertyRelationMapping extends IPropertyMapping {
     
     public function GetEntityType();
     
-    public function AddToRelationalRequest(DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest);
-    
     /**
      * @return Relational\IRelation
      */
     public function GetRelation();
+    
+    public function Revive(RevivingContext $Context, Map $ParentRowRevivalDataMap);
+    public function AddToRelationalRequest(DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest);
 }
 
 ?>

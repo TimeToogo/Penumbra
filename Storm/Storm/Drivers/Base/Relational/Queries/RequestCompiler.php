@@ -9,14 +9,14 @@ use \Storm\Core\Object\Constraints\Predicate;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
 abstract class RequestCompiler implements IRequestCompiler {    
-    final public function AppendOperation(QueryBuilder $QueryBuilder, Procedure $Operation) {
-        $this->AppendOperationStatement($QueryBuilder, $Operation);
-        $this->AppendOperationExpressions($QueryBuilder, $Operation->GetExpressions());
-        $this->AppendRequest($QueryBuilder, $Operation);
+    final public function AppendProcedure(QueryBuilder $QueryBuilder, Procedure $Procedure) {
+        $this->AppendProcedureStatement($QueryBuilder, $Procedure);
+        $this->AppendProcedureExpressions($QueryBuilder, $Procedure->GetExpressions());
+        $this->AppendRequest($QueryBuilder, $Procedure);
     }
-    protected abstract function AppendOperationStatement(QueryBuilder $QueryBuilder, Procedure $Operation);
+    protected abstract function AppendProcedureStatement(QueryBuilder $QueryBuilder, Procedure $Procedure);
     
-    protected abstract function AppendOperationExpressions(QueryBuilder $QueryBuilder, array $Expressions);
+    protected abstract function AppendProcedureExpressions(QueryBuilder $QueryBuilder, array $Expressions);
     
     final protected function AppendOperationExpression(QueryBuilder $QueryBuilder, Expression $Expression) {
         $QueryBuilder->AppendExpression($Expression);

@@ -11,14 +11,16 @@ class Column implements IColumn {
     
     private $Name;
     private $Identifier;
+    private $IsPrimaryKey;
     private $Table;
     private $DataType;
     private $Traits = array();
     
-    public function __construct($Name, DataType $DataType, array $Traits = array()) {
+    public function __construct($Name, DataType $DataType, $IsPrimaryKey = false, array $Traits = array()) {
         $this->Name = $Name;
         $this->Identifier = $Name;
         $this->DataType = $DataType;
+        $this->IsPrimaryKey = $IsPrimaryKey;
         foreach($Traits as $Trait) {
             $this->AddTrait($Trait);
         }
@@ -31,6 +33,10 @@ class Column implements IColumn {
     final public function SetName($Name) {
         $this->Name = $Name;
         $this->UpdateIdentifier();
+    }
+    
+    final public function IsPrimaryKey() {
+        return $this->IsPrimaryKey;
     }
     
     final public function GetIdentifier() {

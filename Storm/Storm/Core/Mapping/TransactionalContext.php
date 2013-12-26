@@ -45,7 +45,7 @@ final class TransactionalContext extends MappingContext {
         $Domain = $DomainDatabaseMap->GetDomain();
         $Rows = array();
         foreach($Entities as $Key => $Entity) {
-            $Row = $this->PersistState($Domain->State($Entity));
+            $Row = $this->PersistState($Domain->Store($Entity));
             if($Row !== null)
                 $Rows[$Key] = $Row;
         }

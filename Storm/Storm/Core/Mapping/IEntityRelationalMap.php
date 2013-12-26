@@ -2,6 +2,7 @@
 
 namespace Storm\Core\Mapping;
 
+use \Storm\Core\Containers\Map;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
@@ -20,15 +21,14 @@ interface IEntityRelationalMap {
      */
     public function GetPrimaryKeyTable();
     
+    public function Revive(RevivingContext $Context, Map $ResultRowRevivalDataMap);
+    public function Persist(PersistingContext $Context, TransactionalContext $TransactionalContext);
+    public function Discard(DiscardingContext $Context, TransactionalContext $TransactionalContext);
+    
     /**
      * @return IPropertyMapping[]
      */
     public function GetPropertyMappings();
-    
-    /**
-     * @return IIdentityPrimaryKeyMapping[]
-     */
-    public function GetIdentityPrimaryKeyMappings();
     
     /**
      * @return IPropertyColumnMapping[]
@@ -43,22 +43,22 @@ interface IEntityRelationalMap {
     /**
      * @return Relational\IColumn[]
      */
-    public function GetMappedColumns(Object\IProperty $Property);
-    
-    /**
-     * @return Object\IProperty[]
-     */
-    public function GetMappedProperties(Relational\IColumn $Column);
+    public function GetMappedReviveColumns(Object\IProperty $Property);
     
     /**
      * @return Relational\IColumn[]
      */
-    public function GetAllMappedColumns(array $Properties = null);
+    public function GetMappedPersistColumns(Object\IProperty $Property);
     
     /**
-     * @return Object\IProperty[]
+     * @return Relational\IColumn[]
      */
-    public function GetAllMappedProperties(array $Columns = null);
+    public function GetAllMappedReviveColumns(array $Properties = null);
+    
+    /**
+     * @return Relational\IColumn[]
+     */
+    public function GetAllMappedPersistColumns(array $Properties = null);
     
     public function MapPropertyDataToColumnData(Object\PropertyData $PropertyData, Relational\ColumnData $ColumnData);
     public function MapColumnDataToPropertyData(Relational\ColumnData $ColumnData, Object\PropertyData $PropertyData);

@@ -2,8 +2,6 @@
 
 namespace Storm\Core\Relational;
 
-use \Storm\Core\Containers\Map;
-
 interface IToOneRelation extends IRelation {
     const IToOneRelationType = __CLASS__;
     

@@ -24,6 +24,7 @@ abstract class Table extends Relational\Table {
         $this->KeyGenerator = $this->KeyGenerator($Context->GetPlatform()->GetKeyGeneratorSet());
         
         $Registrar = new Containers\Registrar(StructuralTableTrait::GetType());
+        $Registrar->Register(new Traits\PrimaryKey($this->GetPrimaryKeyColumns()));
         $this->RegisterStructuralTraits($Registrar);
         foreach($Registrar->GetRegistered() as $Trait) {
             $this->AddTrait($Trait);

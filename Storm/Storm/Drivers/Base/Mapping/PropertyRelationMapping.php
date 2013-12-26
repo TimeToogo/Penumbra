@@ -24,27 +24,27 @@ abstract class PropertyRelationMapping extends PropertyMapping implements IPrope
     
     public function AddToRelationalRequest(Mapping\DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest) { }
     
-    final protected function LoadRelatedRows(Mapping\RevivingContext $Context, Map $ResultRowStateMap) {
+    final protected function LoadRelatedRows(Mapping\RevivingContext $Context, Map $ParentRowRevivalDataMap) {
         $RelationalRequest = new Relational\Request(array(), false);
         $DomainDatabaseMap = $Context->GetDomainDatabaseMap();
-        $this->Relation->AddParentPredicateToRequest($RelationalRequest, $ResultRowStateMap->GetInstances());
+        $this->Relation->AddParentPredicateToRequest($RelationalRequest, $ParentRowRevivalDataMap->GetInstances());
         $DomainDatabaseMap->MapEntityToRelationalRequest($this->GetEntityType(), $RelationalRequest);
         
         return $DomainDatabaseMap->GetDatabase()->Load($RelationalRequest);
     }
-    public function Revive(Mapping\RevivingContext $Context, Map $ResultRowStateMap) {
-        $RelatedRows = $this->LoadRelatedRows($Context, $ResultRowStateMap);
+    public function Revive(Mapping\RevivingContext $Context, Map $ParentRowRevivalDataMap) {
+        $RelatedRows = $this->LoadRelatedRows($Context, $ParentRowRevivalDataMap);
         
-        $ParentRelatedRowsMap = $this->Relation->MapRelatedRows($ResultRowStateMap->GetInstances(), $RelatedRows);
-        $RevivedEntities = $Context->ReviveEntities($this->GetEntityType(), $RelatedRows);
-        $RelatedRowEntityMap = Map::From($RelatedRows, $RevivedEntities);
+        $ParentRelatedRowsMap = $this->Relation->MapRelatedRows($ParentRowRevivalDataMap->GetInstances(), $RelatedRows);
+        $RevivalData = $Context->MapRowsToRevivalData($this->GetEntityType(), $RelatedRows);
+        $RelatedRowRevivalDataMap = Map::From($RelatedRows, $RevivalData);
         
-        $this->ReviveProperties($ResultRowStateMap, $ParentRelatedRowsMap, $RelatedRowEntityMap);
+        $this->ReviveProperties($ParentRowRevivalDataMap, $ParentRelatedRowsMap, $RelatedRowRevivalDataMap);
     }
     protected abstract function ReviveProperties(
-            Map $ResultRowStateMap,
+            Map $ParentRowRevivalDataMap,
             Map $ParentRelatedRowsMap,
-            Map $RelatedRowEntityMap);
+            Map $RelatedRowRevivalDataMap);
     
     /**
      * @return Relational\IRelation

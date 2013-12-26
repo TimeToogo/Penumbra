@@ -7,7 +7,7 @@ namespace Storm\Core\Object;
  */
 final class UnitOfWork {
     private $Domain;
-    private $PersistedStates = array();
+    private $PersistedData = array();
     private $Procedures = array();
     private $DiscardedIdentities = array();
     private $DiscardedRequests = array();
@@ -16,34 +16,55 @@ final class UnitOfWork {
         $this->Domain = $Domain;
     }
     
+    /**
+     * @return Domain
+     */
+    public function GetDomain() {
+        return $this->Domain;
+    }
+    
+    /**
+     * @return PersistanceData
+     */
     public function Persist($Entity) {
         $Hash = spl_object_hash($Entity);
-        if(isset($this->PersistedStates[$Hash]))
-            return;
+        if(isset($this->PersistedData[$Hash])) {
+            return $this->PersistedData[$Hash];
+        }
         
-        $this->PersistedStates[$Hash] = $this->Domain->State($Entity);
-        $this->Domain->Persist($Entity, $this);
+        $this->PersistedData[$Hash] = $this->Domain->Persist($this, $Entity);
+        return $this->PersistedData[$Hash];
     }
+    
     public function Execute(IProcedure $Procedure) {
         $this->Procedures[] = $Procedure;
     }
+    
+    /**
+     * @return Identity
+     */
     public function Discard($Entity) {
         $Hash = spl_object_hash($Entity);
-        if(isset($this->DiscardedIdentities[$Hash]))
-            return;
+        if(isset($this->DiscardedIdentities[$Hash])) {
+            return $this->DiscardedIdentities[$Hash];
+        }
+        if(!$this->Domain->HasIdentity($Entity)) {
+            return null;
+        }
         
-        $this->DiscardedIdentities[spl_object_hash($Entity)] = $this->Domain->Identity($Entity);
-        $this->Domain->Discard($Entity, $this);
+        $this->DiscardedIdentities[$Hash] = $this->Domain->Identity($Entity);
+        $this->Domain->Discard($this, $Entity);
     }
+    
     public function DiscardWhere(IRequest $Request) {
         $this->DiscardedRequests[spl_object_hash($Request)] = $Request;
     }
     
     /**
-     * @return State[]
+     * @return PersistenceData[]
      */
-    public function GetPersistedStates() {
-        return $this->PersistedStates;
+    public function GetPersistedData() {
+        return $this->PersistedData;
     }
     
     /**

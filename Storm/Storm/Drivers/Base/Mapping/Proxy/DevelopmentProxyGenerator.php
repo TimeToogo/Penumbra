@@ -2,7 +2,9 @@
 
 namespace Storm\Drivers\Base\Mapping\Proxy;
 
-class Null__Proxy implements IEntityProxy {
+use \Storm\Core\Object\EntityMap;
+
+class Null__Proxy implements IProxy {
     use \Storm\Core\Helpers\Type;
     use EntityProxyFunctionality;
     
@@ -113,7 +115,7 @@ NOW;
         }
         $OverridenMethods = implode(PHP_EOL, $OverridenMethods);
 
-        $ProxyTemplate = str_replace('<ProxyInterface>', IEntityProxy::IEntityProxyType, $ProxyTemplate);
+        $ProxyTemplate = str_replace('<ProxyInterface>', IProxy::IEntityProxyType, $ProxyTemplate);
         $ProxyTemplate = str_replace('<ProxyFunctionality>', __NAMESPACE__ . '\\EntityProxyFunctionality', $ProxyTemplate);
         $ProxyTemplate = str_replace('<Namespace>', $this->ProxyNamespace, $ProxyTemplate);
         $ProxyTemplate = str_replace('<ProxyName>', $ProxyClassName, $ProxyTemplate);

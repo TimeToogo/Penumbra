@@ -7,11 +7,11 @@ use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
 class RequestCompiler  extends Queries\RequestCompiler {    
-    protected function AppendOperationStatement(QueryBuilder $QueryBuilder, Relational\Procedure $Operation) {
-        $QueryBuilder->AppendIdentifier('UPDATE # ', [$Operation->GetTables()->GetName()]);
+    protected function AppendProcedureStatement(QueryBuilder $QueryBuilder, Relational\Procedure $Procedure) {
+        $QueryBuilder->AppendIdentifier('UPDATE # ', [$Procedure->GetTables()->GetName()]);//TODO
     }
     
-    protected function AppendOperationExpressions(QueryBuilder $QueryBuilder, array $Expressions) {
+    protected function AppendProcedureExpressions(QueryBuilder $QueryBuilder, array $Expressions) {
         $First = true;
         foreach($Expressions as $Expression) {
             if($First) $First = false;

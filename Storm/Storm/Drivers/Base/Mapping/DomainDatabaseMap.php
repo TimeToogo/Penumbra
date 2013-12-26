@@ -44,7 +44,7 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
                         }, $Expression->GetValueExpressions()));
             
             case $Expression instanceof O\AssignmentExpression:
-                return $ExpressionMapper->MapAssignmentExpression(
+                return $ExpressionMapper->MapAssignmentExpression(//TODO
                         $EntityRelationalMap->GetMappedColumns($Expression->GetProperty()), 
                         $this->OperatorMapper->MapAssignmentOperator($ExpressionMapper->GetOperator()), 
                         $this->MapExpression($EntityRelationalMap, $ExpressionMapper->GetRightOperandExpression()));

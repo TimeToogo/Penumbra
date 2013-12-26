@@ -111,7 +111,7 @@ class QueryBuilder {
     }
     
     final public function AppendOperation(Procedure $Operation) {
-        $this->RequestCompiler->AppendOperation($this, $Operation);
+        $this->RequestCompiler->AppendProcedure($this, $Operation);
     }
     
     final public function AppendPredicate(Predicate $Predicate) {

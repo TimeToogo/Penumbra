@@ -15,47 +15,85 @@ abstract class EntityMap implements \IteratorAggregate {
      */
     private $Properties = array();
     /**
-     * @var IIdentityProperty[] 
+     * @var IDataProperty[] 
+     */
+    private $DataProperties = array();
+    /**
+     * @var IEntityProperty[] 
+     */
+    private $EntityProperties = array();
+    /**
+     * @var ICollectionProperty[] 
+     */
+    private $CollectionProperties = array();
+    /**
+     * @var IProperty[] 
      */
     private $IdentityProperties = array();
     
     public function __construct() {
         $this->EntityType = $this->EntityType();
-        
+    }
+    
+    final public function InititalizeProperties(Domain $Domain) {
         $Registrar = new Registrar(IProperty::IPropertyType);
-        $this->RegisterProperties($Registrar);
+        $this->RegisterProperties($Domain, $Registrar);
         foreach($Registrar->GetRegistered() as $Property) {
             $this->AddProperty($Property);
         }
     }
-    protected abstract function EntityType();
-    protected abstract function RegisterProperties(Registrar $Registrar);
     
-    final protected function AddProperty(IProperty $Property) {
-        $this->Properties[$Property->GetName()] = $Property;
-        if($Property instanceof IIdentityProperty)
-            $this->IdentityProperties[$Identity->GetName()] = $Identity;
+    protected abstract function EntityType();
+    protected abstract function RegisterProperties(Domain $Domain, Registrar $Registrar);
+    
+    private function AddProperty(IProperty $Property) {
+        if($Property->GetEntityMap()) {
+            if(!$Property->GetEntityMap()->Is($this)) {
+                throw new \Exception('Property belongs to another EntityMap');
+            }
+        }
+        $Property->SetEntityMap($this);
+        $Identifier = $Property->GetIdentifier();
+        
+        if($Property instanceof IDataProperty) {
+            $this->DataProperties[$Identifier] = $Property;
+            if($Property->IsIdentity()) {
+                $this->IdentityProperties[$Identifier] = $Property;
+            }
+        }
+        else if($Property instanceof IEntityProperty) {
+            $this->EntityProperties[$Identifier] = $Property;
+        }
+        else if($Property instanceof ICollectionProperty) {
+            $this->CollectionProperties[$Identifier] = $Property;
+        }
+        else {
+            throw new Exception;//TODO:error message
+        }
+        
+        $this->Properties[$Identifier] = $Property;
     }
     
     private function VerifyEntity($Entity) {
-        if(!($Entity instanceof $this->EntityType))
+        if(!($Entity instanceof $this->EntityType)) {
             throw new \InvalidArgumentException('$Entity must be of the type ' . $this->EntityType);
+        }
     }
     
-    final public function HasProperty($Name) {
-        return isset($this->Properties[$Name]);
+    final public function HasProperty($Identifier) {
+        return isset($this->Properties[$Identifier]);
     }
     
-    final public function HasIdentityProperty($Name) {
-        return isset($this->IdentityProperties[$Name]);
+    final public function HasIdentityProperty($Identifier) {
+        return isset($this->IdentityProperties[$Identifier]);
     }
     
-    final public function GetProperty($Name) {
-        return $this->HasProperty($Name) ? $this->Properties[$Name] : null;
+    final public function GetProperty($Identifier) {
+        return $this->HasProperty($Identifier) ? $this->Properties[$Identifier] : null;
     }
     
     /**
-     * @return IIdentityProperty[]
+     * @return IProperty[]
      */
     final public function GetIdentityProperties() {
         return $this->IdentityProperties;
@@ -66,6 +104,20 @@ abstract class EntityMap implements \IteratorAggregate {
      */
     final public function GetProperties() {
         return $this->Properties;
+    }
+    
+    /**
+     * @return IEntityProperty[]
+     */
+    final public function GetEntityProperties() {
+        return $this->EntityProperties;
+    }
+    
+    /**
+     * @return ICollectionProperty[]
+     */
+    final public function GetCollectionProperties() {
+        return $this->CollectionProperties;
     }
     
     protected abstract function ConstructEntity();
@@ -91,37 +143,42 @@ abstract class EntityMap implements \IteratorAggregate {
         
         $Identity = new Identity($this);
         foreach($this->IdentityProperties as $IdentityProperty) {
-            $IdentityProperty->Identity($Identity, $Entity);
+            $IdentityProperty->Store($Identity, $Entity);
         }
         
         return $Identity;
     }
     
-    final public function State($Entity = null, UnitOfWork $UnitOfWork = null) {
-        if($Entity === null)
-            return new State($this);
-        
+    final public function RevivalData() {
+        return new RevivalData($this);
+    }
+    
+    final public function PersistanceData() {
+        return new PersistenceData($this);
+    }
+    
+    final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
         
-        $State = new State($this);
+        $PersistenceData = new PersistenceData($this);
         foreach($this->Properties as $Property) {
-            $Property->Persist($UnitOfWork, $State, $Entity);
+            $Property->Persist($UnitOfWork, $PersistenceData, $Entity);
         }
         
-        return $State;
+        return $PersistenceData;
     }
     
-    final public function Apply($Entity, PropertyData $PropertyData) {
-        foreach($PropertyData as $PropertyName => $Value) {
-            $this->Properties[$PropertyName]->Revive($Entity, $Value);
+    final public function Apply(Domain $Domain, $Entity, PropertyData $PropertyData) {
+        foreach($PropertyData as $PropertyIdentifier => $Value) {
+            $this->Properties[$PropertyIdentifier]->Revive($Domain, $Entity, $Value);
         }
     }
     
-    final public function ReviveEntities(array $EntityStates) {
+    final public function ReviveEntities(Domain $Domain, array $RevivalDatas) {
         $Entities = array();
-        foreach($EntityStates as $Key => $EntityState) {
+        foreach($RevivalDatas as $Key => $RevivalData) {
             $Entity = $this->ConstructEntity();
-            $this->LoadEntity($EntityState, $Entity);
+            $this->LoadEntity($RevivalData, $Entity);
             $Entities[$Key] = $Entity;
         }
         
@@ -129,25 +186,16 @@ abstract class EntityMap implements \IteratorAggregate {
     }
     
     
-    final public function ReviveEntityInstances(Map $StateInstanceMap) {
-        foreach($StateInstanceMap as $State) {
+    final public function ReviveEntityInstances(Domain $Domain, Map $StateInstanceMap) {
+        /*foreach($StateInstanceMap as $State) {
             $Instance = $StateInstanceMap[$State];
             $this->LoadEntity($State, $Instance);
-        }
+        }*/
     }
     
-    private function LoadEntity(State $State, $Instance) {
+    final public function LoadEntity(Domain $Domain, RevivalData $RevivalData, $Entity) {
         foreach($this->Properties as $Property) {
-            if(isset($State[$Property])) {
-                $Value = $State[$Property];
-                $Property->Revive($Instance, $Value);
-            }
-        }
-    }
-    
-    final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
-        foreach($this->Properties as $Property) {
-            $Property->Persist($UnitOfWork, $Entity);
+            $Property->Revive($Domain, $RevivalData, $Entity);
         }
     }
 

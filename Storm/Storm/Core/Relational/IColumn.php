@@ -6,14 +6,14 @@ interface IColumn {
     const IColumnType = __CLASS__;
     
     public function GetIdentifier();
+    public function IsPrimaryKey();
     
-    public function HasTable();
     
     /**
      * @return Table
      */
     public function GetTable();
-    
+    public function HasTable();    
     public function SetTable(Table $Table = null);
     
     public function GetName();

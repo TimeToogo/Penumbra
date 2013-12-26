@@ -13,7 +13,7 @@ abstract class Table {
      */
     private $Columns;
     /**
-     * @var IPrimaryKeyColumns[]
+     * @var IColumn[]
      */
     private $PrimaryKeyColumns;
     private $ToOneRelations;
@@ -24,45 +24,45 @@ abstract class Table {
         $this->Name = $this->Name();
     }
     
-    final public function InitializeStructure(Database $Context) {
-        $this->OnInitializeStructure($Context);
+    final public function InitializeStructure(Database $Database) {
+        $this->OnInitializeStructure($Database);
         
         $Registrar = new Registrar(IColumn::IColumnType);
-        $this->RegisterColumns($Registrar, $Context);
+        $this->RegisterColumns($Registrar, $Database);
         $this->Columns = array();
         foreach($Registrar->GetRegistered() as $Column) {
             $this->AddColum($Column);
         }
         
-        $this->OnStructureInitialized($Context);
+        $this->OnStructureInitialized($Database);
     }
-    protected function OnInitializeStructure(Database $Context) { }
-    protected function OnStructureInitialized(Database $Context) { }
+    protected function OnInitializeStructure(Database $Database) { }
+    protected function OnStructureInitialized(Database $Database) { }
     
-    public abstract function InitializeRelatedStructure(Database $Context);
+    public abstract function InitializeRelatedStructure(Database $Database);
     
-    final public function InitializeRelations(Database $Context) {
-        $this->OnInitializeRelations($Context);
+    final public function InitializeRelations(Database $Database) {
+        $this->OnInitializeRelations($Database);
         
         $Registrar = new Registrar(IToOneRelation::IToOneRelationType);
-        $this->RegisterToOneRelations($Registrar, $Context);
+        $this->RegisterToOneRelations($Registrar, $Database);
         $this->ToOneRelations = $Registrar->GetRegistered();
         
         $Registrar = new Registrar(IToManyRelation::IToManyRelationType);
-        $this->RegisterToManyRelations($Registrar, $Context);
+        $this->RegisterToManyRelations($Registrar, $Database);
         $this->ToManyRelations = $Registrar->GetRegistered();
         
         $this->AllRelations = array_merge($this->ToOneRelations, $this->ToManyRelations);
         
-        $this->OnRelationsInitialized($Context);
+        $this->OnRelationsInitialized($Database);
     }
-    protected function OnInitializeRelations(Database $Context) { }
-    protected function OnRelationsInitialized(Database $Context) { }
+    protected function OnInitializeRelations(Database $Database) { }
+    protected function OnRelationsInitialized(Database $Database) { }
     
     protected abstract function Name();
-    protected abstract function RegisterColumns(Registrar $Registrar, Database $Context);
-    protected abstract function RegisterToOneRelations(Registrar $Registrar, Database $Context);
-    protected abstract function RegisterToManyRelations(Registrar $Registrar, Database $Context);
+    protected abstract function RegisterColumns(Registrar $Registrar, Database $Database);
+    protected abstract function RegisterToOneRelations(Registrar $Registrar, Database $Database);
+    protected abstract function RegisterToManyRelations(Registrar $Registrar, Database $Database);
 
     final protected function AddColum(IColumn $Column) {
         if($Column->HasTable()) {
@@ -73,8 +73,9 @@ abstract class Table {
         $Column->SetTable($this);
         
         $this->Columns[$Column->GetName()] = $Column;
-        if($Column instanceof IPrimaryKeyColumn)
+        if($Column->IsPrimaryKey()) {
             $this->PrimaryKeyColumns[$Column->GetName()] = $Column;
+        }
      }
     
     final public function GetName() {
@@ -119,9 +120,7 @@ abstract class Table {
      */
     final public function GetToManyRelations() {
         return $this->ToManyRelations;
-    }
-    
-    
+    }    
     
     final public function GetPersistingOrderBetween(Table $OtherTable) {
         return $this->GetDepedencyOrderBetweenInternal(true, $OtherTable);

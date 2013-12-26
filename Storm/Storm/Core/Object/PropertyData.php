@@ -12,7 +12,6 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     }
     
     /**
-     * 
      * @return EntityMap
      */
     final public function GetEntityMap() {
@@ -27,56 +26,46 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
         return $this->PropertyData;
     }
     
-    final public function SetProperty($PropertyOrPropertyName, $Data) {
-        $PropertyName = $this->GetPropertyName($PropertyOrPropertyName);
-        if(!$this->EntityMap->HasProperty($PropertyName))
+    final public function SetProperty(IProperty $Property, $Data) {
+        if(!$this->EntityMap->HasProperty($Property))
             throw new \InvalidArgumentException('$PropertyOrPropertyName must be a valid property of EntityMap ' . get_class($this->EntityMap));
         
-        $this->AddProperty($PropertyName, $Data);
+        $this->AddProperty($Property, $Data);
     }
     
-    protected function AddProperty($PropertyName, $Data) {
-        $this->PropertyData[$PropertyName] = $Data;
+    protected function AddProperty(IProperty $Property, $Data) {
+        $this->PropertyData[$Property->GetIdentifier()] = $Data;
     }
 
     final public function getIterator() {
         return new \ArrayIterator($this->PropertyData);
     }
 
-    final public function offsetExists($PropertyOrPropertyName) {
-        return isset($this->PropertyData[$this->GetPropertyName($PropertyOrPropertyName)]);
+    final public function offsetExists(IProperty $Property) {
+        return isset($this->PropertyData[$Property->GetIdentifier()]);
     }
     
-    final public function offsetGet($PropertyOrPropertyName) {
-        return $this->PropertyData[$this->GetPropertyName($PropertyOrPropertyName)];
+    final public function offsetGet(IProperty $Property) {
+        return $this->PropertyData[$Property->GetIdentifier()];
     }
 
-    final public function offsetSet($PropertyOrPropertyName, $Data) {
-        $this->SetProperty($PropertyOrPropertyName, $Data);
+    final public function offsetSet(IProperty $Property, $Data) {
+        $this->SetProperty($Property, $Data);
     }
 
-    final public function offsetUnset($PropertyOrPropertyName) {
-        unset($this->PropertyData[$this->GetPropertyName($PropertyOrPropertyName)]);
+    final public function offsetUnset(IProperty $Property) {
+        unset($this->PropertyData[$Property->GetIdentifier()]);
     }
-    
-    final protected function GetPropertyName($PropertyOrPropertyName) {
-        if($PropertyOrPropertyName instanceof IProperty)
-            return $PropertyOrPropertyName->GetName();
-        else
-            return $PropertyOrPropertyName;
+    public function GetProperty($Identifier) {
+        return $this->EntityMap->GetProperty($Identifier);
     }
     
     final public function Matches(PropertyData $Data) {
-        if(!$this->GetEntityType !== $Data->GetEntityType())
+        if(!$this->GetEntityType !== $Data->GetEntityType()) {
             return false;
-        foreach($this->PropertyData as $PropertyName => $Value) {
-            if(!isset($Data->PropertyData[$PropertyName]))
-                return false;
-            if($Value !== $Data->PropertyData[$PropertyName])
-                return false;
         }
         
-        return true;
+        return ksort($this->PropertyData) === ksort($Data->PropertyData);
     }
 }
 

@@ -15,11 +15,21 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     private $EntityMap;
     private $EntityType;
     private $PrimaryKeyTable;
+    /**
+     * @var IProperty
+     */
+    private $MappedProperties = array();
+    /**
+     * @var IPropertyMapping
+     */
     private $PropertyMappings = array();
-    private $IdentityPrimaryKeyMappings = array();
+    /**
+     * @var IPropertyColumnMapping
+     */
     private $PropertyColumnMappings = array();
-    private $PropertyColumnsMap;
-    private $ColumnPropertiesMap;
+    /**
+     * @var IPropertyRelationMapping
+     */
     private $PropertyRelationMappings = array();
     
     public function __construct() {
@@ -34,13 +44,14 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
             throw new \UnexpectedValueException
                     ('Return value from ' . get_class($this) . '->EntityMap() must be a valid EntityMap');
         
-        $this->PrimaryKeyTable = $this->PrimaryKeyTable($DomainDatabaseMap->GetDatabase());
+        $Database = $DomainDatabaseMap->GetDatabase();
+        $this->PrimaryKeyTable = $this->PrimaryKeyTable($Database);
         if(!($this->PrimaryKeyTable instanceof Relational\Table))
             throw new \UnexpectedValueException
                     ('Return value from ' . get_class($this) . '->PrimaryKeyTable() must be a valid Table');
         
-        $this->PropertyColumnsMap = new Map();
-        $this->ColumnPropertiesMap = new Map();
+        $Registrar = new Registrar(IPropertyMapping::IPropertyMappingType);
+        $this->RegisterPropertyMappings($Registrar, $this->EntityMap, $Database);
         foreach($Registrar->GetRegistered() as $PropertyMapping) {
             $this->AddPropertyMapping($PropertyMapping);
         }
@@ -55,34 +66,18 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     protected abstract function RegisterPropertyMappings(Registrar $Registrar, Object\EntityMap $EntityMap, Relational\Database $Database);
     
     final protected function AddPropertyMapping(IPropertyMapping $PropertyMapping) {
-        $ProperyName = $PropertyMapping->GetProperty()->GetName();
+        $ProperyIdentifier = $PropertyMapping->GetProperty()->GetIdentifier();
         if($PropertyMapping instanceof IPropertyColumnMapping) {
-            $this->AddPropertyColumnMapping($PropertyMapping);
+            $this->PropertyColumnMappings[$ProperyIdentifier] = $PropertyMapping;
         }
         else if($PropertyMapping instanceof IPropertyRelationMapping) {
-            $this->PropertyRelationMappings[$ProperyName] = $PropertyMapping;
+            $this->PropertyRelationMappings[$ProperyIdentifier] = $PropertyMapping;
         }
         else {
             throw new \UnexpectedValueException('$PropertyMapping not instance of ^');//TODO: error messages
         }
-        $this->PropertyMappings[$ProperyName] = $PropertyMapping;
-    }
-    
-    private function AddPropertyColumnMapping(IPropertyColumnMapping $PropertyColumnMapping) {
-        $this->PropertyColumnMappings[] = $PropertyColumnMapping;
-
-        $Property = $PropertyColumnMapping->GetProperty();
-        $Column = $PropertyColumnMapping->GetColumn();
-        
-        if(!isset($this->PropertyColumnsMap->Map[$Property])) {
-            $this->PropertyColumnsMap->Map[$Property] = new \ArrayObject();
-        }
-        $this->PropertyColumnsMap[$Property][] = $Column;
-        
-        if(!isset($this->ColumnPropertiesMap[$Column])) {
-            $this->PropertyColumnsMap->Map[$Property] = new \ArrayObject();
-        }
-        $this->PropertyColumnsMap[$Column][] = $Property;
+        $this->MappedProperties[$ProperyIdentifier] = $PropertyMapping->GetProperty();
+        $this->PropertyMappings[$ProperyIdentifier] = $PropertyMapping;
     }
     
     final public function GetEntityMap() {
@@ -109,52 +104,62 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         return $this->PropertyRelationMappings;
     }
     
-    public function GetMappedPersistColumns(IProperty $Property) {
-        
-    }
-    
-    final public function GetMappedColumns(IProperty $Property) {
-        if(isset($this->PropertyColumnsMap[$Property])) {
-            return $this->PropertyColumnsMap[$Property]->getArrayCopy();
+    private function VerifyPropertyColumnMapping(IProperty $Property) {
+        $PropertyName = $Property;
+        if(isset($this->PropertyColumnMappings[$PropertyName])) {
+            return $this->PropertyColumnMappings[$PropertyName];
         }
         else {
             throw new \Storm\Core\Exceptions\UnmappedPropertyException();
         }
     }
     
-    final public function GetMappedProperties(IColumn $Column) {
-        if(isset($this->ColumnPropertiesMap[$Column])) {
-            return $this->ColumnPropertiesMap[$Column]->getArrayCopy();
+    final public function Revive(RevivingContext $Context, Map $ResultRowStateMap) {
+        foreach($this->PropertyColumnMappings as $PropertyColumnMapping) {
+            $PropertyColumnMapping->Revive($ResultRowStateMap);
         }
-        else {
-            throw new \Storm\Core\Exceptions\UnmappedPropertyException();
+        foreach($this->PropertyRelationMappings as $PropertyRelationMapping) {
+            $PropertyRelationMapping->Revive($Context, $ResultRowStateMap);
         }
     }
     
-    final public function GetAllMappedColumns(array $Properties = null) {
-        $ColumnGroups = null;
+    final public function Persist(PersistingContext $Context, TransactionalContext $TransactionalContext) {
+        foreach($this->PropertyMappings as $PropertyMapping) {
+            $PropertyMapping->Persist($Context, $TransactionalContext);
+        }
+    }
+    
+    final public function Discard(DiscardingContext $Context, TransactionalContext $TransactionalContext) {
+        foreach($this->PropertyMappings as $PropertyMapping) {
+            $PropertyMapping->Discard($Context, $TransactionalContext);
+        }
+    }
+    
+    final public function GetMappedReviveColumns(IProperty $Property) {
+        $this->VerifyPropertyColumnMapping($Property)->GetReviveColumns();
+    }
+    
+    final public function GetMappedPersistColumns(IProperty $Property) {
+        $this->VerifyPropertyColumnMapping($Property)->GetPersistColumns();
+    }
+    
+    final public function GetAllMappedReviveColumns(array $Properties = null) {
         if($Properties === null) {
-            $ColumnGroups = $this->PropertyColumnsMap->GetToInstances();
+            $Properties = $this->MappedProperties;
         }
-        else {
-            $ColumnGroups = array_map([$this, 'GetMappedColumns'], $Properties);
-        }
+        $ColumnGroups = array_map([$this, 'GetMappedReviveColumns'], $Properties);
         $Columns = call_user_func_array('array_merge', $ColumnGroups);
         return $Columns;
     }
     
-    final public function GetAllMappedProperties(array $Columns = null) {
-        $PropertyGroups = null;
-        if($Columns === null) {
-            $PropertyGroups = $this->ColumnPropertiesMap->GetToInstances();
+    final public function GetAllMappedPersistColumns(array $Properties = null) {
+        if($Properties === null) {
+            $Properties = $this->MappedProperties;
         }
-        else {
-            $PropertyGroups = array_map([$this, 'GetMappedProperties'], $Columns);
-        }
-        $Properties = call_user_func_array('array_merge', $PropertyGroups);
-        return $Properties;
+        $ColumnGroups = array_map([$this, 'GetMappedPersistColumns'], $Properties);
+        $Columns = call_user_func_array('array_merge', $ColumnGroups);
+        return $Columns;
     }
-    
 
     final public function MapPropertyDataToColumnData(
             Object\PropertyData $PropertyData, 
@@ -162,9 +167,11 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         foreach($this->PropertyColumnMappings as $Mapping) {
             $Property = $Mapping->GetProperty();
             if(isset($PropertyData[$Property])) {
-                $Column = $Mapping->GetColumn();
-                $Value =  $PropertyData[$Property];
-                $Column->Store($ColumnData, $Value);
+                $Columns = $Mapping->GetPersistColumns();
+                foreach($Column as $Column) {
+                    $Value = $PropertyData[$Property];
+                    $Column->Store($ColumnData, $Value);
+                }
             }
         }
     }
@@ -173,10 +180,12 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
             Relational\ColumnData $ColumnData, 
             Object\PropertyData $PropertyData) {
         foreach($this->GetPropertyColumnMappings() as $Mapping) {
-            $Column = $Mapping->GetColumn();
+            $Columns = $Mapping->GetReviveColumns();
             $Property =  $Mapping->GetProperty();
-            if(isset($ColumnData[$Column])) {
-               $PropertyData[$Property] = $Column->Retrieve($ColumnData);
+            foreach ($Columns as $Column) {
+                if(isset($ColumnData[$Column])) {
+                   $PropertyData[$Property] = $Column->Retrieve($ColumnData);
+                }
             }
         }
     }
