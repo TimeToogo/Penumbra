@@ -16,14 +16,15 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
     }
     
     public static function From(array $Instances, array $ToInstances) {
-        if(count($Instances) !== count($ToInstances))
-            throw new \InvalidArgumentException('Unequal length instance arrays');
+        if(count($Instances) !== count($ToInstances)) {
+            throw new \InvalidArgumentException('Inequal length arrays given');
+        }
         
         $Map = new Map();
         $InstancesUnkeyed = array_values($Instances);
         $ToInstancesUnkeyed = array_values($ToInstances);
         foreach($InstancesUnkeyed as $Key => $Instance) {
-            $Map->Map($Instance, $ToInstancesUnkeyed[$Key]);
+            $this->MapNew($Instance, $ToInstancesUnkeyed[$Key]);
         }
         
         return $Map;
@@ -41,17 +42,20 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
      * @return Map
      */
     public function Map($Instance, $ToInstance) {
-        if(!is_object($Instance) || !is_object($ToInstance))
+        if(!is_object($Instance) || !is_object($ToInstance)) {
             throw new \InvalidArgumentException('$Instance and $ToInstance must be valid object intances');
+        }
         
         $this->Unmap($Instance);
+        $this->MapNew($Instance, $ToInstance);
         
+        return $this;
+    }
+    private function MapNew($Instance, $ToInstance) {
         $this->IteratingStorage->attach($Instance);
         $this->InverseIteratingStorage->attach($ToInstance);
         $this->Storage->attach($Instance, $ToInstance);
         $this->InversedStorage->attach($ToInstance, $Instance);
-        
-        return $this;
     }
 
     public function Unmap($Instance) {
@@ -82,7 +86,7 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
     }
     
     public function getIterator() {
-        return $this->IteratingStorage;
+        return new \IteratorIterator($this->IteratingStorage);
     }
 
     public function offsetExists($Instance) {

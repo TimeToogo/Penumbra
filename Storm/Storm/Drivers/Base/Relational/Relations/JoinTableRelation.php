@@ -49,7 +49,7 @@ class JoinTableRelation extends Relation implements Relational\IToManyRelation {
         return $this->OtherForeignKey;
     }
     
-    public function AddConstraintPredicateToRequest(Relational\Request $Request) {
+    public function AddConstraintToRequest(Relational\Request $Request) {
         $Request->AddTable($this->JoinTable);
         $Request->AddTable($this->JoinTable->GetTable1());
         $Request->AddTable($this->JoinTable->GetTable2());

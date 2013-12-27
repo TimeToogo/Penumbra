@@ -2,12 +2,7 @@
 
 namespace Storm\Drivers\Base\Mapping;
 
-use \Storm\Core\Containers;
 use \Storm\Core\Mapping;
-use \Storm\Core\Object;
-use \Storm\Core\Object\IProperty;
-use \Storm\Core\Relational;
-use \Storm\Core\Relational\IColumn;
 
 abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
     private $MappingConfiguration;

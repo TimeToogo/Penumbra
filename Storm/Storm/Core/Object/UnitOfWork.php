@@ -7,9 +7,11 @@ namespace Storm\Core\Object;
  */
 final class UnitOfWork {
     private $Domain;
-    private $PersistedData = array();
+    private $PersistenceData = array();
+    private $PersistenceDataGroups = array();
     private $Procedures = array();
     private $DiscardedIdentities = array();
+    private $DiscardedIdentityGroups = array();
     private $DiscardedRequests = array();
     
     public function __construct(Domain $Domain) {
@@ -28,12 +30,20 @@ final class UnitOfWork {
      */
     public function Persist($Entity) {
         $Hash = spl_object_hash($Entity);
-        if(isset($this->PersistedData[$Hash])) {
-            return $this->PersistedData[$Hash];
+        if(isset($this->PersistenceData[$Hash])) {
+            return $this->PersistenceData[$Hash];
         }
         
-        $this->PersistedData[$Hash] = $this->Domain->Persist($this, $Entity);
-        return $this->PersistedData[$Hash];
+        $PersistenceData = $this->Domain->Persist($this, $Entity);
+        $this->PersistenceData[$Hash] = $PersistenceData;
+        
+        $EntityType = $PersistenceData->GetEntityType();
+        if(!isset($this->PersistenceDataGroups[$EntityType])) {
+            $this->PersistenceDataGroups[$EntityType] = array();
+        }
+        $this->PersistenceDataGroups[$EntityType][] = $PersistenceData;
+            
+        return $PersistenceData;
     }
     
     public function Execute(IProcedure $Procedure) {
@@ -52,8 +62,16 @@ final class UnitOfWork {
             return null;
         }
         
-        $this->DiscardedIdentities[$Hash] = $this->Domain->Identity($Entity);
-        $this->Domain->Discard($this, $Entity);
+        $DiscardedIdentity = $this->Domain->Discard($this, $Entity);
+        $this->DiscardedIdentities[$Hash] = $DiscardedIdentity;
+        
+        $EntityType = $DiscardedIdentity->GetEntityType();
+        if(!isset($this->DiscardedIdentityGroups[$EntityType])) {
+            $this->DiscardedIdentityGroups[$EntityType] = array();
+        }
+        $this->DiscardedIdentityGroups[$EntityType][] = $PersistenceData;
+        
+        return $DiscardedIdentity;
     }
     
     public function DiscardWhere(IRequest $Request) {
@@ -63,22 +81,36 @@ final class UnitOfWork {
     /**
      * @return PersistenceData[]
      */
-    public function GetPersistedData() {
-        return $this->PersistedData;
+    public function GetPersistenceData() {
+        return $this->PersistenceData;
+    }
+    
+    /**
+     * @return PersistenceData[][]
+     */
+    public function GetPersistenceDataGroups() {
+        return $this->PersistenceDataGroups;
     }
     
     /**
      * @return IProcedure[]
      */
-    public function GetProcedures() {
+    public function GetExecutedProcedures() {
         return $this->Procedures;
     }
     
     /**
-     * @return Identity[]
+     * @return PersistenceData[]
      */
     public function GetDiscardedIdentities() {
         return $this->DiscardedIdentities;
+    }
+    
+    /**
+     * @return PersistenceData[][]
+     */
+    public function GetDiscardedIdentityGroups() {
+        return $this->DiscardedIdentityGroups;
     }
     
     /**

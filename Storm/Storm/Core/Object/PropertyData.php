@@ -4,10 +4,12 @@ namespace Storm\Core\Object;
 
 abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     private $EntityMap;
+    private $EntityType;
     private $PropertyData;
     
     public function __construct(EntityMap $EntityMap, array $PropertyData = array()) {
         $this->EntityMap = $EntityMap;
+        $this->EntityType = $EntityMap->GetEntityType();
         $this->PropertyData = $PropertyData;
     }
     
@@ -19,7 +21,7 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     }
     
     final public function GetEntityType() {
-        return $this->EntityMap->GetEntityType();
+        return $this->EntityType;
     }
 
     final protected function GetPropertyData() {

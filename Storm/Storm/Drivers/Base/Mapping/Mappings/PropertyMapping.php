@@ -1,6 +1,6 @@
 <?php
 
-namespace Storm\Drivers\Base\Mapping;
+namespace Storm\Drivers\Base\Mapping\Mappings;
 
 use \Storm\Core\Mapping;
 use \Storm\Core\Object;

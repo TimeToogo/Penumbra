@@ -5,6 +5,8 @@ namespace Storm\Core\Object;
 interface IEntityProperty extends IRelationshipProperty {
     const IEntityPropertyType = __CLASS__;
     
+    public function IsOptional();
+    
     /**
      * @return RelationshipChange
      */

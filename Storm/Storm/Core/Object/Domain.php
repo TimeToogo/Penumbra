@@ -4,7 +4,6 @@ namespace Storm\Core\Object;
 
 use \Storm\Core\Containers\Registrar;
 use \Storm\Core\Containers\Map;
-use \Storm\Core\Mapping\DomainDatabaseMap;
 
 abstract class Domain {
     use \Storm\Core\Helpers\Type;
@@ -91,7 +90,7 @@ abstract class Domain {
      * @return Relationship
      */
     final public function Relationship($ParentEntity, $ChildEntity) {
-        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($Entity);
+        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
         $ChildIdentity = $this->VerifyEntity($ChildEntity)->Identity($ChildEntity);
         
         return new Relationship($ParentIdentity, $ChildIdentity);
@@ -104,10 +103,16 @@ abstract class Domain {
         return $this->VerifyEntity($Entity)->State($Entity);
     }
     
+    /**
+     * @return PersistenceData
+     */
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
         return $this->VerifyEntity($Entity)->Persist($UnitOfWork, $Entity);
     }
     
+    /**
+     * @return PersistenceData
+     */
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
         return $this->VerifyEntity($Entity)->Discard($UnitOfWork, $Entity);
     }

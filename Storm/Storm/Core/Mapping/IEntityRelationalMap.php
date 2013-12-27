@@ -21,9 +21,11 @@ interface IEntityRelationalMap {
      */
     public function GetPrimaryKeyTable();
     
-    public function Revive(RevivingContext $Context, Map $ResultRowRevivalDataMap);
-    public function Persist(PersistingContext $Context, TransactionalContext $TransactionalContext);
-    public function Discard(DiscardingContext $Context, TransactionalContext $TransactionalContext);
+    public function Initialize(DomainDatabaseMap $DomainDatabaseMap);
+    
+    public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ResultRowRevivalDataMap);
+    public function Persist(Relational\Transaction $Transaction, array $PersistenceData);
+    public function Discard(Relational\Transaction $Transaction, array $Identities);
     
     /**
      * @return IPropertyMapping[]
@@ -31,14 +33,30 @@ interface IEntityRelationalMap {
     public function GetPropertyMappings();
     
     /**
-     * @return IPropertyColumnMapping[]
+     * @return IDataPropertyColumnMapping[]
      */
-    public function GetPropertyColumnMappings();
+    public function GetDataPropertyColumnMappings();
     
     /**
-     * @return IPropertyRelationMapping[]
+     * @return IEntityPropertyToOneRelationMapping[]
      */
-    public function GetProperyRelationMappings();
+    public function GetEntityPropertyToOneRelationMappings();
+    
+    /**
+     * @return ICollectionPropertyToManyRelationMapping[]
+     */
+    public function GetCollectionPropertyToManyRelationMappings();
+    
+    
+    /**
+     * @return Relational\ResultRow
+     */
+    public function ResultRow($ColumnData = array());
+    
+    /**
+     * @return Relational\Request[]
+     */
+    public function RelationalRequest(Object\IRequest $ObjectRequest);
     
     /**
      * @return Relational\IColumn[]
@@ -60,8 +78,14 @@ interface IEntityRelationalMap {
      */
     public function GetAllMappedPersistColumns(array $Properties = null);
     
-    public function MapPropertyDataToColumnData(Object\PropertyData $PropertyData, Relational\ColumnData $ColumnData);
-    public function MapColumnDataToPropertyData(Relational\ColumnData $ColumnData, Object\PropertyData $PropertyData);
+    /**
+     * @return Relational\PrimaryKey
+     */
+    public function MapIdentityToPrimaryKey(Object\Identity $Identity);
+    /**
+     * @return Object\Identity
+     */
+    public function MapPrimaryKeyToIdentity(Relational\PrimaryKey $PrimaryKey);
 }
 
 ?>

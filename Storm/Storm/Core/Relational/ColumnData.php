@@ -25,14 +25,18 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         $this->AddColumn($Column, $Data);
     }
     
-    protected function AddColumn(IColumn $Column, $Data) {
+    final public function SetColumnAsReference(IColumn $Column, &$Data) {
+        $this->AddColumn($Column, $Data);
+    }
+    
+    protected function AddColumn(IColumn $Column, &$Data) {
         $ColumnIdentifier = $Column->GetIdentifier();
         if(!isset($this->Columns[$ColumnIdentifier])) {
             throw new \InvalidArgumentException('$Column must be one of: ' . 
                     implode(', ', array_keys($this->Columns)));
         }
         
-        $this->ColumnData[$ColumnIdentifier] = $Data;
+        $this->ColumnData[$ColumnIdentifier] =& $Data;
     }
     
     final public function Hash() {

@@ -2,8 +2,6 @@
 
 namespace Storm\Core\Relational;
 
-use \Storm\Core\Containers\Map;
-
 class Request {
     private $Tables = array();
     private $Columns = array();

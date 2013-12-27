@@ -17,13 +17,12 @@ interface IRelation {
     public function GetPersistingDependencyOrder();
     public function GetDiscardingDependencyOrder();
     
-    public function AddConstraintPredicateToRequest(Request $Request);
-    public function AddParentPredicateToRequest(Request $Request, array $ParentRows);
-    
     /**
-     * @return Map 
+     * @return Request
      */
-    public function MapRelatedRows(array $ParentRows, array $RelatedRows);
+    public function RelationRequest(array $ParentRows = null);
+    public function AddConstraintToRequest(Request $Request);
+    public function AddParentPredicateToRequest(Request $Request, array $ParentRows);
 }
 
 ?>

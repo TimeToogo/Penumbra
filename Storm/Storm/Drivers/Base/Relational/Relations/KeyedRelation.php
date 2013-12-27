@@ -28,7 +28,7 @@ abstract class KeyedRelation extends Relation {
         return $this->ForeignKey;
     }
     
-    public function AddConstraintPredicateToRequest(Relational\Request $Request) {
+    public function AddConstraintToRequest(Relational\Request $Request) {
         $Request->AddTable($this->GetTable());
         $Request->AddTable($this->ForeignKey->GetReferencedTable());
         $Request->AddPredicate($this->ForeignKey->GetConstraintPredicate());

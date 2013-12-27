@@ -11,10 +11,12 @@ class DeepClonedInstance implements IEntityConstructor {
     }
     
     public function Construct($EntityType) {
-        if(!($this->Instance instanceof $EntityType))
+        if(!($this->Instance instanceof $EntityType)) {
             throw new \InvalidArgumentException('Unsupported Entity Type');
-        else
+        }
+        else {
             return unserialize($this->SerializedInstance);
+        }
     }
 }
 

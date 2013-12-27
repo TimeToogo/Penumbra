@@ -4,19 +4,27 @@ namespace Storm\Core\Relational;
 
 final class Transaction {
     private $PersistedRows = array();
+    private $PersistedRowGroups = array();
     private $Procedures = array();
     private $DiscardedPrimaryKeys = array();
+    private $DiscardedPrimaryKeyGroups = array();
     private $DiscardedRequests = array();
     
     public function __construct() {
     }
-    
     
     /**
      * @return Row[]
      */
     public function GetPersistedRows() {
         return $this->PersistedRows;
+    }
+    
+    /**
+     * @return Row[][]
+     */
+    public function GetPersistedRowGroups() {
+        return $this->PersistedRowGroups;
     }
     
     /**
@@ -34,6 +42,13 @@ final class Transaction {
     }
     
     /**
+     * @return PrimaryKey[][]
+     */
+    public function GetDiscardedPrimaryKeyGroups() {
+        return $this->DiscardedPrimaryKeyGroups;
+    }
+    
+    /**
      * @return Request[]
      */
     public function GetDiscardedRequests() {
@@ -41,7 +56,13 @@ final class Transaction {
     }
     
     public function Persist(Row $Row) {
-        $this->PersistedRows[] = $Row;
+        $this->PersistedRows[spl_object_hash($Row)] = $Row;
+        
+        $TableName = $Row->GetTable()->GetName();
+        if(!isset($this->PersistedRowGroups[$TableName])) {
+            $this->PersistedRowGroups[$TableName] = array();
+        }
+        $this->PersistedRowGroups[$TableName][] = $Row;
     }
     
     public function PersistAll(array $Rows) {
@@ -54,6 +75,12 @@ final class Transaction {
     
     public function Discard(PrimaryKey $PrimaryKey) {
         $this->DiscardedPrimaryKeys[] = $PrimaryKey;
+        
+        $TableName = $PrimaryKey->GetTable()->GetName();
+        if(!isset($this->DiscardedPrimaryKeyGroups[$TableName])) {
+            $this->DiscardedPrimaryKeyGroups[$TableName] = array();
+        }
+        $this->DiscardedPrimaryKeyGroups[$TableName][] = $PrimaryKey;
     }
     
     public function DiscardAll(Request $Request) {

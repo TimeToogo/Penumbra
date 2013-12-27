@@ -13,9 +13,6 @@ interface IPropertyMapping {
      * @return Object\IProperty
      */
     public function GetProperty();
-    
-    public function Persist(PersistingContext $Context, TransactionalContext $TransactionalContext);
-    public function Discard(DiscardingContext $Context, TransactionalContext $TransactionalContext);
 }
 
 ?>

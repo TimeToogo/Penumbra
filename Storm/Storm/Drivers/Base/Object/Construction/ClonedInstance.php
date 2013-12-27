@@ -9,10 +9,12 @@ class ClonedInstance implements IEntityConstructor {
     }
     
     public function Construct($EntityType) {
-        if(!($this->Instance instanceof $EntityType))
+        if(!($this->Instance instanceof $EntityType)) {
             throw new \InvalidArgumentException('Unsupported EntityType');
-        else
+        }
+        else {
             return clone $this->Instance;
+        }
     }
 }
 

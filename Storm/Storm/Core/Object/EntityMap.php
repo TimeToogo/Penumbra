@@ -27,7 +27,7 @@ abstract class EntityMap implements \IteratorAggregate {
      */
     private $CollectionProperties = array();
     /**
-     * @var IProperty[] 
+     * @var IDataProperty[] 
      */
     private $IdentityProperties = array();
     
@@ -143,7 +143,7 @@ abstract class EntityMap implements \IteratorAggregate {
         
         $Identity = new Identity($this);
         foreach($this->IdentityProperties as $IdentityProperty) {
-            $IdentityProperty->Store($Identity, $Entity);
+            $Identity[$IdentityProperty] = $IdentityProperty->GetValue($Entity);
         }
         
         return $Identity;
@@ -161,8 +161,31 @@ abstract class EntityMap implements \IteratorAggregate {
         $this->VerifyEntity($Entity);
         
         $PersistenceData = new PersistenceData($this);
-        foreach($this->Properties as $Property) {
-            $Property->Persist($UnitOfWork, $PersistenceData, $Entity);
+        foreach($this->DataProperties as $DataProperty) {
+            $PersistenceData[$DataProperty] = $DataProperty->GetValue($Entity);
+        }
+        foreach($this->EntityProperties as $EntityProperty) {
+            $PersistenceData[$EntityProperty] = $EntityProperty->Persist($UnitOfWork, $Entity);
+        }
+        foreach($this->CollectionProperties as $CollectionProperty) {
+            $PersistenceData[$CollectionProperty] = $CollectionProperty->Persist($UnitOfWork, $Entity);
+        }
+        
+        return $PersistenceData;
+    }
+
+    final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
+        $this->VerifyEntity($Entity);
+        
+        $PersistenceData = new PersistenceData($this);
+        foreach($this->IdentityProperties as $IdentityProperty) {
+            $PersistenceData[$IdentityProperty] = $IdentityProperty->GetValue($Entity);
+        }
+        foreach($this->EntityProperties as $EntityProperty) {
+            $PersistenceData[$EntityProperty] = $EntityProperty->Discard($UnitOfWork, $Entity);
+        }
+        foreach($this->CollectionProperties as $CollectionProperty) {
+            $PersistenceData[$CollectionProperty] = $CollectionProperty->Discard($UnitOfWork, $Entity);
         }
         
         return $PersistenceData;
@@ -170,7 +193,15 @@ abstract class EntityMap implements \IteratorAggregate {
     
     final public function Apply(Domain $Domain, $Entity, PropertyData $PropertyData) {
         foreach($PropertyData as $PropertyIdentifier => $Value) {
-            $this->Properties[$PropertyIdentifier]->Revive($Domain, $Entity, $Value);
+            if(isset($this->DataProperties[$PropertyIdentifier])) {
+                $this->DataProperties[$PropertyIdentifier]->ReviveValue($Value, $Entity);
+            }
+            else if(isset($this->EntityProperties[$PropertyIdentifier])) {
+                $this->EntityProperties[$PropertyIdentifier]->Revive($Domain, $Value, $Entity);
+            }
+            else if(isset($this->CollectionProperties[$PropertyIdentifier])) {
+                $this->CollectionProperties[$PropertyIdentifier]->Revive($Value, $Value, $Entity);
+            }
         }
     }
     
@@ -178,7 +209,7 @@ abstract class EntityMap implements \IteratorAggregate {
         $Entities = array();
         foreach($RevivalDatas as $Key => $RevivalData) {
             $Entity = $this->ConstructEntity();
-            $this->LoadEntity($RevivalData, $Entity);
+            $this->LoadEntity($Domain, $RevivalData, $Entity);
             $Entities[$Key] = $Entity;
         }
         
@@ -194,15 +225,7 @@ abstract class EntityMap implements \IteratorAggregate {
     }
     
     final public function LoadEntity(Domain $Domain, RevivalData $RevivalData, $Entity) {
-        foreach($this->Properties as $Property) {
-            $Property->Revive($Domain, $RevivalData, $Entity);
-        }
-    }
-
-    final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
-        foreach($this->Properties as $Property) {
-            $Property->Discard($UnitOfWork, $Entity);
-        }
+        $this->Apply($Domain, $Entity, $RevivalData);
     }
     
     final public function DiscardWhere(UnitOfWork $UnitOfWork, IRequest $Request) {
