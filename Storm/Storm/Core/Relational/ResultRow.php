@@ -5,7 +5,7 @@ namespace Storm\Core\Relational;
 class ResultRow extends ColumnData {
     private $Tables = array();
     private $TableColumnsMap = array();
-    public function __construct(array $Columns, array $ColumnData = array()) {
+    public function __construct(array $Columns, array &$ColumnData = array()) {
         foreach($Columns as $Column) {
             $Table = $Column->GetTable();
             $TableName = $Table->GetName();
@@ -53,7 +53,7 @@ class ResultRow extends ColumnData {
         }
         
         $ColumnData = $this->GetColumnData();
-        $TableColumnData = array_intersect_key($ColumnData, $this->TableColumnsMap[$Table->GetName()]);
+        $TableColumnData =& array_intersect_key($ColumnData, $this->TableColumnsMap[$Table->GetName()]);
         
         return new Row($Table, $TableColumnData, true);
     }

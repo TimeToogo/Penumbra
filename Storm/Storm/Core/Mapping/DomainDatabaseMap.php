@@ -81,7 +81,7 @@ abstract class DomainDatabaseMap {
     }
     
     /**
-     * @return EntityRelationalMap 
+     * @return IEntityRelationalMap 
      */
     final protected function VerifyRelationalMap($EntityType) {
         $RelationMap = $this->GetRelationMap($EntityType);
@@ -97,9 +97,7 @@ abstract class DomainDatabaseMap {
         $RelationalRequest = $this->MapRequest($ObjectRequest);
         $Rows = $this->Database->Load($RelationalRequest);
         
-        $this->ReviveEntities($EntityType, $Rows);
-        $Context = new RevivingContext($this);
-        $RevivedEntities = $Context->ReviveEntities($EntityType, $Rows);
+        $RevivedEntities = $this->ReviveEntities($EntityType, $Rows);
         
         if($ObjectRequest->IsSingleEntity()) {
             return count($RevivedEntities) > 0 ? reset($RevivedEntities) : null;
@@ -289,36 +287,6 @@ abstract class DomainDatabaseMap {
         $EntityRelationalMap->Revive($this, $ResultRowRevivalDataMap);
         
         return $RevivalDataArray;
-    }
-
-    /**
-     * @internal
-     */
-    final public function ReviveEntityInstances(RevivingContext $Context, Map $RowInstanceMap) {
-        if (count($RowInstanceMap) === 0)
-            return;
-        
-        $EntityType = null;
-        foreach($RowInstanceMap as $Row) {
-            $Instance = $RowInstanceMap[$Row];
-            $EntityType = get_class($Instance);
-            break;
-        }
-        $EntityRelationalMap = $this->GetRelationMap($EntityType);
-
-        $RowStateMap = new Map();
-        $EntityMap = $EntityRelationalMap->GetEntityMap();
-        foreach ($RowInstanceMap as $Row) {
-            $RowStateMap[$Row] = $EntityMap->State();
-        }
-        $EntityRelationalMap->Revive($Context, $RowStateMap);
-        $StateInstanceMap = new Map();
-        foreach ($RowStateMap as $Row) {
-            $State = $RowStateMap[$Row];
-            $Instance = $RowInstanceMap[$Row];
-            $StateInstanceMap[$State] = $Instance;
-        }
-        return $EntityMap->ReviveEntityInstances($StateInstanceMap);
     }
     // </editor-fold>
     

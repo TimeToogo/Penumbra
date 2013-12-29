@@ -18,7 +18,7 @@ class RequestCompiler  extends Queries\RequestCompiler {
             else
                 $QueryBuilder->Append(', ');
             
-            $this->AppendOperationExpression($QueryBuilder, $Expression);
+            $this->AppendProcedureExpression($QueryBuilder, $Expression);
         }
     }
     

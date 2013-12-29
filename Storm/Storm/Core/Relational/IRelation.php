@@ -21,8 +21,7 @@ interface IRelation {
      * @return Request
      */
     public function RelationRequest(array $ParentRows = null);
-    public function AddConstraintToRequest(Request $Request);
-    public function AddParentPredicateToRequest(Request $Request, array $ParentRows);
+    public function AddRelationToRequest(Request $Request, array $ParentRows = null);
 }
 
 ?>

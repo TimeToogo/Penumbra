@@ -125,7 +125,7 @@ abstract class JoinTable extends Base\Relational\Table {
     /**
      * @param Relational\ColumnData $PrimaryKey1
      * @param Relational\ColumnData $PrimaryKey2
-     * @return Relational\ColumnData
+     * @return Relational\Row
      */
     final public function JoinRow(Relational\ColumnData $PrimaryKey1, Relational\ColumnData $PrimaryKey2) {
         $Row = $this->Row();
@@ -133,13 +133,13 @@ abstract class JoinTable extends Base\Relational\Table {
         $ForeignKey1Map = $this->ForeignKey1->GetReferencedColumnMap();
         foreach($ForeignKey1Map as $ParentColumn) {
             $ReferencedColumn = $ForeignKey1Map[$ParentColumn];
-            $Row[$ParentColumn] = $PrimaryKey1[$ReferencedColumn];
+            $Row[$ParentColumn] =& $PrimaryKey1[$ReferencedColumn];
         }
         
         $ForeignKey2Map = $this->ForeignKey2->GetReferencedColumnMap();
         foreach($ForeignKey2Map as $ParentColumn) {
             $ReferencedColumn = $ForeignKey2Map[$ParentColumn];
-            $Row[$ParentColumn] = $PrimaryKey2[$ReferencedColumn];
+            $Row[$ParentColumn] =& $PrimaryKey2[$ReferencedColumn];
         }
         
         return $Row;

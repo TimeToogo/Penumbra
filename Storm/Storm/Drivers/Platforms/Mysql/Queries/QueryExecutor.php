@@ -24,22 +24,25 @@ class QueryExecutor extends Queries\QueryExecutor {
         }
         $QueryBuilder->AppendIdentifiers('FROM # ', array_keys($Request->GetTables()), ', ');
     }
-    
-    protected function ExecuteCommit(IConnection $Connection, array $Tables,
-            array &$DiscardedRequests, array &$DiscardedPrimaryKeys, 
-            array $Procedures, array &$PersistedRowGroups) {
+
+    protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Relational\Table $Table, array &$DiscardedPrimaryKeys) {
+        $this->DeleteQuery($Connection, new Requests\PrimaryKeyRequest($DiscardedPrimaryKeys))->Execute();
+    }
+
+    protected function DeleteWhereQuery(IConnection $Connection, Relational\Table $Table, array &$DiscardedRequests) {
         foreach($DiscardedRequests as $Request) {
             $this->DeleteQuery($Connection, $Request)->Execute();
         }
-        foreach($DiscardedPrimaryKeys as $PrimaryKey) {
-            $this->DeleteQuery($Connection, new Requests\PrimaryKeyRequest($PrimaryKey))->Execute();
-        }
-        foreach($Procedures as $Procedure) {
+    }
+
+    protected function ExecuteUpdates(IConnection $Connection, Relational\Table $Table, array &$ProceduresToExecute) {
+        foreach($ProceduresToExecute as $Procedure) {
             $this->UpdateQuery($Connection, $Procedure)->Execute();
         }
-        foreach ($PersistedRowGroups as $TableName => $PersistedRows) {
-            $this->SaveQuery($Connection, $Tables[$TableName], $PersistedRows)->Execute();
-        }
+    }
+    
+    protected function PersistRows(IConnection $Connection, Relational\Table $Table, array &$RowsToPersist) {
+        $this->SaveQuery($Connection, $Table, $RowsToPersist)->Execute();
     }
     
     protected function SaveQuery(IConnection $Connection, Relational\Table $Table, array $Rows) {
@@ -106,8 +109,8 @@ class QueryExecutor extends Queries\QueryExecutor {
         $Table = $Request->GetTables();
         $QueryBuilder = $Connection->QueryBuilder();
         
-        $QueryBuilder->AppendIdentifier('DELETE FROM #', [$Table->GetName()]);
-        $this->AppendRequest($QueryBuilder, $Request);
+        $QueryBuilder->AppendIdentifier('DELETE FROM # ', [$Table->GetName()]);
+        $QueryBuilder->AppendRequest($QueryBuilder, $Request);
         
         return $QueryBuilder->Build();
     }

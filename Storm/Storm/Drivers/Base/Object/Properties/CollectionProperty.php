@@ -88,6 +88,9 @@ class CollectionProperty extends RelationshipProperty implements Object\IEntityP
         
         return array_merge($PersistedRelationships, $DiscarededRelationships);
     }
+    protected function GetOriginalEntities($OriginalValue) {
+        
+    }
     
     public function Discard(Object\UnitOfWork $UnitOfWork, $ParentEntity) {
         $Domain = $UnitOfWork->GetDomain();

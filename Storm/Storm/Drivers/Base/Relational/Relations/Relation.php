@@ -2,7 +2,6 @@
 
 namespace Storm\Drivers\Base\Relational\Relations;
 
-use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
 
 abstract class Relation implements Relational\IRelation {
@@ -12,8 +11,8 @@ abstract class Relation implements Relational\IRelation {
     private $PersistingOrder;
     private $DiscardingOrder;
     
-    public function __construct(Relational\Table $Table, $PersistingOrder, $DiscardingOrder) {
-        $this->Table = $Table;
+    public function __construct(Relational\Table $RelatedTable, $PersistingOrder, $DiscardingOrder) {
+        $this->Table = $RelatedTable;
         $this->PersistingOrder = $PersistingOrder;
         $this->DiscardingOrder = $DiscardingOrder;
     }
@@ -25,6 +24,20 @@ abstract class Relation implements Relational\IRelation {
         return $this->Table;
     }
     
+    final public function AddRelationToRequest(Relational\Request $Request, array $ParentRows = null) {
+        $Request->AddTable($this->Table);
+        $this->AddConstraintToRequest($Request);
+        if($ParentRows !== null) {
+            $this->AddParentPredicateToRequest($Request, $ParentRows);
+        }
+    }
+    /**
+     * Relational\Request
+     */
+    protected abstract function AddConstraintToRequest(Relational\Request $Request);
+    
+    protected abstract function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows);
+    
     final public function GetPersistingDependencyOrder() {
         return $this->PersistingOrder;
     }
@@ -33,19 +46,18 @@ abstract class Relation implements Relational\IRelation {
         return $this->DiscardingOrder;
     }
     
-    final public function MapRelatedRows(array $ParentRows, array $RelatedRows) {
-        $Map = new Map();
-        if(count($ParentRows) === 1) {
-            $Map->Map(reset($ParentRows), new \ArrayObject($RelatedRows));
-        } 
-        else {
-            $this->MapParentToRelatedRows($Map, $ParentRows, $RelatedRows);
+    final public function RelationRequest(array $ParentRows = null) {
+        $Request = $this->NewRelationRequest();
+        $this->AddRelationToRequest($Request);
+        if($ParentRows !== null) {
+            $this->AddParentPredicateToRequest($Request, $ParentRows);
         }
-        
-        return $Map;
+        return $Request;
     }
-    protected abstract function MapParentToRelatedRows(Map $Map, array $ParentRows, array $RelatedRows);
-
+    /**
+     * Relational\Request
+     */
+    protected abstract function NewRelationRequest();
 }
 
 ?>

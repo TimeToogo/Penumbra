@@ -59,9 +59,8 @@ abstract class EntityPropertyToOneRelationMapping extends PropertyMapping implem
 
         $ParentRowRelatedRevivalDataMap = new Map();
         foreach($ParentRowRevivalDataMap as $ParentRow) {
-            $RelatedRow = isset($ParentRelatedRowMap[$ParentRow]) ?
-                            $RelatedRowRevivalDataMap[$ParentRelatedRowMap[$ParentRow]] : null;
-            $RelatedRevivalData = $ParentRow ? $RelatedRowRevivalDataMap[$RelatedRow] : null;
+            $RelatedRow = $ParentRelatedRowMap[$ParentRow];
+            $RelatedRevivalData = $RelatedRow !== null ? $RelatedRowRevivalDataMap[$RelatedRow] : null;
             
             $ParentRowRelatedRevivalDataMap[$ParentRow] = $RelatedRevivalData;
         }

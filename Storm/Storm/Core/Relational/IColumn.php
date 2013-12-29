@@ -6,8 +6,7 @@ interface IColumn {
     const IColumnType = __CLASS__;
     
     public function GetIdentifier();
-    public function IsPrimaryKey();
-    
+    public function IsPrimaryKey();    
     
     /**
      * @return Table

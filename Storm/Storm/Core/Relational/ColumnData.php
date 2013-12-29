@@ -6,11 +6,11 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     private $Columns = array();
     private $ColumnData;
     
-    protected function __construct(array $Columns, array $ColumnData) {
+    protected function __construct(array $Columns, array &$ColumnData) {
         foreach ($Columns as $Column) {
             $this->Columns[$Column->GetIdentifier()] = $Column;
         }
-        $this->ColumnData = $ColumnData;
+        $this->ColumnData =& $ColumnData;
     }
     
     final public function GetColumnData() {
@@ -21,11 +21,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         return $this->Columns[$Identifier];
     }
     
-    final public function SetColumn(IColumn $Column, $Data) {
-        $this->AddColumn($Column, $Data);
-    }
-    
-    final public function SetColumnAsReference(IColumn $Column, &$Data) {
+    final public function SetColumn(IColumn $Column, &$Data) {
         $this->AddColumn($Column, $Data);
     }
     
@@ -40,7 +36,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
     
     final public function Hash() {
-        return md5(serialize(asort($this->ColumnData)));
+        return md5(json_encode(asort($this->ColumnData)));
     }
     
     final public function getIterator() {
@@ -51,15 +47,16 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         return isset($this->ColumnData[$Column->GetIdentifier()]);
     }
     
-    final public function offsetGet($Column) {
+    final public function &offsetGet($Column) {
+        $Null = null;
         if(!$this->offsetExists($Column))
-            return null;
+            return $Null;
         else
             return $this->ColumnData[$Column->GetIdentifier()];
     }
 
-    final public function offsetSet($Column, $Data) {
-        $this->SetColumn($Column, $Data);
+    final public function offsetSet($Column, &$Data) {
+        $this->AddColumn($Column, $Data);
     }
 
     final public function offsetUnset($Column) {

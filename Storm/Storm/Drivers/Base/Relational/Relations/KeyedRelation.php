@@ -12,10 +12,10 @@ abstract class KeyedRelation extends Relation {
     
     public function __construct(
             ForeignKey $ForeignKey, 
-            Relational\Table $Table, 
+            Relational\Table $RelatedTable, 
             $PersistingOrder, 
             $DiscardingOrder) {
-        parent::__construct($Table, 
+        parent::__construct($RelatedTable, 
                 $PersistingOrder, $DiscardingOrder);
         
         $this->ForeignKey = $ForeignKey;
@@ -29,17 +29,15 @@ abstract class KeyedRelation extends Relation {
     }
     
     public function AddConstraintToRequest(Relational\Request $Request) {
-        $Request->AddTable($this->GetTable());
-        $Request->AddTable($this->ForeignKey->GetReferencedTable());
         $Request->AddPredicate($this->ForeignKey->GetConstraintPredicate());
     }
     
-    public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows = null) {
+    public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows) {
         $Predicate = new Constraints\Predicate();
         $RuleGroup = Constraints\RuleGroup::Any();
         
         foreach($ParentRows as $ParentRow) {
-            $ReferencedKey = $this->MapParentRowToReferencedKey($this->ForeignKey, $ParentRow);
+            $ReferencedKey = $this->MapParentRowToRelatedKey($this->ForeignKey, $ParentRow);
             
             $RuleGroup->AddRuleGroup(
                     Constraints\RuleGroup::Matches($ReferencedKey));
@@ -50,16 +48,19 @@ abstract class KeyedRelation extends Relation {
     /**
      * @return Relational\ColumnData
      */
-    protected abstract function MapParentRowToReferencedKey(ForeignKey $ForeinKey, 
+    protected abstract function MapParentRowToRelatedKey(ForeignKey $ForeignKey, 
             Relational\ResultRow $ParentRow);
     
-    final protected function MapParentToRelatedRows(Map $Map, array $ParentRows, array $RelatedRows) {
-        return $this->MapParentToRelatedRowsByKey($Map, $ParentRows, $RelatedRows, 
-                $this->ForeignKey->GetParentColumns(), $this->ForeignKey->GetReferencedColumns());
+    
+    final protected function HashRowsByColumns(array $Rows, array $Columns) {
+        $KeyedRows = array();
+        foreach($Rows as $Row) {
+            $Hash = $Row->GetDataFromColumns($Columns)->Hash();
+            $KeyedRows[$Hash] = $Row;
+        }
+        
+        return $KeyedRows;
     }
-    protected abstract function MapParentToRelatedRowsByKey(
-            Map $Map, array $ParentRows, array $RelatedRows, 
-            array $ParentColumns, array $ReferencedColumns);
 }
 
 ?>

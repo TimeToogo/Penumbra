@@ -2,14 +2,11 @@
 
 namespace Storm\Drivers\Base\Relational\PrimaryKeys;
 
-use \Storm\Drivers\Base\Relational;
-use \Storm\Drivers\Base\Relational\Queries\IConnection;
+use \Storm\Core\Relational\Table;
 
 interface IKeyGenerator {
-    /**
-     * @return Relational\PrimaryKey[]
-     */
-    public function FillPrimaryKeys(IConnection $Connection, Relational\Table $Table, array $PrimaryKeys, array $PrimaryKeyColumns);
+    public function GetKeyGeneratorMode();
+    public function SetTable(Table $Table);
 }
 
 ?>

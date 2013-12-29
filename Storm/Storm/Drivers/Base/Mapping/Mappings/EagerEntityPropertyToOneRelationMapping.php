@@ -16,7 +16,7 @@ class EagerEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelatio
                     $this->GetEntityType(),
                     $RelationalRequest);
 
-            $this->GetToOneRelation()->AddConstraintToRequest($RelationalRequest);
+            $this->GetToOneRelation()->AddRelationToRequest($RelationalRequest);
         }
     }
 

@@ -31,7 +31,7 @@ abstract class Table {
         $this->RegisterColumns($Registrar, $Database);
         $this->Columns = array();
         foreach($Registrar->GetRegistered() as $Column) {
-            $this->AddColum($Column);
+            $this->AddColumn($Column);
         }
         
         $this->OnStructureInitialized($Database);
@@ -64,7 +64,7 @@ abstract class Table {
     protected abstract function RegisterToOneRelations(Registrar $Registrar, Database $Database);
     protected abstract function RegisterToManyRelations(Registrar $Registrar, Database $Database);
 
-    final protected function AddColum(IColumn $Column) {
+    final protected function AddColumn(IColumn $Column) {
         if($Column->HasTable()) {
             if(!$Column->GetTable()->Is($this)) {
                 throw new \Exception('Column belongs to another table');
@@ -72,9 +72,10 @@ abstract class Table {
         }
         $Column->SetTable($this);
         
-        $this->Columns[$Column->GetName()] = $Column;
+        $ColumnName = $Column->GetName();
+        $this->Columns[$ColumnName] = $Column;
         if($Column->IsPrimaryKey()) {
-            $this->PrimaryKeyColumns[$Column->GetName()] = $Column;
+            $this->PrimaryKeyColumns[$ColumnName] = $Column;
         }
      }
     

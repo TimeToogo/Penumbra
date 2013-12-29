@@ -6,6 +6,7 @@ use \Storm\Core\Containers;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Relational\Columns\IColumnSet;
+use \Storm\Drivers\Base\Relational\PrimaryKeys\IKeyGenerator;
 use \Storm\Drivers\Base\Relational\PrimaryKeys\IKeyGeneratorSet;
 
 abstract class Table extends Relational\Table {
@@ -20,14 +21,16 @@ abstract class Table extends Relational\Table {
     protected abstract function RegisterColumnStructure(Containers\Registrar $Registrar, IColumnSet $Column);
     
     protected function OnStructureInitialized(Relational\Database $Context) {
-        
-        $this->KeyGenerator = $this->KeyGenerator($Context->GetPlatform()->GetKeyGeneratorSet());
-        
         $Registrar = new Containers\Registrar(StructuralTableTrait::GetType());
         $Registrar->Register(new Traits\PrimaryKey($this->GetPrimaryKeyColumns()));
         $this->RegisterStructuralTraits($Registrar);
         foreach($Registrar->GetRegistered() as $Trait) {
             $this->AddTrait($Trait);
+        }
+        
+        $this->KeyGenerator = $this->KeyGenerator($Context->GetPlatform()->GetKeyGeneratorSet());
+        if($this->KeyGenerator !== null) {
+            $this->KeyGenerator->SetTable($this);
         }
     }
     protected abstract function RegisterStructuralTraits(Containers\Registrar $Registrar);
@@ -47,36 +50,13 @@ abstract class Table extends Relational\Table {
     protected function OnRelatedStructureInitialized(Relational\Database $Context) { }
     
     protected abstract function RegisterRelationalTraits(Containers\Registrar $Registrar, Relational\Database $Context);
-        
-    protected abstract function KeyGenerator(IKeyGeneratorSet $KeyGenerator);
-    final public function GeneratePrimaryKeys(IConnection $Connection, $Amount = 1) {
-        $PrimaryKeys = array();
-        for($Count = 0; $Count < $Amount; $Count++) {
-            $PrimaryKeys[] = $this->PrimaryKey();
-        }
-        
-        $this->KeyGenerator->FillPrimaryKeys($Connection, $this, $PrimaryKeys, $this->GetPrimaryKeyColumns());
-        
-        return $PrimaryKeys;
-    }
-    
-    final protected function ColumnIsPrimaryKey(Relational\IColumn $Column) {
-        foreach ($this->Traits as $Trait) {
-            if($Trait instanceof Traits\PrimaryKey)
-                if(array_search($Column, $Trait->GetColumns()) !== false)
-                        return true;
-        }
-        return false;
-    }
     
     /**
-     * @return TableTrait[]
+     * @return IKeyGenerator
      */
-    final public function GetTraits() {
-        return $this->Traits;
-    }
+    protected abstract function KeyGenerator(IKeyGeneratorSet $KeyGenerator);
     
-    final public function AddTrait(TableTrait $Trait) {
+    private function AddTrait(TableTrait $Trait) {
         if($Trait instanceof StructuralTableTrait) {
             $this->StructuralTraits[] = $Trait;
             $this->Traits[] = $Trait;
@@ -91,6 +71,13 @@ abstract class Table extends Relational\Table {
     }
     
     /**
+     * @return TableTrait[]
+     */
+    final public function GetTraits() {
+        return $this->Traits;
+    }
+    
+    /**
      * @return StructuralTableTrait[]
      */
     final public function GetStructuralTraits() {
@@ -102,6 +89,17 @@ abstract class Table extends Relational\Table {
      */
     final public function GetRelationalTraits() {
         return $this->RelationalTraits;
+    }
+    
+    public function HasKeyGenerator() {
+        return $this->KeyGenerator !== null;
+    }
+    
+    /**
+     * @return IKeyGenerator
+     */
+    public function GetKeyGenerator() {
+        return $this->KeyGenerator;
     }
 }
 

@@ -8,13 +8,20 @@ use \Storm\Drivers\Base\Relational\Queries;
 class Connection extends Queries\Connection {
     private $PDO;
     
-    public function __construct(\PDO $Connection) {
+    public function __construct(\PDO $Connection, $EmulatePreparedStatements = true) {
         $Connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $Connection->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
-        $Connection->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+        $Connection->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $EmulatePreparedStatements);
         $Connection->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
         $Connection->setAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
         $this->PDO = $Connection;
+    }
+    
+    /**
+     * @return Connection
+     */
+    public static function Connect($DSN, $Username = null, $Password = null, array $DriverOptions = null, $EmulatePreparedStatements = false) {
+        return new self(new \PDO($DSN, $Username, $Password, $DriverOptions), $EmulatePreparedStatements);
     }
     
     public function BeginTransaction() {
@@ -53,8 +60,7 @@ class Connection extends Queries\Connection {
     public function QueryBuilder(Queries\Bindings $Bindings = null) {
         if($Bindings === null) {
             $Bindings = new Queries\Bindings();
-        }
-        
+        }        
         return new Queries\QueryBuilder($this, '?', $Bindings, 
                 $this->ExpressionCompiler, 
                 $this->RequestCompiler, 

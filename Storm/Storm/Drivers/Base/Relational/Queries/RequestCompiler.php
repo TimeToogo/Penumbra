@@ -18,7 +18,7 @@ abstract class RequestCompiler implements IRequestCompiler {
     
     protected abstract function AppendProcedureExpressions(QueryBuilder $QueryBuilder, array $Expressions);
     
-    final protected function AppendOperationExpression(QueryBuilder $QueryBuilder, Expression $Expression) {
+    final protected function AppendProcedureExpression(QueryBuilder $QueryBuilder, Expression $Expression) {
         $QueryBuilder->AppendExpression($Expression);
     }
     

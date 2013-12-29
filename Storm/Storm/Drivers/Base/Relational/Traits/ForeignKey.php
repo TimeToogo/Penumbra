@@ -19,8 +19,8 @@ class ForeignKey extends RelationalTableTrait {
     private $ReferencedTable;
     private $ReferencedColumnMap;
     private $ReferencedColumnNameMap = array();
-    private $PrimaryColumnIdentifierMap = array();
-    private $ForeignColumnIdentifierMap = array();
+    private $ParentColumnIdentifierMap = array();
+    private $ReferencedColumnIdentifierMap = array();
     
     private $UpdateMode;
     private $DeleteMode;
@@ -36,10 +36,10 @@ class ForeignKey extends RelationalTableTrait {
         $this->ReferencedTable = $ReferencedTable;
         $this->ReferencedColumnMap = $ReferencedColumnMap;
         foreach($ReferencedColumnMap as $PrimaryColumn) {
-            $this->PrimaryColumnIdentifierMap[$PrimaryColumn->GetIdentifier()] = $PrimaryColumn;
+            $this->ParentColumnIdentifierMap[$PrimaryColumn->GetIdentifier()] = $PrimaryColumn;
             
             $ForeignColumn = $ReferencedColumnMap[$PrimaryColumn];
-            $this->ForeignColumnIdentifierMap[$ForeignColumn->GetIdentifier()] = $ForeignColumn;
+            $this->ReferencedColumnIdentifierMap[$ForeignColumn->GetIdentifier()] = $ForeignColumn;
             
             $this->ReferencedColumnNameMap[$PrimaryColumn->GetName()] = $ForeignColumn->GetName();
         }
@@ -74,9 +74,6 @@ class ForeignKey extends RelationalTableTrait {
         return $this->ReferencedColumnMap;
     }
     
-    /**
-     * @return Map
-     */
     final public function GetReferencedColumnNameMap() {
         return $this->ReferencedColumnNameMap;
     }
@@ -95,8 +92,6 @@ class ForeignKey extends RelationalTableTrait {
     final public function GetConstraintPredicate() {
         return new ForeignKeyPredicate($this);
     }
-    
-    
 
     protected function IsRelationalTrait(RelationalTableTrait $OtherTrait) {
         if(!$this->ReferencedTable->Is($OtherTrait->ReferencedTable))
@@ -110,23 +105,21 @@ class ForeignKey extends RelationalTableTrait {
             count(array_diff_assoc($OtherTrait->ReferencedColumnNameMap, $this->ReferencedColumnNameMap)) === 0; 
     }
     
-    final public function MapParentKey(Relational\ColumnData $PrimaryKey, Relational\ColumnData $ForeignKey) {
-        foreach($PrimaryKey as $ColumnIdentifer => $Data) {
-            if(isset($this->PrimaryColumnIdentifierMap[$ColumnIdentifer])) {
-                $PrimaryColumn = $this->PrimaryColumnIdentifierMap[$ColumnIdentifer];
-                $ForeignColumn = $this->ReferencedColumnMap[$PrimaryColumn];
-                $ForeignKey[$ForeignColumn] = $Data;
-            }
+    final public function MapParentToReferencedKey(Relational\ColumnData $ParentKeyData, Relational\ColumnData $ReferencedKeyData) {
+        $MappableColumnValues =& array_intersect_key($ParentKeyData->GetColumnData(), $this->ParentColumnIdentifierMap);
+        foreach ($MappableColumnValues as $ColumnIdentifier => &$ColumnValue) {
+            $ParentColumn = $this->ParentColumnIdentifierMap[$ColumnIdentifier];
+            $ReferencedColumn = $this->ReferencedColumnMap[$ParentColumn];
+            $ReferencedKeyData[$ReferencedColumn] =& $ColumnValue;
         }
     }
     
-    final public function MapReferencedKey(Relational\ColumnData $ForeignKey, Relational\ColumnData $PrimaryKey) {
-        foreach($ForeignKey as $ColumnIdentifer => $Data) {
-            if(isset($this->ForeignColumnIdentifierMap[$ColumnIdentifer])) {
-                $ForeignColumn = $this->ForeignColumnIdentifierMap[$ColumnIdentifer];
-                $PrimaryColumn = $this->ReferencedColumnMap[$ForeignColumn];
-                $PrimaryKey[$PrimaryColumn] = $Data;
-            }
+    final public function MapReferencedToParentKey(Relational\ColumnData $ReferencedKeyData, Relational\ColumnData $ParentKeyData) {
+        $MappableColumnValues =& array_intersect_key($ReferencedKeyData->GetColumnData(), $this->ReferencedColumnNameMap);
+        foreach ($MappableColumnValues as $ColumnIdentifier => &$ColumnValue) {
+            $ReferencedColumn = $this->ReferencedColumnIdentifierMap[$ColumnIdentifier];
+            $ParentColumn = $this->ReferencedColumnMap[$ReferencedColumn];
+            $ParentKeyData[$ParentColumn] =& $ColumnValue;
         }
     }
 }

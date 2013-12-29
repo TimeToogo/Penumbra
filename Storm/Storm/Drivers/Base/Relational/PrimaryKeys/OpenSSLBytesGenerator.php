@@ -5,7 +5,7 @@ namespace Storm\Drivers\Base\Relational\PrimaryKeys;
 use \Storm\Drivers\Base\Relational;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 
-class OpenSSLBytesGenerator extends SingleKeyGenerator {
+class OpenSSLBytesGenerator extends PreInsertKeyGenerator {
     private $Length;
     private $Hexadecimal;
     public function __construct($Length, $Hexadecimal = true) {
@@ -13,16 +13,17 @@ class OpenSSLBytesGenerator extends SingleKeyGenerator {
         $this->Hexadecimal = $Hexadecimal;
     }
 
-    
-    protected function FillSinglePrimaryKeys(IConnection $Connection, Relational\Table $Table, 
-            array $PrimaryKeys, Relational\Columns\Column $Column) {
-        $BytesToGenerate = $this->Length * count($PrimaryKeys);
+    public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
+        $Columns = $this->GetPrimaryKeyColumns();
+        $BytesToGenerate = $this->Length * count($UnkeyedRows) * count($Columns);
         $Bytes = openssl_random_pseudo_bytes($BytesToGenerate);
-        foreach($PrimaryKeys as $PrimaryKey) {
-            $CurrentBytes = substr($Bytes, 0, $this->Length);
-            $PrimaryKey[$Column] = $this->Hexadecimal ? bin2hex($CurrentBytes) : $CurrentBytes;
-            
-            $Bytes = substr($Bytes, $this->Length);
+        
+        foreach($UnkeyedRows as $UnkeyedRow) {
+            foreach($Columns as $Column) {
+                $CurrentBytes = substr($Bytes, 0, $this->Length);
+                $UnkeyedRow[$Column] = $this->Hexadecimal ? bin2hex($CurrentBytes) : $CurrentBytes;
+                $Bytes = substr($Bytes, $this->Length);
+            }
         }
     }
 }

@@ -24,22 +24,29 @@ abstract class QueryExecutor implements IQueryExecutor {
         try {
             $Connection->BeginTransaction();
             
-            $DiscardedRequests = $this->OrderByTableDependency($Transaction->GetDiscardedRequests(), $TablesOrderedByDiscardingDependency);
+            $GroupedDiscardedRequests = $this->GroupByTableName($Transaction->GetDiscardedRequests());
+            $GroupedDiscardedPrimaryKeys = $this->GroupByTableName($Transaction->GetDiscardedPrimaryKeys());
+            foreach($TablesOrderedByDiscardingDependency as $Table) {
+                $TableName = $Table->GetName();
+                if(isset($GroupedDiscardedRequests[$TableName])) {
+                    $this->DeleteWhereQuery($Connection, $Table, $GroupedDiscardedRequests[$TableName]);
+                }
+                if(isset($GroupedDiscardedPrimaryKeys[$TableName])) {
+                    $this->DeleteRowsByPrimaryKeysQuery($Connection, $Table, $GroupedDiscardedPrimaryKeys[$TableName]);
+                }
+            }
             
-            $DiscardedPrimaryKeys = $this->OrderByTableDependency($Transaction->GetDiscardedPrimaryKeys(), $TablesOrderedByDiscardingDependency);
-            
-            $Operations = $this->OrderByTableDependency($Transaction->GetProcedures(), $TablesOrderedByPersistingDependency);
-            
-            $PersistedRows = $this->OrderByTableDependency($Transaction->GetPersistedRows(), $TablesOrderedByPersistingDependency);
-            $PersistedRowGroups = $this->GroupRowsByTable($PersistedRows);
-            
-            $Tables = array_combine(
-                    array_map(function ($Table) {
-                        return $Table->GetName();
-                    }, $TablesOrderedByPersistingDependency), 
-                    $TablesOrderedByPersistingDependency);
-                    
-            $this->ExecuteCommit($Connection, $Tables, $DiscardedRequests, $DiscardedPrimaryKeys, $Operations, $PersistedRowGroups);
+            $GroupedProceduresToExecute = $this->GroupByTableName($Transaction->GetProcedures(), $TablesOrderedByPersistingDependency);
+            $GroupedPersistedRows = $this->GroupByTableName($Transaction->GetPersistedRows(), $TablesOrderedByPersistingDependency);
+            foreach($TablesOrderedByPersistingDependency as $Table) {
+                $TableName = $Table->GetName();
+                if(isset($GroupedProceduresToExecute[$TableName])) {
+                    $this->ExecuteUpdates($Connection, $Table, $GroupedProceduresToExecute[$TableName]);
+                }
+                if(isset($GroupedPersistedRows[$TableName])) {
+                    $this->PersistRows($Connection, $Table, $GroupedPersistedRows[$TableName]);
+                }
+            }
             
             $Connection->CommitTransaction();
         }
@@ -48,12 +55,10 @@ abstract class QueryExecutor implements IQueryExecutor {
             throw $Exception;
         }
     }
-    
-    /**
-     * @return IQuery
-     */
-    protected abstract function ExecuteCommit(IConnection $Connection, array $Tables,
-            array &$DiscardedRequests, array &$DiscardedPrimaryKeys, array $Operations, array &$PersistedRowGroups);
+    protected abstract function DeleteWhereQuery(IConnection $Connection, Relational\Table $Table, array &$DiscardedRequests);
+    protected abstract function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Relational\Table $Table, array &$DiscardedPrimaryKeys);
+    protected abstract function ExecuteUpdates(IConnection $Connection, Relational\Table $Table, array &$ProceduresToExecute);
+    protected abstract function PersistRows(IConnection $Connection, Relational\Table $Table, array &$RowsToPersist);
     
     
     final protected function AppendProcedure(QueryBuilder $QueryBuilder, Relational\Procedure $Operation) {
@@ -83,6 +88,19 @@ abstract class QueryExecutor implements IQueryExecutor {
                     unset($ObjectsWithTable[$Key]);
                 }
             }
+        }
+        
+        return $OrderedObjects;
+    }
+    
+    private function GroupByTableName(array $ObjectsWithTable) {
+        $OrderedObjects = array();
+        foreach($ObjectsWithTable as $ObjectWithTable) {
+            $TableName = $ObjectWithTable->GetTable()->GetName();
+            if(!isset($OrderedObjects[$TableName])) {
+                $OrderedObjects[$TableName] = array();
+            }
+            $OrderedObjects[$TableName][] = $ObjectWithTable;
         }
         
         return $OrderedObjects;

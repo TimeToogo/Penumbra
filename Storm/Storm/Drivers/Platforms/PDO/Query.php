@@ -12,8 +12,9 @@ class Query implements Queries\IQuery {
     public function __construct(\PDOStatement $Statement, Queries\Bindings $Bindings = null) {
         $this->Statement = $Statement;
         
-        if($Bindings === null)
+        if($Bindings === null) {
             $Bindings = new Queries\Bindings();
+        }
         $this->Bindings = $Bindings;
     }
     
@@ -45,9 +46,9 @@ class Query implements Queries\IQuery {
     private function BindAll() {
         foreach($this->Bindings->Get() as $ParameterKey => $Binding) {
             //Positional parameters are one based
-            if(is_int($ParameterKey))
+            if(is_int($ParameterKey)) {
                 $ParameterKey++;
-            
+            }
             $this->Bind($ParameterKey, $Binding->GetValue(), $Binding->GetParameterType());
         }
         $this->HasBound = true;
