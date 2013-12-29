@@ -9,6 +9,8 @@ use \Storm\Core\Relational;
 interface IDataPropertyColumnMapping extends IPropertyMapping {
     const IDataPropertyColumnMappingType = __CLASS__;
     
+    public function IsIdentityPrimaryKeyMapping();
+    
     /**
      * @return Object\IDataProperty
      */

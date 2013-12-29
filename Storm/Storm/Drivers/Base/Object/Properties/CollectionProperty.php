@@ -74,9 +74,7 @@ class CollectionProperty extends RelationshipProperty implements Object\IEntityP
         $RemovedEntities = array_udiff($OriginalEntities, $CurrentEntities, [$this, 'ObjectComparison']);
 
         foreach($NewEntities as $NewEntity) {
-            if($this->IsIdentifying() || $this->IsEntityAltered($NewEntity)) {
-                $UnitOfWork->Persist($NewEntity);
-            }
+            $UnitOfWork->Persist($NewEntity);
             $PersistedRelationships[] = new Object\RelationshipChange($Domain->Relationship($ParentEntity, $NewEntity), null);
         }
         foreach($RemovedEntities as $RemovedEntity) {

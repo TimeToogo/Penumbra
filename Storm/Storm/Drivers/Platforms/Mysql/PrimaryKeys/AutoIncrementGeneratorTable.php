@@ -11,7 +11,7 @@ use \Storm\Drivers\Base\Relational\Columns\DataType;
 use \Storm\Drivers\Platforms\Mysql;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 
-class AutoIncrementGeneratorTable extends Relational\Table implements Relational\PrimaryKeys\IKeyGenerator {
+class AutoIncrementGeneratorTable extends Relational\Table {
     private $Name;
     
     private $TableNameColumn;
@@ -33,12 +33,11 @@ class AutoIncrementGeneratorTable extends Relational\Table implements Relational
     protected function Name() {
         return $this->Name;
     }
-
-    protected function RegisterColumns(Database $Context, Registrar $Registrar) {
+    protected function RegisterColumnStructure(Registrar $Registrar, Columns\IColumnSet $Column) {
         $Registrar->Register($this->TableNameColumn);
         $Registrar->Register($this->IncrementColumn);
     }
-
+    
     protected function RegisterStructuralTraits(Registrar $Registrar) {
         $Registrar->Register(new Mysql\Tables\Engine('MYISAM'));
         
@@ -50,35 +49,6 @@ class AutoIncrementGeneratorTable extends Relational\Table implements Relational
 
     protected function RegisterToManyRelations(Database $Context, Registrar $Registrar) { }
     protected function RegisterToOneRelations(Database $Context, Registrar $Registrar) { }
-
-    public function FillPrimaryKeys(IConnection $Connection, Relational\Table $Table, array $PrimaryKeys, array $PrimaryKeyColumns) {
-        if(count($PrimaryKeys) === 0)
-            return;
-        
-        if(count($PrimaryKeyColumns) !== 1)
-            throw new \InvalidArgumentException('Can only generate single increment per table');
-        
-        $TableName = $Table->GetName();
-        
-        $QueryBuilder = $Connection->QueryBuilder();
-        $QueryBuilder->AppendIdentifier('INSERT INTO # ', [$this->Name]);
-        $QueryBuilder->AppendIdentifier('(#)', $this, [$this->Name, $this->TableNameColumn->GetName()]);
-        $QueryBuilder->Append(' VALUES ');
-        
-        $InsertRows = array_fill(0, count($PrimaryKeys), '(#)');
-        $QueryBuilder->AppendValue(implode(',', $InsertRows), $TableName);
-        
-        $QueryBuilder->Build()->Execute();
-        
-        //Mysql will return the first inserted id
-        $IncrementValue = $Connection->GetLastInsertIncrement();
-        
-        $PrimaryKeyColumn = reset($PrimaryKeyColumns);
-        foreach($PrimaryKeys as $PrimaryKey) {
-            $PrimaryKey[$PrimaryKeyColumn] = $IncrementValue;
-            $IncrementValue++;
-        }
-    }
 }
 
 ?>

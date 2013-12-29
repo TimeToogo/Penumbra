@@ -95,13 +95,6 @@ abstract class Domain {
         
         return new Relationship($ParentIdentity, $ChildIdentity);
     }
-    /**
-     * @param object $Entity
-     * @return State
-     */
-    final public function State($Entity) {
-        return $this->VerifyEntity($Entity)->State($Entity);
-    }
     
     /**
      * @return PersistenceData

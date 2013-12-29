@@ -108,9 +108,6 @@ abstract class DomainDatabaseMap {
     }
     
     final public function Commit(Object\UnitOfWork $UnitOfWork) {
-        $this->EnsureIdentifiable($UnitOfWork->GetPersistenceData());
-        $this->VerifyIdentifiable($UnitOfWork->GetDiscardedIdentities());
-        
         $Transaction = new Relational\Transaction();
         $this->MapUnitOfWorkToTransaction($UnitOfWork, $Transaction);
         
@@ -333,16 +330,18 @@ abstract class DomainDatabaseMap {
         foreach($UnitOfWork->GetExecutedProcedures() as $Procedure) {
             $Transaction->Execute($this->MapProcedure($Procedure));
         }
-        /*foreach($UnitOfWork->GetDiscardedIdentities() as $DiscardedIdentity) {
-            $DiscardedPrimaryKey = $TransactionalContext->DiscardIdentity($DiscardedIdentity);
-            $Transaction->Discard($DiscardedPrimaryKey);
+        foreach($UnitOfWork->GetDiscardedIdentityGroups() as $EntityType => $DiscardedIdentityGroup) {
+            $EntityRelationalMap = $this->EntityRelationMaps[$EntityType];
+            $this->MapDiscardedIdentitiesToTransaction($Transaction, $EntityRelationalMap, $DiscardedIdentityGroup);
         }
         foreach($UnitOfWork->GetDiscardedRequests() as $DiscardedRequest) {
             $Transaction->DiscardAll($this->MapRequest($DiscardedRequest));
-        }*/
+        }
     }
     
-    private function MapPersistenceDataToTransaction(Relational\Transaction $Transaction, EntityRelationalMap $EntityRelationalMap, array $PersistenceDataArray) {
+    private function MapPersistenceDataToTransaction(Relational\Transaction $Transaction, 
+            IEntityRelationalMap $EntityRelationalMap, array $PersistenceDataArray) {
+        
         $DataPropertyColumnMappings = $EntityRelationalMap->GetDataPropertyColumnMappings();
         $EntityPropertyToOneRelationMappings = $EntityRelationalMap->GetEntityPropertyToOneRelationMappings();
         $CollectionPropertyToManyRelationMappings = $EntityRelationalMap->GetCollectionPropertyToManyRelationMappings();
@@ -366,6 +365,16 @@ abstract class DomainDatabaseMap {
             }
             
             $Transaction->Persist($ResultRowData->GetRows());
+        }
+    }
+    
+    private function MapDiscardedIdentitiesToTransaction(Relational\Transaction $Transaction, 
+            IEntityRelationalMap $EntityRelationalMap, array $DiscardedIdentities) {
+        
+        foreach($DiscardedIdentities as $DiscardedIdentity) {
+            $PrimaryKey = $EntityRelationalMap->MapIdentityToPrimaryKey($DiscardedIdentity);
+            
+            $Transaction->Discard($PrimaryKey);
         }
     }
     // </editor-fold>

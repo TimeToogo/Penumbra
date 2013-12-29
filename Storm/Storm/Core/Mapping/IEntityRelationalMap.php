@@ -38,6 +38,11 @@ interface IEntityRelationalMap {
     public function GetDataPropertyColumnMappings();
     
     /**
+     * @return IDataPropertyColumnMapping[]
+     */
+    public function GetIdentityPropertyPrimaryKeyMappings();
+    
+    /**
      * @return IEntityPropertyToOneRelationMapping[]
      */
     public function GetEntityPropertyToOneRelationMappings();

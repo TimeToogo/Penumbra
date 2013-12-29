@@ -124,11 +124,11 @@ abstract class EntityMap implements \IteratorAggregate {
     
     final public function HasIdentity($Entity) {
         foreach($this->Identity($Entity) as $Value) {
-            if($Value !== null) {
-                return true;
+            if($Value === null) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
     
     /**

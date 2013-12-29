@@ -3,7 +3,9 @@
 namespace Storm\Drivers\Base\Relational\Queries;
 
 use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Relational\Table;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
+use \Storm\Drivers\Base\Relational\PrimaryKeys;
 
 abstract class QueryExecutor implements IQueryExecutor {
     
@@ -45,6 +47,7 @@ abstract class QueryExecutor implements IQueryExecutor {
                 }
                 if(isset($GroupedPersistedRows[$TableName])) {
                     $this->PersistRows($Connection, $Table, $GroupedPersistedRows[$TableName]);
+                    $Transaction->TriggerPostPersistEvent($GroupedPersistedRows[$TableName]);
                 }
             }
             
@@ -55,42 +58,49 @@ abstract class QueryExecutor implements IQueryExecutor {
             throw $Exception;
         }
     }
-    protected abstract function DeleteWhereQuery(IConnection $Connection, Relational\Table $Table, array &$DiscardedRequests);
-    protected abstract function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Relational\Table $Table, array &$DiscardedPrimaryKeys);
-    protected abstract function ExecuteUpdates(IConnection $Connection, Relational\Table $Table, array &$ProceduresToExecute);
-    protected abstract function PersistRows(IConnection $Connection, Relational\Table $Table, array &$RowsToPersist);
+    protected abstract function DeleteWhereQuery(IConnection $Connection, Table $Table, array &$DiscardedRequests);
+    protected abstract function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys);
+    protected abstract function ExecuteUpdates(IConnection $Connection, Table $Table, array &$ProceduresToExecute);
+    private function PersistRows(IConnection $Connection, Table $Table, array &$RowsToPersist,
+            PrimaryKeys\ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
+        
+        $HasKeyGenerator = $Table->HasKeyGenerator();
+        $ValueWithReturningDataKeyGenerator = null;
+        if($HasKeyGenerator) {
+            $UnkeyedRows = array_filter($RowsToPersist, 
+                    function (Relational\Row $Row) { return $Row->HasPrimaryKey(); });
+            
+            $KeyGenerator = $Table->GetKeyGenerator();
+            $KeyGeneratorMode = $KeyGenerator->GetKeyGeneratorMode();
+            
+            if($KeyGeneratorMode === PrimaryKeys\KeyGeneratorMode::PreInsert) {
+                /* @var $KeyGenerator PrimaryKeys\PreInsertKeyGenerator */
+                
+                $KeyGenerator->FillPrimaryKeys($Connection, $UnkeyedRows);
+            }
+            else if($KeyGeneratorMode === PrimaryKeys\KeyGeneratorMode::ValueWithReturningData) {
+                /* @var $KeyGenerator PrimaryKeys\ValueWithReturningDataKeyGenerator */
+                
+                $ValueWithReturningDataKeyGenerator = $KeyGenerator;
+            }
+        }
+        
+        $this->SaveRows($Connection, $Table, $RowsToPersist, $ValueWithReturningDataKeyGenerator);
+        
+        if($HasKeyGenerator) {
+            if($KeyGeneratorMode === PrimaryKeys\KeyGeneratorMode::PostInsert) {
+                /* @var $KeyGenerator PrimaryKeys\PostInsertKeyGenerator */
+                
+                $KeyGenerator->FillPrimaryKeys($Connection, $UnkeyedRows);
+            }
+        }
+    }
+    protected abstract function SaveRows(IConnection $Connection, Relational\Table $Table, array &$RowsToPersist,
+            PrimaryKeys\ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null);
     
     
     final protected function AppendProcedure(QueryBuilder $QueryBuilder, Relational\Procedure $Operation) {
         $this->RequestCompiler->AppendProcedure($QueryBuilder, $Operation);
-    }
-    
-    private function GroupRowsByTable(array $Rows) {
-        $GroupedRows = array();
-        foreach($Rows as $Row) {
-            $TableName = $Row->GetTable()->GetName();
-            if(!isset($GroupedRows[$TableName])) {
-                $GroupedRows[$TableName] = array();
-            }
-            
-            $GroupedRows[$TableName][] = $Row;
-        }
-        
-        return $GroupedRows;
-    }
-    
-    private function OrderByTableDependency(array $ObjectsWithTable, array $OrderedTables) {
-        $OrderedObjects = array();
-        foreach($OrderedTables as $Table) {
-            foreach ($ObjectsWithTable as $Key => $ObjectWithTable) {
-                if($ObjectWithTable->GetTable()->Is($Table)) {
-                    $OrderedObjects[$Key] = $ObjectWithTable;
-                    unset($ObjectsWithTable[$Key]);
-                }
-            }
-        }
-        
-        return $OrderedObjects;
     }
     
     private function GroupByTableName(array $ObjectsWithTable) {

@@ -8,6 +8,7 @@ use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Relational\Requests;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
+use \Storm\Drivers\Base\Relational\PrimaryKeys\ValueWithReturningDataKeyGenerator;
 
 class QueryExecutor extends Queries\QueryExecutor {
       
@@ -41,7 +42,11 @@ class QueryExecutor extends Queries\QueryExecutor {
         }
     }
     
-    protected function PersistRows(IConnection $Connection, Relational\Table $Table, array &$RowsToPersist) {
+    protected function SaveRows(IConnection $Connection, Relational\Table $Table, array &$RowsToPersist,
+            ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
+        if($ValueWithReturningDataKeyGenerator !== null) {
+            throw new Exception('Mysql does not support returning data');
+        }
         $this->SaveQuery($Connection, $Table, $RowsToPersist)->Execute();
     }
     
@@ -85,14 +90,19 @@ class QueryExecutor extends Queries\QueryExecutor {
             $QueryBuilder->Append(')');
         }
         
-        $QueryBuilder->Append(' ON DUPLICATE KEY UPDATE ');
         $First = true;
-        foreach($Identifiers as $Identifier) {
-            if($First) $First = false;
-            else
-                $QueryBuilder->Append(', ');
-            
-            $QueryBuilder->AppendIdentifier('# = VALUES(#)', $Identifier);
+        foreach($Table->GetColumns() as $Column) {
+            if(!$Column->IsPrimaryKey()) {
+                if($First) {
+                    $QueryBuilder->Append(' ON DUPLICATE KEY UPDATE ');
+                    $First = false;
+                }
+                else
+                    $QueryBuilder->Append(', ');
+
+                $Identifier = [$TableName, $Column->GetName()];
+                $QueryBuilder->AppendIdentifier('# = VALUES(#)', $Identifier);
+            }
         }
         
         return $QueryBuilder->Build();

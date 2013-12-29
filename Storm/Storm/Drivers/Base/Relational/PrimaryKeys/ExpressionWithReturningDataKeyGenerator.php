@@ -3,16 +3,16 @@
 namespace Storm\Drivers\Base\Relational\PrimaryKeys;
 
 use \Storm\Core\Relational\Expressions\Expression;
+use \Storm\Core\Relational\IColumn;
+use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
-abstract class ExpressionWithReturningDataKeyGenerator implements IKeyGenerator {
+abstract class ValueWithReturningDataKeyGenerator implements IKeyGenerator {
     final public function GetKeyGeneratorMode() {
-        return KeyGeneratorMode::ExpressionWithReturningData;
+        return KeyGeneratorMode::ValueWithReturningData;
     }
     
-    /**
-     * @return Expression
-     */
-    public abstract function GetExpression(array $PrimaryKeyColumns);
+    public abstract function AppendValueToQueryBuilder(QueryBuilder $QueryBuilder, IColumn $PrimaryKey);
+    
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows, array $ReturnedKeyData) {
         if(count($UnkeyedRows) !== count($ReturnedKeyData)) {
             throw new Exception;//TODO:error message

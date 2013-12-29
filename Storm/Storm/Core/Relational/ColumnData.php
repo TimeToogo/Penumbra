@@ -21,18 +21,18 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         return $this->Columns[$Identifier];
     }
     
-    final public function SetColumn(IColumn $Column, &$Data) {
+    final public function SetColumn(IColumn $Column, $Data) {
         $this->AddColumn($Column, $Data);
     }
     
-    protected function AddColumn(IColumn $Column, &$Data) {
+    protected function AddColumn(IColumn $Column, $Data) {
         $ColumnIdentifier = $Column->GetIdentifier();
         if(!isset($this->Columns[$ColumnIdentifier])) {
             throw new \InvalidArgumentException('$Column must be one of: ' . 
                     implode(', ', array_keys($this->Columns)));
         }
         
-        $this->ColumnData[$ColumnIdentifier] =& $Data;
+        $this->ColumnData[$ColumnIdentifier] = $Data;
     }
     
     final public function Hash() {
@@ -47,7 +47,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         return isset($this->ColumnData[$Column->GetIdentifier()]);
     }
     
-    final public function &offsetGet($Column) {
+    final public function offsetGet($Column) {
         $Null = null;
         if(!$this->offsetExists($Column))
             return $Null;
@@ -55,7 +55,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
             return $this->ColumnData[$Column->GetIdentifier()];
     }
 
-    final public function offsetSet($Column, &$Data) {
+    final public function offsetSet($Column, $Data) {
         $this->AddColumn($Column, $Data);
     }
 

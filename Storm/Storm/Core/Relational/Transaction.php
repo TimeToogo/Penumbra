@@ -2,15 +2,19 @@
 
 namespace Storm\Core\Relational;
 
+use Storm\Core\Containers\Map;
+
 final class Transaction {
     private $PersistedRows = array();
     private $PersistedRowGroups = array();
+    private $PostPersistRowEventMap;
     private $Procedures = array();
     private $DiscardedPrimaryKeys = array();
     private $DiscardedPrimaryKeyGroups = array();
     private $DiscardedRequests = array();
     
     public function __construct() {
+        $this->PostPersistRowEventMap = new Map;
     }
     
     /**
@@ -57,6 +61,9 @@ final class Transaction {
     
     public function Persist(Row $Row) {
         $this->PersistedRows[spl_object_hash($Row)] = $Row;
+        if(!isset($this->PostPersistRowEvent[$Row])) {
+            $this->PostPersistRowEvent[$Row] = new \ArrayObject();
+        }
         
         $TableName = $Row->GetTable()->GetName();
         if(!isset($this->PersistedRowGroups[$TableName])) {
@@ -67,6 +74,19 @@ final class Transaction {
     
     public function PersistAll(array $Rows) {
         array_walk($Rows, [$this, 'Persist']);
+    }
+    
+    public function TriggerPostPersistEvent(array $Rows) {
+        foreach($Rows as $Row) {
+            $Events = $this->PostPersistRowEventMap[$Row];
+            foreach($Events as $Event) {
+                $Event($Row);
+            }
+        }
+    }
+    
+    public function SubscribeToPostPersistEvent(Row $Row, callable $Event) {
+        $this->PostPersistRowEvent[$Row][] = $Event;
     }
     
     public function Execute(Procedure $Procedure) {

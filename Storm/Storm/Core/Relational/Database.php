@@ -104,7 +104,7 @@ abstract class Database {
         return $this->GetRows($Request);
     }
     protected abstract function GetRows(Request $Request);
-
+    
     public abstract function Commit(Transaction $Transaction);
     
     /**

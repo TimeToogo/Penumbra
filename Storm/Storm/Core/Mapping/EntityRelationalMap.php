@@ -36,6 +36,10 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      */
     private $DataPropertyColumnMappings = array();
     /**
+     * @var IDataPropertyColumnMapping[]
+     */
+    private $IdentityPropertyPrimaryKeyMappings = array();
+    /**
      * @var IEntityPropertyToOneRelationMapping[]
      */
     private $EntityPropertyToOneRelationMappings = array();
@@ -43,7 +47,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * @var ICollectionPropertyToManyRelationMapping[]
      */
     private $CollectionPropertyToManyRelationMappings = array();
-        
+    
     final public function Initialize(DomainDatabaseMap $DomainDatabaseMap) {
         $this->OnInitialize($DomainDatabaseMap);
         
@@ -80,6 +84,9 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
             $this->DataPropertyColumnMappings[$ProperyIdentifier] = $PropertyMapping;
             $this->MappedReviveColumns = array_merge($this->MappedReviveColumns, $PropertyMapping->GetReviveColumns());
             $this->MappedPersistColumns = array_merge($this->MappedPersistColumns, $PropertyMapping->GetPersistColumns());
+            if($PropertyMapping->IsIdentityPrimaryKeyMapping()) {
+                $this->IdentityPropertyPrimaryKeyMappings[] = $PropertyMapping;
+            }
         }
         else if($PropertyMapping instanceof IEntityPropertyToOneRelationMapping) {
             $this->EntityPropertyToOneRelationMappings[$ProperyIdentifier] = $PropertyMapping;
@@ -112,6 +119,10 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     
     final public function GetDataPropertyColumnMappings() {
         return $this->DataPropertyColumnMappings;
+    }
+    
+    final public function GetIdentityPropertyPrimaryKeyMappings() {
+        return $this->IdentityPropertyPrimaryKeyMappings;
     }
     
     final public function GetEntityPropertyToOneRelationMappings() {
@@ -212,7 +223,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     final public function MapIdentityToPrimaryKey(Object\Identity $Identity) {
         $PrimaryKey = $this->PrimaryKeyTable->PrimaryKey();
         $Map = Map::From([$PrimaryKey], [$Identity]);
-        foreach($this->DataPropertyColumnMappings as $Mapping) {
+        foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
             $Property = $Mapping->GetProperty();
             if(isset($Identity[$Property])) {
                 $Mapping->Persist($Map);
@@ -225,7 +236,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     final public function MapPrimaryKeyToIdentity(Relational\PrimaryKey $PrimaryKey) {
         $Identity = $this->EntityMap->Identity();
         $Map = Map::From([$PrimaryKey], [$Identity]);
-        foreach($this->DataPropertyColumnMappings as $Mapping) {
+        foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
             $Columns = $Mapping->GetReviveColumns();
             foreach($Columns as $Column) {
                 if(!isset($PrimaryKey[$Column])) {

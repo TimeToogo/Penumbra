@@ -6,7 +6,7 @@ use \Storm\Drivers\Base\Relational;
 use \Storm\Drivers\Base\Relational\PrimaryKeys;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 
-class UUIDGenerator extends PrimaryKeys\KeyGenerator {
+class UUIDGenerator extends PrimaryKeys\PreInsertKeyGenerator {
     public function FillAllPrimaryKeys(IConnection $Connection, Relational\Table $Table, 
             array $PrimaryKeys, array $PrimaryKeyColumns) {
         $QueryBuilder = $Connection->QueryBuilder();
