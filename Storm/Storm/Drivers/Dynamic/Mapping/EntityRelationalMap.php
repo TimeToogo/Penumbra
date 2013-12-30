@@ -9,24 +9,24 @@ use \Storm\Core\Relational;
 
 class EntityRelationalMap extends Mapping\EntityRelationalMap {
     private $EntityMap;
-    private $Table;
+    private $PrimaryKeyTable;
     private $PropertyMappings;
     
     public function __construct(
             Object\EntityMap $EntityMap,
+            Relational\Table $PrimaryKeyTable,
             array $PropertyMappings) {
-        $this->EntityType = $EntityMap;
+        $this->EntityMap = $EntityMap;
+        $this->PrimaryKeyTable = $PrimaryKeyTable;
         $this->PropertyMappings = $PropertyMappings;
-        
-        parent::__construct();
     }
 
     protected function EntityMap(Object\Domain $Domain) {
         return $this->EntityMap;
     }
     
-    protected function Table(Relational\Database $Database) {
-        return $this->Table;
+    protected function PrimaryKeyTable(Relational\Database $Database) {
+        return $this->PrimaryKeyTable;
     }
     
     protected function RegisterPropertyMappings(Registrar $Registrar, 

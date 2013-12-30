@@ -3,6 +3,8 @@
 namespace StormTests\One\Domain\Maps;
 
 use \Storm\Drivers\Base\Object;
+use \Storm\Drivers\Base\Object\Properties;
+use \Storm\Drivers\Base\Object\Properties\Accessors;
 use \Storm\Drivers\Constant\Object\EntityMap;
 use \StormTests\One\Entities\Post;
 
@@ -23,15 +25,14 @@ class PostMap extends EntityMap {
     public $Tags;
     
     protected function CreateProperties() {
-        $this->Blog = new Object\Properties\FieldProperty('Blog');
-        $this->BlogId = new Object\Properties\TraversedObjectProperty([$this->Blog], 
-                new Object\Properties\GetterSetter('BlogId', true, new Object\Properties\GetterField('Id')));
+        $this->Blog = new Properties\EntityProperty(new Accessors\Field('Blog'), \StormTests\One\Entities\Blog::GetType());
+        $this->BlogId = new Properties\DataProperty(new Accessors\Traversing([$this->Blog->GetAccessor(), new Accessors\Field('Id')]), true);
         
-        $this->Title = new Object\Properties\FieldProperty('Title', true);
-        $this->Content = new Object\Properties\FieldProperty('Content');
-        $this->CreatedDate = new Object\Properties\FieldProperty('CreatedDate');
+        $this->Title = new Properties\DataProperty(new Accessors\Field('Title'), true);
+        $this->Content = new Properties\DataProperty(new Accessors\Field('Content'));
+        $this->CreatedDate = new Properties\DataProperty(new Accessors\Field('CreatedDate'));
         
-        $this->Tags = new Object\Properties\FieldProperty('Tags');
+        $this->Tags = new Properties\CollectionProperty(new Accessors\Field('Tags'), \StormTests\One\Entities\Tag::GetType());
     }
 
 }

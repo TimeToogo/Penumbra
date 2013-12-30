@@ -95,7 +95,7 @@ abstract class QueryExecutor implements IQueryExecutor {
             }
         }
     }
-    protected abstract function SaveRows(IConnection $Connection, Relational\Table $Table, array &$RowsToPersist,
+    protected abstract function SaveRows(IConnection $Connection, Table $Table, array &$RowsToPersist,
             PrimaryKeys\ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null);
     
     

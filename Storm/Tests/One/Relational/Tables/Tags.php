@@ -28,10 +28,8 @@ class Tags extends Relational\Table {
     public $PrimaryKey;
     
     protected function CreateTableStructure(IColumnSet $Column) {
-        $this->Id = new Column('Id', new Mysql\Columns\DataTypes\HexedBinaryDataType(16));
-        $this->Name = new Column('Name', new DataType('VARCHAR', [50]));
-        
-        $this->PrimaryKey = new Traits\PrimaryKey([$this->Id]);
+        $this->Id = $Column->Guid('Id');
+        $this->Name = $Column->String('Name', 50);
     }
 
     protected function CreateRelationalStructure(Database $Database) {

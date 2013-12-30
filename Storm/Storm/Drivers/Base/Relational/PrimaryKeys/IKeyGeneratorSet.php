@@ -17,7 +17,7 @@ interface IKeyGeneratorSet {
     /**
      * @return IKeyGenerator
      */
-    public function Sequence();
+    public function Sequence($Name);
     
 }
 

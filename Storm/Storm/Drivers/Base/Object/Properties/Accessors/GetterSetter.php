@@ -33,7 +33,7 @@ class GetterSetter extends Accessor {
         return $this->PropertySetter;
     }
     
-    protected function SetEntityType($EntityType) {
+    public function SetEntityType($EntityType) {
         parent::SetEntityType($EntityType);
         $this->PropertyGetter->SetEntityType($EntityType);
         $this->PropertySetter->SetEntityType($EntityType);
@@ -43,7 +43,7 @@ class GetterSetter extends Accessor {
         return $this->PropertyGetter->GetValueFrom($Entity);
     }
 
-    final public function SetValue($Entity, &$Value) {
+    final public function SetValue($Entity, $Value) {
         $this->PropertySetter->SetValueTo($Entity, $Value);
     }
 }

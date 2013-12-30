@@ -24,7 +24,7 @@ abstract class Property implements IProperty {
      * @return Accessors\Accessor
      */
     final public function GetAccessor() {
-        return $this->Identifier;
+        return $this->Accessor;
     }
     
     final public function GetEntityMap() {

@@ -22,7 +22,10 @@ abstract class Table extends Relational\Table {
     
     protected function OnStructureInitialized(Relational\Database $Context) {
         $Registrar = new Containers\Registrar(StructuralTableTrait::GetType());
-        $Registrar->Register(new Traits\PrimaryKey($this->GetPrimaryKeyColumns()));
+        $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
+        if(count($PrimaryKeyColumns) > 0) {
+            $Registrar->Register(new Traits\PrimaryKey($PrimaryKeyColumns));
+        }
         $this->RegisterStructuralTraits($Registrar);
         foreach($Registrar->GetRegistered() as $Trait) {
             $this->AddTrait($Trait);
@@ -54,7 +57,9 @@ abstract class Table extends Relational\Table {
     /**
      * @return IKeyGenerator
      */
-    protected abstract function KeyGenerator(IKeyGeneratorSet $KeyGenerator);
+    protected function KeyGenerator(IKeyGeneratorSet $KeyGenerator) {
+        return null;
+    }
     
     private function AddTrait(TableTrait $Trait) {
         if($Trait instanceof StructuralTableTrait) {

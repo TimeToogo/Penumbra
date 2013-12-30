@@ -9,80 +9,108 @@ use \Storm\Drivers\Base\Relational\Columns\DataType;
 
 class ColumnSet implements IColumnSet {
     
-    public function Guid($Name) {
-        return new Column($Name, new DataTypes\HexedBinaryDataType(16));
+    public function Guid($Name, $PrimaryKey = true) {
+        return new Column($Name, new DataTypes\ReversedDataType(new DataTypes\HexedBinaryDataType(16)), $PrimaryKey);
     }
     
-    public function IncrementInt32($Name) {
-        return new Column($Name, new DataType('INT', [], new Columns\Traits\Increment()));
+    public function IncrementInt32($Name, $PrimaryKey = true) {
+        return new Column($Name, new DataTypes\IntDataType('BIGINT'), $PrimaryKey, [new Columns\Traits\Increment()]);
     }
     
-    public function String($Name, $Length) {
-        return new Column($Name, new DataType('VARCHAR', [$Length]));
+    public function IncrementInt64($Name, $PrimaryKey = true) {
+        return new Column($Name, new DataTypes\IntDataType('INT'), $PrimaryKey, [new Columns\Traits\Increment()]);
     }
     
-    public function Boolean($Name) {
-        return new Column($Name, new DataTypes\BooleanBitDataType());
+    public function String($Name, $Length, $PrimaryKey = false) {
+        if($Length <= 8000) {
+            return new Column($Name, new DataType('VARCHAR', [$Length]), $PrimaryKey);
+        }
+        else if($Length <= 65535) {
+            return new Column($Name, new DataType('TEXT'), $PrimaryKey);
+        }
+        else if($Length <= 16777215) {
+            return new Column($Name, new DataType('MEDIUMTEXT'), $PrimaryKey);
+        }
+        else if($Length <= 4294967295) {
+            return new Column($Name, new DataType('LONGTEXT'), $PrimaryKey);
+        }
+        else {
+            throw new \InvalidArgumentException('Exceeded maxium string length Mysql TEXT datatypes');
+        }
     }
     
-    public function Byte($Name) {
-        return new Column($Name, new DataTypes\IntDataType('TINYINT'));
+    public function Boolean($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\BooleanBitDataType(), $PrimaryKey);
     }
     
-    public function Int16($Name) {
-        return new Column($Name, new DataTypes\IntDataType('SMALLINT'));
+    public function Byte($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\IntDataType('TINYINT'), $PrimaryKey);
     }
     
-    public function Int32($Name) {
-        return new Column($Name, new DataTypes\IntDataType('INT'));
+    public function Int16($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\IntDataType('SMALLINT'), $PrimaryKey);
     }
     
-    public function Int64($Name) {
-        return new Column($Name, new DataTypes\BigIntDataType(true));
+    public function Int32($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\IntDataType('INT'), $PrimaryKey);
     }
     
-    public function UByte($Name) {
-        return new Column($Name, new DataTypes\IntDataType('TINYINT', true));
+    public function Int64($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\BigIntDataType(true), $PrimaryKey);
     }
     
-    public function UInt16($Name) {
-        return new Column($Name, new DataTypes\IntDataType('SMALLINT', true));
+    public function UnsignedByte($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\IntDataType('TINYINT', true), $PrimaryKey);
     }
     
-    public function UInt32($Name) {
-        return new Column($Name, new DataTypes\IntDataType('INT', true));
+    public function UnsignedInt16($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\IntDataType('SMALLINT', true), $PrimaryKey);
     }
     
-    public function UInt64($Name) {
-        return new Column($Name, new DataTypes\BigIntDataType(true));
+    public function UnsignedInt32($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\IntDataType('INT', true), $PrimaryKey);
     }
     
-    public function Double($Name) {
-        return new Column($Name, new DataTypes\DoubleDataType());
+    public function UnsignedInt64($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\BigIntDataType(true), $PrimaryKey);
     }
     
-    public function Decimal($Name, $Length, $Precision) {
-        return new Column($Name, new DataTypes\DecimalDataType($Name, $Length, $Precision));
+    public function Double($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\DoubleDataType(), $PrimaryKey);
     }
     
-    public function Date($Name) {
-        return new Column($Name, new DataTypes\DateDataType());
+    public function Decimal($Name, $Length, $Precision, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\DecimalDataType($Name, $Length, $Precision), $PrimaryKey);
     }
     
-    public function DateTime($Name) { 
-        return new Column($Name, new DataTypes\DateTimeDataType());
+    public function Date($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\DateDataType(), $PrimaryKey);
     }
     
-    public function Time($Name) {
-        return new Column($Name, new DataTypes\TimeDataType());
+    public function DateTime($Name, $PrimaryKey = false) { 
+        return new Column($Name, new DataTypes\DateTimeDataType(), $PrimaryKey);
     }
     
-    public function Binary($Name, $Length) {
-        return new Column($Name, new DataType('BINARY', [$Length]));
+    public function Time($Name, $PrimaryKey = false) {
+        return new Column($Name, new DataTypes\TimeDataType(), $PrimaryKey);
     }
     
-    public function Blob($Name) {
-        return new Column($Name, new DataType('BLOB'));
+    public function Binary($Name, $Length, $PrimaryKey = false) {
+        if($Length <= 8000) {
+            return new Column($Name, new DataType('VARBINARY', [$Length]), $PrimaryKey);
+        }
+        else if($Length <= 65535) {
+            return new Column($Name, new DataType('BLOB'), $PrimaryKey);
+        }
+        else if($Length <= 16777215) {
+            return new Column($Name, new DataType('MEDIUMBLOB'), $PrimaryKey);
+        }
+        else if($Length <= 4294967295) {
+            return new Column($Name, new DataType('LONGBLOB'), $PrimaryKey);
+        }
+        else {
+            throw new \InvalidArgumentException('Exceeded maxium binary length Mysql BLOB datatypes');
+        }
     }
 }
 

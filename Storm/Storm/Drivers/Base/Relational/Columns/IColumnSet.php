@@ -7,97 +7,97 @@ interface IColumnSet {
     /**
      * @return Column
      */
-    public function Guid($Name);
+    public function Guid($Name, $PrimaryKey = true);
     
     /**
      * @return Column
      */
-    public function IncrementInt32($Name);
+    public function IncrementInt32($Name, $PrimaryKey = true);
     
     /**
      * @return Column
      */
-    public function String($Name, $Length);
+    public function IncrementInt64($Name, $PrimaryKey = true);
     
     /**
      * @return Column
      */
-    public function Boolean($Name);
+    public function String($Name, $Length, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function Byte($Name);
+    public function Boolean($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function Int16($Name);
+    public function Byte($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function Int32($Name);
+    public function Int16($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function Int64($Name);
+    public function Int32($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function UByte($Name);
+    public function Int64($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function UInt16($Name);
+    public function UnsignedByte($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function UInt32($Name);
+    public function UnsignedInt16($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function UInt64($Name);
+    public function UnsignedInt32($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function Double($Name);
+    public function UnsignedInt64($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function Decimal($Name, $Length, $Precision);
+    public function Double($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function Date($Name);
+    public function Decimal($Name, $Length, $Precision, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function DateTime($Name);
+    public function Date($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function Time($Name);
+    public function DateTime($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function Binary($Name, $Length);
+    public function Time($Name, $PrimaryKey = false);
     
     /**
      * @return Column
      */
-    public function Blob($Name);
+    public function Binary($Name, $Length, $PrimaryKey = false);
 }
 
 ?>

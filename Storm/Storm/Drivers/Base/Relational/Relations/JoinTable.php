@@ -84,7 +84,7 @@ abstract class JoinTable extends Base\Relational\Table {
     }
     
     private function MakeForeignKey(Relational\Table $Table, Map $ReferencedColumnMap) {
-        return new ForeignKey($this->GetName() . '_' . $Table->GetName(), $Table, $ReferencedColumnMap,
+        return new ForeignKey($this->GetName() . '_' . $Table->GetName(), $ReferencedColumnMap,
                 ForeignKeyMode::Cascade, ForeignKeyMode::Cascade);
     }
     
@@ -114,7 +114,7 @@ abstract class JoinTable extends Base\Relational\Table {
     }
     
     protected function RegisterStructuralTraits(Registrar $Registrar) {
-        $Registrar->Register(new Base\Relational\Traits\PrimaryKey($this->GetColumns()));
+        
     }
     
     protected function RegisterRelationalTraits(Registrar $Registrar, Relational\Database $Context) {

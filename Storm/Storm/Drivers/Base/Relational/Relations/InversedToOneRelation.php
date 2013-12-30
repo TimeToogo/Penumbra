@@ -7,10 +7,18 @@ use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
 class InversedToOneRelation extends ToOneRelationBase {    
+    public function __construct(ForeignKey $ForeignKey, Relational\Table $RelatedTable) {
+        parent::__construct($ForeignKey, $RelatedTable, 
+                Relational\DependencyOrder::Before, Relational\DependencyOrder::After);
+    }
     protected function FillParentToRelatedRowMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
         $KeyedParentRows = $this->HashRowsByColumns($ParentRows, $ForeignKey->GetReferencedColumns());
         $KeyedRelatedRows = $this->HashRowsByColumns($RelatedRows, $ForeignKey->GetParentColumns());
         $this->MapKeyIntersection($Map, $KeyedParentRows, $KeyedRelatedRows);
+    }
+    
+    protected function GetParentTables(ForeignKey $ForeignKey) {
+        
     }
 
     protected function MapParentRowToRelatedKey(ForeignKey $ForeignKey, Relational\ResultRow $ParentRow) {

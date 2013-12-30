@@ -18,7 +18,7 @@ class LazyCollectionPropertyToManyRelationMapping extends CollectionPropertyToMa
         $RelatedEntityRevivalDataArrayLoader = function ($ParentRow) use (&$DomainDatabaseMap, &$ToManyRelation, &$ParentRowRevivalDataMap) {
             static $ParentRelatedRevivalDataArraysMap;
             if($ParentRelatedRevivalDataArraysMap === null) {
-                $ParentRows = $ResultRowRevivalDataMap->GetInstances();
+                $ParentRows = $ParentRowRevivalDataMap->GetInstances();
                 $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ParentRows);
                 
                 $ParentRelatedRevivalDataArraysMap = $this->MapToParentRowRelatedRevivalDataArrayMap($DomainDatabaseMap, $ResultRowRevivalDataMap, $RelatedRows);

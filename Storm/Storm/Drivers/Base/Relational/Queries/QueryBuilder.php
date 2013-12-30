@@ -187,7 +187,10 @@ class QueryBuilder {
     // <editor-fold defaultstate="collapsed" desc="Bound Value Appenders">
     final public function AppendReference($QueryStringFormat, &$Value, $ParameterType = null, $ValuePlaceholder = self::DefaultPlaceholder) {
         $this->ParameterType($ParameterType, $Value);
-        $this->Bindings->Bind($Value, $ParameterType);
+        $PlaceholderCount = substr_count($QueryStringFormat, $ValuePlaceholder);
+        for($Count = 0; $Count < $PlaceholderCount; $Count++) {
+            $this->Bindings->Bind($Value, $ParameterType);
+        }
 
 
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $this->ParameterPlaceholder);
@@ -196,15 +199,16 @@ class QueryBuilder {
 
     final public function AppendValue($QueryStringFormat, $Value, $ParameterType = null, $ValuePlaceholder = self::DefaultPlaceholder) {
         $this->ParameterType($ParameterType, $Value);
-        $this->Bindings->Bind($Value, $ParameterType);
-
-
+        $PlaceholderCount = substr_count($QueryStringFormat, $ValuePlaceholder);
+        for($Count = 0; $Count < $PlaceholderCount; $Count++) {
+            $this->Bindings->Bind($Value, $ParameterType);
+        }
+        
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $this->ParameterPlaceholder);
     }
 
 
     final public function AppendAll($QueryStringFormat, array $Values, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
-
         foreach ($Values as $Value) {
             $this->Bindings->Bind($Value, $this->DefaultParameterType($Value));
         }

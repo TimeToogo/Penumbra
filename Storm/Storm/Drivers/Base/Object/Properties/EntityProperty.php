@@ -4,7 +4,7 @@ namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
 
-class EnitityProperty extends RelationshipProperty implements Object\IEntityProperty {
+class EntityProperty extends RelationshipProperty implements Object\IEntityProperty {
     private $IsOptional;
     private $ProxyGenerator;
     public function __construct(
@@ -22,7 +22,7 @@ class EnitityProperty extends RelationshipProperty implements Object\IEntityProp
         return $this->IsOptional;
     }
         
-    protected function ReviveNull(Domain $Domain, $Entity) {
+    protected function RevivreNull(Object\Domain $Domain, $Entity) {
         if($this->IsOptional) {
             return null;
         }
@@ -31,7 +31,7 @@ class EnitityProperty extends RelationshipProperty implements Object\IEntityProp
         }
     }
     
-    protected function ReviveRevivalData(Domain $Domain, $Entity, RevivalData $RevivalData) {
+    protected function ReviveRevivalData(Object\Domain $Domain, $Entity, RevivalData $RevivalData) {
         if ($this->ProxyGenerator !== null) {
             $LoadFunction = static function () use (&$RevivalData) {
                 return $RevivalData;
@@ -44,7 +44,7 @@ class EnitityProperty extends RelationshipProperty implements Object\IEntityProp
         }
     }
     
-    protected function ReviveCallable(Domain $Domain, $Entity, callable $Callback) {
+    protected function ReviveCallable(Object\Domain $Domain, $Entity, callable $Callback) {
         if ($this->ProxyGenerator !== null) {
             return $this->ProxyGenerator->GenerateProxy($Domain, $this->GetEntityType(), $Callback);
         }

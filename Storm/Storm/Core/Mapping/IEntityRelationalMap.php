@@ -24,8 +24,8 @@ interface IEntityRelationalMap {
     public function Initialize(DomainDatabaseMap $DomainDatabaseMap);
     
     public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ResultRowRevivalDataMap);
-    public function Persist(Relational\Transaction $Transaction, array $PersistenceData);
-    public function Discard(Relational\Transaction $Transaction, array $Identities);
+    public function Persist(DomainDatabaseMap $DomainDatabaseMap, Relational\Transaction $Transaction, array $PersistenceDataArray);
+    public function Discard(Relational\Transaction $Transaction, Map $PersistenceDataColumnDataMap);
     
     /**
      * @return IPropertyMapping[]

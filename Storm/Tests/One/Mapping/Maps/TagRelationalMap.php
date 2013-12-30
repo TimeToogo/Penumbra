@@ -8,12 +8,13 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 final class TagRelationalMap extends Mapping\EntityRelationalMap {
-    public function __construct() {
-        parent::__construct();
-    }
     
     protected function EntityMap(Object\Domain $Domain) {
         return $Domain->GetEntityMap(Tag::GetType());
+    }
+    
+    protected function PrimaryKeyTable(Relational\Database $Database) {
+        return $Database->GetTable('Tags');
     }
     
     protected function InitializeMappings(Object\EntityMap $EntityMap, Relational\Database $Database) {

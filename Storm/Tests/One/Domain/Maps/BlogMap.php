@@ -3,6 +3,8 @@
 namespace StormTests\One\Domain\Maps;
 
 use \Storm\Drivers\Base\Object;
+use \Storm\Drivers\Base\Object\Properties;
+use \Storm\Drivers\Base\Object\Properties\Accessors;
 use \Storm\Drivers\Constant\Object\EntityMap;
 use \StormTests\One\Entities\Blog;
 
@@ -22,11 +24,11 @@ class BlogMap extends EntityMap {
     public $Posts;
     
     protected function CreateProperties() {
-        $this->Id = new Object\Properties\FieldProperty('Id', true);
-        $this->Name = new Object\Properties\FieldProperty('Name');
-        $this->Description = new Object\Properties\FieldProperty('Description');
-        $this->CreatedDate = new Object\Properties\FieldProperty('CreatedDate');
-        $this->Posts = new Object\Properties\FieldProperty('Posts');
+        $this->Id = new Properties\DataProperty(new Accessors\Field('Id'), true);
+        $this->Name = new Properties\DataProperty(new Accessors\Field('Name'));
+        $this->Description = new Properties\DataProperty(new Accessors\Field('Description'));
+        $this->CreatedDate = new Properties\DataProperty(new Accessors\Field('CreatedDate'));
+        $this->Posts = new Properties\CollectionProperty(new Accessors\Field('Posts'), \StormTests\One\Entities\Post::GetType(), true);
     }
 
 }

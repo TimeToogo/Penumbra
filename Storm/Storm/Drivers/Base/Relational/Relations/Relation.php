@@ -27,7 +27,7 @@ abstract class Relation implements Relational\IRelation {
     final public function AddRelationToRequest(Relational\Request $Request, array $ParentRows = null) {
         $Request->AddTable($this->Table);
         $this->AddConstraintToRequest($Request);
-        if($ParentRows !== null) {
+        if($ParentRows !== null && count($ParentRows) > 0) {
             $this->AddParentPredicateToRequest($Request, $ParentRows);
         }
     }
@@ -48,10 +48,8 @@ abstract class Relation implements Relational\IRelation {
     
     final public function RelationRequest(array $ParentRows = null) {
         $Request = $this->NewRelationRequest();
-        $this->AddRelationToRequest($Request);
-        if($ParentRows !== null) {
-            $this->AddParentPredicateToRequest($Request, $ParentRows);
-        }
+        $this->AddRelationToRequest($Request, $ParentRows);
+        
         return $Request;
     }
     /**

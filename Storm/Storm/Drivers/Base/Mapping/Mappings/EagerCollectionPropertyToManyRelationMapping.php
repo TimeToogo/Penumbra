@@ -7,7 +7,7 @@ use \Storm\Core\Mapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
-final class CollectionPropertyToManyRelationMapping extends Mappings\CollectionPropertyToManyRelationMapping {
+final class EagerCollectionPropertyToManyRelationMapping extends Mappings\CollectionPropertyToManyRelationMapping {
     public function __construct(
             Object\ICollectionProperty $CollectionProperty, 
             Relational\IToManyRelation $ToManyRelation) {

@@ -8,12 +8,13 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 final class BlogRelationalMap extends Mapping\EntityRelationalMap {
-    public function __construct() {
-        parent::__construct();
-    }
     
     protected function EntityMap(Object\Domain $Domain) {
         return $Domain->GetEntityMap(Blog::GetType());
+    }
+    
+    protected function PrimaryKeyTable(Relational\Database $Database) {
+        return $Database->GetTable('Blogs');
     }
     
     protected function InitializeMappings(Object\EntityMap $EntityMap, Relational\Database $Database) {
@@ -26,7 +27,7 @@ final class BlogRelationalMap extends Mapping\EntityRelationalMap {
         $this->Map($EntityMap->Description)->ToColumn($Table->Description);
         $this->Map($EntityMap->CreatedDate)->ToColumn($Table->CreatedDate);
         
-        $this->Map($EntityMap->Posts)->ToCollection(\StormTests\One\Entities\Post::GetType(), $Table->Posts);
+        $this->Map($EntityMap->Posts)->ToCollection($Table->Posts);
     }
 }
 

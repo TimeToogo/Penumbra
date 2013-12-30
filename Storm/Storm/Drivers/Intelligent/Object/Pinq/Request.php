@@ -14,8 +14,8 @@ class Request extends Requests\Request {
         $this->EntityMap = $EntityMap;
     }
     
-    public function Where(\Closure $Predicate) {
-        $this->AddPredicate(new Predicate($this->EntityMap, $Predicate));
+    public function Where(\Closure $ClosurePredicate) {
+        $this->AddPredicate(new Predicate($this->EntityMap, $ClosurePredicate));
         
         return $this;
     }

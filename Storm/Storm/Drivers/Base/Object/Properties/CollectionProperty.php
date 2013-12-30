@@ -4,7 +4,7 @@ namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
 
-class CollectionProperty extends RelationshipProperty implements Object\IEntityProperty {
+class CollectionProperty extends RelationshipProperty implements Object\ICollectionProperty {
     private $ProxyGenerator;
     
     public function __construct(
@@ -28,7 +28,7 @@ class CollectionProperty extends RelationshipProperty implements Object\IEntityP
         }
     }
     
-    protected function ReviveCallable(Object\Domain $Domain, $Entity, $Callback) {
+    protected function ReviveCallable(Object\Domain $Domain, $Entity, callable $Callback) {
         return new Collections\LazyCollection($Domain, $this->GetEntityType(), $Callback);
     }
     

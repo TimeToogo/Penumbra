@@ -29,19 +29,17 @@ class Blogs extends Relational\Table {
     public $PrimaryKey;
     
     protected function CreateTableStructure(IColumnSet $Column) {
-        $this->Id = new Column('Id', new Mysql\Columns\DataTypes\HexedBinaryDataType(16));
-        $this->Name = new Column('Name', new DataType('VARCHAR', [50]));
-        $this->Description = new Column('Description', new DataType('VARCHAR', [200]));
-        $this->CreatedDate = new Column('CreatedDate', new Mysql\Columns\DataTypes\DateTimeDataType());
-        
-        $this->PrimaryKey = new Traits\PrimaryKey([$this->Id]);
+        $this->Id = $Column->Guid('Id');
+        $this->Name = $Column->String('Name', 50);
+        $this->Description = $Column->String('Description', 200);
+        $this->CreatedDate = $Column->DateTime('CreatedDate');
     }
     
     public $Posts;
 
     protected function CreateRelations(Database $Database) {
         $PostTable = $Database->Posts;
-        $this->Posts = new Relations\ToManyRelation($PostTable, $PostTable->BlogForeignKey);
+        $this->Posts = new Relations\ToManyRelation($PostTable->BlogForeignKey, $PostTable);
     }
 
     protected function CreateRelationalStructure(Database $Database) {

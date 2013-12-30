@@ -46,6 +46,7 @@ abstract class CollectionPropertyToManyRelationMapping extends PropertyMapping i
     
     final protected function LoadRelatedRows(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows) {
         $RelatedRowRequest = $this->ToManyRelation->RelationRequest($ParentRows);
+        $DomainDatabaseMap->MapEntityToRelationalRequest($this->EntityType, $RelatedRowRequest);
         return $DomainDatabaseMap->GetDatabase()->Load($RelatedRowRequest);
     }
     

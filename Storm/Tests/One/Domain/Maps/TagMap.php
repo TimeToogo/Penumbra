@@ -3,6 +3,8 @@
 namespace StormTests\One\Domain\Maps;
 
 use \Storm\Drivers\Base\Object;
+use \Storm\Drivers\Base\Object\Properties;
+use \Storm\Drivers\Base\Object\Properties\Accessors;
 use \Storm\Drivers\Constant\Object\EntityMap;
 use \StormTests\One\Entities\Tag;
 
@@ -19,8 +21,8 @@ class TagMap extends EntityMap {
     public $Name;
     
     protected function CreateProperties() {
-        $this->Id = new Object\Properties\FieldProperty('Id', true);
-        $this->Name = new Object\Properties\FieldProperty('Name');
+        $this->Id = new Properties\DataProperty(new Accessors\Field('Id'), true);
+        $this->Name = new Properties\DataProperty(new Accessors\Field('Name'));
     }
 
 }

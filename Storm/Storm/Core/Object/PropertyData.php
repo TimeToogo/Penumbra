@@ -29,8 +29,9 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     }
     
     final public function SetProperty(IProperty $Property, $Data) {
-        if(!$this->EntityMap->HasProperty($Property))
+        if(!$this->EntityMap->HasProperty($Property->GetIdentifier())) {
             throw new \InvalidArgumentException('$PropertyOrPropertyName must be a valid property of EntityMap ' . get_class($this->EntityMap));
+        }
         
         $this->AddProperty($Property, $Data);
     }
@@ -43,19 +44,19 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
         return new \ArrayIterator($this->PropertyData);
     }
 
-    final public function offsetExists(IProperty $Property) {
+    final public function offsetExists($Property) {
         return isset($this->PropertyData[$Property->GetIdentifier()]);
     }
     
-    final public function offsetGet(IProperty $Property) {
+    final public function offsetGet($Property) {
         return $this->PropertyData[$Property->GetIdentifier()];
     }
 
-    final public function offsetSet(IProperty $Property, $Data) {
+    final public function offsetSet($Property, $Data) {
         $this->SetProperty($Property, $Data);
     }
 
-    final public function offsetUnset(IProperty $Property) {
+    final public function offsetUnset($Property) {
         unset($this->PropertyData[$Property->GetIdentifier()]);
     }
     public function GetProperty($Identifier) {

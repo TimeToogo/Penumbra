@@ -13,6 +13,10 @@ final class NullKeyGeneratorSet implements Relational\PrimaryKeys\IKeyGeneratorS
         
     }
 
+    public function Sequence($Name) {
+        
+    }
+
 }
 
 ?>

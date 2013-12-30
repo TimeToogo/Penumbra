@@ -11,17 +11,14 @@ use \Storm\Drivers\Base\Relational\Columns\DataType;
 use \Storm\Drivers\Platforms\Mysql;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 
-class AutoIncrementGeneratorTable extends Relational\Table {
+class SequenceTable extends Relational\Table {
     private $Name;
     
-    private $TableNameColumn;
-    private $IncrementColumn;
+    public $SequenceNameColumn;
+    public $IncrementColumn;
     
     public function __construct($Name) {
         $this->Name = $Name;
-        
-        $this->TableNameColumn = new Column('Table', new DataType('VARCHAR', [64]));
-        $this->IncrementColumn = new Column('Increment', new DataType('INT', [11]), [new Columns\Traits\Increment()]);
         
         parent::__construct();
     }
@@ -34,15 +31,15 @@ class AutoIncrementGeneratorTable extends Relational\Table {
         return $this->Name;
     }
     protected function RegisterColumnStructure(Registrar $Registrar, Columns\IColumnSet $Column) {
-        $Registrar->Register($this->TableNameColumn);
+        $this->SequenceNameColumn = $Column->String('Sequence', 64, true);
+        $this->IncrementColumn = $Column->IncrementInt64('Increment', true);
+        
+        $Registrar->Register($this->SequenceNameColumn);
         $Registrar->Register($this->IncrementColumn);
     }
     
     protected function RegisterStructuralTraits(Registrar $Registrar) {
         $Registrar->Register(new Mysql\Tables\Engine('MYISAM'));
-        
-        $Registrar->Register(new Relational\Traits\PrimaryKey
-                ([$this->TableNameColumn, $this->IncrementColumn]));
     }
     
     protected function RegisterRelationalTraits(Registrar $Registrar, Database $Context) { }

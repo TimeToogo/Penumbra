@@ -41,6 +41,10 @@ class Request {
         $this->Tables[$Table->GetName()] = $Table;
     }
     
+    final public function AddTables(array $Tables) {
+        array_walk($Tables, [$this, 'AddTable']);
+    }
+    
     /**
      * @return IColumn[]
      */
@@ -51,8 +55,9 @@ class Request {
     
     final public function IsConstrained() {
         foreach($this->Predicates as $Predicate) {
-            if(!$Predicate->IsEmpty())
+            if(!$Predicate->IsEmpty()) {
                 return true;
+            }
         }
         
         return false;
@@ -69,7 +74,7 @@ class Request {
      * @return Constraints\Predicate[]
      */
     final public function GetPredicates() {
-        return $this->Predicates;
+        return array_filter($this->Predicates, function ($Predicate) { return !$Predicate->IsEmpty(); });
     }
     final public function AddPredicate(Constraints\Predicate $Predicate) {
         $this->Predicates[] = $Predicate;

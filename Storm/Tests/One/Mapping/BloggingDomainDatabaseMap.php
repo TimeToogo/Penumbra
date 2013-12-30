@@ -16,10 +16,7 @@ class BloggingDomainDatabaseMap extends Mapping\DomainDatabaseMap {
     
     protected function MappingConfiguration() {
         return new MappingConfiguration(
-                Mapping\LoadingMode::Lazy, 
-                new \Storm\Drivers\Base\Mapping\Proxy\DevelopmentProxyGenerator
-                        (__NAMESPACE__ . '\\' . 'Proxies', 
-                        str_replace('\\', DIRECTORY_SEPARATOR, __DIR__) . DIRECTORY_SEPARATOR . 'Proxies'));
+                Mapping\LoadingMode::Lazy);
     }
     
     public $BlogRelationalMap;

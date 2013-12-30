@@ -16,12 +16,13 @@ class AutoIncrementGenerator extends PrimaryKeys\PostInsertKeyGenerator {
             throw new Exception('Column must be an AUTO_INCREMENT column');
         }
     }
+    
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
-        $IncrementColumn = $this->GetPrimaryKeyColumns()[0];
+        $PrimaryKeyColumn = reset($this->GetPrimaryKeyColumns());
         $FirstInsertId = $Connection->FetchValue('SELECT LAST_INSERT_ID()');
         $IncrementId = $FirstInsertId;
         foreach ($UnkeyedRows as $Row) {
-            $Row[$IncrementColumn] = $IncrementId;
+            $IncrementColumn->Store($Row, $IncrementId);
             $IncrementId++;
         }
     }

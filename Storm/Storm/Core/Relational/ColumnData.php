@@ -6,11 +6,11 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     private $Columns = array();
     private $ColumnData;
     
-    protected function __construct(array $Columns, array &$ColumnData) {
+    protected function __construct(array $Columns, array $ColumnData) {
         foreach ($Columns as $Column) {
             $this->Columns[$Column->GetIdentifier()] = $Column;
         }
-        $this->ColumnData =& $ColumnData;
+        $this->ColumnData = $ColumnData;
     }
     
     final public function GetColumnData() {
@@ -36,7 +36,8 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
     
     final public function Hash() {
-        return md5(json_encode(asort($this->ColumnData)));
+        asort($this->ColumnData);
+        return md5(json_encode($this->ColumnData));
     }
     
     final public function getIterator() {

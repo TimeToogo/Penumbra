@@ -3,6 +3,7 @@
 namespace Storm\Drivers\Platforms\Mysql\Queries;
 
 use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Relational\Table;
 use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
@@ -23,26 +24,27 @@ class QueryExecutor extends Queries\QueryExecutor {
             $QueryBuilder->AppendExpression(Expression::ReviveColumn($Column));
             $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetIdentifier()]);
         }
+        var_dump(array_keys($Request->GetTables()));
         $QueryBuilder->AppendIdentifiers('FROM # ', array_keys($Request->GetTables()), ', ');
     }
 
-    protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Relational\Table $Table, array &$DiscardedPrimaryKeys) {
+    protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys) {
         $this->DeleteQuery($Connection, new Requests\PrimaryKeyRequest($DiscardedPrimaryKeys))->Execute();
     }
 
-    protected function DeleteWhereQuery(IConnection $Connection, Relational\Table $Table, array &$DiscardedRequests) {
+    protected function DeleteWhereQuery(IConnection $Connection, Table $Table, array &$DiscardedRequests) {
         foreach($DiscardedRequests as $Request) {
             $this->DeleteQuery($Connection, $Request)->Execute();
         }
     }
 
-    protected function ExecuteUpdates(IConnection $Connection, Relational\Table $Table, array &$ProceduresToExecute) {
+    protected function ExecuteUpdates(IConnection $Connection, Table $Table, array &$ProceduresToExecute) {
         foreach($ProceduresToExecute as $Procedure) {
             $this->UpdateQuery($Connection, $Procedure)->Execute();
         }
     }
     
-    protected function SaveRows(IConnection $Connection, Relational\Table $Table, array &$RowsToPersist,
+    protected function SaveRows(IConnection $Connection, Table $Table, array &$RowsToPersist,
             ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
         if($ValueWithReturningDataKeyGenerator !== null) {
             throw new Exception('Mysql does not support returning data');
@@ -50,7 +52,7 @@ class QueryExecutor extends Queries\QueryExecutor {
         $this->SaveQuery($Connection, $Table, $RowsToPersist)->Execute();
     }
     
-    protected function SaveQuery(IConnection $Connection, Relational\Table $Table, array $Rows) {
+    protected function SaveQuery(IConnection $Connection, Table $Table, array $Rows) {
         if(count($Rows) === 0)
             return;
         

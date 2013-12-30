@@ -5,9 +5,9 @@ namespace Storm\Drivers\Platforms\Mysql\PrimaryKeys;
 use \Storm\Drivers\Base\Relational\PrimaryKeys;
 
 class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
-    private $KeyGeneratorTable;
-    function __construct(AutoIncrementGeneratorTable $KeyGeneratorTable = null) {
-        $this->KeyGeneratorTable = $KeyGeneratorTable;
+    private $SequenceTable;
+    function __construct(SequenceTable $SequenceTable = null) {
+        $this->SequenceTable = $SequenceTable;
     }
 
     
@@ -16,11 +16,17 @@ class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
     }
 
     public function Increment() {
-        if($this->KeyGeneratorTable === null)
-            throw new \BadMethodCallException('$KeyGeneratorTable was not supplied');
-        
-        return $this->KeyGeneratorTable;
+        return new AutoIncrementGenerator();
     }
+
+    public function Sequence($Name) {
+        if($this->SequenceTable === null) {
+            throw new \BadMethodCallException('$KeyGeneratorTable was not supplied');
+        }
+        
+        return new SequenceGenerator($Name, $this->SequenceTable);
+    }
+
 }
 
 ?>

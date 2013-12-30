@@ -65,7 +65,6 @@ abstract class DomainDatabaseMap {
     }
     
     /**
-     * @param string $EntityType
      * @return IEntityRelationalMap
      */
     final public function GetRelationMap($EntityType) {
@@ -159,14 +158,18 @@ abstract class DomainDatabaseMap {
             $Properties = $EntityRelationalMap->GetEntityMap()->GetProperties();
         }
         
-        $PropertyColumnMappings = $EntityRelationalMap->GetPropertyColumnMappings();
-        $PropertyRelationMappings = $EntityRelationalMap->GetProperyRelationMappings();
+        $DataPropertyColumnMappings = $EntityRelationalMap->GetDataPropertyColumnMappings();
+        $EntityPropertyToOneRelationMappings = $EntityRelationalMap->GetEntityPropertyToOneRelationMappings();
+        $CollectionPropertyToManyRelationMappings = $EntityRelationalMap->GetCollectionPropertyToManyRelationMappings();
         foreach($Properties as $PropertyIdentifier => $Property) {
-            if(isset($PropertyColumnMappings[$PropertyIdentifier])) {
-                $RelationalRequest->AddColumns($PropertyColumnMappings->GetReviveColumns());
+            if(isset($DataPropertyColumnMappings[$PropertyIdentifier])) {
+                $RelationalRequest->AddColumns($DataPropertyColumnMappings[$PropertyIdentifier]->GetReviveColumns());
             }
-            else if(isset($PropertyRelationMappings[$PropertyIdentifier])) {
-                $PropertyRelationMappings[$PropertyIdentifier]->AddToRelationalRequest($this, $RelationalRequest);
+            else if(isset($EntityPropertyToOneRelationMappings[$PropertyIdentifier])) {
+                $EntityPropertyToOneRelationMappings[$PropertyIdentifier]->AddToRelationalRequest($this, $RelationalRequest);
+            }
+            else if(isset($CollectionPropertyToManyRelationMappings[$PropertyIdentifier])) {
+                $CollectionPropertyToManyRelationMappings[$PropertyIdentifier]->AddToRelationalRequest($this, $RelationalRequest);
             }
             else {
                 throw new \Storm\Core\Exceptions\UnmappedPropertyException();
@@ -251,18 +254,15 @@ abstract class DomainDatabaseMap {
     // <editor-fold defaultstate="collapsed" desc="Entity Revival Helpers">
     /**
      * @internal
-     * @param Relational\Row[] $ResultRows
      * @return object[]
      */
     final public function ReviveEntities($EntityType, array $ResultRows) {
-        $EntityRelationalMap = $this->VerifyRelationalMap($EntityType);
         $RevivalDataArray = $this->MapRowsToRevivalData($EntityType, $ResultRows);
-        return $EntityRelationalMap->GetEntityMap()->ReviveEntities($RevivalDataArray);
+        return $this->Domain->ReviveEntities($EntityType, $RevivalDataArray);
     }
     
     /**
      * @internal
-     * @param Relational\Row[] $ResultRows
      * @return Object\RevivalData[]
      */
     final public function MapRowsToRevivalData($EntityType, array $ResultRows) {
@@ -277,8 +277,8 @@ abstract class DomainDatabaseMap {
         $EntityMap = $EntityRelationalMap->GetEntityMap();
         foreach ($ResultRows as $Key => $ResultRow) {
             $RevivalData = $EntityMap->RevivalData();
-            $ResultRowRevivalDataMap[$ResultRow] =& $RevivalData;
-            $RevivalDataArray[$Key] =& $RevivalData;
+            $ResultRowRevivalDataMap[$ResultRow] = $RevivalData;
+            $RevivalDataArray[$Key] = $RevivalData;
         }
         
         $EntityRelationalMap->Revive($this, $ResultRowRevivalDataMap);

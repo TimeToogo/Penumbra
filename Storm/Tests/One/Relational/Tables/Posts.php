@@ -30,18 +30,16 @@ class Posts extends Relational\Table {
     public $PrimaryKey;
     
     protected function CreateTableStructure(IColumnSet $Column) {
-        $this->BlogId = new Column('BlogId', new Mysql\Columns\DataTypes\HexedBinaryDataType(16));
-        $this->Title = new Column('Title', new DataType('VARCHAR', [50]));
-        $this->Content = new Column('Content', new DataType('VARCHAR', [2000]));
-        $this->CreatedDate = new Column('CreatedDate', new Mysql\Columns\DataTypes\DateTimeDataType());
-        
-        $this->PrimaryKey = new Traits\PrimaryKey([$this->BlogId, $this->Title]);
+        $this->BlogId = $Column->Guid('BlogId');
+        $this->Title = $Column->String('Title', 50, true);
+        $this->Content = $Column->String('Content', 2000);
+        $this->CreatedDate = $Column->DateTime('CreatedDate');
     }
     
     public $BlogForeignKey;
 
     protected function CreateRelationalStructure(Database $Database) {
-        $this->BlogForeignKey = new Traits\ForeignKey('BlogForeignKey', $Database->Blogs, 
+        $this->BlogForeignKey = new Traits\ForeignKey('BlogForeignKey', 
                 Map::From([$this->BlogId], [$Database->Blogs->Id]),
                 Traits\ForeignKeyMode::Cascade, Traits\ForeignKeyMode::Cascade);
     }

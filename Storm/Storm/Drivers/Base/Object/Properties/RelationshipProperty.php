@@ -24,7 +24,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
     }
     
     final public function Revive(Domain $Domain, $PropertyValue, $Entity) {
-        $RevivedPropertyValue = $this->ReviveRevivalData($Domain, $Entity, $PropertyValue);
+        $RevivedPropertyValue = $this->ReviveValue($Domain, $Entity, $PropertyValue);
         $Entity->{$this->OriginalValueStorageKey} = clone $RevivedPropertyValue;
         $this->GetAccessor()->SetValue($Entity, $RevivedPropertyValue);
     }

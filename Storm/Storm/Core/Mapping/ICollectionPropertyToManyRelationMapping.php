@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Storm\Core\Mapping;

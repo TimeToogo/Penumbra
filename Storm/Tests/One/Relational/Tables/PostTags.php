@@ -22,25 +22,25 @@ class PostTags extends Relational\Relations\JoinTable {
     public $TagId;
 
     protected function CreateTableStructure(IColumnSet $Column) {
-        $this->PostBlogId = new Column('PostBlogId', new Mysql\Columns\DataTypes\HexedBinaryDataType(16));
-        $this->PostTitle = new Column('PostTitle', new DataType('VARCHAR', [50]));
+        $this->PostBlogId = $Column->Guid('PostBlogId', true);
+        $this->PostTitle = $Column->String('PostTitle', 50, true);
         
-        $this->TagId = new Column('TagId', new Mysql\Columns\DataTypes\HexedBinaryDataType(16));
+        $this->TagId = $Column->Guid('TagId', true);
     }
     
     protected function Table1(Database $Database) {
         return $Database->Posts;
     }
-    protected function MapForeignKey1(Map $Map, Table $Table1) {
-        $Map->Map($this->PostBlogId, $Table1->BlogId);
-        $Map->Map($this->PostTitle, $Table1->Title);
+    protected function MapForeignKey1(Map $Map, Table $Posts) {
+        $Map->Map($this->PostBlogId, $Posts->BlogId);
+        $Map->Map($this->PostTitle, $Posts->Title);
     }
 
     protected function Table2(Database $Database) {
         return $Database->Tags;
     }
-    protected function MapForeignKey2(Map $Map, Table $Table2) {
-        $Map->Map($this->TagId, $Table2->Id);
+    protected function MapForeignKey2(Map $Map, Table $Tags) {
+        $Map->Map($this->TagId, $Tags->Id);
     }
 }
 

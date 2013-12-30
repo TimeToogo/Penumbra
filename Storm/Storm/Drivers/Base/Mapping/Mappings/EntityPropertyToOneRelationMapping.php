@@ -47,6 +47,7 @@ abstract class EntityPropertyToOneRelationMapping extends PropertyMapping implem
     
     final protected function LoadRelatedRows(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows) {
         $RelatedRowRequest = $this->ToOneRelation->RelationRequest($ParentRows);
+        $DomainDatabaseMap->MapEntityToRelationalRequest($this->EntityType, $RelatedRowRequest);
         return $DomainDatabaseMap->GetDatabase()->Load($RelatedRowRequest);
     }
     

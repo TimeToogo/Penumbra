@@ -69,16 +69,9 @@ class DatabaseBuilder implements IDatabaseBuilder {
             $StructuralTraits[] = new Traits\Comment($TableInfoRow['TABLE_COMMENT']);
         }
 
-
         foreach ($this->BuildIndexes($Connection, $Columns, $DatabaseName, $TableName) as $Index) {
             $StructuralTraits[] = $Index;
         }
-
-
-        $PrimaryKey = $this->BuildPrimaryKey($Connection, $Columns, $DatabaseName, $TableName);
-        if ($PrimaryKey !== null)
-            $StructuralTraits[] = $PrimaryKey;
-
 
         $ForeignKeys = $this->BuildForeignKeys($Connection, $Columns, $DatabaseName, $TableName, $LoadedTables);
         foreach ($ForeignKeys as $ForeignKey) {
@@ -88,25 +81,6 @@ class DatabaseBuilder implements IDatabaseBuilder {
 
         $LoadedTables[$TableName] = new Relational\Table($TableName, new Null\NullKeyGenerator(), $Columns, $StructuralTraits, $RelationalTraits);
         return $LoadedTables[$TableName];
-    }
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Primary Key Builder">
-    private function BuildPrimaryKey(IConnection $Connection, array $Columns, $DatabaseName, $TableName) {
-
-        $QueryBuilder = $Connection->QueryBuilder();
-        $QueryBuilder->Append('SELECT * FROM `INFORMATION_SCHEMA`.`STATISTICS` WHERE TRUE ');
-        $QueryBuilder->AppendValue('AND `TABLE_SCHEMA` = # ', $DatabaseName);
-        $QueryBuilder->AppendValue('AND `TABLE_NAME` = # ', $TableName);
-        $QueryBuilder->AppendValue('AND `INDEX_NAME` = # ', 'PRIMARY');
-
-
-        $PrimaryKeyInfoRows = $QueryBuilder->Build()->Execute()->FetchAll();
-        if (count($PrimaryKeyInfoRows) === 0)
-            return null;
-        else
-            return new Traits\PrimaryKey(
-                    $this->GetColumnsFromRows($Columns, $PrimaryKeyInfoRows, 'SEQ_IN_INDEX', 'COLUMN_NAME'));
     }
     // </editor-fold>
     
@@ -206,15 +180,15 @@ class DatabaseBuilder implements IDatabaseBuilder {
 
         $ReferencedColumnMap = new Map();
         foreach ($ForeignKeyRows as $ForeignKeyRow) {
-            $PrimaryColumn = $Columns[$ForeignKeyRow['COLUMN_NAME']];
-            $ForeignColumn = $ReferencedTable->GetColumn($ForeignKeyRow['REFERENCED_COLUMN_NAME']);
-            $ReferencedColumnMap[$PrimaryColumn] = $ForeignColumn;
+            $ParentColumn = $Columns[$ForeignKeyRow['COLUMN_NAME']];
+            $ReferencedColumn = $ReferencedTable->GetColumn($ForeignKeyRow['REFERENCED_COLUMN_NAME']);
+            $ReferencedColumnMap[$ParentColumn] = $ReferencedColumn;
         }
 
         $UpdateMode = $this->MapForeignKeyMode($ForeignKeyRow['UPDATE_RULE']);
         $DeleteMode = $this->MapForeignKeyMode($ForeignKeyRow['DELETE_RULE']);
 
-        return new Traits\ForeignKey($Name, $ReferencedTable, $ReferencedColumnMap, $UpdateMode, $DeleteMode);
+        return new Traits\ForeignKey($Name, $ReferencedColumnMap, $UpdateMode, $DeleteMode);
     }
 
     private function MapForeignKeyMode($Mode) {
@@ -301,8 +275,9 @@ class DatabaseBuilder implements IDatabaseBuilder {
         if (strlen($ColumnInfoRow['COLUMN_COMMENT']) > 0) {
             $Traits[] = new Columns\Traits\Comment($ColumnInfoRow['COLUMN_COMMENT']);
         }
+        $IsPrimaryKey = $ColumnInfoRow['COLUMN_KEY'] === 'PRI';
         
-        return new Columns\Column($Name, $DataType, $Traits);
+        return new Columns\Column($Name, $DataType, $IsPrimaryKey, $Traits);
     }
 
 

@@ -145,10 +145,10 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     }
     protected function RelationalRequestConstraints(Relational\Request $RelationalRequest) { }
     
-    private function VerifyPropertyColumnMapping(IProperty $Property) {
-        $PropertyName = $Property;
-        if(isset($this->PropertyColumnMappings[$PropertyName])) {
-            return $this->PropertyColumnMappings[$PropertyName];
+    private function VerifyDataPropertyColumnMapping(IProperty $Property) {
+        $PropertyIdentifier = $Property->GetIdentifier();
+        if(isset($this->DataPropertyColumnMappings[$PropertyIdentifier])) {
+            return $this->DataPropertyColumnMappings[$PropertyIdentifier];
         }
         else {
             throw new \Storm\Core\Exceptions\UnmappedPropertyException();
@@ -195,11 +195,11 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     }
     
     final public function GetMappedReviveColumns(IProperty $Property) {
-        $this->VerifyPropertyColumnMapping($Property)->GetReviveColumns();
+        return $this->VerifyDataPropertyColumnMapping($Property)->GetReviveColumns();
     }
     
     final public function GetMappedPersistColumns(IProperty $Property) {
-        $this->VerifyPropertyColumnMapping($Property)->GetPersistColumns();
+        return $this->VerifyDataPropertyColumnMapping($Property)->GetPersistColumns();
     }
     
     final public function GetAllMappedReviveColumns(array $Properties = null) {

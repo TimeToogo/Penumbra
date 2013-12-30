@@ -30,6 +30,7 @@ abstract class Table {
         $Registrar = new Registrar(IColumn::IColumnType);
         $this->RegisterColumns($Registrar, $Database);
         $this->Columns = array();
+        $this->PrimaryKeyColumns = array();
         foreach($Registrar->GetRegistered() as $Column) {
             $this->AddColumn($Column);
         }

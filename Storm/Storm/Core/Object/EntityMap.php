@@ -200,7 +200,7 @@ abstract class EntityMap implements \IteratorAggregate {
                 $this->EntityProperties[$PropertyIdentifier]->Revive($Domain, $Value, $Entity);
             }
             else if(isset($this->CollectionProperties[$PropertyIdentifier])) {
-                $this->CollectionProperties[$PropertyIdentifier]->Revive($Value, $Value, $Entity);
+                $this->CollectionProperties[$PropertyIdentifier]->Revive($Domain, $Value, $Entity);
             }
         }
     }

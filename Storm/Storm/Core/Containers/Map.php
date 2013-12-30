@@ -24,7 +24,7 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
         $InstancesUnkeyed = array_values($Instances);
         $ToInstancesUnkeyed = array_values($ToInstances);
         foreach($InstancesUnkeyed as $Key => $Instance) {
-            $this->MapNew($Instance, $ToInstancesUnkeyed[$Key]);
+            $Map->MapNew($Instance, $ToInstancesUnkeyed[$Key]);
         }
         
         return $Map;

@@ -9,7 +9,7 @@ class LazyCollection extends Collection {
     private $IsLoaded = false;
     
     public function __construct(Domain $Domain, $EntityType, callable $ArrayLoaderFunction) {
-        parent::__construct($Domain, $EntityType, array());
+        parent::__construct($EntityType, array());
         $this->ArrayLoaderFunction = $ArrayLoaderFunction;
     }
     private function Load() {

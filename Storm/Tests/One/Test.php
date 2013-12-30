@@ -21,7 +21,7 @@ class Test implements \StormTests\IStormTest {
     public function Run(Storm $BloggingStorm) {        
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         
-        $Action = self::Persist;
+        $Action = self::Retreive;
         $Amount = 1;
         
         $Last;
@@ -33,7 +33,7 @@ class Test implements \StormTests\IStormTest {
     }
     
     private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository) {
-        $Id = '91CFD8806B9B11E38E8100270E076073';
+        $Id = strrev('91CFD8806B9B11E38E8100270E076073');
         if($Action === self::Persist) {
             $Blog = $this->CreateBlog();
             
@@ -65,7 +65,7 @@ class Test implements \StormTests\IStormTest {
             
             
             $RevivedBlog = $BlogRepository->Load(new Requests\IdentityRequest($Identity));
-            
+            var_dump($RevivedBlog);
             $RevivedBlog->Posts[0]->Tags->ToArray();
             $RevivedBlog->Posts[1]->Tags->ToArray();
             

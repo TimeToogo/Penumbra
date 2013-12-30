@@ -45,8 +45,13 @@ abstract class KeyedRelation extends Relation {
         $Predicate->AddRules($RuleGroup);
         $Request->AddPredicate($Predicate);
     }
+    
     /**
-     * @return Relational\ColumnData
+     * @return Relational\ResultRow
+     */
+    protected abstract function GetParentTables(ForeignKey $ForeignKey);
+    /**
+     * @return Relational\ResultRow
      */
     protected abstract function MapParentRowToRelatedKey(ForeignKey $ForeignKey, 
             Relational\ResultRow $ParentRow);
