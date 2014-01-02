@@ -60,7 +60,7 @@ class Parser {
         else if($Node instanceof \PHPParser_Node_Arg) 
             return $this->ParseNode($Node->value);
         else
-            throw new Exception();
+            throw new \Exception();
     }
 
     // <editor-fold defaultstate="collapsed" desc="Statement node parsers">
@@ -156,7 +156,7 @@ class Parser {
                     $this->ParseBodyAsBlock($Node));
         else
 
-            throw new Exception();
+            throw new \Exception();
     }
 
     // </editor-fold>
@@ -256,7 +256,7 @@ class Parser {
             return is_string($Node->name) ?
                     Expression::Variable($Node->name) : $this->ParseNode($Node->name);
         else
-            throw new Exception();
+            throw new \Exception();
     }
 
     private function ParseNameNode($Node) {
@@ -294,7 +294,7 @@ class Parser {
         else if ($Node instanceof \PHPParser_Node_Scalar_String)
             return Expression::Constant($Node->value);
         else
-            throw new Exception();
+            throw new \Exception();
     }
     // </editor-fold>
 

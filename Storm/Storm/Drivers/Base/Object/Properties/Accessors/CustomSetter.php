@@ -11,7 +11,7 @@ class CustomSetter extends CustomBase implements IPropertySetter {
         return $this->ValidCustomOf($EntityType);
     }
 
-    final public function SetValueTo($Entity, &$Value) {
+    final public function SetValueTo($Entity, $Value) {
         return $this->CallFunction([$Entity, $Value]); 
     }
 }

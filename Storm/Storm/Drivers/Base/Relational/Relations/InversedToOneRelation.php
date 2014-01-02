@@ -11,14 +11,23 @@ class InversedToOneRelation extends ToOneRelationBase {
         parent::__construct($ForeignKey, $RelatedTable, 
                 Relational\DependencyOrder::Before, Relational\DependencyOrder::After);
     }
-    protected function FillParentToRelatedRowMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
-        $KeyedParentRows = $this->HashRowsByColumns($ParentRows, $ForeignKey->GetReferencedColumns());
-        $KeyedRelatedRows = $this->HashRowsByColumns($RelatedRows, $ForeignKey->GetParentColumns());
-        $this->MapKeyIntersection($Map, $KeyedParentRows, $KeyedRelatedRows);
+    
+    protected function ParentTable(ForeignKey $ForeignKey) {
+        return $ForeignKey->GetReferencedTable();
+    }
+
+    protected function RelatedColumns(ForeignKey $ForeignKey) {
+        return $ForeignKey->GetParentColumns();
     }
     
-    protected function GetParentTables(ForeignKey $ForeignKey) {
-        
+    protected function FillParentToRelatedRowMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
+        $KeyedRelatedRows = $this->HashRowsByColumnValues($RelatedRows, $ForeignKey->GetParentColumns());
+        foreach($ParentRows as $ParentRow) {
+            $Hash = $ParentRow->GetDataFromColumns($ForeignKey->GetReferencedColumns())->Hash();
+            if(isset($KeyedRelatedRows[$Hash])) {
+                $Map->Map($ParentRow, $KeyedRelatedRows[$Hash]);
+            }
+        }
     }
 
     protected function MapParentRowToRelatedKey(ForeignKey $ForeignKey, Relational\ResultRow $ParentRow) {
@@ -29,6 +38,19 @@ class InversedToOneRelation extends ToOneRelationBase {
         return $ParentKey;
     }
 
+    
+    protected function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
+            Relational\Row $ParentRow, Relational\Row $ChildRow) {
+        if($ParentRow->HasPrimaryKey()) {
+            $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildRow);
+        }
+        else {
+            $Transaction->SubscribeToPrePersistEvent($ChildRow, 
+                    function (Relational\Row $ChildRow) use (&$ParentRow) {
+                        $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildRow);
+                    });
+        }
+    }
 }
 
 ?>

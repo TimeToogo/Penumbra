@@ -48,14 +48,14 @@ class RelatedEntityCollectionType extends RelatedType {
             return new Collections\LazyCollection($Domain, $this->EntityType, $LoadFunction);
         }
         else {
-            throw new Exception;//TODO: error message
+            throw new \Exception;//TODO: error message
         }
     }
     
     public function Persist(UnitOfWork $UnitOfWork, $Entity, $PropertyValue) {
         if($this->CascadePersist) {
             if(!($PropertyValue instanceof Collections\ICollection)) {
-                throw new Exception;//TODO:error message
+                throw new \Exception;//TODO:error message
             }
             
             $PersistedData = array();
@@ -73,7 +73,7 @@ class RelatedEntityCollectionType extends RelatedType {
     public function Discard(UnitOfWork $UnitOfWork, $Entity, $PropertyValue) {
         if($this->CascadeDiscard) {
             if(!($PropertyValue instanceof Collections\ICollection)) {
-                throw new Exception;//TODO:error message
+                throw new \Exception;//TODO:error message
             }
             
             $DiscardedIdentities = array();

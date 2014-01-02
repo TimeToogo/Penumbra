@@ -12,10 +12,12 @@ abstract class Table {
      * @var IColumn[]
      */
     private $Columns;
+    private $ColumnIdentifiers;
     /**
      * @var IColumn[]
      */
     private $PrimaryKeyColumns;
+    private $PrimaryKeyColumnIdentifiers;
     private $ToOneRelations;
     private $ToManyRelations;
     private $AllRelations;
@@ -30,7 +32,9 @@ abstract class Table {
         $Registrar = new Registrar(IColumn::IColumnType);
         $this->RegisterColumns($Registrar, $Database);
         $this->Columns = array();
+        $this->ColumnIdentifiers = array();
         $this->PrimaryKeyColumns = array();
+        $this->PrimaryKeyColumnIdentifiers = array();
         foreach($Registrar->GetRegistered() as $Column) {
             $this->AddColumn($Column);
         }
@@ -74,9 +78,12 @@ abstract class Table {
         $Column->SetTable($this);
         
         $ColumnName = $Column->GetName();
+        $ColumnIdentifier = $Column->GetIdentifier();
         $this->Columns[$ColumnName] = $Column;
+        $this->ColumnIdentifiers[$ColumnIdentifier] = $ColumnIdentifier;
         if($Column->IsPrimaryKey()) {
             $this->PrimaryKeyColumns[$ColumnName] = $Column;
+            $this->PrimaryKeyColumnIdentifiers[$ColumnIdentifier] = $ColumnIdentifier;
         }
      }
     
@@ -97,17 +104,27 @@ abstract class Table {
     final public function GetColumn($Name) {
         return $this->HasColumn($Name) ? $this->Columns[$Name] : null;
     }
+    
     /**
      * @return IColumn[]
      */
     final public function GetColumns() {
         return $this->Columns;
     }
+    
+    final public function GetColumnIdentifiers() {
+        return $this->ColumnIdentifiers;
+    }
+    
     /**
      * @return IColumn[]
      */
     final public function GetPrimaryKeyColumns() {
         return $this->PrimaryKeyColumns;
+    }
+    
+    final public function GetPrimaryKeyColumnIdentifiers() {
+        return $this->PrimaryKeyColumnIdentifiers;
     }
     
     /**

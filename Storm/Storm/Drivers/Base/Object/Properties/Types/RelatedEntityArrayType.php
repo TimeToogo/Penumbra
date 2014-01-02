@@ -64,14 +64,14 @@ class RelatedEntityArrayType extends RelatedType {
             }
         }
         else {
-            throw new Exception;//TODO: error message
+            throw new \Exception;//TODO: error message
         }
     }
     
     public function Persist(UnitOfWork $UnitOfWork, $Entity, $PropertyValue) {
         if($this->CascadePersist) {
             if(!is_array($PropertyValue)) {
-                throw new Exception;//TODO:error message
+                throw new \Exception;//TODO:error message
             }
             $OriginalArray = isset($Entity->{$this->OriginalArrayKey}) ? 
                     $Entity->{$this->OriginalArrayKey} : array();
@@ -95,7 +95,7 @@ class RelatedEntityArrayType extends RelatedType {
     public function Discard(UnitOfWork $UnitOfWork, $Entity, $PropertyValue) {
         if($this->CascadeDiscard) {
             if(!is_array($PropertyValue)) {
-                throw new Exception;//TODO:error message
+                throw new \Exception;//TODO:error message
             }
             $Entities = isset($Entity->{$this->OriginalArrayKey}) ? 
                     $Entity->{$this->OriginalArrayKey} : $PropertyValue;

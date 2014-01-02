@@ -10,7 +10,7 @@ interface IToManyRelation extends IRelation {
      */
     public function MapParentToRelatedRows(array $ParentRows, array $RelatedRows);
     
-    public function Persist(Transaction $Transaction, ColumnData $ParentData, array $RelationshipChanges);
+    public function Persist(Transaction $Transaction, ResultRow $ParentData, array $RelationshipChanges);
 }
 
 ?>

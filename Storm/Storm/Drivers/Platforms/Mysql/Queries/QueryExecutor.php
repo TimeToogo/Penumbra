@@ -24,7 +24,7 @@ class QueryExecutor extends Queries\QueryExecutor {
             $QueryBuilder->AppendExpression(Expression::ReviveColumn($Column));
             $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetIdentifier()]);
         }
-        var_dump(array_keys($Request->GetTables()));
+        
         $QueryBuilder->AppendIdentifiers('FROM # ', array_keys($Request->GetTables()), ', ');
     }
 
@@ -47,7 +47,7 @@ class QueryExecutor extends Queries\QueryExecutor {
     protected function SaveRows(IConnection $Connection, Table $Table, array &$RowsToPersist,
             ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
         if($ValueWithReturningDataKeyGenerator !== null) {
-            throw new Exception('Mysql does not support returning data');
+            throw new \Exception('Mysql does not support returning data');
         }
         $this->SaveQuery($Connection, $Table, $RowsToPersist)->Execute();
     }

@@ -25,14 +25,21 @@ class PostMap extends EntityMap {
     public $Tags;
     
     protected function CreateProperties() {
-        $this->Blog = new Properties\EntityProperty(new Accessors\Field('Blog'), \StormTests\One\Entities\Blog::GetType());
-        $this->BlogId = new Properties\DataProperty(new Accessors\Traversing([$this->Blog->GetAccessor(), new Accessors\Field('Id')]), true);
+        $ProxyGenerator = new Properties\Proxies\DevelopmentProxyGenerator(
+                __NAMESPACE__ . '\\' . 'Proxies', 
+                str_replace('\\', DIRECTORY_SEPARATOR, __DIR__) . DIRECTORY_SEPARATOR . 'Proxies');
+        
+        $this->Blog = new Properties\EntityProperty(new Accessors\Field('Blog'), 
+                \StormTests\One\Entities\Blog::GetType(),
+                new Properties\Relationships\NonIdentifying(), false, $ProxyGenerator);
         
         $this->Title = new Properties\DataProperty(new Accessors\Field('Title'), true);
         $this->Content = new Properties\DataProperty(new Accessors\Field('Content'));
         $this->CreatedDate = new Properties\DataProperty(new Accessors\Field('CreatedDate'));
         
-        $this->Tags = new Properties\CollectionProperty(new Accessors\Field('Tags'), \StormTests\One\Entities\Tag::GetType());
+        $this->Tags = new Properties\CollectionProperty(new Accessors\Field('Tags'), 
+                \StormTests\One\Entities\Tag::GetType(),
+                new Properties\Relationships\NonIdentifying(), $ProxyGenerator);
     }
 
 }

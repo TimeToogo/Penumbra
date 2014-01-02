@@ -40,7 +40,7 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
 
     protected function GetBinaryOperatorString($Operator) {
         if (!isset(static::$BinaryOperators[$Operator])) {
-            throw new Exception;
+            throw new \Exception;
         }         
         else {
             return ' ' . static::$BinaryOperators[$Operator] . ' ';
@@ -57,7 +57,7 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
 
     protected function GetSetOperatorString($Operator) {
         if ($Operator !== Operators\Assignment::Equal) {
-            throw new Exception('Mysql only support equal');
+            throw new \Exception('Mysql only support equal');
         }
         return ' = ';
     }
@@ -79,7 +79,7 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
 
     protected function GetUnaryOperatorString($Operator) {
         if (!isset(static::$UnaryOperators[$Operator])) {
-            throw new Exception;
+            throw new \Exception;
         } 
         else {
             return ' ' . static::$UnaryOperators[$Operator] . ' ';

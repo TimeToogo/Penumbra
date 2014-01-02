@@ -13,7 +13,7 @@ class ExtraLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRel
             Object\IEntityProperty $EntityProperty, 
             Relational\IToOneRelation $ToOneRelation) {
         if($EntityProperty->IsOptional()) {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
         
         parent::__construct($EntityProperty, $ToOneRelation);

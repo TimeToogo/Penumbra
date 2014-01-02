@@ -44,7 +44,7 @@ abstract class Domain {
      * @return EntityMap
      */
     private function VerifyEntity($Entity) {
-        $EntityTypes = array_reverse(array_merge([get_class($Entity)], class_parents($Entity, false)));
+        $EntityTypes = array_reverse(array_merge([get_class($Entity)], array_values(class_parents($Entity, false))));
         foreach($EntityTypes as $EntityType) {
             if(isset($this->EntityMaps[$EntityType])) {
                 return $this->EntityMaps[$EntityType];
@@ -84,16 +84,48 @@ abstract class Domain {
         return $this->VerifyEntity($Entity)->Apply($this, $Entity, $PropertyData);
     }
     
-    
     /**
      * @param object $Entity
-     * @return Relationship
+     * @return DiscardedRelationship
      */
-    final public function Relationship($ParentEntity, $ChildEntity) {
+    final public function DiscardedRelationship($ParentEntity, $ChildEntity) {
         $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
         $ChildIdentity = $this->VerifyEntity($ChildEntity)->Identity($ChildEntity);
         
-        return new Relationship($ParentIdentity, $ChildIdentity);
+        return new DiscardedRelationship(false, $ParentIdentity, $ChildIdentity);
+    }
+    
+    /**
+     * @param object $Entity
+     * @return DiscardedRelationship
+     */
+    final public function DiscardedIdentifyingRelationship($ParentEntity, $ChildEntity, UnitOfWork $UnitOfWork) {
+        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
+        $ChildIdentity = $this->VerifyEntity($ChildEntity)->Discard($UnitOfWork, $ChildEntity);
+        
+        return new DiscardedRelationship(false, $ParentIdentity, $ChildIdentity);
+    }
+    
+    /**
+     * @param object $Entity
+     * @return PersistedRelationship
+     */
+    final public function PersistedRelationship($ParentEntity, $RelatedEntity) {
+        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
+        $RelatedIdentity = $this->VerifyEntity($RelatedEntity)->Identity($RelatedEntity);
+        
+        return new PersistedRelationship($ParentIdentity, $RelatedIdentity);
+    }
+    
+    /**
+     * @param object $Entity
+     * @return PersistedRelationship
+     */
+    final public function PersistedIdentifyingRelationship($ParentEntity, $ChildEntity, UnitOfWork $UnitOfWork) {
+        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
+        $RelatedPersistenceData = $this->VerifyEntity($ChildEntity)->Persist($UnitOfWork, $ChildEntity);
+        
+        return new PersistedRelationship($ParentIdentity, null, $RelatedPersistenceData);
     }
     
     /**
@@ -104,7 +136,7 @@ abstract class Domain {
     }
     
     /**
-     * @return PersistenceData
+     * @return DiscardenceData
      */
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
         return $this->VerifyEntity($Entity)->Discard($UnitOfWork, $Entity);
@@ -119,10 +151,10 @@ abstract class Domain {
         return $EntityMap->ReviveEntities($this, $RevivalData);
     }
     
-    final public function ReviveEntityInstances($EntityType, Map $StateInstanceMap) {
-        $EntityMap = $this->GetEntityMap($EntityType);
+    final public function LoadEntity(RevivalData $RevivalData, $Entity) {
+        $EntityMap = $this->EntityMaps[$RevivalData->GetEntityType()];
         
-        return $EntityMap->ReviveEntityInstances($this, $StateInstanceMap);
+        return $EntityMap->LoadEntity($this, $RevivalData, $Entity);
     }
     
     final public function DiscardWhere(UnitOfWork $UnitOfWork, IRequest $Request) {
@@ -134,7 +166,7 @@ abstract class Domain {
      */
     final public function BuildUnitOfWork(
             array $EntitiesToPersist = array(),
-            array $OperationsToExecute = array(),
+            array $ProceduresToExecute = array(),
             array $EntitiesToDiscard = array(), 
             array $RequestsToDiscard = array()) {
         $UnitOfWork = new UnitOfWork($this);
@@ -142,8 +174,8 @@ abstract class Domain {
         foreach($EntitiesToPersist as $Entity) {
             $UnitOfWork->Persist($Entity);
         }
-        foreach($OperationsToExecute as $Operation) {
-            $UnitOfWork->Execute($Operation);
+        foreach($ProceduresToExecute as $Procedure) {
+            $UnitOfWork->Execute($Procedure);
         }
         foreach($EntitiesToDiscard as $Entity) {
             $UnitOfWork->Discard($Entity);

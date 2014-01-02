@@ -2234,7 +2234,7 @@ class PHPParser_Parser
                 $this->yyval = new PHPParser_Node_Expr_StaticCall($tmp->var->class, $this->yyastk[$this->stackPos-(2-1)], $this->yyastk[$this->stackPos-(2-2)], $attributes);
                 $tmp->var = new PHPParser_Node_Expr_Variable($tmp->var->name, $attributes);
             } else {
-                throw new Exception;
+                throw new \Exception;
             }
           
     }

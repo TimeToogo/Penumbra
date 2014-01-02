@@ -6,7 +6,7 @@ final class RelationshipChange {
     private $PersistedRelationship;
     private $DiscardedRelationship;
     
-    public function __construct(Relationship $PersistedRelationship = null, Relationship $DiscardedRelationship = null) {
+    public function __construct(PersistedRelationship $PersistedRelationship = null, DiscardedRelationship $DiscardedRelationship = null) {
         $this->PersistedRelationship = $PersistedRelationship;
         $this->DiscardedRelationship = $DiscardedRelationship;
     }
@@ -16,7 +16,7 @@ final class RelationshipChange {
     }
     
     /**
-     * @return Relationship
+     * @return DiscardedRelationship
      */
     public function GetPersistedRelationship() {
         return $this->PersistedRelationship;
@@ -27,7 +27,7 @@ final class RelationshipChange {
     }
 
     /**
-     * @return Relationship
+     * @return PersistedRelationship
      */
     public function GetDiscardedRelationship() {
         return $this->DiscardedRelationship;

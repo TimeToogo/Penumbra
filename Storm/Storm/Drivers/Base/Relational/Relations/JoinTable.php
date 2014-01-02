@@ -101,7 +101,7 @@ abstract class JoinTable extends Base\Relational\Table {
         }
         else {
             //TODO: error
-            throw new Exception;
+            throw new \Exception;
         }
     }
     
@@ -133,13 +133,13 @@ abstract class JoinTable extends Base\Relational\Table {
         $ForeignKey1Map = $this->ForeignKey1->GetReferencedColumnMap();
         foreach($ForeignKey1Map as $ParentColumn) {
             $ReferencedColumn = $ForeignKey1Map[$ParentColumn];
-            $Row[$ParentColumn] =& $PrimaryKey1[$ReferencedColumn];
+            $Row[$ParentColumn] = $PrimaryKey1[$ReferencedColumn];
         }
         
         $ForeignKey2Map = $this->ForeignKey2->GetReferencedColumnMap();
         foreach($ForeignKey2Map as $ParentColumn) {
             $ReferencedColumn = $ForeignKey2Map[$ParentColumn];
-            $Row[$ParentColumn] =& $PrimaryKey2[$ReferencedColumn];
+            $Row[$ParentColumn] = $PrimaryKey2[$ReferencedColumn];
         }
         
         return $Row;

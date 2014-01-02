@@ -22,7 +22,7 @@ final class PostRelationalMap extends Mapping\EntityRelationalMap {
         /* @var $Table \StormTests\One\Relational\Tables\Posts */
         $Table = $Database->Posts;
         
-        $this->Map($EntityMap->BlogId)->ToColumn($Table->BlogId);
+        $this->Map($EntityMap->Title)->ToColumn($Table->Title);
         $this->Map($EntityMap->Title)->ToColumn($Table->Title);
         $this->Map($EntityMap->Content)->ToColumn($Table->Content);
         $this->Map($EntityMap->CreatedDate)->ToColumn($Table->CreatedDate);

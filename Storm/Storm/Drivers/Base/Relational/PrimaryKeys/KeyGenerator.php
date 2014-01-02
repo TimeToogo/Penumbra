@@ -11,7 +11,7 @@ abstract class KeyGenerator implements IKeyGenerator {
         $this->Table = $Table;
         $PrimaryKeyColumns = $Table->GetPrimaryKeyColumns();
         if(count($PrimaryKeyColumns) === 0) {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
         $this->OnSetPrimaryKeyColumns($PrimaryKeyColumns);
         $this->PrimaryKeyColumns = $PrimaryKeyColumns;

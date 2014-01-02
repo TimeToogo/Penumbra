@@ -9,7 +9,7 @@ use \Storm\Drivers\Base\Relational\Constraints\RuleGroup;
 class PrimaryKeyRequest extends Relational\Request {
     public function __construct(array $PrimaryKeys) {
         if(count($PrimaryKeys) === 0) {
-            throw new Exception;//TODO: error message
+            throw new \Exception;//TODO: error message
         }
         parent::__construct(reset($PrimaryKeys)->GetTable()->GetColumns(), true);
         

@@ -21,7 +21,7 @@ class JoinTableRelation extends ToManyRelationBase {
     
     public function __construct(JoinTable $JoinTable, $RelatesToTableTwo = true) {
         parent::__construct(
-                $this->RelatesToTableTwo ? $JoinTable->GetForeignKey2() : $JoinTable->GetForeignKey1(),
+                $RelatesToTableTwo ? $JoinTable->GetForeignKey2() : $JoinTable->GetForeignKey1(),
                 $RelatesToTableTwo ? $JoinTable->GetTable2() : $JoinTable->GetTable1(), 
                 Relational\DependencyOrder::After, 
                 Relational\DependencyOrder::Before);
@@ -53,6 +53,11 @@ class JoinTableRelation extends ToManyRelationBase {
         parent::AddConstraintToRequest($Request);
     }
     
+    
+    protected function ParentTable(ForeignKey $ForeignKey) { }
+    protected function RelatedColumns(ForeignKey $ForeignKey) {
+        return array();
+    }
     public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows) {
         if(count($ParentRows) > 1) {
             $Request->AddColumns($this->OtherForeignKey->GetParentColumns());
@@ -64,40 +69,59 @@ class JoinTableRelation extends ToManyRelationBase {
         $ParentJoinTableKeys = $this->OtherForeignKey->GetParentColumns();
         $ParentReferencedKeys = $this->OtherForeignKey->GetReferencedColumns();
         
-        $GroupedRelatedRows = $this->GroupRelatedRows($RelatedRows, $ParentJoinTableKeys);
+        $GroupedRelatedRows = $this->GroupRowsByColumns($RelatedRows, $ParentJoinTableKeys);
         $this->MapParentRowsToGroupedRelatedRows($Map, $ParentRows, $ParentReferencedKeys, $GroupedRelatedRows);
     }
 
     protected function MapParentRowToRelatedKey(ForeignKey $ForeignKey, Relational\ResultRow $ParentRow) {
         $ParentKey = $ParentRow->GetDataFromColumns($this->OtherForeignKey->GetReferencedColumns());
         $JoinTableKey = new Relational\ResultRow($this->OtherForeignKey->GetParentColumns());
-        $ForeignKey->MapParentToReferencedKey($ParentKey, $JoinTableKey);
+        $this->OtherForeignKey->MapReferencedToParentKey($ParentKey, $JoinTableKey);
         
         return $JoinTableKey;
     }
     
-    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, array $RelationshipChanges) {
+    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges) {
         /* @var $RelationshipChanges Relational\RelationshipChange[] */
         foreach($RelationshipChanges as $RelationshipChange) {
             if($RelationshipChange->HasPersistedRelationship()) {
-                $JoinRow = $this->MapRelationshipToJoinRow($RelationshipChange->GetPersistedRelationship());
+                $JoinRow = $this->MapPersistedRelationshipToJoinRow($RelationshipChange->GetPersistedRelationship());
                 $Transaction->Persist($JoinRow);
+                if(!$JoinRow->HasPrimaryKey()) {
+                    $Transaction->SubscribeToPrePersistEvent($JoinRow, function($JoinRow) use (&$ParentData) {
+                        $this->OtherForeignKey->MapReferencedToParentKey(
+                                $ParentData->GetRow($this->OtherForeignKey->GetReferencedTable()), 
+                                $JoinRow);
+                    });
+                }
             }
             if($RelationshipChange->HasDiscardedRelationship()) {
-                $JoinRow = $this->MapRelationshipToJoinRow($RelationshipChange->GetDiscardedRelationship());
+                $JoinRow = $this->MapDiscardedRelationshipToJoinRow($RelationshipChange->GetDiscardedRelationship());
                 $Transaction->Discard($JoinRow->GetPrimaryKey());
             }
         }
     }
-    private function MapRelationshipToJoinRow (Relational\Relationship $Relationship) {
+    protected function PersistIdentifyingRelationship(Relational\Transaction $Transaction, Relational\Row $ParentRow, array $ChildRows) { }
+    
+    private function MapDiscardedRelationshipToJoinRow (Relational\DiscardedRelationship $Relationship) {
+        return $this->MapRelationshipToJoinRow($Relationship);
+    }
+    private function MapPersistedRelationshipToJoinRow (Relational\PersistedRelationship $Relationship) {
+        if($Relationship->IsIdentifying()) {
+            throw new \Exception;//TODO:error message
+        }
+        return $this->MapRelationshipToJoinRow($Relationship);        
+    }
+    
+    private function MapRelationshipToJoinRow($Relationship) {
         if($this->RelatesToTableTwo) {
             return $this->JoinTable->JoinRow(
                     $Relationship->GetParentPrimaryKey(), 
-                    $Relationship->GetChildPrimaryKey());
+                    $Relationship->GetRelatedPrimaryKey());
         }
         else {
             return $this->JoinTable->JoinRow(
-                    $Relationship->GetChildPrimaryKey(), 
+                    $Relationship->GetRelatedPrimaryKey(), 
                     $Relationship->GetParentPrimaryKey());               
         }
     }

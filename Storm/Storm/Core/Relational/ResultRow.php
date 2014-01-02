@@ -4,21 +4,34 @@ namespace Storm\Core\Relational;
 
 class ResultRow extends ColumnData {
     private $Tables = array();
-    private $TableColumnsMap = array();
-    public function __construct(array $Columns, array &$ColumnData = array()) {
+    private $Rows = array();
+    private $PrimaryKeys = array();
+    public function __construct(array $Columns, array $ColumnData = array()) {
         foreach($Columns as $Column) {
             $Table = $Column->GetTable();
             $TableName = $Table->GetName();
-            $ColumnIdentifier = $Column->GetIdentifier();
             
             $this->Tables[$TableName] = $Table;
-            if(!isset($this->TableColumnsMap[$TableName])) {
-                $this->TableColumnsMap[$TableName] = array();
+            if(!isset($this->Rows[$TableName])) {
+                $this->Rows[$TableName] = new Row($Table, 
+                        array_intersect_key($ColumnData, $Table->GetColumnIdentifiers()));
+                $this->PrimaryKeys[$TableName] = $this->Rows[$TableName]->GetPrimaryKey();
             }
-            $this->TableColumnsMap[$TableName][$ColumnIdentifier] = true;
         }
         
         parent::__construct($Columns, $ColumnData);
+    }
+    
+    protected function AddColumn(IColumn $Column, $Data) {
+        parent::AddColumn($Column, $Data);
+        
+        $this->Rows[$Column->GetTable()->GetName()][$Column] = $Data;
+    }
+    
+    protected function RemoveColumn(IColumn $Column) {
+        parent::RemoveColumn($Column);
+        
+        unset($this->Rows[$Column->GetTable()->GetName()][$Column]);
     }
     
     /**
@@ -36,12 +49,14 @@ class ResultRow extends ColumnData {
      * @return Row[]
      */
     final public function GetRows() {
-        $Rows = array();
-        foreach($this->Tables as $Table) {
-            $Rows[] = $this->GetRow($Table);
-        }
-        
-        return $Rows;
+        return $this->Rows;
+    }
+    
+    /**
+     * @return PrimaryKeys[]
+     */
+    final public function GetPrimaryKeys() {
+        return $this->PrimaryKeys;
     }
     
     /**
@@ -52,24 +67,29 @@ class ResultRow extends ColumnData {
             throw new \InvalidArgumentException('$Table must be a part of this row');
         }
         
-        $ColumnData = $this->GetColumnData();
-        $TableColumnData =& array_intersect_key($ColumnData, $this->TableColumnsMap[$Table->GetName()]);
+        return $this->Rows[$Table->GetName()];
+    }
+    
+    /**
+     * @return Row
+     */
+    final public function GetPrimaryKey(Table $Table) {
+        if(!$this->IsOf($Table)) {
+            throw new \InvalidArgumentException('$Table must be a part of this row');
+        }
         
-        return new Row($Table, $TableColumnData, true);
+        return $this->PrimaryKeys[$Table->GetName()];
     }
     
     /**
      * @return ResultRow
      */
     final public function GetDataFromColumns(array $Columns) {
-        $ResultRow = new ResultRow($Columns);
-        foreach($Columns as $Column) {
-            if(isset($this[$Column])) {
-                $ResultRow->SetColumn($Column, $this[$Column]);
-            }
-        }
+        $ColumnData = $this->GetColumnData();
+        $ColumnIdentifiers = 
+                array_flip(array_map(function ($Column) { return $Column->GetIdentifier(); }, $Columns));
         
-        return $ResultRow;
+        return new ResultRow($Columns, array_intersect_key($ColumnData, $ColumnIdentifiers));
     }
 }
 

@@ -24,11 +24,17 @@ class BlogMap extends EntityMap {
     public $Posts;
     
     protected function CreateProperties() {
+        $ProxyGenerator = new Properties\Proxies\DevelopmentProxyGenerator(
+                __NAMESPACE__ . '\\' . 'Proxies', 
+                str_replace('\\', DIRECTORY_SEPARATOR, __DIR__) . DIRECTORY_SEPARATOR . 'Proxies');
+        
         $this->Id = new Properties\DataProperty(new Accessors\Field('Id'), true);
         $this->Name = new Properties\DataProperty(new Accessors\Field('Name'));
         $this->Description = new Properties\DataProperty(new Accessors\Field('Description'));
         $this->CreatedDate = new Properties\DataProperty(new Accessors\Field('CreatedDate'));
-        $this->Posts = new Properties\CollectionProperty(new Accessors\Field('Posts'), \StormTests\One\Entities\Post::GetType(), true);
+        $this->Posts = new Properties\CollectionProperty(new Accessors\Field('Posts'), 
+                \StormTests\One\Entities\Post::GetType(), 
+                new Properties\Relationships\Identifying(), $ProxyGenerator);
     }
 
 }

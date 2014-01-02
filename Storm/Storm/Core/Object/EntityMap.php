@@ -68,7 +68,7 @@ abstract class EntityMap implements \IteratorAggregate {
             $this->CollectionProperties[$Identifier] = $Property;
         }
         else {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
         
         $this->Properties[$Identifier] = $Property;
@@ -177,7 +177,7 @@ abstract class EntityMap implements \IteratorAggregate {
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
         
-        $PersistenceData = new PersistenceData($this);
+        $PersistenceData = new DiscardenceData($this);
         foreach($this->IdentityProperties as $IdentityProperty) {
             $PersistenceData[$IdentityProperty] = $IdentityProperty->GetValue($Entity);
         }

@@ -11,7 +11,7 @@ class Predicate extends Constraints\Predicate {
         $ExpressionParser = new Closure\Reader($ExpressionClosure);
         $Parameters = $ExpressionParser->GetParameters();
         if(count($Parameters) === 0)
-            throw new Exception;
+            throw new \Exception;
         
         $EntityVariableName = $Parameters[0]->getName();
         $ExpressionSource = $ExpressionParser->GetBodySource();

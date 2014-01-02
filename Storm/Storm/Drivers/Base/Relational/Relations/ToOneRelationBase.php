@@ -13,7 +13,7 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
     
     final public function MapParentToRelatedRow(array $ParentRows, array $RelatedRows) {
         if(count($RelatedRows) > count($ParentRows)) {
-            throw new Exception;//TODO: error message
+            throw new \Exception;//TODO: error message
         }
         
         $Map = new Map();
@@ -28,15 +28,25 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
     }
     protected abstract function FillParentToRelatedRowMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows);
 
-    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, Relational\RelationshipChange $RelationshipChange) {
-        
-    }
-    
     final protected function MapKeyIntersection(Map $Map, array $KeyedParentRows, array $KeyedRelatedRows) {
         foreach(array_intersect_key($KeyedParentRows, $KeyedRelatedRows) as $Key => $ParentRow) {
             $Map->Map($ParentRow, $KeyedRelatedRows[$Key]);
         }
     }
+    
+    public function Persist(Relational\Transaction $Transaction, 
+            Relational\ResultRow $ParentData, Relational\RelationshipChange $RelationshipChange) {
+        if($RelationshipChange->HasPersistedRelationship()) {
+            $PersistedRelationship = $RelationshipChange->GetPersistedRelationship();
+            if($PersistedRelationship->IsIdentifying()) {
+                $ParentRow = $ParentData->GetRow($this->GetParentTable());
+                $ChildRow = $PersistedRelationship->GetChildResultRow()->GetRow($this->GetTable());
+                $this->PersistIdentifyingRelationship($Transaction, $ParentRow, $ChildRow);
+            }
+        }
+    }
+    protected abstract function PersistIdentifyingRelationship(Relational\Transaction $Transaction, Relational\Row $ParentRow, Relational\Row $ChildRow);
+    
 }
 
 ?>

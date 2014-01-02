@@ -5,12 +5,14 @@ namespace Storm\Drivers\Base\Object\Properties\Collections;
 use \Storm\Core\Object\Domain;
 
 class LazyCollection extends Collection {
+    private $Domain;
     private $ArrayLoaderFunction;
     private $IsLoaded = false;
     
     public function __construct(Domain $Domain, $EntityType, callable $ArrayLoaderFunction) {
         parent::__construct($EntityType, array());
         $this->ArrayLoaderFunction = $ArrayLoaderFunction;
+        $this->Domain = $Domain;
     }
     private function Load() {
         if($this->IsLoaded) {
@@ -22,7 +24,7 @@ class LazyCollection extends Collection {
         
         $Loader = $this->ArrayLoaderFunction;
         $RevivalData = $Loader();
-        $Entities = $this->GetDomain()->ReviveEntities($this->GetEntityType(), $RevivalData);
+        $Entities = $this->Domain->ReviveEntities($this->GetEntityType(), $RevivalData);
         $this->exchangeArray($Entities);
         $this->OriginalEntities = $Entities;
     }

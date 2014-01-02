@@ -6,26 +6,28 @@ use \Storm\Core\Object;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 
 class Repository {
-    private $ORM;
+    private $DomainDatabaseMap;
     private $EntityType;
     private $AutoSave;
     private $PersistedQueue = array();
+    private $ExecutionQueue = array();
     private $DiscardedQueue = array();
     private $DiscardedRequestQueue = array();
     
     final public function __construct(DomainDatabaseMap $ORM, $EntityType, $AutoSave) {
-        $this->ORM = $ORM;
+        $this->DomainDatabaseMap = $ORM;
         $this->EntityType = $EntityType;
         $this->AutoSave = $AutoSave;
     }
     
     public function Load(Object\IRequest $Request) {
-        return $this->ORM->Load($Request);
+        return $this->DomainDatabaseMap->Load($Request);
     }
     
     private function VerifyEntity($Entity) {
-        if(!($Entity instanceof $this->EntityType))
+        if(!($Entity instanceof $this->EntityType)) {
             throw new \InvalidArgumentException('$Entity must be a valid instance of ' . $this->EntityType);
+        }
     }
     
     public function Persist($Entity) {
@@ -35,6 +37,14 @@ class Repository {
     }
     public function PersistAll(array $Entities) {
         $this->PersistedQueue = array_merge($this->PersistedQueue, $Entities);
+        $this->AutoSave();
+    }
+    
+    public function Execute(Object\IProcedure $Procedure) {
+        if($Procedure->GetEntityType() !== $this->EntityType) {
+            throw new \Exception;//TODO: error messages;
+        }
+        $this->ExecutionQueue[] = $Procedure;
         $this->AutoSave();
     }
     
@@ -63,8 +73,14 @@ class Repository {
                 count($this->DiscardedQueue) === 0 && count($this->DiscardedRequestQueue) === 0)
             return;
         
-        $this->ORM->Commit($this->PersistedQueue, $this->DiscardedQueue, $this->DiscardedRequestQueue);
+        $this->DomainDatabaseMap->Commit(
+                $this->PersistedQueue, 
+                $this->ExecutionQueue, 
+                $this->DiscardedQueue, 
+                $this->DiscardedRequestQueue);
+        
         $this->PersistedQueue = array();
+        $this->ExecutionQueue = array();
         $this->DiscardedQueue = array();
         $this->DiscardedRequestQueue = array();
     }

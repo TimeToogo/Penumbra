@@ -132,7 +132,7 @@ final class ExpressionMapper extends E\ExpressionMapper {
                 return Expression::Cast('CHAR', $CastValueExpression);
             
             default:
-                throw new Exception();
+                throw new \Exception();
         }
     }
 
@@ -245,7 +245,7 @@ final class ExpressionMapper extends E\ExpressionMapper {
             case 'round':
                 $MysqlFunctionName = 'ROUND';
                 if(isset($ArgumentExpressions[2]))
-                    throw new Exception('Does not suppor rounding modes');
+                    throw new \Exception('Does not suppor rounding modes');
                 break;
             
             case 'rand':
@@ -286,7 +286,7 @@ final class ExpressionMapper extends E\ExpressionMapper {
                 break;
             
             default:
-                throw new Exception();
+                throw new \Exception();
         }
         
         return new E\FunctionCallExpression($MysqlFunctionName, $MysqlArgumentExpressions);

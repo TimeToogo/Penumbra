@@ -73,7 +73,7 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
                         }, $Expression->GetArgumentValueExpressions()));
             
             default:
-                throw new Exception();
+                throw new \Exception();
         }
     }
     

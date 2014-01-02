@@ -37,7 +37,7 @@ class RelatedEntityType extends RelatedType {
             return null;
         }
         else {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
     }
     
@@ -71,7 +71,7 @@ class RelatedEntityType extends RelatedType {
             return $this->ProxyGenerator->GenerateProxy($Domain, $this->GetEntityType(), $LoadFunction);
         }
         else {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
     }
     
@@ -91,7 +91,7 @@ class RelatedEntityType extends RelatedType {
                     return null;
                 }
                 else {
-                    throw new Exception;//TODO: error mesage
+                    throw new \Exception;//TODO: error mesage
                 }
             }
         }

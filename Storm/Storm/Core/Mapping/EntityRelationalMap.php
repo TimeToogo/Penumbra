@@ -222,11 +222,11 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
 
     final public function MapIdentityToPrimaryKey(Object\Identity $Identity) {
         $PrimaryKey = $this->PrimaryKeyTable->PrimaryKey();
-        $Map = Map::From([$PrimaryKey], [$Identity]);
         foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
             $Property = $Mapping->GetProperty();
+            $PropertyValue = $Identity[$Property];
             if(isset($Identity[$Property])) {
-                $Mapping->Persist($Map);
+                $Mapping->Persist($PropertyValue, $PrimaryKey);
             }
         }
         

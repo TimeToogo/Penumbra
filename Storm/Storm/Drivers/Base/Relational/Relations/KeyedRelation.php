@@ -33,6 +33,11 @@ abstract class KeyedRelation extends Relation {
     }
     
     public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows) {
+        $ParentTable = $this->GetParentTable();
+        if($ParentTable) {
+            $Request->AddTable($ParentTable);
+        }
+        $Request->AddColumns($this->GetRelatedColumns());
         $Predicate = new Constraints\Predicate();
         $RuleGroup = Constraints\RuleGroup::Any();
         
@@ -45,22 +50,31 @@ abstract class KeyedRelation extends Relation {
         $Predicate->AddRules($RuleGroup);
         $Request->AddPredicate($Predicate);
     }
-    
     /**
-     * @return Relational\ResultRow
+     * @return Relational\Table
      */
-    protected abstract function GetParentTables(ForeignKey $ForeignKey);
+    final protected function GetParentTable() {
+        return $this->ParentTable($this->ForeignKey);
+    }
+    protected abstract function ParentTable(ForeignKey $ForeignKey);
+    /**
+     * @return Relational\IColumn[]
+     */
+    final protected function GetRelatedColumns() {
+        return $this->RelatedColumns($this->ForeignKey);
+    }
+    protected abstract function RelatedColumns(ForeignKey $ForeignKey);
+    
     /**
      * @return Relational\ResultRow
      */
     protected abstract function MapParentRowToRelatedKey(ForeignKey $ForeignKey, 
             Relational\ResultRow $ParentRow);
     
-    
-    final protected function HashRowsByColumns(array $Rows, array $Columns) {
+    final protected function HashRowsByColumnValues(array $Rows, array $Columns) {
         $KeyedRows = array();
         foreach($Rows as $Row) {
-            $Hash = $Row->GetDataFromColumns($Columns)->Hash();
+            $Hash = $Row->GetDataFromColumns($Columns)->Hash(false);
             $KeyedRows[$Hash] = $Row;
         }
         

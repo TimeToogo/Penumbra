@@ -10,10 +10,10 @@ use \Storm\Drivers\Base\Relational\Queries\IConnection;
 class AutoIncrementGenerator extends PrimaryKeys\PostInsertKeyGenerator {
     protected function OnSetPrimaryKeyColumns(array $PrimaryKeyColumns) {
         if(count($PrimaryKeyColumns) !== 1) {
-            throw new Exception('Only supports single auto increment column');
+            throw new \Exception('Only supports single auto increment column');
         }
         else if(!$PrimaryKeyColumns[0]->HasTrait(Relational\Columns\Traits\Increment::GetType())) {
-            throw new Exception('Column must be an AUTO_INCREMENT column');
+            throw new \Exception('Column must be an AUTO_INCREMENT column');
         }
     }
     

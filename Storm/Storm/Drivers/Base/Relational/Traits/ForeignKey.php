@@ -43,10 +43,10 @@ class ForeignKey extends RelationalTableTrait {
             }
             else {
                 if(!$this->ParentTable->Is($ParentColumn->GetTable())) {
-                    throw new Exception;//TODO:error message
+                    throw new \Exception;//TODO:error message
                 }
                 if(!$this->ReferencedTable->Is($ReferencedColumn->GetTable())) {
-                    throw new Exception;//TODO:error message
+                    throw new \Exception;//TODO:error message
                 }                
             }
             
@@ -80,11 +80,11 @@ class ForeignKey extends RelationalTableTrait {
     }
     
     final public function GetParentColumns() {
-        return $this->ReferencedColumnMap->GetInstances();
+        return $this->ParentColumnIdentifierMap;
     }
     
     final public function GetReferencedColumns() {
-        return $this->ReferencedColumnMap->GetToInstances();
+        return $this->ReferencedColumnIdentifierMap;
     }
     
     /**

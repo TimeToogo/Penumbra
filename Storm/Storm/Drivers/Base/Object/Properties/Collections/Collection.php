@@ -10,7 +10,7 @@ class Collection extends \ArrayObject implements ICollection {
     protected $OriginalEntities = array();
     private $RemovedEntities = array();
     
-    public function __construct($EntityType, array $Entities) {        
+    public function __construct($EntityType, array $Entities = array()) {        
         parent::__construct($Entities);
         
         $this->EntityType = $EntityType;

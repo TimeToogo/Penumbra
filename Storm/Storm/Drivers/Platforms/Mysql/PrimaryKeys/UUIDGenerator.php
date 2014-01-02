@@ -8,6 +8,9 @@ use \Storm\Drivers\Base\Relational\Queries\IConnection;
 
 class UUIDGenerator extends PrimaryKeys\PreInsertKeyGenerator {
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
+        if(count($UnkeyedRows) === 0) {
+            return;
+        }
         $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
         $QueryBuilder = $Connection->QueryBuilder();
         

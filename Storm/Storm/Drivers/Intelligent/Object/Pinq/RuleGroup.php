@@ -71,7 +71,7 @@ class RuleGroup extends Constraints\RuleGroup {
         list($LeftHandSide, $Comparison, $RightHandSide) = $this->ParseRuleSegments($RuleTokens);
         
         if(count($LeftHandSide) === 0 || $Comparison === null || count($RightHandSide) === 0)
-            throw new Exception;
+            throw new \Exception;
         
         
         //Special case: contains - strpos
@@ -90,11 +90,11 @@ class RuleGroup extends Constraints\RuleGroup {
                     if(strtolower($LeftMethodCall[1]) === 'stripos')
                         $Comparison = Constraints\Comparison::ContainsCaseInsensitive;
                     else
-                        throw new Exception;
+                        throw new \Exception;
                     
                     $ArgumentArray = $this->GetFunctionArgumentTokensArray($LeftHandSide);
                     if(count($ArgumentArray) !== 2)
-                        throw new Exception;
+                        throw new \Exception;
                     
                     $EntityProperty = $this->GetEntityPropertyFromTraverse($EntityMap, $ArgumentArray[0]);
                     $SearchValue = $this->GetVariableValue(array_shift($ArgumentArray[1]), $RuleTokens);
@@ -166,7 +166,7 @@ class RuleGroup extends Constraints\RuleGroup {
                     return $VariableMap[$VariableName];
                 }
                 else {
-                    throw new Exception;
+                    throw new \Exception;
                 }
             }
             switch ($VariableToken[0]) {
@@ -189,14 +189,14 @@ class RuleGroup extends Constraints\RuleGroup {
                     }
                     break;
                 default:
-                    throw new Exception;
+                    throw new \Exception;
             }
         }
         else {
             if(!is_array($VariableTokens[0]))
-                throw new Exception;
+                throw new \Exception;
             if(array_shift($VariableTokens)[0] !== T_NEW)
-                throw new Exception;
+                throw new \Exception;
             
             $ObjectName = '';
             while(true) {
@@ -206,7 +206,7 @@ class RuleGroup extends Constraints\RuleGroup {
                     break;
                 }
                 if(!is_array($NameToken))
-                    throw new Exception;
+                    throw new \Exception;
                 if($NameToken[0] === T_NS_SEPARATOR)
                     $ObjectName .= '\\';
                 else if($NameToken[0] === T_STRING)
@@ -214,7 +214,7 @@ class RuleGroup extends Constraints\RuleGroup {
                 
             }
             if(!class_exists($ObjectName))
-                throw new Exception;
+                throw new \Exception;
             $ArgumentsArray = $this->GetFunctionArgumentTokensArray($VariableTokens);
             $ArgumentValues = array();
             foreach($ArgumentsArray as $ArgumentTokens) {
@@ -255,7 +255,7 @@ class RuleGroup extends Constraints\RuleGroup {
         $MappedProperties = $EntityMap->GetProperties();
         
         if(count($EntityPropertyTokens) === 0)
-            throw new Exception;
+            throw new \Exception;
                 
         $TraversedPropertyTokensArray = array(array());
         $Count = 0;
@@ -274,9 +274,9 @@ class RuleGroup extends Constraints\RuleGroup {
         foreach($TraversedPropertyTokensArray as $PropertyTokens) {
             $ObjectPropertyToken = array_shift($PropertyTokens);
             if(!is_array($ObjectPropertyToken))
-                throw new Exception;
+                throw new \Exception;
             if($ObjectPropertyToken[0] !== T_STRING)
-                throw new Exception;
+                throw new \Exception;
 
             $ObjectPropertyName = $ObjectPropertyToken[1];
             $NextToken = array_shift($PropertyTokens);

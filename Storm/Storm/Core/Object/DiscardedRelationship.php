@@ -2,17 +2,22 @@
 
 namespace Storm\Core\Object;
 
-final class Relationship {
+final class DiscardedRelationship {
     private $IsIdentifying;
     private $ParentIdentity;
     private $ChildIdentity;
     
-    public function __construct(Identity $ParentIdentity, Identity $ChildIdentity) {
+    public function __construct($IsIdentifying, Identity $ParentIdentity, Identity $ChildIdentity) {
+        $this->IsIdentifying = $IsIdentifying;
         $this->ParentIdentity = $ParentIdentity;
         $this->ChildIdentity = $ChildIdentity;
     }
     
-    /**
+    public function IsIdentifying() {
+        return $this->IsIdentifying;
+    }
+
+        /**
      * @return Identity
      */
     public function GetParentIdentity() {
@@ -22,7 +27,7 @@ final class Relationship {
     /**
      * @return Identity
      */
-    public function GetChildIdentity() {
+    public function GetRelatedIdentity() {
         return $this->ChildIdentity;
     }
 }

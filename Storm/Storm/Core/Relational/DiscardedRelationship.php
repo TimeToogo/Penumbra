@@ -2,7 +2,7 @@
 
 namespace Storm\Core\Relational;
 
-final class Relationship {
+final class DiscardedRelationship {
     private $ParentPrimaryKey;
     private $ChildPrimaryKey;
     
@@ -21,7 +21,7 @@ final class Relationship {
     /**
      * @return PrimaryKey
      */
-    public function GetChildPrimaryKey() {
+    public function GetRelatedPrimaryKey() {
         return $this->ChildPrimaryKey;
     }
 }

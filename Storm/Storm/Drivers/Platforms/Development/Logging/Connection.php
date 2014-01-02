@@ -15,11 +15,18 @@ class Connection implements Queries\IConnection {
     }
 
     public function BeginTransaction() {
+        $this->Logger->Log('Starting transaction');
         return $this->Connection->BeginTransaction();
     }
 
     public function CommitTransaction() {
+        $this->Logger->Log('Commiting transaction');
         return $this->Connection->CommitTransaction();
+    }
+
+    public function RollbackTransaction() {
+        $this->Logger->Log('Rolling back transaction');
+        return $this->Connection->RollbackTransaction();
     }
 
     public function Disconnect() {
@@ -63,10 +70,6 @@ class Connection implements Queries\IConnection {
                 $QueryBuilder->GetRequestCompiler(),
                 $QueryBuilder->GetPredicateCompiler(),
                 $QueryBuilder->GetIdentifierEscaper());
-    }
-
-    public function RollbackTransaction() {
-        return $this->Connection->RollbackTransaction();
     }
 
     public function SetIdentifierEscaper(Queries\IIdentifierEscaper $IdentifierEscaper) {

@@ -35,27 +35,27 @@ class RelatedType extends PropertyType {
             }
         }
         
-        throw new Exception;//TODO:error message
+        throw new \Exception;//TODO:error message
     }
     
     protected function ReviveNull(Domain $Domain, $Entity) {
-        throw new Exception;//TODO:error message
+        throw new \Exception;//TODO:error message
     }
     
     protected function ReviveRevivalData(Domain $Domain, $Entity, RevivalData $RevivalData) {
-        throw new Exception;//TODO:error message
+        throw new \Exception;//TODO:error message
     }
     
     protected function ReviveCallable(Domain $Domain, $Entity, callable $Callback) {
-        throw new Exception;//TODO:error message
+        throw new \Exception;//TODO:error message
     }
     
     protected function ReviveArrayOfRevivalData(Domain $Domain, $Entity, array $RevivalDataArray) {
-        throw new Exception;//TODO:error message
+        throw new \Exception;//TODO:error message
     }
     
     protected function ReviveArrayOfCallables(Domain $Domain, $Entity, array $Callbacks) {
-        throw new Exception;//TODO:error message
+        throw new \Exception;//TODO:error message
     }
 }
 

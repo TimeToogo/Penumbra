@@ -7,14 +7,16 @@ namespace Storm\Core\Object;
  */
 final class UnitOfWork {
     private $Domain;
+    private $PersistenceDataEntityMap;
     private $PersistenceData = array();
     private $PersistenceDataGroups = array();
     private $Procedures = array();
-    private $DiscardedIdentities = array();
+    private $DiscardenceData = array();
     private $DiscardedIdentityGroups = array();
     private $DiscardedRequests = array();
     
     public function __construct(Domain $Domain) {
+        $this->PersistenceDataEntityMap = new \Storm\Core\Containers\Map();
         $this->Domain = $Domain;
     }
     
@@ -36,6 +38,7 @@ final class UnitOfWork {
         
         $PersistenceData = $this->Domain->Persist($this, $Entity);
         $this->PersistenceData[$Hash] = $PersistenceData;
+        $this->PersistenceDataEntityMap[$PersistenceData] = $Entity;
         
         $EntityType = $PersistenceData->GetEntityType();
         if(!isset($this->PersistenceDataGroups[$EntityType])) {
@@ -46,32 +49,39 @@ final class UnitOfWork {
         return $PersistenceData;
     }
     
+    public function SupplyIdentity(PersistenceData $PersistenceData, Identity $Identity) {
+        if(isset($this->PersistenceDataEntityMap[$PersistenceData])) {
+            $Entity = $this->PersistenceDataEntityMap[$PersistenceData];
+            $this->Domain->Apply($Entity, $Identity);
+        }
+    }
+    
     public function Execute(IProcedure $Procedure) {
         $this->Procedures[] = $Procedure;
     }
     
     /**
-     * @return Identity
+     * @return DiscardenceData
      */
     public function Discard($Entity) {
         $Hash = spl_object_hash($Entity);
-        if(isset($this->DiscardedIdentities[$Hash])) {
-            return $this->DiscardedIdentities[$Hash];
+        if(isset($this->DiscardenceData[$Hash])) {
+            return $this->DiscardenceData[$Hash];
         }
         if(!$this->Domain->HasIdentity($Entity)) {
             return null;
         }
         
-        $DiscardedIdentity = $this->Domain->Discard($this, $Entity);
-        $this->DiscardedIdentities[$Hash] = $DiscardedIdentity;
+        $DiscardenceData = $this->Domain->Discard($this, $Entity);
+        $this->DiscardenceData[$Hash] = $DiscardenceData;
         
-        $EntityType = $DiscardedIdentity->GetEntityType();
+        $EntityType = $DiscardenceData->GetEntityType();
         if(!isset($this->DiscardedIdentityGroups[$EntityType])) {
             $this->DiscardedIdentityGroups[$EntityType] = array();
         }
-        $this->DiscardedIdentityGroups[$EntityType][] = $PersistenceData;
+        $this->DiscardedIdentityGroups[$EntityType][] = $DiscardenceData;
         
-        return $DiscardedIdentity;
+        return $DiscardenceData;
     }
     
     public function DiscardWhere(IRequest $Request) {
@@ -102,14 +112,14 @@ final class UnitOfWork {
     /**
      * @return PersistenceData[]
      */
-    public function GetDiscardedIdentities() {
-        return $this->DiscardedIdentities;
+    public function GetDiscardenceData() {
+        return $this->DiscardenceData;
     }
     
     /**
      * @return PersistenceData[][]
      */
-    public function GetDiscardedIdentityGroups() {
+    public function GetDiscardenceDataGroups() {
         return $this->DiscardedIdentityGroups;
     }
     

@@ -6,28 +6,30 @@ use \Storm\Core\Object;
 
 class EntityProperty extends RelationshipProperty implements Object\IEntityProperty {
     private $IsOptional;
+    private $RelationshipType;
     private $ProxyGenerator;
     public function __construct(
             Accessors\Accessor $Accessor,
             $EntityType,
+            IRelationshipType $RelationshipType,
             $IsOptional = false,
-            $IsIdentifying = true,
             Proxies\IProxyGenerator $ProxyGenerator = null) {
-        parent::__construct($Accessor, $EntityType, $IsIdentifying);
+        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying());
         $this->IsOptional = $IsOptional;
+        $this->RelationshipType = $RelationshipType;
         $this->ProxyGenerator = $ProxyGenerator;
     }
-
-    final public function IsOptional() {
+    
+    public function IsOptional() {
         return $this->IsOptional;
     }
         
-    protected function RevivreNull(Object\Domain $Domain, $Entity) {
+    protected function ReviveNull(Object\Domain $Domain, $Entity) {
         if($this->IsOptional) {
             return null;
         }
         else {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
     }
     
@@ -49,7 +51,7 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
             return $this->ProxyGenerator->GenerateProxy($Domain, $this->GetEntityType(), $Callback);
         }
         else {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
     }
     
@@ -66,28 +68,24 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
         $DiscardedRelationship = null;
         
         if(!$CurrentIsValidEntity && !$this->IsOptional) {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
         else if(!$CurrentIsValidEntity && !$OriginalIsValidEntity) {
             
         }
         else if($CurrentValue == $OriginalValue || $Domain->ShareIdentity($CurrentValue, $OriginalValue)) {
-            if($this->IsEntityAltered($CurrentValue)) {
-                $UnitOfWork->Persist($CurrentValue);
-            }
+            
         }
         else {
             if($OriginalIsValidEntity) {
-                if($this->IsIdentifying()) {
-                    $UnitOfWork->Discard($OriginalValue);
-                }
-                $DiscardedRelationship = $Domain->Relationship($ParentEntity, $OriginalValue);
+                $DiscardedRelationship = $this->RelationshipType->GetDiscardedRelationship(
+                        $Domain, $UnitOfWork, 
+                        $ParentEntity, $OriginalValue);
             }
             if($CurrentIsValidEntity) {
-                if($this->IsEntityAltered($CurrentValue)) {
-                    $UnitOfWork->Persist($CurrentValue);
-                }
-                $PersistedRelationship = $Domain->Relationship($ParentEntity, $CurrentValue);
+                $PersistedRelationship = $this->RelationshipType->GetPersistedRelationship(
+                        $Domain, $UnitOfWork, 
+                        $ParentEntity, $CurrentValue);
             }
         }
         
@@ -106,13 +104,12 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
         $DiscardedRelationship = null;
         
         if(!$CurrentIsValidEntity && !$this->IsOptional) {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
         if($OriginalIsValidEntity) {
-            if($this->IsIdentifying()) {
-                $UnitOfWork->Discard($OriginalValue);
-            }
-            $DiscardedRelationship = $Domain->Relationship($ParentEntity, $OriginalValue);
+            $DiscardedRelationship = $this->RelationshipType->GetDiscardedRelationship(
+                    $Domain, $UnitOfWork, 
+                    $ParentEntity, $OriginalValue);
         }
         
         return new Object\RelationshipChange(null, $DiscardedRelationship);

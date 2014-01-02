@@ -12,7 +12,7 @@ class LazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelation
             Object\IEntityProperty $EntityProperty, 
             Relational\IToOneRelation $ToOneRelation) {
         if($EntityProperty->IsOptional()) {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
         
         parent::__construct($EntityProperty, $ToOneRelation);
@@ -23,10 +23,10 @@ class LazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelation
         $RelatedEntityRevivalDataLoader = function ($ParentRow) use (&$DomainDatabaseMap, &$ToOneRelation, &$ParentRowRevivalDataMap) {
             static $ParentRowRelatedRevivalDataMap;
             if($ParentRowRelatedRevivalDataMap === null) {
-                $ParentRows = $ResultRowRevivalDataMap->GetInstances();
+                $ParentRows = $ParentRowRevivalDataMap->GetInstances();
                 $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ParentRows);
                 
-                $ParentRowRelatedRevivalDataMap = $this->MapToParentRowRelatedRevivalDataMap($DomainDatabaseMap, $ResultRowRevivalDataMap, $RelatedRows);
+                $ParentRowRelatedRevivalDataMap = $this->MapToParentRowRelatedRevivalDataMap($DomainDatabaseMap, $ParentRowRevivalDataMap, $RelatedRows);
             }
             
             return $ParentRowRelatedRevivalDataMap[$ParentRow];
@@ -36,7 +36,7 @@ class LazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelation
         foreach($ParentRowRevivalDataMap as $ParentRow) {
             $RevivalData = $ParentRowRevivalDataMap[$ParentRow];
             $RelatedEntityDataLoader = function () use (&$RelatedEntityRevivalDataLoader, $ParentRow) {
-                $RelatedEntityRevivalDataLoader($ParentRow);
+                return $RelatedEntityRevivalDataLoader($ParentRow);
             };
             
             $RevivalData[$Property] = $RelatedEntityDataLoader;

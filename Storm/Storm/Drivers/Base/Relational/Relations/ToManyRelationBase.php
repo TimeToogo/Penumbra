@@ -24,10 +24,10 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
     }
     protected abstract function FillParentToRelatedRowsMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows);
     
-    final protected function GroupRelatedRows(array $RelatedRows, array $GroupByColumns) {
+    final protected function GroupRowsByColumns(array $RelatedRows, array $GroupByColumns) {
         $GroupedRelatedRows = array();
         foreach($RelatedRows as $RelatedRow) {
-            $Hash = $RelatedRow->GetDataFromColumns($GroupByColumns)->Hash();
+            $Hash = $RelatedRow->GetDataFromColumns($GroupByColumns)->Hash(false);
             if(!isset($GroupedRelatedRows[$Hash])) {
                 $GroupedRelatedRows[$Hash] = array();
             }
@@ -39,7 +39,7 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
     
     final protected function MapParentRowsToGroupedRelatedRows(Map $Map, array $ParentRows, array $MapByColumns, array $GroupedRelatedRows) {
         foreach($ParentRows as $ParentRow) {
-            $Hash = $ParentRow->GetDataFromColumns($MapByColumns)->Hash();
+            $Hash = $ParentRow->GetDataFromColumns($MapByColumns)->Hash(false);
             if(isset($GroupedRelatedRows[$Hash])) {
                 $Map->Map($ParentRow, new \ArrayObject($GroupedRelatedRows[$Hash]));
             }
@@ -49,9 +49,23 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
         }
     }
     
-    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, array $RelationshipChanges) {
-        
+    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges) {
+        $IdentifyingChildRows = array();
+        $Table = $this->GetTable();
+        foreach($RelationshipChanges as $RelationshipChange) {
+            if($RelationshipChange->HasPersistedRelationship()) {
+                $PersistedRelationship = $RelationshipChange->GetPersistedRelationship();
+                if($PersistedRelationship->IsIdentifying()) {
+                    $IdentifyingChildRows[] = $PersistedRelationship->GetChildResultRow()->GetRow($Table);
+                }
+            }
+        }
+        $ParentRow = $ParentData->GetRow($this->GetParentTable());
+        $this->PersistIdentifyingRelationship($Transaction, $ParentRow, $IdentifyingChildRows);
     }
+    protected abstract function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
+            Relational\Row $ParentRow, array $ChildRows);
+    
 }
 
 ?>

@@ -11,7 +11,7 @@ class PrimaryKey extends StructuralTableTrait {
     
     public function __construct(array $Columns) {
         if(count($Columns) === 0) {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
         $this->Columns = array_values($Columns);
         foreach($this->Columns as $Column) {

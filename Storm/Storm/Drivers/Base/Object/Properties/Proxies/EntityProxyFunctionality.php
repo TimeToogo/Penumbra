@@ -2,12 +2,13 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Proxies;
 
-use \Storm\Core\Object\EntityMap;
+use \Storm\Core\Object\Domain;
 use \Storm\Core\Object\RevivalData;
 
 trait EntityProxyFunctionality {
-    private $__EntityMap;
+    private $__Domain;
     private $__IsConstructed = false;
+    private $__IsCloning = false;
     private $__IsLoading = false;
     private $__IsLoaded = false;
     private $__OriginalEntity = null;
@@ -22,13 +23,13 @@ trait EntityProxyFunctionality {
     private static $__EntityMethods = array();
     private static $__IsInitialized = false;
     
-    private function __ConstructProxy(EntityMap $EntityMap, callable $LoadRevivalDataFunction) {
+    private function __ConstructProxy(Domain $Domain, callable $LoadRevivalDataFunction) {
         $this->Initialize();
-        $this->__EntityMap = $EntityMap;
+        $this->__Domain = $Domain;
         $this->__LoadRevivalDataFunction = $LoadRevivalDataFunction;
         foreach(static::$__EntityProperties as $Property) {
             if($Property->getDeclaringClass()->getName() !== static::$__ClassName
-                    && $Property->isPublic()) {
+                    && $Property->isPublic() && !$Property->isStatic()) {
                 unset($this->{$Property->getName()});
             }
         }
@@ -70,7 +71,7 @@ trait EntityProxyFunctionality {
     }
     
     private function __ShouldNotLoad() {
-        return $this->__IsLoading || $this->__IsLoaded || !$this->__IsConstructed;
+        return $this->__IsLoading || $this->__IsLoaded || !$this->__IsConstructed || $this->__IsCloning;
     }
     
     private function __Load() {
@@ -85,7 +86,7 @@ trait EntityProxyFunctionality {
         $this->__OriginalEntity = clone $this;
         
         unset($this->__LoadEntityFunction);
-        unset($this->__EntityMap);
+        unset($this->__Domain);
         foreach($this->__UnsetQueue as $Variable) {
             if(property_exists($this, $Variable)) {
                 unset($this->$Variable);
@@ -97,7 +98,7 @@ trait EntityProxyFunctionality {
     }
     
     private function __Revive(RevivalData $RevivalData) {
-        $this->__EntityMap->Load($RevivalData, $this);
+        $this->__Domain->LoadEntity($RevivalData, $this);
     }
     
     private function HasParentMethod($Method) {
@@ -163,7 +164,15 @@ trait EntityProxyFunctionality {
             unset($this->$Name);
         }
     }
-
+    
+    public function __CloneProxyInstance() {
+        $this->__IsCloning = true;
+        $ClonedProxy = clone $this;
+        $this->__IsCloning = false;
+        
+        return $ClonedProxy;
+    }
+    
     public function __clone() {
         $this->__Load();
         if($this->HasParentMethod(__FUNCTION__))

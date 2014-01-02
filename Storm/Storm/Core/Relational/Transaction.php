@@ -7,6 +7,7 @@ use Storm\Core\Containers\Map;
 final class Transaction {
     private $PersistedRows = array();
     private $PersistedRowGroups = array();
+    private $PrePersistRowEventMap;
     private $PostPersistRowEventMap;
     private $Procedures = array();
     private $DiscardedPrimaryKeys = array();
@@ -14,6 +15,7 @@ final class Transaction {
     private $DiscardedRequests = array();
     
     public function __construct() {
+        $this->PrePersistRowEventMap = new Map;
         $this->PostPersistRowEventMap = new Map;
     }
     
@@ -60,10 +62,11 @@ final class Transaction {
     }
     
     public function Persist(Row $Row) {
-        $this->PersistedRows[spl_object_hash($Row)] = $Row;
-        if(!isset($this->PostPersistRowEvent[$Row])) {
-            $this->PostPersistRowEvent[$Row] = new \ArrayObject();
+        $Hash = spl_object_hash($Row);
+        if(isset($this->PersistedRows[$Hash])) {
+            return;
         }
+        $this->PersistedRows[$Hash] = $Row;
         
         $TableName = $Row->GetTable()->GetName();
         if(!isset($this->PersistedRowGroups[$TableName])) {
@@ -76,17 +79,40 @@ final class Transaction {
         array_walk($Rows, [$this, 'Persist']);
     }
     
-    public function TriggerPostPersistEvent(array $Rows) {
-        foreach($Rows as $Row) {
-            $Events = $this->PostPersistRowEventMap[$Row];
+    private function TriggerEvents(Map $EventMap, $Key) {
+        if(isset($EventMap[$Key])) {
+            $Events = $EventMap[$Key];
             foreach($Events as $Event) {
-                $Event($Row);
+                $Event($Key);
             }
         }
     }
+    private function AddEvent(Map $EventMap, $Key, callable $Event) {
+        if(isset($EventMap[$Key])) {
+            $Events = $EventMap[$Key];
+            $Events[] = $Event;
+        }
+        else {
+            $EventMap[$Key] = new \ArrayObject([$Event]);
+        }
+    }
     
+    public function TriggerPrePersistEvent(array $Rows) {
+        foreach($Rows as $Row) {
+            $this->TriggerEvents($this->PrePersistRowEventMap, $Row);
+        }
+    }    
+    public function SubscribeToPrePersistEvent(Row $Row, callable $Event) {
+        $this->AddEvent($this->PrePersistRowEventMap, $Row, $Event);
+    }
+    
+    public function TriggerPostPersistEvent(array $Rows) {
+        foreach($Rows as $Row) {
+            $this->TriggerEvents($this->PostPersistRowEventMap, $Row);
+        }
+    }    
     public function SubscribeToPostPersistEvent(Row $Row, callable $Event) {
-        $this->PostPersistRowEvent[$Row][] = $Event;
+        $this->AddEvent($this->PostPersistRowEventMap, $Row, $Event);
     }
     
     public function Execute(Procedure $Procedure) {
@@ -103,7 +129,11 @@ final class Transaction {
         $this->DiscardedPrimaryKeyGroups[$TableName][] = $PrimaryKey;
     }
     
-    public function DiscardAll(Request $Request) {
+    public function DiscardAll(array $PrimaryKeys) {
+        array_walk($PrimaryKeys, [$this, 'Discard']);
+    }
+    
+    public function DiscardWhere(Request $Request) {
         $this->DiscardedRequests[] = $Request;
     }
 }

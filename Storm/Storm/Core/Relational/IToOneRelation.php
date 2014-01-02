@@ -10,7 +10,7 @@ interface IToOneRelation extends IRelation {
      */
     public function MapParentToRelatedRow(array $ParentRows, array $RelatedRows);
     
-    public function Persist(Transaction $Transaction, ColumnData $ParentData, RelationshipChange $RelationshipChange);
+    public function Persist(Transaction $Transaction, ResultRow $ParentData, RelationshipChange $RelationshipChange);
 }
 
 ?>

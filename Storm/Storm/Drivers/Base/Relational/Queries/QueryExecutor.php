@@ -46,7 +46,8 @@ abstract class QueryExecutor implements IQueryExecutor {
                     $this->ExecuteUpdates($Connection, $Table, $GroupedProceduresToExecute[$TableName]);
                 }
                 if(isset($GroupedPersistedRows[$TableName])) {
-                    $this->PersistRows($Connection, $Table, $GroupedPersistedRows[$TableName]);
+                    $Transaction->TriggerPrePersistEvent($GroupedPersistedRows[$TableName]);
+                    $this->PersistRows($Connection, $Transaction, $Table, $GroupedPersistedRows[$TableName]);
                     $Transaction->TriggerPostPersistEvent($GroupedPersistedRows[$TableName]);
                 }
             }
@@ -61,14 +62,14 @@ abstract class QueryExecutor implements IQueryExecutor {
     protected abstract function DeleteWhereQuery(IConnection $Connection, Table $Table, array &$DiscardedRequests);
     protected abstract function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys);
     protected abstract function ExecuteUpdates(IConnection $Connection, Table $Table, array &$ProceduresToExecute);
-    private function PersistRows(IConnection $Connection, Table $Table, array &$RowsToPersist,
-            PrimaryKeys\ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
+    private function PersistRows(IConnection $Connection, Relational\Transaction $Transaction, 
+            Table $Table, array &$RowsToPersist) {
         
         $HasKeyGenerator = $Table->HasKeyGenerator();
         $ValueWithReturningDataKeyGenerator = null;
         if($HasKeyGenerator) {
             $UnkeyedRows = array_filter($RowsToPersist, 
-                    function (Relational\Row $Row) { return $Row->HasPrimaryKey(); });
+                    function (Relational\Row $Row) { return !$Row->HasPrimaryKey(); });
             
             $KeyGenerator = $Table->GetKeyGenerator();
             $KeyGeneratorMode = $KeyGenerator->GetKeyGeneratorMode();

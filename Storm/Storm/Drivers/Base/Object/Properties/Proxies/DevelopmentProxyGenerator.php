@@ -85,12 +85,12 @@ NOW;
         $ProxyClassName = $this->GenerateProxyClassName($EntityReflection->getName());
         $FullProxyName = $this->GetProxyFullName($ProxyClassName);
         
-        return $this->GenerateProxyInstance($Domain->GetEntityMap($EntityType), $EntityReflection, $ProxyClassName, $FullProxyName, $RevivalDataLoaderFunction);
+        return $this->GenerateProxyInstance($Domain, $EntityReflection, $ProxyClassName, $FullProxyName, $RevivalDataLoaderFunction);
     }
     
-    private function GenerateProxyInstance(Object\EntityMap $EntityMap, $EntityReflection, $ProxyClassName, $FullProxyName, callable $RevivalDataLoaderFunction) {
+    private function GenerateProxyInstance(Object\Domain $Domain, $EntityReflection, $ProxyClassName, $FullProxyName, callable $RevivalDataLoaderFunction) {
         if(class_exists($FullProxyName, false)) {
-            return new $FullProxyName($EntityMap, $RevivalDataLoaderFunction);
+            return new $FullProxyName($Domain, $RevivalDataLoaderFunction);
         }
         else {
             $ProxyFileName = $this->GenerateProxyFileName($ProxyClassName);
@@ -98,7 +98,7 @@ NOW;
             $this->GenerateProxyClassFile($ProxyFileName, $ProxyClassName, $EntityReflection);
             
             require $ProxyFileName;
-            return new $FullProxyName($RevivalDataLoaderFunction);
+            return new $FullProxyName($Domain, $RevivalDataLoaderFunction);
         }
     }
     

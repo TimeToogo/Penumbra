@@ -5,15 +5,17 @@ namespace Storm\Drivers\Base\Object\Properties;
 use \Storm\Core\Object;
 
 class CollectionProperty extends RelationshipProperty implements Object\ICollectionProperty {
+    private $RelationshipType;
     private $ProxyGenerator;
     
     public function __construct(
             Accessors\Accessor $Accessor,
             $EntityType,
-            $IsIdentifying = true,
+            IRelationshipType $RelationshipType,
             Proxies\IProxyGenerator $ProxyGenerator = null) {
-        parent::__construct($Accessor, $EntityType, $IsIdentifying);
+        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying());
         
+        $this->RelationshipType = $RelationshipType;
         $this->ProxyGenerator = $ProxyGenerator;
     }
     
@@ -24,7 +26,7 @@ class CollectionProperty extends RelationshipProperty implements Object\ICollect
             return new Collections\Collection($EntityType, $Proxies);
         }
         else {
-            throw new Exception;//TODO:error
+            throw new \Exception;//TODO:error
         }
     }
     
@@ -44,8 +46,7 @@ class CollectionProperty extends RelationshipProperty implements Object\ICollect
                 $HasOriginalValue, 
                 $OriginalValue) = $this->GetEntityRelationshipData($ParentEntity);
         
-        $PersistedRelationships = array();
-        $DiscarededRelationships = array();
+        $RelationshipChanges = array();
         
         $OriginalEntities = array();
         $CurrentEntities = array();
@@ -56,7 +57,7 @@ class CollectionProperty extends RelationshipProperty implements Object\ICollect
         
         if(!($CurrentValue instanceof Collections\ICollection)) {
             if(!($CurrentValue instanceof \Traversable)) {
-                throw new Exception;//TODO:error message
+                throw new \Exception;//TODO:error message
             }
             foreach($CurrentValue as $Entity) {
                 if($this->IsValidEntity($Entity)) {
@@ -72,22 +73,23 @@ class CollectionProperty extends RelationshipProperty implements Object\ICollect
         }
         $NewEntities = array_udiff($CurrentEntities, $OriginalEntities, [$this, 'ObjectComparison']);
         $RemovedEntities = array_udiff($OriginalEntities, $CurrentEntities, [$this, 'ObjectComparison']);
-
+        
         foreach($NewEntities as $NewEntity) {
-            $UnitOfWork->Persist($NewEntity);
-            $PersistedRelationships[] = new Object\RelationshipChange($Domain->Relationship($ParentEntity, $NewEntity), null);
+            $RelationshipChanges[] = new Object\RelationshipChange(
+                    $this->RelationshipType->GetPersistedRelationship(
+                            $Domain, $UnitOfWork, 
+                            $ParentEntity, $NewEntity), 
+                    null);
         }
         foreach($RemovedEntities as $RemovedEntity) {
-            if($this->IsIdentifying()) {
-                $UnitOfWork->Discard($RemovedEntity);
-            }
-            $DiscarededRelationships[] = new Object\RelationshipChange(null, $Domain->Relationship($ParentEntity, $RemovedEntity));
+            $RelationshipChanges[] = new Object\RelationshipChange(
+                    null, 
+                    $this->RelationshipType->GetDiscardedRelationship(
+                            $Domain, $UnitOfWork, 
+                            $ParentEntity, $RemovedEntity));
         }
         
-        return array_merge($PersistedRelationships, $DiscarededRelationships);
-    }
-    protected function GetOriginalEntities($OriginalValue) {
-        
+        return $RelationshipChanges;
     }
     
     public function Discard(Object\UnitOfWork $UnitOfWork, $ParentEntity) {
@@ -100,10 +102,11 @@ class CollectionProperty extends RelationshipProperty implements Object\ICollect
         $DiscarededRelationships = array();
         if($HasOriginalValue) {
             foreach($OriginalValue->ToArray() as $RemovedEntity) {
-                if($this->IsIdentifying()) {
-                    $UnitOfWork->Discard($RemovedEntity);
-                }
-                $DiscarededRelationships[] = new Object\RelationshipChange(null, $Domain->Relationship($ParentEntity, $RemovedEntity));
+                $DiscarededRelationships[] = new Object\RelationshipChange(
+                        null, 
+                        $this->RelationshipType->GetDiscardedRelationship(
+                                $Domain, $UnitOfWork, 
+                                $ParentEntity, $RemovedEntity));
             }
         }
         

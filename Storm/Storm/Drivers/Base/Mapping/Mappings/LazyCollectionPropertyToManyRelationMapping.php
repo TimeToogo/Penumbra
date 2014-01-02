@@ -21,10 +21,10 @@ class LazyCollectionPropertyToManyRelationMapping extends CollectionPropertyToMa
                 $ParentRows = $ParentRowRevivalDataMap->GetInstances();
                 $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ParentRows);
                 
-                $ParentRelatedRevivalDataArraysMap = $this->MapToParentRowRelatedRevivalDataArrayMap($DomainDatabaseMap, $ResultRowRevivalDataMap, $RelatedRows);
+                $ParentRelatedRevivalDataArraysMap = $this->MapToParentRowRelatedRevivalDataArrayMap($DomainDatabaseMap, $ParentRowRevivalDataMap, $RelatedRows);
             }
             
-            return $ParentRelatedRevivalDataArraysMap[$ParentRow];
+            return $ParentRelatedRevivalDataArraysMap[$ParentRow]->getArrayCopy();
         };
         
         $Property = $this->GetProperty();

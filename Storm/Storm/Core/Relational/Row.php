@@ -3,31 +3,41 @@
 namespace Storm\Core\Relational;
 
 final class Row extends TableColumnData {
-    private $PrimaryKeyColumnNames;
+    private $PrimaryKeyColumnsAmount;
+    private $PrimaryKey;
     public function __construct(Table $Table, array $RowData = array()) {
-        $this->PrimaryKeyColumnNames = array_flip(array_keys($Table->GetPrimaryKeyColumns()));
         parent::__construct($Table, $RowData);
+        $this->PrimaryKey = new PrimaryKey($Table, 
+                array_intersect_key($RowData,  $Table->GetPrimaryKeyColumnIdentifiers()));
+        $this->PrimaryKeyColumnsAmount = count($Table->GetPrimaryKeyColumns());
     }
-    
+    protected function AddColumn(IColumn $Column, $Data) {
+        parent::AddColumn($Column, $Data);
+        if($Column->IsPrimaryKey()) {
+            $this->PrimaryKey[$Column] = $Data;
+        }
+    }
+    protected function RemoveColumn(IColumn $Column) {
+        parent::RemoveColumn($Column);
+        if($Column->IsPrimaryKey()) {
+            unset($this->PrimaryKey[$Column]);
+        }
+    }
     /**
      * @return PrimaryKey
      */
     final public function HasPrimaryKey() {
-        return count(array_filter(
-                array_intersect_key($this->GetColumnData(),  $this->PrimaryKeyColumnNames),
+        return count(array_filter($this->PrimaryKey->GetColumnData(),
                         function ($Value) { return $Value !== null; }))
                 === 
-                count($this->PrimaryKeyColumnNames);
+                $this->PrimaryKeyColumnsAmount;
     }
     
     /**
      * @return PrimaryKey
      */
     final public function GetPrimaryKey() {
-        $ColumnData = $this->GetColumnData();
-        $PrimaryKeyData = array_intersect_key($ColumnData,  $this->PrimaryKeyColumnNames);
-        
-        return new PrimaryKey($this->GetTable(), $PrimaryKeyData, true);
+        return $this->PrimaryKey;
     }
 }
 

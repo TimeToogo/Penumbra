@@ -21,7 +21,7 @@ class SequenceGenerator extends PrimaryKeys\PreInsertKeyGenerator {
         
     protected function OnSetPrimaryKeyColumns(array $PrimaryKeyColumns) {
         if(count($PrimaryKeyColumns) !== 1) {
-            throw new Exception('Only supports single column');
+            throw new \Exception('Only supports single column');
         }
     }
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {

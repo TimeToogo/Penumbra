@@ -26,13 +26,13 @@ class BloggingDatabase extends Relational\Database {
             return new Platforms\Mysql\Platform(
                     new Logging\Connection(new Logging\DumpLogger(), 
                             new Platforms\PDO\Connection(
-                                    new \PDO('mysql:host=localhost;dbname=StormTest', 'root', 'admin'))), 
+                                    new \PDO('mysql:host=localhost;dbname=StormTest', 'root', 'admin'), false)), 
                     $Development > 1);
         }
         else {
             return new Platforms\Mysql\Platform(
                             new Platforms\PDO\Connection(
-                                    new \PDO('mysql:host=localhost;dbname=StormTest', 'root', 'admin')), 
+                                    new \PDO('mysql:host=localhost;dbname=StormTest', 'root', 'admin'), true), 
                     false);
         }
     }

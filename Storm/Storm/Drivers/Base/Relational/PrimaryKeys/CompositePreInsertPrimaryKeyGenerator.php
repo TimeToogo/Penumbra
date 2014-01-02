@@ -21,7 +21,7 @@ class CompositePreInsertPrimaryKeyGenerator extends PreInsertKeyGenerator {
     protected function OnSetPrimaryKeyColumns(array $PrimaryKeyColumns) {
         foreach($PrimaryKeyColumns as $PrimaryKeyColumn) {
             if(!isset($this->ColumnGeneratorMap[$PrimaryKeyColumn])) {
-                throw new Exception('Unmapped primary key: ' . $PrimaryKeyColumn->GetName());
+                throw new \Exception('Unmapped primary key: ' . $PrimaryKeyColumn->GetName());
             }
         }
     }

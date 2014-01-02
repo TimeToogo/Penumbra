@@ -7,6 +7,7 @@ interface IProxy {
     
     public function __IsLoaded();
     public function __IsAltered();
+    public function __CloneProxyInstance();
 }
 
 ?>

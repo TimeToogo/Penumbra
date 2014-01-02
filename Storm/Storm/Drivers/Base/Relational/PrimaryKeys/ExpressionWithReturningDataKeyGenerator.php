@@ -15,7 +15,7 @@ abstract class ValueWithReturningDataKeyGenerator implements IKeyGenerator {
     
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows, array $ReturnedKeyData) {
         if(count($UnkeyedRows) !== count($ReturnedKeyData)) {
-            throw new Exception;//TODO:error message
+            throw new \Exception;//TODO:error message
         }
         else {
             $this->FillPrimaryKeyValues($Connection, array_values($UnkeyedRows), array_values($ReturnedKeyData));

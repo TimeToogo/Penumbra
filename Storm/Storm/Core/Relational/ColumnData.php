@@ -25,6 +25,13 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         $this->AddColumn($Column, $Data);
     }
     
+    final public function SetData(ColumnData $ColumnData) {
+        foreach($ColumnData as $Identifier => $Data) {
+            $Column = $ColumnData->GetColumn($Identifier);
+            $this->AddColumn($Column, $Data);
+        }
+    }
+    
     protected function AddColumn(IColumn $Column, $Data) {
         $ColumnIdentifier = $Column->GetIdentifier();
         if(!isset($this->Columns[$ColumnIdentifier])) {
@@ -35,9 +42,13 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         $this->ColumnData[$ColumnIdentifier] = $Data;
     }
     
-    final public function Hash() {
+    protected function RemoveColumn(IColumn $Column) {
+        unset($this->ColumnData[$Column->GetIdentifier()]);
+    }
+    
+    final public function Hash($UseColumns = true) {
         asort($this->ColumnData);
-        return md5(json_encode($this->ColumnData));
+        return md5(json_encode($UseColumns ? $this->ColumnData : array_values($this->ColumnData)));
     }
     
     final public function getIterator() {
@@ -61,18 +72,13 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
 
     final public function offsetUnset($Column) {
-        unset($this->ColumnData[$Column->GetIdentifier()]);
+        $this->RemoveColumn($Column);
     }
     
     public function Matches(ColumnData $Data) {
-        foreach($this->ColumnData as $ColumnName => $Value) {
-            if(!isset($Data->ColumnData[$ColumnName]))
-                return false;
-            if($Value !== $Data->ColumnData[$ColumnName])
-                return false;
-        }
-        
-        return true;
+        asort($this->ColumnData);
+        asort($Data->ColumnData);
+        return $this->ColumnData === $Data->ColumnData;
     }
 }
 
