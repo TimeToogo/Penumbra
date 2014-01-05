@@ -2,16 +2,20 @@
 
 namespace Storm\Drivers\Base\Object\Construction;
 
-class CustomConstructor implements IEntityConstructor {
+class Custom extends Constructor {
     private $ConstructorCallable;
     
     public function __construct(callable $ConstructorCallable) {
         $this->ConstructorCallable = $ConstructorCallable;
     }
     
-    public function Construct($EntityType) {
+    protected function OnSetEntityType($EntityType) {
+        
+    }
+    
+    public function Construct() {
         $Constructor = $this->ConstructorCallable;
-        return $Constructor($EntityType);
+        return $Constructor();
     }
 }
 

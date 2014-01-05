@@ -12,13 +12,14 @@ class AutoIncrementGenerator extends PrimaryKeys\PostInsertKeyGenerator {
         if(count($PrimaryKeyColumns) !== 1) {
             throw new \Exception('Only supports single auto increment column');
         }
-        else if(!$PrimaryKeyColumns[0]->HasTrait(Relational\Columns\Traits\Increment::GetType())) {
+        else if(!reset($PrimaryKeyColumns)->HasTrait(Relational\Columns\Traits\Increment::GetType())) {
             throw new \Exception('Column must be an AUTO_INCREMENT column');
         }
     }
     
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
-        $PrimaryKeyColumn = reset($this->GetPrimaryKeyColumns());
+        $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
+        $IncrementColumn = reset($PrimaryKeyColumns);
         $FirstInsertId = $Connection->FetchValue('SELECT LAST_INSERT_ID()');
         $IncrementId = $FirstInsertId;
         foreach ($UnkeyedRows as $Row) {

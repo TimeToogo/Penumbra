@@ -13,8 +13,18 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         $this->ColumnData = $ColumnData;
     }
     
+    final public function GetColumns() {
+        return $this->Columns;
+    }
+    
     final public function GetColumnData() {
         return $this->ColumnData;
+    }
+    
+    final public function Another(array $ColumnData) {
+        $ClonedColumnData = clone $this;
+        $ClonedColumnData->ColumnData = $ColumnData;
+        return $ClonedColumnData;
     }
     
     final public function GetColumn($Identifier) {
@@ -46,9 +56,14 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         unset($this->ColumnData[$Column->GetIdentifier()]);
     }
     
-    final public function Hash($UseColumns = true) {
+    final public function Hash() {
         asort($this->ColumnData);
-        return md5(json_encode($UseColumns ? $this->ColumnData : array_values($this->ColumnData)));
+        return md5(json_encode($this->ColumnData));
+    }
+    
+    final public function HashData() {
+        asort($this->ColumnData);
+        return md5(json_encode(array_values($this->ColumnData)));
     }
     
     final public function getIterator() {

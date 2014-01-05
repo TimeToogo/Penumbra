@@ -23,10 +23,6 @@ interface IEntityRelationalMap {
     
     public function Initialize(DomainDatabaseMap $DomainDatabaseMap);
     
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ResultRowRevivalDataMap);
-    public function Persist(DomainDatabaseMap $DomainDatabaseMap, Relational\Transaction $Transaction, array $PersistenceDataArray);
-    public function Discard(Relational\Transaction $Transaction, Map $PersistenceDataColumnDataMap);
-    
     /**
      * @return IPropertyMapping[]
      */
@@ -88,9 +84,17 @@ interface IEntityRelationalMap {
      */
     public function MapIdentityToPrimaryKey(Object\Identity $Identity);
     /**
+     * @return Relational\PrimaryKey
+     */
+    public function MapIdentitiesToPrimaryKeys(array $Identities);
+    /**
      * @return Object\Identity
      */
     public function MapPrimaryKeyToIdentity(Relational\PrimaryKey $PrimaryKey);
+    /**
+     * @return Object\Identity
+     */
+    public function MapPrimaryKeysToIdentities(array $PrimaryKeys);
 }
 
 ?>

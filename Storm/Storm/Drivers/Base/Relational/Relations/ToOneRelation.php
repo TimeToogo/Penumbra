@@ -25,7 +25,7 @@ class ToOneRelation extends ToOneRelationBase {
     protected function FillParentToRelatedRowMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
         $KeyedRelatedRows = $this->HashRowsByColumnValues($RelatedRows, $ForeignKey->GetReferencedColumns());
         foreach($ParentRows as $ParentRow) {
-            $Hash = $ParentRow->GetDataFromColumns($ForeignKey->GetParentColumns())->Hash(false);
+            $Hash = $ParentRow->GetDataFromColumns($ForeignKey->GetParentColumns())->HashData();
             if(isset($KeyedRelatedRows[$Hash])) {
                 $Map->Map($ParentRow, $KeyedRelatedRows[$Hash]);
             }

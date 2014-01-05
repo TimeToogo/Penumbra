@@ -61,7 +61,7 @@ abstract class Table extends Relational\Table {
         return null;
     }
     
-    private function AddTrait(TableTrait $Trait) {
+    final public function AddTrait(TableTrait $Trait) {
         if($Trait instanceof StructuralTableTrait) {
             $this->StructuralTraits[] = $Trait;
             $this->Traits[] = $Trait;

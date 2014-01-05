@@ -22,8 +22,7 @@ class ExtraLazyCollectionPropertyToManyRelationMapping extends CollectionPropert
         foreach($ParentRowRevivalDataMap as $ParentRow) {
             $RevivalData = $ParentRowRevivalDataMap[$ParentRow];
             $RelatedEntityRevivalDataLoader = function () use (&$DomainDatabaseMap, &$Database, &$ToManyRelation, $EntityType, $ParentRow) {
-                $RelatedRowRequest = $ToManyRelation->RelationRequest([$ParentRow]);
-                $RelatedRows = $Database->Load($RelatedRowRequest);
+                $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, [$ParentRow]);
                 $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($EntityType, $RelatedRows);
                 
                 return $RelatedRevivalDataArray;

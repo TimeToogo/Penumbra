@@ -32,11 +32,11 @@ class Test implements \StormTests\IStormTest {
             $Last = $this->Act($Action, $BloggingStorm, $BlogRepository, $TagRepository);
         }
 
-        //return $Last;
+        return $Last;
     }
 
     private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $Id = strrev('91CFD8806B9B11E38E8100270E076073');
+        $Id = 1;//strrev('91CFD8806B9B11E38E8100270E076073');
         if ($Action === self::Persist) {
             $Blog = $this->CreateBlog();
             foreach ($Blog->Posts as $Post) {
@@ -46,7 +46,7 @@ class Test implements \StormTests\IStormTest {
 
             $BlogRepository->Persist($Blog);
             $BlogRepository->SaveChanges();
-
+            
             return $Blog;
         } else if ($Action === self::Discard) {
             $BlogMap = $BloggingStorm->GetORM()->GetDomain()->GetEntityMap(Entities\Blog::GetType());
@@ -61,22 +61,22 @@ class Test implements \StormTests\IStormTest {
             $BlogMap = $BloggingStorm->GetORM()->GetDomain()->GetEntityMap(Entities\Blog::GetType());
 
             static $Request = null;
-            if ($Request === null && 1 == 2) {
-                $Request = new Pinq\Request($BlogMap, true);
+            if ($Request === null && false) {
+                $Request = new Pinq\Request($BlogMap, null, true);
                 $Request->Where(function ($Blog) {
                     return $Blog->Name === 'Test blog' || $Blog->CreatedDate < new \DateTime();
                 });
             }
             $Identity = $BlogMap->Identity();
             $Identity->SetProperty($BlogMap->Id, $Id);
-
-
+            
             $RevivedBlog = $BlogRepository->Load(new Requests\IdentityRequest($Identity));
             var_dump($RevivedBlog);
-            $RevivedBlog->Posts[0]->Tags->ToArray();
-            $RevivedBlog->Posts[1]->Tags->ToArray();
-
+            ($RevivedBlog->Posts[0]->Tags->ToArray());
+            ($RevivedBlog->Posts[1]->Tags->ToArray());
+            
             return null;
+            
         }
     }
 

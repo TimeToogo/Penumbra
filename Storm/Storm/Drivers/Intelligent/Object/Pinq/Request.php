@@ -8,8 +8,11 @@ use \Storm\Drivers\Constant\Object\EntityMap;
 class Request extends Requests\Request {
     private $EntityMap;
     
-    public function __construct(EntityMap $EntityMap, $IsSingleEntity = false) {
-        parent::__construct($EntityMap->GetEntityType(), $IsSingleEntity);
+    public function __construct(EntityMap $EntityMap, array $Properties = null, $IsSingleEntity = false) {
+        parent::__construct(
+                $EntityMap->GetEntityType(), 
+                $Properties ?: $EntityMap->GetProperties(),
+                $IsSingleEntity);
         
         $this->EntityMap = $EntityMap;
     }

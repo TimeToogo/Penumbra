@@ -7,7 +7,7 @@ use \Storm\Drivers\Base\Relational\Columns\Column;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 
 interface IDatabaseModifier {
-    public function CreateTableColumns(IConnection $Connection, Relational\Table $Table);
+    public function CreateTableStructure(IConnection $Connection, Relational\Table $Table);
     public function DropTable(IConnection $Connection, Relational\Table $Table);
     public function AddTableTrait(IConnection $Connection, Relational\Table $Table, Relational\TableTrait $Trait);
     public function DropTableTrait(IConnection $Connection, Relational\Table $Table, Relational\TableTrait $Trait);

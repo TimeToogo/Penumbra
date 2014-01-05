@@ -21,12 +21,17 @@ abstract class DatabaseModifier implements IDatabaseModifier {
         $this->ColumnTraitManager = $ColumnTraitManager;
     }    
     
-    final public function CreateTableColumns(IConnection $Connection, Table $Table) {
+    
+    final public function CreateTableStructure(IConnection $Connection, Table $Table) {
         $QueryBuilder = $Connection->QueryBuilder();
-        $this->AppendCreateTableColumnsQuery($QueryBuilder, $Table);
+        $this->AppendCreateTableStructureQuery($QueryBuilder, 
+                $this->TableTraitManger, $this->ColumnTraitManager,
+                $Table);
         $QueryBuilder->Build()->Execute();
     }
-    protected abstract function AppendCreateTableColumnsQuery(QueryBuilder $QueryBuilder, Table $Table);
+    protected abstract function AppendCreateTableStructureQuery(QueryBuilder $QueryBuilder,
+            Traits\ITableTraitManager $TableTraitManager, Traits\IColumnTraitManager $ColumnTraitManager,
+            Table $Table);
 
     final public function DropTable(IConnection $Connection, Table $Table) {
         $QueryBuilder = $Connection->QueryBuilder();

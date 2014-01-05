@@ -14,7 +14,9 @@ final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
     
     public function __construct(
             IDatabaseBuilder $Builder, IDatabaseModifier $Modifier,
-            $IdentifiersAreCaseSenstive = true, $DropUnspecifiedTables = false, $DropUnspecifiedColumns = false) {
+            $IdentifiersAreCaseSenstive = true, 
+            $DropUnspecifiedTables = false, 
+            $DropUnspecifiedColumns = false) {
         parent::__construct($Builder, $Modifier);
         
         $this->IdentifiersAreCaseSenstive = $IdentifiersAreCaseSenstive;
@@ -58,8 +60,10 @@ final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
         if($CurrentTable === null) {
             $this->CreateTable($Connection, $Modifier, $Table);
         }
-        else if ($Table === null && $this->DropUnspecifiedTables) {
-            $Modifier->DropTable($Connection, $CurrentTable);
+        else if ($Table === null) {
+            if($this->DropUnspecifiedTables) {
+                $Modifier->DropTable($Connection, $CurrentTable);
+            }
         }
         else {
             list($TraitsToAdd, $TraitsToRemove) = 
@@ -106,17 +110,7 @@ final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
     }
     
     private function CreateTable(IConnection $Connection, IDatabaseModifier $Modifier, Relational\Table $Table) {
-        $Modifier->CreateTableColumns($Connection, $Table);
-
-        $PreviousColumn = null;
-        foreach($Table->GetColumns() as $Column) {
-            $Modifier->ModifyColumn($Connection, $Table, $Column, $PreviousColumn);
-            $PreviousColumn = $Column;
-        }
-
-        foreach($Table->GetStructuralTraits() as $Trait) {
-            $Modifier->AddTableTrait($Connection, $Table, $Trait);
-        }
+        $Modifier->CreateTableStructure($Connection, $Table);
     }
     
     private function DropRelationalTraits(IConnection $Connection, 

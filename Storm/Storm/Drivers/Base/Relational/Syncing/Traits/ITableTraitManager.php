@@ -11,6 +11,8 @@ interface ITableTraitManager {
     public function AppendAdd(IConnection $Connection, QueryBuilder $QueryBuilder, Relational\Table $Table, TableTrait $Trait);
     
     public function AppendDrop(IConnection $Connection, QueryBuilder $QueryBuilder, Relational\Table $Table, TableTrait $Trait);
+
+    public function AppendDefinition(QueryBuilder $QueryBuilder, Relational\Table $Table, TableTrait $Trait);
 }
 
 ?>

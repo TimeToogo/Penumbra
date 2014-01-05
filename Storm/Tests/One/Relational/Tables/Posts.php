@@ -18,10 +18,6 @@ class Posts extends Relational\Table {
         return 'Posts';
     }
 
-    protected function KeyGenerator(IKeyGeneratorSet $KeyGenerator) {
-        return new \Storm\Drivers\Platforms\Null\NullKeyGenerator();
-    }
-    
     public $BlogId;
     public $Title;
     public $Content;
@@ -30,7 +26,7 @@ class Posts extends Relational\Table {
     public $PrimaryKey;
     
     protected function CreateTableStructure(IColumnSet $Column) {
-        $this->BlogId = $Column->Guid('BlogId');
+        $this->BlogId = $Column->IncrementInt32('BlogId');
         $this->Title = $Column->String('Title', 50, true);
         $this->Content = $Column->String('Content', 2000);
         $this->CreatedDate = $Column->DateTime('CreatedDate');

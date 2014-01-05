@@ -10,15 +10,15 @@ use \Storm\Drivers\Base\Relational\Columns\DataType;
 class ColumnSet implements IColumnSet {
     
     public function Guid($Name, $PrimaryKey = true) {
-        return new Column($Name, new DataTypes\ReversedDataType(new DataTypes\HexedBinaryDataType(16)), $PrimaryKey);
+        return new Column($Name, new DataTypes\BinaryGuidDataType(), $PrimaryKey);
     }
     
     public function IncrementInt32($Name, $PrimaryKey = true) {
-        return new Column($Name, new DataTypes\IntDataType('BIGINT'), $PrimaryKey, [new Columns\Traits\Increment()]);
+        return new Column($Name, new DataTypes\IntDataType('INT'), $PrimaryKey, [new Columns\Traits\Increment()]);
     }
     
     public function IncrementInt64($Name, $PrimaryKey = true) {
-        return new Column($Name, new DataTypes\IntDataType('INT'), $PrimaryKey, [new Columns\Traits\Increment()]);
+        return new Column($Name, new DataTypes\IntDataType('BIGINT'), $PrimaryKey, [new Columns\Traits\Increment()]);
     }
     
     public function String($Name, $Length, $PrimaryKey = false) {

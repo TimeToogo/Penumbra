@@ -2,11 +2,13 @@
 
 namespace StormTests;
 
+echo '<pre>';
+            
 date_default_timezone_set('Australia/Melbourne');
 
 ini_set('display_errors', 'On');
 error_reporting(-1);
-set_time_limit(30);
+set_time_limit(60);
 
 define('DIRECTORY_SEPERATOR', '/');
 define('BASE_PATH', str_replace('\\', DIRECTORY_SEPERATOR, __DIR__) . DIRECTORY_SEPERATOR);

@@ -7,6 +7,7 @@ use \Storm\Drivers\Base\Relational\PrimaryKeys;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 
 class UUIDGenerator extends PrimaryKeys\PreInsertKeyGenerator {
+        
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
         if(count($UnkeyedRows) === 0) {
             return;
@@ -14,7 +15,7 @@ class UUIDGenerator extends PrimaryKeys\PreInsertKeyGenerator {
         $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
         $QueryBuilder = $Connection->QueryBuilder();
         
-        $UUIDStatment = 'SELECT UPPER(REPLACE(UUID(), \'-\', \'\')) AS `UUID`';
+        $UUIDStatment = 'SELECT UUID() AS `UUID`';
         $UUIDStatments = array_fill(0, count($UnkeyedRows) * count($PrimaryKeyColumns), $UUIDStatment);
         $QueryBuilder->Append(implode(' UNION ', $UUIDStatments));
         

@@ -53,10 +53,8 @@ class DatabaseBuilder implements IDatabaseBuilder {
         $QueryBuilder->AppendValue('AND T.`TABLE_SCHEMA` = # ', $DatabaseName);
         $QueryBuilder->AppendValue('AND T.`TABLE_NAME` = # ', $TableName);
 
-
         $TableInfoRow = $QueryBuilder->Build()->Execute()->FetchRow();
-
-
+        
         $Columns = $this->BuildColumns($Connection, $DatabaseName, $TableName);
         
         $StructuralTraits = array();
@@ -72,15 +70,19 @@ class DatabaseBuilder implements IDatabaseBuilder {
         foreach ($this->BuildIndexes($Connection, $Columns, $DatabaseName, $TableName) as $Index) {
             $StructuralTraits[] = $Index;
         }
-
+        
+        $Table = new Relational\Table(
+                $TableName, new Null\NullKeyGenerator(), 
+                $Columns, $StructuralTraits, array());
+        $LoadedTables[$TableName] = $Table;
+        
         $ForeignKeys = $this->BuildForeignKeys($Connection, $Columns, $DatabaseName, $TableName, $LoadedTables);
+        
         foreach ($ForeignKeys as $ForeignKey) {
-            $RelationalTraits[] = $ForeignKey;
+            $Table->AddTrait($ForeignKey);
         }
 
-
-        $LoadedTables[$TableName] = new Relational\Table($TableName, new Null\NullKeyGenerator(), $Columns, $StructuralTraits, $RelationalTraits);
-        return $LoadedTables[$TableName];
+        return $Table;
     }
     // </editor-fold>
     

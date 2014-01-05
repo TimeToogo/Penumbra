@@ -10,7 +10,7 @@ namespace StormTests\One\Domain\Maps\Proxies;
 use Storm\Drivers\Base\Object\Properties\Proxies\IProxy as IProxy;
 use Storm\Drivers\Base\Object\Properties\Proxies\EntityProxyFunctionality as ProxyFunctionality;
 
-class StormTests_One_Entities_Blog__Proxy extends \StormTests\One\Entities\Blog implements IProxy {
+class StormTests_One_Entities_Blog_Proxy extends \StormTests\One\Entities\Blog implements IProxy {
     use ProxyFunctionality;
     
     public function __construct() {

@@ -6,9 +6,6 @@ use Storm\Core\Object\IProperty;
 
 abstract class Expression {
     use \Storm\Core\Helpers\Type;
-    public function __construct() {
-        
-    }
     
     // <editor-fold defaultstate="collapsed" desc="Factory Methods">    
     /**

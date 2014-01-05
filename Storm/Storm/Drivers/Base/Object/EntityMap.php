@@ -8,8 +8,12 @@ abstract class EntityMap extends \Storm\Core\Object\EntityMap {
     private $EntityConstructor;
     
     public function __construct() {
-        $this->EntityConstructor = $this->EntityConstructor();
         parent::__construct();
+        $this->EntityConstructor = $this->EntityConstructor();
+        if($this->EntityConstructor->HasEntityType()) {
+            throw new Exception;
+        }
+        $this->EntityConstructor->SetEntityType($this->GetEntityType());
     }
     
     /**
@@ -25,11 +29,13 @@ abstract class EntityMap extends \Storm\Core\Object\EntityMap {
     final public function RequestId(Identity $Identity) {
         return new Requests\IdEntityRequest($Identity);
     }
-    
+    /**
+     * @return Construction\IEntityConstructor
+     */
     protected abstract function EntityConstructor();
     
     final protected function ConstructEntity() {
-        return $this->EntityConstructor->Construct($this->EntityType());
+        return $this->EntityConstructor->Construct();
     }
 }
 

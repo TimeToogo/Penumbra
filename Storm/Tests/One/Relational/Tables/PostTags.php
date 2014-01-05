@@ -22,10 +22,10 @@ class PostTags extends Relational\Relations\JoinTable {
     public $TagId;
 
     protected function CreateTableStructure(IColumnSet $Column) {
-        $this->PostBlogId = $Column->Guid('PostBlogId', true);
+        $this->PostBlogId = $Column->Int32('PostBlogId', true);
         $this->PostTitle = $Column->String('PostTitle', 50, true);
         
-        $this->TagId = $Column->Guid('TagId', true);
+        $this->TagId = $Column->Int32('TagId', true);
     }
     
     protected function Table1(Database $Database) {

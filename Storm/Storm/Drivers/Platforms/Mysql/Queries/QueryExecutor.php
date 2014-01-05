@@ -25,7 +25,7 @@ class QueryExecutor extends Queries\QueryExecutor {
             $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetIdentifier()]);
         }
         
-        $QueryBuilder->AppendIdentifiers('FROM # ', array_keys($Request->GetTables()), ', ');
+        $QueryBuilder->AppendIdentifiers(' FROM # ', array_keys($Request->GetTables()), ', ');
     }
 
     protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys) {
@@ -94,17 +94,15 @@ class QueryExecutor extends Queries\QueryExecutor {
         
         $First = true;
         foreach($Table->GetColumns() as $Column) {
-            if(!$Column->IsPrimaryKey()) {
-                if($First) {
-                    $QueryBuilder->Append(' ON DUPLICATE KEY UPDATE ');
-                    $First = false;
-                }
-                else
-                    $QueryBuilder->Append(', ');
-
-                $Identifier = [$TableName, $Column->GetName()];
-                $QueryBuilder->AppendIdentifier('# = VALUES(#)', $Identifier);
+            if($First) {
+                $QueryBuilder->Append(' ON DUPLICATE KEY UPDATE ');
+                $First = false;
             }
+            else
+                $QueryBuilder->Append(', ');
+
+            $Identifier = [$TableName, $Column->GetName()];
+            $QueryBuilder->AppendIdentifier('# = VALUES(#)', $Identifier);
         }
         
         return $QueryBuilder->Build();

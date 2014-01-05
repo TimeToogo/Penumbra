@@ -47,7 +47,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         }
         else if(is_array($PropertyRevivalValue)) {
             if(count(array_filter($PropertyRevivalValue, function ($Value) { return $Value instanceof Object\RevivalData; })) === count($PropertyRevivalValue)) {
-                return $this->ReviveRevivalData($Domain, $Entity, $PropertyRevivalValue);
+                return $this->ReviveArrayOfRevivalData($Domain, $Entity, $PropertyRevivalValue);
             }
             else if(count(array_filter($PropertyRevivalValue, function ($Value) { return is_callable($Value); })) === count($PropertyRevivalValue)) {
                 return $this->ReviveArrayOfCallables($Domain, $Entity, $PropertyRevivalValue);

@@ -86,7 +86,7 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
     }
     
     public function getIterator() {
-        return new \IteratorIterator($this->IteratingStorage);
+        return $this->IteratingStorage;
     }
 
     public function offsetExists($Instance) {

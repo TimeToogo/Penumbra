@@ -56,6 +56,10 @@ final class UnitOfWork {
         }
     }
     
+    public function GetEntities() {
+        return $this->PersistenceDataEntityMap->GetToInstances();
+    }
+    
     public function Execute(IProcedure $Procedure) {
         $this->Procedures[] = $Procedure;
     }

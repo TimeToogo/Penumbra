@@ -7,25 +7,25 @@ use \Storm\Core\Mapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
-final class EagerCollectionPropertyToManyRelationMapping extends Mappings\CollectionPropertyToManyRelationMapping {
+final class EagerCollectionPropertyToManyRelationMapping extends CollectionPropertyToManyRelationMapping {
     public function __construct(
             Object\ICollectionProperty $CollectionProperty, 
             Relational\IToManyRelation $ToManyRelation) {
         parent::__construct($CollectionProperty, $ToManyRelation);
     }
     
-    public function Revive(Mapping\DomainDatabaseMap $DomainDatabaseMap, Map $ResultRowRevivalDataMap) {
-        $ParentRows = $ResultRowRevivalDataMap->GetInstances();
+    public function Revive(Mapping\DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap) {
+        $ParentRows = $ParentRowRevivalDataMap->GetInstances();
         $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ParentRows);
         $ParentRowRelatedRevivalDataArrayMap = 
                 $this->MapToParentRowRelatedRevivalDataArrayMap($DomainDatabaseMap, $ParentRowRevivalDataMap, $RelatedRows);
         
         $Property = $this->GetProperty();
         foreach($ParentRowRelatedRevivalDataArrayMap as $ParentRow) {
-            $RelatedRevivalDataArray = $ParentRowRelatedRevivalDataMap[$ParentRow];
-            $ParentRevivalData = $ResultRowRevivalDataMap[$ParentRow];
+            $RelatedRevivalDataArray = $ParentRowRelatedRevivalDataArrayMap[$ParentRow];
+            $ParentRevivalData = $ParentRowRevivalDataMap[$ParentRow];
 
-            $ParentRevivalData[$Property] = $RelatedRevivalDataArray;
+            $ParentRevivalData[$Property] = $RelatedRevivalDataArray->getArrayCopy();
         }
     }
 }

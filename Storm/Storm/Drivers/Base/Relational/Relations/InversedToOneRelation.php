@@ -23,7 +23,7 @@ class InversedToOneRelation extends ToOneRelationBase {
     protected function FillParentToRelatedRowMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
         $KeyedRelatedRows = $this->HashRowsByColumnValues($RelatedRows, $ForeignKey->GetParentColumns());
         foreach($ParentRows as $ParentRow) {
-            $Hash = $ParentRow->GetDataFromColumns($ForeignKey->GetReferencedColumns())->Hash();
+            $Hash = $ParentRow->GetDataFromColumns($ForeignKey->GetReferencedColumns())->HashData();
             if(isset($KeyedRelatedRows[$Hash])) {
                 $Map->Map($ParentRow, $KeyedRelatedRows[$Hash]);
             }

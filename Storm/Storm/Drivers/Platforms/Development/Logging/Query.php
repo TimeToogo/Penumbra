@@ -14,26 +14,56 @@ class Query implements Queries\IQuery {
     }
 
     public function Execute() {
-        $Log = 'Executing Query: ' . $this->GetQueryString();
         $Bindings = $this->GetBindings();
-        $First = true;
-        foreach($Bindings->Get() as $ParameterKey => $Binding) {
-            if($First) {
-                $Log .= ' - With Bindings: - (';
-                $First = false;
-            }
-            else
-               $Log .= ', ';
-            
-            $Log .= var_export($ParameterKey, true) . ' => ' . var_export($Binding->GetValue(), true);
-        }
-        if(!$First)
-            $Log .= ')';
         
-        $this->Logger->Log($Log);
+        $this->Logger->Log(
+                'Executing Query: ' . $this->InterpolateQuery($this->GetQueryString(), $Bindings->Get()));
         
         return $this->Query->Execute();
     }
+    
+   /**
+    * Replaces any parameter placeholders in a query with the value of that
+    * parameter. Useful for debugging. Assumes anonymous parameters from 
+    * $params are are in the same order as specified in $query
+    *
+    * @param string $Query The sql query with parameter placeholders
+    * @param Queries\Binding[] $Params The array of substitution parameters
+    * @return string The interpolated query
+    */
+   public function InterpolateQuery($Query, array $Params) {
+       $QuerySegments = explode('?', $Query);
+       $InterpolatedQuery = array_shift($QuerySegments);
+       $Count = 0;
+       foreach ($Params as $Key => $Binding) {
+           $ParameterType = $Binding->GetParameterType();
+           $Value = $Binding->GetValue();
+           switch ($ParameterType) {
+               case Queries\ParameterType::String:
+                   $Value = "'" . $Value . "'";
+                   break;
+               case Queries\ParameterType::Integer:
+                   $Value = (string)$Value;
+                   break;
+               case Queries\ParameterType::Binary:
+                   $Value = "'" . $Value . "'";
+                   break;
+               case Queries\ParameterType::Boolean:
+                   $Value = $Value ? 'TRUE' : 'FALSE';
+                   break;
+               case Queries\ParameterType::Null:
+                   $Value = 'NULL';
+                   break;
+               default:
+                   throw new \Exception;
+           }
+           
+           $InterpolatedQuery .= $Value . array_shift($QuerySegments);
+           $Count++;
+       }
+       
+       return $InterpolatedQuery;
+   }
     
     public function GetQueryString() {
         return $this->Query->GetQueryString();

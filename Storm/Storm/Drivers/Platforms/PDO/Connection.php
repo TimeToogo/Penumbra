@@ -86,9 +86,10 @@ class Connection extends Queries\Connection {
     
     public function LoadResultRows(array $Columns, Queries\IQuery $Query) {
         $Query->Execute();
+        $Row = new Relational\ResultRow($Columns, array());
         $Rows = array();
         while($RowData = $Query->FetchRow()) {
-            $Rows[] = new Relational\ResultRow($Columns, $RowData, true);
+            $Rows[] = $Row->Another($RowData);
         }
         
         return $Rows;

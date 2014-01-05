@@ -2,15 +2,22 @@
 
 namespace Storm\Drivers\Base\Object\Construction;
 
-class Constructor extends ReflectionConstructor {
-    private $Parameters;
-    public function __construct(array $Parameters) {
-        $this->Parameters = $Parameters;
-    }
+ abstract class Constructor implements IEntityConstructor {
+    private $EntityType;
     
-    protected function ConstructFrom(\ReflectionClass $Reflection) {
-        return $Reflection->newInstanceArgs($this->Parameters);
+    final public function GetEntityType() {
+        return $this->EntityType;
     }
+
+    public function HasEntityType() {
+        return $this->EntityType !== null;
+    }
+
+    public function SetEntityType($EntityType) {
+        $this->EntityType = $EntityType;
+        $this->OnSetEntityType($EntityType);
+    }
+    protected abstract function OnSetEntityType($EntityType);
 }
 
 ?>

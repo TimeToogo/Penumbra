@@ -27,7 +27,7 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
     final protected function GroupRowsByColumns(array $RelatedRows, array $GroupByColumns) {
         $GroupedRelatedRows = array();
         foreach($RelatedRows as $RelatedRow) {
-            $Hash = $RelatedRow->GetDataFromColumns($GroupByColumns)->Hash(false);
+            $Hash = $RelatedRow->GetDataFromColumns($GroupByColumns)->HashData();
             if(!isset($GroupedRelatedRows[$Hash])) {
                 $GroupedRelatedRows[$Hash] = array();
             }
@@ -39,7 +39,7 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
     
     final protected function MapParentRowsToGroupedRelatedRows(Map $Map, array $ParentRows, array $MapByColumns, array $GroupedRelatedRows) {
         foreach($ParentRows as $ParentRow) {
-            $Hash = $ParentRow->GetDataFromColumns($MapByColumns)->Hash(false);
+            $Hash = $ParentRow->GetDataFromColumns($MapByColumns)->HashData();
             if(isset($GroupedRelatedRows[$Hash])) {
                 $Map->Map($ParentRow, new \ArrayObject($GroupedRelatedRows[$Hash]));
             }

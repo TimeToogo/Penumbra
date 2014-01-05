@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Base\Object\Construction;
 
-class DeepClonedInstance implements IEntityConstructor {
+class DeepClonedInstance extends Constructor {
     private $SerializedInstance;
     private $Instance;
     public function __construct($Instance) {
@@ -10,13 +10,14 @@ class DeepClonedInstance implements IEntityConstructor {
         $this->Instance = $Instance;
     }
     
-    public function Construct($EntityType) {
+    protected function OnSetEntityType($EntityType) {
         if(!($this->Instance instanceof $EntityType)) {
             throw new \InvalidArgumentException('Unsupported Entity Type');
         }
-        else {
-            return unserialize($this->SerializedInstance);
-        }
+    }
+    
+    public function Construct() {
+        return unserialize($this->SerializedInstance);
     }
 }
 

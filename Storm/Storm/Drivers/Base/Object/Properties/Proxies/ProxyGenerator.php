@@ -17,7 +17,7 @@ abstract class ProxyGenerator implements IProxyGenerator {
     }
     
     final protected function GenerateProxyClassName($EntityType) {
-        return str_replace('\\', '_', $EntityType) . '__Proxy';
+        return str_replace('\\', '_', $EntityType) . '_Proxy';
     }
     
     final protected function GetProxyFullName($ProxyClassName) {

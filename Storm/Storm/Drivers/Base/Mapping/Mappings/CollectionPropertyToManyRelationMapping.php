@@ -51,7 +51,8 @@ abstract class CollectionPropertyToManyRelationMapping extends PropertyMapping i
         return $DomainDatabaseMap->GetDatabase()->Load($RelatedRowRequest);
     }
     
-    final protected function MapToParentRowRelatedRevivalDataArrayMap(DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap, array $RelatedRows) {
+    final protected function MapToParentRowRelatedRevivalDataArrayMap(DomainDatabaseMap $DomainDatabaseMap, 
+            Map $ParentRowRevivalDataMap, array $RelatedRows) {
         $ParentRows = $ParentRowRevivalDataMap->GetInstances();
         $ParentRelatedRowsMap = $this->ToManyRelation->MapParentToRelatedRows($ParentRows, $RelatedRows);
         

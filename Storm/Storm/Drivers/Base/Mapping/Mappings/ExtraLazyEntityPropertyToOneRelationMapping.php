@@ -27,8 +27,7 @@ class ExtraLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRel
         foreach($ResultRowRevivalDataMap as $ParentRow) {
             $RevivalData = $ResultRowRevivalDataMap[$ParentRow];
             $RelatedEntityDataLoader = function () use (&$DomainDatabaseMap, &$Database, &$ToOneRelation, $EntityType, $ParentRow) {
-                $RelatedRowRequest = $ToOneRelation->RelationRequest([$ParentRow]);
-                $RelatedRows = $Database->Load($RelatedRowRequest);
+                $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, [$ParentRow]);
                 $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($EntityType, $RelatedRows);
                 
                 return reset($RelatedRevivalData);

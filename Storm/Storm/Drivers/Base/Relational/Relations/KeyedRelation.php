@@ -74,7 +74,7 @@ abstract class KeyedRelation extends Relation {
     final protected function HashRowsByColumnValues(array $Rows, array $Columns) {
         $KeyedRows = array();
         foreach($Rows as $Row) {
-            $Hash = $Row->GetDataFromColumns($Columns)->Hash(false);
+            $Hash = $Row->GetDataFromColumns($Columns)->HashData();
             $KeyedRows[$Hash] = $Row;
         }
         

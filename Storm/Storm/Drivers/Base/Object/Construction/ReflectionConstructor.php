@@ -2,14 +2,14 @@
 
 namespace Storm\Drivers\Base\Object\Construction;
 
-abstract class ReflectionConstructor implements IEntityConstructor {
-    private static $Cache = array();
+abstract class ReflectionConstructor extends Constructor {
+    private $Reflection;
+    protected function OnSetEntityType($EntityType) {
+        $this->Reflection = new \ReflectionClass($EntityType);
+    }
     
-    final public function Construct($EntityType) {
-        if(!isset(self::$Cache[$EntityType]))
-            self::$Cache[$EntityType] = new \ReflectionClass($EntityType);
-        
-        return $this->ConstructFrom(self::$Cache[$EntityType]);
+    final public function Construct() {
+        $this->ConstructFrom($this->Reflection);
     }
     protected abstract function ConstructFrom(\ReflectionClass $Reflection);
 }

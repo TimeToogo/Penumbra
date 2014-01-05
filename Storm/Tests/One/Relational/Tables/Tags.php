@@ -19,7 +19,7 @@ class Tags extends Relational\Table {
     }
 
     protected function KeyGenerator(IKeyGeneratorSet $KeyGenerator) {
-        return $KeyGenerator->Guid();
+        return $KeyGenerator->Increment();
     }
     
     public $Id;
@@ -28,7 +28,7 @@ class Tags extends Relational\Table {
     public $PrimaryKey;
     
     protected function CreateTableStructure(IColumnSet $Column) {
-        $this->Id = $Column->Guid('Id');
+        $this->Id = $Column->IncrementInt32('Id');
         $this->Name = $Column->String('Name', 50);
     }
 

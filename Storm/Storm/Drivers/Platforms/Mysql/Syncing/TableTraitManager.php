@@ -12,32 +12,52 @@ use \Storm\Drivers\Platforms\Mysql;
 
 class TableTraitManager extends Syncing\Traits\TableTraitManager {
     final protected function Initialize() {
+        $MakeAddFunction = function (callable $DefinitionFunction, $Add = false) {
+            return function(IConnection $Connection, 
+                    QueryBuilder $QueryBuilder, 
+                    Table $Table, 
+                    \Storm\Drivers\Base\Relational\TableTrait $Trait) 
+                    use (&$DefinitionFunction, &$Add) {
+                QueryBuilderExtensions::AppendAlterTable($QueryBuilder, $Table);
+                if($Add) {
+                    $QueryBuilder->Append('ADD ');
+                }
+                $DefinitionFunction($QueryBuilder, $Table, $Trait);
+            };
+        };
+        
         $this->Register(Mysql\Tables\CharacterSet::GetType(), 
-                [$this, 'AddCharacterSet'], [$this, 'DropCharacterSet']);
+                [$this, 'CharacterSet'], 
+                $MakeAddFunction([$this, 'CharacterSet']), [$this, 'DropCharacterSet']);
                 
         $this->Register(Mysql\Tables\Collation::GetType(), 
-                [$this, 'AddCollation'], [$this, 'DropCollation']);
+                [$this, 'Collation'], 
+                $MakeAddFunction([$this, 'CharacterSet']), [$this, 'DropCollation']);
         
         $this->Register(Traits\Comment::GetType(), 
-                [$this, 'AddComment'], [$this, 'DropComment']);
+                [$this, 'Comment'], 
+                $MakeAddFunction([$this, 'Comment']), [$this, 'DropComment']);
         
         $this->Register(Mysql\Tables\Engine::GetType(), 
-                [$this, 'AddEngine'], [$this, 'DropEngine']);
+                [$this, 'Engine'], 
+                $MakeAddFunction([$this, 'Engine']), [$this, 'DropEngine']);
         
         $this->Register(Traits\ForeignKey::GetType(), 
-                [$this, 'AddForeignKey'], [$this, 'DropForeignKey']);
+                [$this, 'ForeignKey'], 
+                $MakeAddFunction([$this, 'ForeignKey'], true), [$this, 'DropForeignKey']);
         
         $this->Register(Mysql\Tables\Index::GetType(), 
-                [$this, 'AddIndex'], [$this, 'DropIndex']);
+                [$this, 'Index'], 
+                $MakeAddFunction([$this, 'Index'], true), [$this, 'DropIndex']);
         
         $this->Register(Traits\PrimaryKey::GetType(), 
-                [$this, 'AddPrimaryKey'], [$this, 'DropPrimaryKey']);
+                [$this, 'PrimaryKey'], 
+                $MakeAddFunction([$this, 'PrimaryKey'], true), [$this, 'DropPrimaryKey']);
     }
 
     // <editor-fold defaultstate="collapsed" desc="Character Set">
-    public function AddCharacterSet(IConnection $Connection, 
+    public function CharacterSet(
             QueryBuilder $QueryBuilder, Table $Table, Mysql\Tables\CharacterSet $Trait) {
-        QueryBuilderExtensions::AppendAlterTable($QueryBuilder, $Table);
         $QueryBuilder->AppendIdentifier('CHARACTER SET #', [$Trait->GetName()]);
     }
 
@@ -50,13 +70,12 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Collation">
-    public function AddCollation(IConnection $Connection, 
+    public function Collation(
             QueryBuilder $QueryBuilder, Table $Table, Mysql\Tables\Collation $Trait) {
-        QueryBuilderExtensions::AppendAlterTable($QueryBuilder, $Table);
         $QueryBuilder->AppendIdentifier('COLLATE #', [$Trait->GetName()]);
     }
 
-    public function DropCollation(IConnection $Connection, 
+    public function DropCollation(IConnection $Connection,
             QueryBuilder $QueryBuilder, Table $Table, Mysql\Tables\Collation $Trait) {
         $DefaultCollation = $Connection->FetchValue('SELECT @@collation_database');
         QueryBuilderExtensions::AppendAlterTable($QueryBuilder, $Table);
@@ -65,9 +84,8 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Comment">
-    public function AddComment(IConnection $Connection, 
+    public function Comment(
             QueryBuilder $QueryBuilder, Table $Table, Traits\Comment $Trait) {
-        QueryBuilderExtensions::AppendAlterTable($QueryBuilder, $Table);
         $QueryBuilder->AppendEscaped('COMMENT #', [$Trait->GetValue()]);
     }
 
@@ -79,9 +97,8 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Engine">
-    public function AddEngine(IConnection $Connection, 
+    public function Engine(
             QueryBuilder $QueryBuilder, Table $Table, Mysql\Tables\Engine $Trait) {
-        QueryBuilderExtensions::AppendAlterTable($QueryBuilder, $Table);
         $QueryBuilder->AppendIdentifier('ENGINE #', [$Trait->GetName()]);
     }
 
@@ -94,15 +111,13 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Foreign Key">
-    public function AddForeignKey(IConnection $Connection, 
+    public function ForeignKey(
             QueryBuilder $QueryBuilder, Table $Table, Traits\ForeignKey $Trait) {
         $ColumnNameMap = $Trait->GetReferencedColumnNameMap();
         $PrimaryColumns = array_keys($ColumnNameMap);
         $ForeignColumns = array_values($ColumnNameMap);
-
-
-        QueryBuilderExtensions::AppendAlterTable($QueryBuilder, $Table);
-        $QueryBuilder->AppendIdentifier('ADD CONSTRAINT # ', [$Trait->GetName()]);
+        
+        $QueryBuilder->AppendIdentifier('CONSTRAINT # ', [$Trait->GetName()]);
         $QueryBuilder->AppendIdentifiers('FOREIGN KEY (#) ', $PrimaryColumns, ',');
         $QueryBuilder->AppendIdentifier('REFERENCES # ', [$Trait->GetReferencedTable()->GetName()]);
         $QueryBuilder->AppendIdentifiers('(#) ', $ForeignColumns, ',');
@@ -133,10 +148,9 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Index">
-    public function AddIndex(IConnection $Connection, 
+    public function Index(
             QueryBuilder $QueryBuilder, Table $Table, Mysql\Tables\Index $Trait) {
-        QueryBuilderExtensions::AppendAlterTable($QueryBuilder, $Table);
-        $QueryBuilder->AppendIdentifier('ADD ' . $this->MapIndexType($Trait->GetType()) . ' INDEX # ', [$Trait->GetName()]);
+        $QueryBuilder->AppendIdentifier($this->MapIndexType($Trait->GetType()) . ' INDEX # ', [$Trait->GetName()]);
         $QueryBuilder->Append('(');
         $First = true;
         foreach ($Trait->GetColumns() as $Column) {
@@ -201,10 +215,9 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Primary Key">
-    public function AddPrimaryKey(IConnection $Connection, 
+    public function PrimaryKey(
             QueryBuilder $QueryBuilder, Table $Table, Traits\PrimaryKey $Trait) {
-        QueryBuilderExtensions::AppendAlterTable($QueryBuilder, $Table);
-        $QueryBuilder->AppendIdentifiers('ADD PRIMARY KEY (#) ', $Trait->GetColumnNames(), ',');
+        $QueryBuilder->AppendIdentifiers('PRIMARY KEY (#)', $Trait->GetColumnNames(), ',');
     }
 
     public function DropPrimaryKey(IConnection $Connection, 

@@ -4,7 +4,6 @@ namespace Storm\Drivers\Base\Mapping\Mappings;
 
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Mapping\DomainDatabaseMap;
-use \Storm\Core\Mapping\IEntityPropertyToOneRelationMapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 

@@ -15,7 +15,6 @@ class Connection implements Queries\IConnection {
     }
 
     public function BeginTransaction() {
-        $this->Logger->Log('Starting transaction');
         return $this->Connection->BeginTransaction();
     }
 
@@ -56,7 +55,6 @@ class Connection implements Queries\IConnection {
     }
     
     public function Prepare($QueryString, Queries\Bindings $Bindings = null) {
-        $this->Logger->Log('Preparing query: ' . $QueryString);
         return new Query($this->Logger, $this->Connection->Prepare($QueryString, $Bindings));
     }
 

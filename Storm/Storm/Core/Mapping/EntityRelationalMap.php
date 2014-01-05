@@ -155,45 +155,6 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         }
     }
     
-    final public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ResultRowRevivalDataMap) {
-        foreach($this->DataPropertyColumnMappings as $PropertyColumnMapping) {
-            $PropertyColumnMapping->Revive($ResultRowRevivalDataMap);
-        }
-        foreach($this->EntityPropertyToOneRelationMappings as $EntityPropertyToOneRelationMapping) {
-            $EntityPropertyToOneRelationMapping->Revive($DomainDatabaseMap, $ResultRowRevivalDataMap);
-        }
-        foreach($this->CollectionPropertyToManyRelationMappings as $CollectionPropertyToManyRelationMapping) {
-            $CollectionPropertyToManyRelationMapping->Revive($DomainDatabaseMap, $ResultRowRevivalDataMap);
-        }
-    }
-    
-    final public function Persist(DomainDatabaseMap $DomainDatabaseMap, Relational\Transaction $Transaction, array $PersistenceDataArray) {
-        $PersistenceDataColumnDataMap = new Map();
-        foreach($PersistenceDataArray as $PersistenceData) {
-            $PersistenceDataColumnDataMap->Map($PersistenceData, new Relational\ResultRow($this->MappedPersistColumns));
-        }
-        foreach($this->DataPropertyColumnMappings as $PropertyColumnMapping) {
-            $PropertyColumnMapping->Persist($PersistenceDataColumnDataMap);
-        }
-        
-        foreach($this->EntityPropertyToOneRelationMappings as $EntityPropertyToOneRelationMapping) {
-            $RelationshipChange = $DomainDatabaseMap->MapRelationshipChange($ObjectRelationshipChange);
-            $EntityPropertyToOneRelationMapping->Persist($Transaction, $PersistenceDataColumnDataMap);
-        }
-        foreach($this->CollectionPropertyToManyRelationMappings as $CollectionPropertyToManyRelationMapping) {
-            $CollectionPropertyToManyRelationMapping->Persist($Transaction, $PersistenceDataColumnDataMap);
-        }
-    }
-    
-    final public function Discard(Relational\Transaction $Transaction, Map $PersistenceDataColumnDataMap) {
-        foreach($this->EntityPropertyToOneRelationMappings as $EntityPropertyToOneRelationMapping) {
-            $EntityPropertyToOneRelationMapping->Persist($Transaction, $PersistenceDataColumnDataMap);
-        }
-        foreach($this->CollectionPropertyToManyRelationMappings as $CollectionPropertyToManyRelationMapping) {
-            $CollectionPropertyToManyRelationMapping->Persist($Transaction, $PersistenceDataColumnDataMap);
-        }
-    }
-    
     final public function GetMappedReviveColumns(IProperty $Property) {
         return $this->VerifyDataPropertyColumnMapping($Property)->GetReviveColumns();
     }
@@ -232,21 +193,31 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         
         return $PrimaryKey;
     }
-
+    final public function MapIdentitiesToPrimaryKeys(array $Identities) {
+        return array_map([$this, 'MapIdentityToPrimaryKey'], $Identities);
+    }
+    
     final public function MapPrimaryKeyToIdentity(Relational\PrimaryKey $PrimaryKey) {
         $Identity = $this->EntityMap->Identity();
         $Map = Map::From([$PrimaryKey], [$Identity]);
-        foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
-            $Columns = $Mapping->GetReviveColumns();
-            foreach($Columns as $Column) {
-                if(!isset($PrimaryKey[$Column])) {
-                    break;
-                }
-            }
-            $Mapping->Revive($Map);
-        }
+        $this->RevivePrimaryKeyIdentityMap($Map);
         
         return $Identity;
+    }
+    final public function MapPrimaryKeysToIdentities(array $PrimaryKeys) {
+        $Identities = array();
+        foreach($PrimaryKeys as $Key => $PrimaryKey) {
+            $Identities[$Key] = $this->EntityMap->Identity();
+        }
+        $Map = Map::From([$PrimaryKeys], [$Identities]);
+        $this->RevivePrimaryKeyIdentityMap($Map);
+        
+        return $Identities;
+    }
+    private function RevivePrimaryKeyIdentityMap(Map $Map) {
+        foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
+            $Mapping->Revive($Map);
+        }
     }
 }
 
