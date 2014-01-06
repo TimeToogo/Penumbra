@@ -112,6 +112,10 @@ class ColumnSet implements IColumnSet {
             throw new \InvalidArgumentException('Exceeded maxium binary length Mysql BLOB datatypes');
         }
     }
+    
+    public function Enum($Name, array $ValuesMap, $PrimaryKey = false) {
+        return new Column($Name, new Columns\DataTypes\EnumDataType('ENUM', $ValuesMap, array_keys($ValuesMap)), $PrimaryKey);
+    }
 }
 
 ?>

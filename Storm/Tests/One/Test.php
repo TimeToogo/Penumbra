@@ -24,7 +24,7 @@ class Test implements \StormTests\IStormTest {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
 
-        $Action = self::Persist;
+        $Action = self::Retreive;
         $Amount = 1;
 
         $Last;
@@ -36,7 +36,7 @@ class Test implements \StormTests\IStormTest {
     }
 
     private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $Id = 1;//strrev('91CFD8806B9B11E38E8100270E076073');
+        $Id = 39;//strrev('91CFD8806B9B11E38E8100270E076073');
         if ($Action === self::Persist) {
             $Blog = $this->CreateBlog();
             foreach ($Blog->Posts as $Post) {
@@ -71,7 +71,9 @@ class Test implements \StormTests\IStormTest {
             $Identity->SetProperty($BlogMap->Id, $Id);
             
             $RevivedBlog = $BlogRepository->Load(new Requests\IdentityRequest($Identity));
-            var_dump($RevivedBlog);
+            if(extension_loaded('xdebug')) {
+                var_dump($RevivedBlog);
+            }
             ($RevivedBlog->Posts[0]->Tags->ToArray());
             ($RevivedBlog->Posts[1]->Tags->ToArray());
             
@@ -113,7 +115,7 @@ class Test implements \StormTests\IStormTest {
 
     public function AddTags(Entities\Post $Post) {
         $Names = ['Tagged', 'Tummy', 'Tailgater', 'Food Fight', 'Andy'];
-        $Count = 100;
+        $Count = 1000;
         while ($Count > 0) {
             $Tag = new Entities\Tag();
             $Tag->Name = $Names[rand(0, count($Names) - 1)];

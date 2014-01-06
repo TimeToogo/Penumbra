@@ -106,11 +106,6 @@ abstract class Database {
     protected abstract function GetRows(Request $Request);
     
     public abstract function Commit(Transaction $Transaction);
-    
-    /**
-     * @return PrimaryKey[]
-     */
-    public abstract function GeneratePrimaryKeys(Table $Table, $Amount = 1);
 }
 
 ?>

@@ -291,10 +291,6 @@ abstract class DomainDatabaseMap {
      * @return Object\RevivalData[]
      */
     final public function MapRowsToRevivalData($EntityType, array $ResultRows) {
-        if (count($ResultRows) === 0) {
-            return array();
-        }
-        
         $EntityRelationalMap = $this->VerifyRelationalMap($EntityType);
 
         $ResultRowRevivalDataMap = new Map();

@@ -4,7 +4,7 @@ namespace Storm\Drivers\Base\Object\Requests;
 
 use Storm\Core\Object;
 
-class IdEntityRequest extends EntityRequest {
+class IdentityRequest extends EntityRequest {
     public function __construct(Object\Identity $Identity) {
         parent::__construct($Identity->GetEntityMap(), true);
         

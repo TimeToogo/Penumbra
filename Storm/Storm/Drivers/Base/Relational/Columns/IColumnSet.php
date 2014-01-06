@@ -98,6 +98,11 @@ interface IColumnSet {
      * @return Column
      */
     public function Binary($Name, $Length, $PrimaryKey = false);
+    
+    /**
+     * @return Column
+     */
+    public function Enum($Name, array $ValuesMap, $PrimaryKey = false);    
 }
 
 ?>

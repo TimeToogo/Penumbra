@@ -11,18 +11,25 @@ final class Row extends TableColumnData {
                 array_intersect_key($RowData,  $Table->GetPrimaryKeyColumnIdentifiers()));
         $this->PrimaryKeyColumnsAmount = count($Table->GetPrimaryKeyColumns());
     }
+    
+    public function __clone() {
+        $this->PrimaryKey = clone $this->PrimaryKey;
+    }
+    
     protected function AddColumn(IColumn $Column, $Data) {
         parent::AddColumn($Column, $Data);
         if($Column->IsPrimaryKey()) {
             $this->PrimaryKey[$Column] = $Data;
         }
     }
+    
     protected function RemoveColumn(IColumn $Column) {
         parent::RemoveColumn($Column);
         if($Column->IsPrimaryKey()) {
             unset($this->PrimaryKey[$Column]);
         }
     }
+    
     /**
      * @return PrimaryKey
      */

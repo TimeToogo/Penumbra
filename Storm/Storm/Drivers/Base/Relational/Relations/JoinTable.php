@@ -130,17 +130,8 @@ abstract class JoinTable extends Base\Relational\Table {
     final public function JoinRow(Relational\ColumnData $PrimaryKey1, Relational\ColumnData $PrimaryKey2) {
         $Row = $this->Row();
         
-        $ForeignKey1Map = $this->ForeignKey1->GetReferencedColumnMap();
-        foreach($ForeignKey1Map as $ParentColumn) {
-            $ReferencedColumn = $ForeignKey1Map[$ParentColumn];
-            $Row[$ParentColumn] = $PrimaryKey1[$ReferencedColumn];
-        }
-        
-        $ForeignKey2Map = $this->ForeignKey2->GetReferencedColumnMap();
-        foreach($ForeignKey2Map as $ParentColumn) {
-            $ReferencedColumn = $ForeignKey2Map[$ParentColumn];
-            $Row[$ParentColumn] = $PrimaryKey2[$ReferencedColumn];
-        }
+        $this->ForeignKey1->MapReferencedToParentKey($PrimaryKey1, $Row);
+        $this->ForeignKey2->MapReferencedToParentKey($PrimaryKey2, $Row);
         
         return $Row;
     }

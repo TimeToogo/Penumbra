@@ -34,6 +34,12 @@ class Traversing extends Accessor {
         }
     }
     
+    public function __clone() {
+        foreach($this->NestedAccessors as $Key => $NestedAccessor) {
+            $this->NestedAccessors[$Key] = clone $NestedAccessor;
+        }
+    }
+    
     private function Add(Accessor $Accessor) {
         $this->NestedAccessors[] = $Accessor;
     }

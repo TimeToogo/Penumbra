@@ -4,13 +4,15 @@ namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
 abstract class MethodBase {
     private $MethodName;
+    protected $ConstantArguments;
     /**
      * @var \ReflectionMethod
      */
     protected $Reflection;
     
-    public function __construct($MethodName) {
+    public function __construct($MethodName, array $ConstantArguments = array()) {
         $this->MethodName = $MethodName;
+        $this->ConstantArguments = $ConstantArguments;
     }
     
     final public function GetMethodName() {

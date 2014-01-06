@@ -7,6 +7,7 @@ use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
+//Guid reordered to prevent index fragmentation
 class BinaryGuidDataType extends HexedBinaryDataType {
     
     public function __construct() {

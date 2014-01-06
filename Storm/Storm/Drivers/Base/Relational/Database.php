@@ -42,10 +42,6 @@ abstract class Database extends Relational\Database {
                 $this->GetTablesOrderedByDiscardingDependency(),
                 $Transaction);
     }
-    
-    final public function GeneratePrimaryKeys(Relational\Table $Table, $Amount = 1) {
-        return $Table->GeneratePrimaryKeys($this->Connection, $Amount);
-    }
 }
 
 ?>

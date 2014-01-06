@@ -81,6 +81,10 @@ final class NullColumnSet implements Columns\IColumnSet {
         
     }
 
+    public function Enum($Name, array $ValuesMap, $PrimaryKey = false) {
+        
+    }
+
 }
 
 ?>

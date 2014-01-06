@@ -34,6 +34,13 @@ class ResultRow extends ColumnData {
         unset($this->Rows[$Column->GetTable()->GetName()][$Column]);
     }
     
+    public function __clone() {
+        foreach($this->Rows as $TableName => $Rows) {
+            $this->Rows[$TableName] = clone $this->Rows[$TableName];
+            $this->PrimaryKeys[$TableName] = $this->Rows[$TableName]->GetPrimaryKey();
+        }
+    }
+    
     /**
      * @return Table
      */

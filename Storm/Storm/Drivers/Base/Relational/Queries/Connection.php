@@ -2,6 +2,8 @@
 
 namespace Storm\Drivers\Base\Relational\Queries;
 
+use \Storm\Core\Relational;
+
 abstract class Connection implements IConnection {
     /**
      * @var IIdentifierEscaper 
@@ -34,6 +36,17 @@ abstract class Connection implements IConnection {
     
     final public function SetPredicateCompiler(IPredicateCompiler $PredicateCompiler) {
         $this->PredicateCompiler = $PredicateCompiler;
+    }
+    
+    final public function LoadResultRows(array $Columns, IQuery $Query) {
+        $Query->Execute();
+        $Row = new Relational\ResultRow($Columns, array());
+        $Rows = array();
+        while($RowData = $Query->FetchRow()) {
+            $Rows[] = $Row->Another($RowData);
+        }
+        
+        return $Rows;
     }
 }
 

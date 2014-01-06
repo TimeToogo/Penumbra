@@ -7,10 +7,6 @@ class CustomSetter extends CustomBase implements IPropertySetter {
         parent::__construct($SetterFunction);
     }
 
-    final public function CanSetValueTo($EntityType) {
-        return $this->ValidCustomOf($EntityType);
-    }
-
     final public function SetValueTo($Entity, $Value) {
         return $this->CallFunction([$Entity, $Value]); 
     }

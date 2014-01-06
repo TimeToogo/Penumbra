@@ -24,10 +24,10 @@ abstract class EntityMap extends \Storm\Core\Object\EntityMap {
     }
     
     /**
-     * @return Requests\IdEntityRequest
+     * @return Requests\IdentityRequest
      */
     final public function RequestId(Identity $Identity) {
-        return new Requests\IdEntityRequest($Identity);
+        return new Requests\IdentityRequest($Identity);
     }
     /**
      * @return Construction\IEntityConstructor

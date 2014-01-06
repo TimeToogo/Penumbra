@@ -83,17 +83,6 @@ class Connection extends Queries\Connection {
     public function Prepare($QueryString, Queries\Bindings $Bindings = null) {
         return new Query($this->PDO->prepare($QueryString), $Bindings);
     }
-    
-    public function LoadResultRows(array $Columns, Queries\IQuery $Query) {
-        $Query->Execute();
-        $Row = new Relational\ResultRow($Columns, array());
-        $Rows = array();
-        while($RowData = $Query->FetchRow()) {
-            $Rows[] = $Row->Another($RowData);
-        }
-        
-        return $Rows;
-    }
 }
 
 ?>
