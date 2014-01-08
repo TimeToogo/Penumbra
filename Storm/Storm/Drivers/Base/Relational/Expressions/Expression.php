@@ -15,6 +15,13 @@ abstract class Expression extends Expressions\Expression {
     }
     
     /**
+     * @return ReviveColumnExpression
+     */
+    public static function Multiple(array $Expressions) {
+        return new MultipleExpression($Expressions);
+    }
+    
+    /**
      * @return PersistDataExpression
      */
     public static function PersistData(Column $Column, parent $ValueExpression) {
@@ -45,7 +52,8 @@ abstract class Expression extends Expressions\Expression {
     /**
      * @return FunctionCallExpression
      */
-    public static function FunctionCall($Name, ValueListExpression $ArgumentValueListExpression) {
+    public static function FunctionCall($Name, ValueListExpression $ArgumentValueListExpression = null) {
+        $ArgumentValueListExpression = $ArgumentValueListExpression ?: new ValueListExpression([]);
         return new FunctionCallExpression($Name, $ArgumentValueListExpression);
     }
     

@@ -19,10 +19,11 @@ interface IRequest {
     public function GetPredicates();
     
     public function IsOrdered();
+    
     /**
      * @return \SplObjectStorage
      */
-    public function GetOrderedPropertiesAscendingMap();
+    public function GetOrderedExpressionsAscendingMap();
     
     public function IsSingleEntity();
     public function IsRanged();

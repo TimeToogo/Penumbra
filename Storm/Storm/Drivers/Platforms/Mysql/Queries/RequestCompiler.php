@@ -8,7 +8,11 @@ use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
 class RequestCompiler  extends Queries\RequestCompiler {    
     protected function AppendProcedureStatement(QueryBuilder $QueryBuilder, Relational\Procedure $Procedure) {
-        $QueryBuilder->AppendIdentifier('UPDATE # ', [$Procedure->GetTables()->GetName()]);//TODO
+        $QueryBuilder->AppendIdentifiers('UPDATE # SET ', array_map(
+                function ($Table) { 
+                    return $Table->GetName();
+                }, 
+                $Procedure->GetTables()), ',');
     }
     
     protected function AppendProcedureExpressions(QueryBuilder $QueryBuilder, array $Expressions) {
@@ -36,17 +40,14 @@ class RequestCompiler  extends Queries\RequestCompiler {
         $QueryBuilder->Append(')');
     }
 
-    protected function AppendOrderedColumns(QueryBuilder $QueryBuilder, \SplObjectStorage $ColumnAscendingMap) {
+    protected function AppendOrderedExpressions(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap) {
         $QueryBuilder->Append(' ORDER BY ');
-        $First = true;
-        foreach($ColumnAscendingMap as $Column) {
-            if($First) $First = false;
-            else
-                $QueryBuilder->Append(', ');
-
-            $Ascending = $ColumnAscendingMap[$Column];
+        foreach($QueryBuilder->Delimit($ExpressionAscendingMap, ', ') as $Expression) {
+            $Ascending = $ExpressionAscendingMap[$Expression];
             $Direction = $Ascending ? 'ASC' : 'DESC';
-            $QueryBuilder->AppendColumn('# ' . $Direction, $Column);
+            
+            $QueryBuilder->AppendExpression($Expression);
+            $QueryBuilder->Append(' ' . $Direction);
         }
     }
 

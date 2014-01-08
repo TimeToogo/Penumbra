@@ -7,6 +7,7 @@ use \Storm\Core\Relational\Request;
 use \Storm\Core\Relational\Procedure;
 use \Storm\Core\Object\Constraints\Predicate;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
+use \Storm\Drivers\Base\Relational\Expressions\SetExpression;
 
 abstract class RequestCompiler implements IRequestCompiler {    
     final public function AppendProcedure(QueryBuilder $QueryBuilder, Procedure $Procedure) {
@@ -18,7 +19,7 @@ abstract class RequestCompiler implements IRequestCompiler {
     
     protected abstract function AppendProcedureExpressions(QueryBuilder $QueryBuilder, array $Expressions);
     
-    final protected function AppendProcedureExpression(QueryBuilder $QueryBuilder, Expression $Expression) {
+    final protected function AppendProcedureExpression(QueryBuilder $QueryBuilder, SetExpression $Expression) {
         $QueryBuilder->AppendExpression($Expression);
     }
     
@@ -27,7 +28,7 @@ abstract class RequestCompiler implements IRequestCompiler {
             $this->AppendPredicates($QueryBuilder, $Request->GetPredicates());
         }
         if($Request->IsOrdered()) {
-            $this->AppendOrderedColumns($QueryBuilder, $Request->GetOrderedColumnsAscendingMap());
+            $this->AppendOrderedExpressions($QueryBuilder, $Request->GetOrderedExpressionsAscendingMap());
         }
         if($Request->IsRanged()) {
             $this->AppendRange($QueryBuilder, $Request->GetRangeOffset(), $Request->GetRangeAmount());
@@ -40,7 +41,7 @@ abstract class RequestCompiler implements IRequestCompiler {
         $QueryBuilder->AppendPredicate($Predicate);
     }
     
-    protected abstract function AppendOrderedColumns(QueryBuilder $QueryBuilder, \SplObjectStorage $ColumnAscendingMap);
+    protected abstract function AppendOrderedExpressions(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap);
     
     protected abstract function AppendRange(QueryBuilder $QueryBuilder, $Offset, $Limit);
 }

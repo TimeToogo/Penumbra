@@ -6,25 +6,34 @@ use \StormTests\One\Entities;
 use \Storm\Core\Storm;
 use \Storm\Core\Repository;
 use \Storm\Core\Object;
+use \Storm\Drivers\Base\Object\Procedures;
 use \Storm\Drivers\Base\Object\Requests;
 use \Storm\Drivers\Intelligent\Object\Pinq;
-use \Storm\Drivers\Intelligent\Object\Pinq\Expressions\Expression;
+use \Storm\Core\Object\Expressions\Expression;
 
 class Test implements \StormTests\IStormTest {
-
+    
     public function GetStorm() {
         return new Storm(new Mapping\BloggingDomainDatabaseMap());
     }
 
+    const Id = 39;
+    
     const Persist = 0;
     const Retreive = 1;
     const Discard = 2;
+    const Operation = 3;
 
     public function Run(Storm $BloggingStorm) {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
-
-        $Action = self::Retreive;
+        
+        $Closure = function ($Blog) {
+                    return $Blog->Name === 'Test blog' || $Blog->CreatedDate < new \DateTime();
+                };
+        print_r((new Pinq\Closure\Reader($Closure))->GetSource());
+                
+        $Action = self::Operation;
         $Amount = 1;
 
         $Last;
@@ -36,7 +45,7 @@ class Test implements \StormTests\IStormTest {
     }
 
     private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $Id = 39;//strrev('91CFD8806B9B11E38E8100270E076073');
+        $Id = self::Id;
         if ($Action === self::Persist) {
             $Blog = $this->CreateBlog();
             foreach ($Blog->Posts as $Post) {
@@ -79,6 +88,24 @@ class Test implements \StormTests\IStormTest {
             
             return null;
             
+        } else if ($Action === self::Operation) {
+            $BlogMap = $BloggingStorm->GetORM()->GetDomain()->GetEntityMap(Entities\Blog::GetType());
+
+            $Identity = $BlogMap->Identity();
+            $Identity->SetProperty($BlogMap->Id, $Id);
+            
+            $Procedure = new Procedures\Procedure(Entities\Blog::GetType(), [
+                    Expression::Assign(
+                            Expression::Property($BlogMap->Description), 
+                            Expression::FunctionCall('md5', [
+                                    Expression::Construct('DateTime')
+                            ]))]);
+            $Procedure->AddPredicate((new Requests\IdentityRequest($Identity))->GetPredicates()[0]);
+            
+            $BlogRepository->Execute($Procedure);
+            
+            $BlogRepository->SaveChanges();
+            
         }
     }
 
@@ -115,7 +142,7 @@ class Test implements \StormTests\IStormTest {
 
     public function AddTags(Entities\Post $Post) {
         $Names = ['Tagged', 'Tummy', 'Tailgater', 'Food Fight', 'Andy'];
-        $Count = 1000;
+        $Count = 100;
         while ($Count > 0) {
             $Tag = new Entities\Tag();
             $Tag->Name = $Names[rand(0, count($Names) - 1)];

@@ -15,6 +15,7 @@ class Connection implements Queries\IConnection {
     }
 
     public function BeginTransaction() {
+        $this->Logger->Log('Beginning transaction');
         return $this->Connection->BeginTransaction();
     }
 

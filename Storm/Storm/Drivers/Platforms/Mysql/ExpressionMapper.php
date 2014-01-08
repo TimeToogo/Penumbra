@@ -11,14 +11,6 @@ use \Storm\Drivers\Base\Relational\Expressions\Operators as O;
 
 final class ExpressionMapper extends E\ExpressionMapper {
     
-    public function MapConstantExpression($Value) {
-        if($Value instanceof \DateTime) {
-            return Expression::FunctionCall('FROM_UNIXTIME', [new EE\ConstantExpression($Value->getTimestamp())]);
-        }
-        
-        return Expression::Constant($Value);
-    }
-    
     private static $AssignmentBinaryOperatorMap = [
         O\Assignment::Addition => O\Binary::Addition,
         O\Assignment::BitwiseAnd => O\Binary::BitwiseAnd,
@@ -70,7 +62,7 @@ final class ExpressionMapper extends E\ExpressionMapper {
         
         switch($BinaryOperator) {
             case O\Binary::Concatenation:
-                return new E\FunctionCallExpression('CONCAT', [$LeftOperandExpression, $RightOperandExpression]);
+                return new E\FunctionCallExpression('CONCAT', Expression::ValueList([$LeftOperandExpression, $RightOperandExpression]));
             
             default:
                 return new E\BinaryOperationExpression(
@@ -134,162 +126,6 @@ final class ExpressionMapper extends E\ExpressionMapper {
             default:
                 throw new \Exception();
         }
-    }
-
-    public function MapFunctionCallExpression($FunctionName, array $ArgumentExpressions) {
-        $MysqlFunctionName = null;
-        $MysqlArgumentExpressions = $ArgumentExpressions;
-        $Name = strtolower($FunctionName);
-        switch ($Name) {
-            case 'strtoupper':
-                $MysqlFunctionName = 'UPPER';
-                break;
-            case 'strtolower':
-                $MysqlFunctionName = 'LOWER';
-                break;
-            
-            case 'strpos':
-            case 'stripos':
-                $MysqlFunctionName = 'INSTR';
-                $StringExpression = $ArgumentExpressions[1];
-                if(isset($ArgumentExpressions[2])) {
-                    $StringExpression = new E\FunctionCallExpression(
-                            'SUBSTR', [$ArgumentExpressions[1], $ArgumentExpressions[2]]);
-                    unset($MysqlArgumentExpressions[2]);
-                }
-                if($Name === 'strpos') {
-                    $StringExpression = new E\FunctionCallExpression('BINARY', [$StringExpression]);
-                }
-                $ArgumentExpressions[1] = $StringExpression;
-                
-                return new E\BinaryOperationExpression(
-                        new E\FunctionCallExpression($MysqlFunctionName, $MysqlArgumentExpressions),
-                        O\Binary::Subtraction, 
-                        new EE\ConstantExpression(1));
-                
-            case 'bin2hex':
-                $MysqlFunctionName = 'HEX';
-                break;
-            case 'hex2bin':
-                $MysqlFunctionName = 'UNHEX';
-                break;
-            
-            case 'trim':
-            case 'rtrim':
-            case 'ltrim':
-                $MysqlFunctionName = 'TRIM';
-                
-                $DirectionKeyword = null;
-                if($Name === 'trim')
-                    $DirectionKeyword = 'BOTH';
-                else if($Name === 'rtrim')
-                    $DirectionKeyword = 'LEADING';
-                else
-                    $DirectionKeyword = 'TRAILING';
-                
-                $MysqlArgumentExpressions = [
-                    new E\KeywordExpression($DirectionKeyword),
-                    isset($ArgumentExpressions[1]) ?
-                            $ArgumentExpressions[1] : new EE\ConstantExpression(" \t\n\r\0\x0B"),
-                    new E\KeywordExpression('FROM'),
-                    new $ArgumentExpressions[0],
-                ];
-                break;
-            
-            case 'in_array':
-                return new E\BinaryOperationExpression($ArgumentExpressions[0], O\Binary::In, $ArgumentExpressions[1]);
-            
-            case 'time':
-                $MysqlFunctionName = 'UNIX_TIMESTAMP';
-                break;
-            
-            case 'strlen':
-                $MysqlFunctionName = 'CHAR_LENGTH';
-                break;
-            
-            case 'preg_match':
-                return new E\BinaryOperationExpression(
-                        $ArgumentExpressions[1], 
-                        O\Binary::MatchesRegularExpression, 
-                        new E\FunctionCallExpression('BINARY', [$ArgumentExpressions[0]]));            
-            
-            case 'strrev':
-                $MysqlFunctionName = 'REVERSE';
-                break;
-            
-            case 'substr':
-                $MysqlFunctionName = 'SUBSTRING';
-                break;
-            
-            case 'md5':
-            case 'sha1':
-                $MysqlFunctionName = $Name === 'md5' ? 'MD5' : 'SHA1';
-                if(isset($ArgumentExpressions[1])) {
-                    unset($MysqlArgumentExpressions[1]);
-                    if($ArgumentExpressions[1]) {
-                        return new E\FunctionCallExpression('UNHEX', [
-                                new E\FunctionCallExpression
-                                        ($MysqlFunctionName, $MysqlArgumentExpressions)]);
-                    }
-                }
-                break;
-            
-            case 'pow':
-                $MysqlFunctionName = 'POWER';
-                break;
-            
-            case 'pi':
-                $MysqlFunctionName = 'PI';
-                break;
-            
-            case 'round':
-                $MysqlFunctionName = 'ROUND';
-                if(isset($ArgumentExpressions[2]))
-                    throw new \Exception('Does not suppor rounding modes');
-                break;
-            
-            case 'rand':
-            case 'mt_rand':
-                $IsMt = $Name === 'mt_rand';
-                $Minimum = null;
-                $Maximum = null;
-                if(count($ArgumentExpressions === 0)) {
-                    $Minimum = new EE\ConstantExpression(0);
-                    $Maximum = new EE\ConstantExpression($IsMt ? mt_getrandmax() : getrandmax());
-                }
-                else {
-                    $Minimum = $ArgumentExpressions[0];
-                    $Maximum = $ArgumentExpressions[1];
-                }
-                $DifferenceExpression = new E\BinaryOperationExpression(
-                        $Maximum, 
-                        O\Binary::Subtraction, 
-                        $Minimum);
-                
-                return new E\FunctionCallExpression('ROUND', 
-                        new E\BinaryOperationExpression(
-                                $Minimum, 
-                                O\Binary::Addition, 
-                                new E\BinaryOperationExpression(
-                                        new E\FunctionCallExpression('RAND'), 
-                                        O\Binary::Multiplication, 
-                                        $DifferenceExpression)));
-            
-            case 'ceil':
-                $MysqlFunctionName = 'CEILING';
-                break;
-            case 'floor':
-                $MysqlFunctionName = 'FLOOR';
-                break;
-            case 'sqrt':
-                $MysqlFunctionName = 'SQRT';
-                break;
-            
-            default:
-                throw new \Exception();
-        }
-        
-        return new E\FunctionCallExpression($MysqlFunctionName, $MysqlArgumentExpressions);
     }
 }
 

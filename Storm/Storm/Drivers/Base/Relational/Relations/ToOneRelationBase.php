@@ -21,13 +21,32 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
             $Map->Map(reset($ParentRows), reset($RelatedRows));
         } 
         else {
-            $this->FillParentToRelatedRowMap($Map, $this->GetForeignKey(), $ParentRows, $RelatedRows);
+            $ForeignKey = $this->GetForeignKey();
+            if($this->IsInversed()) {
+                $KeyedRelatedRows = $this->HashRowsByColumnValues($RelatedRows, $ForeignKey->GetParentColumns());
+                $ParentReferencedKeys = Relational\ResultRow::GetAllDataFromColumns($ParentRows, $ForeignKey->GetReferencedColumns());
+                foreach($ParentRows as $Key => $ParentRow) {
+                    $Hash = $ParentReferencedKeys[$Key]->HashData();
+                    if(isset($KeyedRelatedRows[$Hash])) {
+                        $Map->Map($ParentRow, $KeyedRelatedRows[$Hash]);
+                    }
+                }
+            }
+            else {
+                $KeyedRelatedRows = $this->HashRowsByColumnValues($RelatedRows, $ForeignKey->GetReferencedColumns());
+                $ParentReferencedKeys = Relational\ResultRow::GetAllDataFromColumns($ParentRows, $ForeignKey->GetParentColumns());
+                foreach($ParentRows as $ParentRow) {
+                    $Hash = $ParentReferencedKeys[$Key]->HashData();
+                    if(isset($KeyedRelatedRows[$Hash])) {
+                        $Map->Map($ParentRow, $KeyedRelatedRows[$Hash]);
+                    }
+                }
+            }
         }
         
         return $Map;
     }
-    protected abstract function FillParentToRelatedRowMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows);
-
+    
     final protected function MapKeyIntersection(Map $Map, array $KeyedParentRows, array $KeyedRelatedRows) {
         foreach(array_intersect_key($KeyedParentRows, $KeyedRelatedRows) as $Key => $ParentRow) {
             $Map->Map($ParentRow, $KeyedRelatedRows[$Key]);
@@ -45,7 +64,33 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
             }
         }
     }
-    protected abstract function PersistIdentifyingRelationship(Relational\Transaction $Transaction, Relational\Row $ParentRow, Relational\Row $ChildRow);
+    
+    final protected function PersistIdentifyingRelationship(
+            Relational\Transaction $Transaction, 
+            Relational\Row $ParentRow, Relational\Row $ChildRow) {
+        if($this->IsInversed()) {
+            if($ParentRow->HasPrimaryKey()) {
+                $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildRow);
+            }
+            else {
+                $Transaction->SubscribeToPrePersistEvent($ChildRow, 
+                        function (Relational\Row $ChildRow) use (&$ParentRow) {
+                            $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildRow);
+                        });
+            }
+        }
+        else {
+            if($ParentRow->HasPrimaryKey()) {
+                $this->GetForeignKey()->MapParentToReferencedKey($ParentRow, $ChildRow);
+            }
+            else {
+                $Transaction->SubscribeToPrePersistEvent($ChildRow, 
+                        function (Relational\Row $ChildRow) use (&$ParentRow) {
+                            $this->GetForeignKey()->MapParentToReferencedKey($ParentRow, $ChildRow);
+                        });
+            }
+        }
+    }
     
 }
 

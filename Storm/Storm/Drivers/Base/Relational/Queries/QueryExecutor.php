@@ -38,13 +38,13 @@ abstract class QueryExecutor implements IQueryExecutor {
                 }
             }
             
-            $GroupedProceduresToExecute = $this->GroupByTableName($Transaction->GetProcedures(), $TablesOrderedByPersistingDependency);
+            foreach($Transaction->GetProcedures() as $Procedure) {
+                $this->ExecuteUpdate($Connection, $Procedure);
+            }
+            
             $GroupedPersistedRows = $this->GroupByTableName($Transaction->GetPersistedRows(), $TablesOrderedByPersistingDependency);
             foreach($TablesOrderedByPersistingDependency as $Table) {
                 $TableName = $Table->GetName();
-                if(isset($GroupedProceduresToExecute[$TableName])) {
-                    $this->ExecuteUpdates($Connection, $Table, $GroupedProceduresToExecute[$TableName]);
-                }
                 if(isset($GroupedPersistedRows[$TableName])) {
                     $Transaction->TriggerPrePersistEvent($GroupedPersistedRows[$TableName]);
                     $this->PersistRows($Connection, $Transaction, $Table, $GroupedPersistedRows[$TableName]);
@@ -61,7 +61,7 @@ abstract class QueryExecutor implements IQueryExecutor {
     }
     protected abstract function DeleteWhereQuery(IConnection $Connection, Table $Table, array &$DiscardedRequests);
     protected abstract function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys);
-    protected abstract function ExecuteUpdates(IConnection $Connection, Table $Table, array &$ProceduresToExecute);
+    protected abstract function ExecuteUpdate(IConnection $Connection, Relational\Procedure &$ProcedureToExecute);
     private function PersistRows(IConnection $Connection, Relational\Transaction $Transaction, 
             Table $Table, array &$RowsToPersist) {
         
@@ -99,10 +99,6 @@ abstract class QueryExecutor implements IQueryExecutor {
     protected abstract function SaveRows(IConnection $Connection, Table $Table, array &$RowsToPersist,
             PrimaryKeys\ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null);
     
-    
-    final protected function AppendProcedure(QueryBuilder $QueryBuilder, Relational\Procedure $Operation) {
-        $this->RequestCompiler->AppendProcedure($QueryBuilder, $Operation);
-    }
     
     private function GroupByTableName(array $ObjectsWithTable) {
         $OrderedObjects = array();

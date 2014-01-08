@@ -13,8 +13,9 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
             $EntityType,
             IRelationshipType $RelationshipType,
             $IsOptional = false,
+            Object\IProperty $BackReferenceProperty = null,
             Proxies\IProxyGenerator $ProxyGenerator = null) {
-        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying());
+        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying(), $BackReferenceProperty);
         $this->IsOptional = $IsOptional;
         $this->RelationshipType = $RelationshipType;
         $this->ProxyGenerator = $ProxyGenerator;
@@ -46,8 +47,14 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
         }
     }
     
-    protected function ReviveCallable(Object\Domain $Domain, $Entity, callable $Callback) {
+    protected function ReviveCallable(Object\Domain $Domain, $Entity, callable $Callback, Object\IProperty $BackReferenceProperty = null) {
         if ($this->ProxyGenerator !== null) {
+            if($BackReferenceProperty !== null) {
+                $Callback = function () use ($Callback, &$BackReferenceProperty, &$Entity) {
+                    $RevivalData = call_user_func_array($Callback, func_get_args());
+                    $RevivalData[$BackReferenceProperty] = $Entity;
+                };
+            }
             return $this->ProxyGenerator->GenerateProxy($Domain, $this->GetEntityType(), $Callback);
         }
         else {

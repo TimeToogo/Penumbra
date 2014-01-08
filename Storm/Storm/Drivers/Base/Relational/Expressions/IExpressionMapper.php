@@ -15,6 +15,16 @@ interface IExpressionMapper {
     /**
      * @return Expression
      */
+    public function MapObjectExpression($Type, $Value);
+        
+    /**
+     * @return Expression
+     */
+    public function MapMethodCallExpression(Expression $ObjectExpression, $Type, $Name, array $ArgumentValueExpressions);
+    
+    /**
+     * @return Expression
+     */
     public function MapAssignmentExpression(
             Relational\IColumn $Column, 
             $AssignmentOperator, 

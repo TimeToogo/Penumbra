@@ -13,7 +13,7 @@ final class Platform extends Relational\Platform {
         }
         parent::__construct(
                 $Connection,
-                new ExpressionMapper(),
+                new ExpressionMapper(new FunctionMapper(), new ObjectMapper()),
                 new Columns\ColumnSet(),
                 new PrimaryKeys\KeyGeneratorSet(/* TODO */),
                 new Queries\ExpressionCompiler(new Queries\ExpressionOptimizer()),

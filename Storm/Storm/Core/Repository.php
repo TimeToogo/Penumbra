@@ -70,7 +70,9 @@ class Repository {
     
     public function SaveChanges() {
         if(count($this->PersistedQueue) === 0 && 
-                count($this->DiscardedQueue) === 0 && count($this->DiscardedRequestQueue) === 0)
+                count($this->ExecutionQueue) === 0 &&
+                count($this->DiscardedQueue) === 0 &&
+                count($this->DiscardedRequestQueue) === 0)
             return;
         
         $this->DomainDatabaseMap->Commit(

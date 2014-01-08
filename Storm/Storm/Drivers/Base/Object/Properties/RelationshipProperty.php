@@ -9,10 +9,17 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
     private $EntityType;
     private $IsIdentifying;
     private $OriginalValueStorageKey;
-    public function __construct(Accessors\Accessor $Accessor, $EntityType, $IsIdentifying) {
+    private $BackReferenceProperty;
+    
+    public function __construct(
+            Accessors\Accessor $Accessor, 
+            $EntityType, 
+            $IsIdentifying,
+            Object\IProperty $BackReferenceProperty = null) {
         parent::__construct($Accessor);
         $this->EntityType = $EntityType;
         $this->IsIdentifying = $IsIdentifying;
+        $this->BackReferenceProperty = $BackReferenceProperty;
         $this->OriginalValueStorageKey = $EntityType . $this->GetIdentifier();
     }
     
@@ -22,6 +29,13 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
     
     final public function IsIdentifying() {
         return $this->IsIdentifying;
+    }
+    
+    /**
+     * @return Object\IProperty
+     */
+    final public function GetBackReferenceProperty() {
+        return $this->BackReferenceProperty;
     }
     
     final public function Revive(Domain $Domain, $PropertyValue, $Entity) {
@@ -40,17 +54,25 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
             return $this->ReviveNull($Domain, $Entity);
         }
         if($PropertyRevivalValue instanceof RevivalData) {
+            if($this->BackReferenceProperty !== null) {
+                $PropertyRevivalValue[$this->BackReferenceProperty] = $Entity;
+            }
             return $this->ReviveRevivalData($Domain, $Entity, $PropertyRevivalValue);
         }
         else if(is_callable($PropertyRevivalValue)) {
-            return $this->ReviveCallable($Domain, $Entity, $PropertyRevivalValue);
+            return $this->ReviveCallable($Domain, $Entity, $PropertyRevivalValue, $this->BackReferenceProperty);
         }
         else if(is_array($PropertyRevivalValue)) {
             if(count(array_filter($PropertyRevivalValue, function ($Value) { return $Value instanceof Object\RevivalData; })) === count($PropertyRevivalValue)) {
+                if($this->BackReferenceProperty !== null) {
+                    foreach($PropertyRevivalValue as $RevivalData) {
+                        $RevivalData[$this->BackReferenceProperty] = $Entity;
+                    }
+                }
                 return $this->ReviveArrayOfRevivalData($Domain, $Entity, $PropertyRevivalValue);
             }
             else if(count(array_filter($PropertyRevivalValue, function ($Value) { return is_callable($Value); })) === count($PropertyRevivalValue)) {
-                return $this->ReviveArrayOfCallables($Domain, $Entity, $PropertyRevivalValue);
+                return $this->ReviveArrayOfCallables($Domain, $Entity, $PropertyRevivalValue, $this->BackReferenceProperty);
             }
         }
         
@@ -65,7 +87,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         throw new \Exception;//TODO:error message
     }
     
-    protected function ReviveCallable(Domain $Domain, $Entity, callable $Callback) {
+    protected function ReviveCallable(Domain $Domain, $Entity, callable $Callback, Object\IProperty $BackReferenceProperty = null) {
         throw new \Exception;//TODO:error message
     }
     
@@ -73,7 +95,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         throw new \Exception;//TODO:error message
     }
     
-    protected function ReviveArrayOfCallables(Domain $Domain, $Entity, array $Callbacks) {
+    protected function ReviveArrayOfCallables(Domain $Domain, $Entity, array $Callbacks, Object\IProperty $BackReferenceProperty = null) {
         throw new \Exception;//TODO:error message
     }
     

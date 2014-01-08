@@ -98,6 +98,22 @@ class ResultRow extends ColumnData {
         
         return new ResultRow($Columns, array_intersect_key($ColumnData, $ColumnIdentifiers));
     }
+    
+    /**
+     * @return ResultRow[]
+     */
+    final public static function GetAllDataFromColumns(array $ResultRows, array $Columns) {
+        $NewResultRow = new ResultRow($Columns);
+        $ColumnIdentifiers = array_flip(array_keys($NewResultRow->GetColumns()));
+        
+        $NewResultRows = array();
+        foreach($ResultRows as $Key => $ResultRow) {
+            $NewResultRows[$Key] = $NewResultRow->Another(
+                    array_intersect_key($ResultRow->GetColumnData(), $ColumnIdentifiers));
+        }
+        
+        return $NewResultRows;
+    }
 }
 
 ?>

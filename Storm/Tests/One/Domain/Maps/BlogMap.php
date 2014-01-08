@@ -2,6 +2,7 @@
 
 namespace StormTests\One\Domain\Maps;
 
+use \Storm\Core\Object\Domain;
 use \Storm\Drivers\Base\Object;
 use \Storm\Drivers\Base\Object\Properties;
 use \Storm\Drivers\Base\Object\Properties\Accessors;
@@ -23,7 +24,7 @@ class BlogMap extends EntityMap {
     public $CreatedDate;
     public $Posts;
     
-    protected function CreateProperties() {
+    protected function CreateProperties(Domain $Domain) {
         $ProxyGenerator = new Properties\Proxies\DevelopmentProxyGenerator(
                 __NAMESPACE__ . '\\' . 'Proxies', 
                 str_replace('\\', DIRECTORY_SEPARATOR, __DIR__) . DIRECTORY_SEPARATOR . 'Proxies');
@@ -32,9 +33,12 @@ class BlogMap extends EntityMap {
         $this->Name = new Properties\DataProperty(new Accessors\Field('Name'));
         $this->Description = new Properties\DataProperty(new Accessors\Field('Description'));
         $this->CreatedDate = new Properties\DataProperty(new Accessors\Field('CreatedDate'));
+        
         $this->Posts = new Properties\CollectionProperty(new Accessors\Field('Posts'), 
                 \StormTests\One\Entities\Post::GetType(), 
-                new Properties\Relationships\Identifying(), $ProxyGenerator);
+                new Properties\Relationships\Identifying(), 
+                $Domain->PostMap->Blog,
+                $ProxyGenerator);
     }
 
 }

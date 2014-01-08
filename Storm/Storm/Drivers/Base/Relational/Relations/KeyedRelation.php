@@ -9,9 +9,10 @@ use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
 abstract class KeyedRelation extends Relation {
     private $ForeignKey;
+    private $IsInversed;
     
     public function __construct(
-            ForeignKey $ForeignKey, 
+            ForeignKey $ForeignKey,
             Relational\Table $RelatedTable, 
             $PersistingOrder, 
             $DiscardingOrder) {
@@ -19,6 +20,7 @@ abstract class KeyedRelation extends Relation {
                 $PersistingOrder, $DiscardingOrder);
         
         $this->ForeignKey = $ForeignKey;
+        $this->IsInversed = $ForeignKey->GetParentTable()->Is($RelatedTable);
     }
     
     /**
@@ -28,6 +30,10 @@ abstract class KeyedRelation extends Relation {
         return $this->ForeignKey;
     }
     
+    final public function IsInversed() {
+        return $this->IsInversed;
+    }
+
     public function AddConstraintToRequest(Relational\Request $Request) {
         $Request->AddPredicate($this->ForeignKey->GetConstraintPredicate());
     }
@@ -37,7 +43,7 @@ abstract class KeyedRelation extends Relation {
         if($ParentTable) {
             $Request->AddTable($ParentTable);
         }
-        $Request->AddColumns($this->GetRelatedColumns());
+        $Request->AddColumns($this->GetReferencedColumns());
         $Predicate = new Constraints\Predicate();
         $RuleGroup = Constraints\RuleGroup::Any();
         
@@ -53,28 +59,45 @@ abstract class KeyedRelation extends Relation {
     /**
      * @return Relational\Table
      */
-    final protected function GetParentTable() {
-        return $this->ParentTable($this->ForeignKey);
+    protected function GetParentTable() {
+        return $this->IsInversed ? 
+                $this->ForeignKey->GetReferencedTable() : $this->ForeignKey->GetParentTable();
     }
-    protected abstract function ParentTable(ForeignKey $ForeignKey);
     /**
      * @return Relational\IColumn[]
      */
-    final protected function GetRelatedColumns() {
-        return $this->RelatedColumns($this->ForeignKey);
+    protected function GetReferencedColumns() {
+        return $this->IsInversed ? 
+                $this->ForeignKey->GetParentColumns() : $this->ForeignKey->GetReferencedColumns();
     }
-    protected abstract function RelatedColumns(ForeignKey $ForeignKey);
     
     /**
      * @return Relational\ResultRow
      */
-    protected abstract function MapParentRowToRelatedKey(ForeignKey $ForeignKey, 
-            Relational\ResultRow $ParentRow);
+    protected function MapParentRowToRelatedKey(
+            ForeignKey $ForeignKey, 
+            Relational\ResultRow $ParentRow) {
+        if($this->IsInversed) {
+            $ReferencedKey = $ParentRow->GetDataFromColumns($ForeignKey->GetReferencedColumns());
+            $ParentKey = new Relational\ResultRow($ForeignKey->GetParentColumns());
+            $ForeignKey->MapReferencedToParentKey($ReferencedKey, $ParentKey);
+
+            return $ParentKey;
+        }
+        else {
+            $ParentKey = $ParentRow->GetDataFromColumns($ForeignKey->GetParentColumns());
+            $ReferencedKey = new Relational\ResultRow($ForeignKey->GetReferencedColumns());
+            $ForeignKey->MapParentToReferencedKey($ParentKey, $ReferencedKey);
+            
+            return $ReferencedKey;
+        }
+    }
     
-    final protected function HashRowsByColumnValues(array $Rows, array $Columns) {
+    final protected function HashRowsByColumnValues(array $ResultRows, array $Columns) {
         $KeyedRows = array();
-        foreach($Rows as $Row) {
-            $Hash = $Row->GetDataFromColumns($Columns)->HashData();
+        $ColumnDataArray = Relational\ResultRow::GetAllDataFromColumns($ResultRows, $Columns);
+        foreach($ResultRows as $Key => $Row) {
+            $Hash = $ColumnDataArray[$Key]->HashData();
             $KeyedRows[$Hash] = $Row;
         }
         

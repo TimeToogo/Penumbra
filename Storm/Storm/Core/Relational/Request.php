@@ -6,7 +6,7 @@ class Request {
     private $Tables = array();
     private $Columns = array();
     private $Predicates = array();
-    private $OrderedColumnsAscendingMap;
+    private $OrderedExpressionsAscendingMap;
     private $IsSingleRow;
     private $RangeOffset;
     private $RangeAmount;
@@ -15,7 +15,7 @@ class Request {
         foreach($Columns as $Column) {
             $this->AddColumn($Column);
         }
-        $this->OrderedColumnsAscendingMap = new \SplObjectStorage();
+        $this->OrderedExpressionsAscendingMap = new \SplObjectStorage();
         $this->IsSingleRow = $IsSingleRow;
         $this->RangeOffset = 0;
         $this->RangeAmount = null;
@@ -81,20 +81,16 @@ class Request {
     }
     
     final public function IsOrdered() {
-        return $this->OrderedColumnsAscendingMap->count() > 0;
+        return $this->OrderedExpressionsAscendingMap->count() > 0;
     }
     /**
      * @return \SplObjectStorage
      */
-    final public function GetOrderedColumnsAscendingMap() {
-        return $this->OrderedColumnsAscendingMap;
+    final public function GetOrderedExpressionsAscendingMap() {
+        return $this->OrderedExpressionsAscendingMap;
     }
-    final public function AddOrderByColumn(IColumn $Column, $Ascending) {
-        if(!$this->Columns->HasColumn($Column->GetName()))
-            throw new \InvalidArgumentException('$Column must be of table ' . $this->GetTables()->GetName());
-        else {
-            $this->OrderedColumnsAscendingMap[$Column] = $Ascending;
-        }
+    final public function AddOrderByExpression(Expressions\Expression $Expression, $Ascending) {
+        $this->OrderedExpressionsAscendingMap[$Expression] = $Ascending;
     }
     
     final public function IsSingleRow() {

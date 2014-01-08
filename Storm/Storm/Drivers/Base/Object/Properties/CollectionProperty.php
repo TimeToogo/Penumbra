@@ -12,15 +12,26 @@ class CollectionProperty extends RelationshipProperty implements Object\ICollect
             Accessors\Accessor $Accessor,
             $EntityType,
             IRelationshipType $RelationshipType,
+            Object\IProperty $BackReferenceProperty = null,
             Proxies\IProxyGenerator $ProxyGenerator = null) {
-        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying());
+        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying(), $BackReferenceProperty);
         
         $this->RelationshipType = $RelationshipType;
         $this->ProxyGenerator = $ProxyGenerator;
     }
     
-    protected function ReviveArrayOfCallables(Object\Domain $Domain, $Entity, array $Callbacks) {
+    protected function ReviveArrayOfCallables(Object\Domain $Domain, $Entity, array $Callbacks, Object\IProperty $BackReferenceProperty = null) {
         if($this->ProxyGenerator !== null) {
+            if($BackReferenceProperty !== null) {
+                foreach($Callbacks as $Key => $Callback) {
+                    $Callbacks[$Key] = function() use($Callback, &$BackReferenceProperty, $Entity) {
+                        $RevivalData = call_user_func_array($Callback, func_get_args());
+                        $RevivalData[$BackReferenceProperty] = $Entity;
+                        
+                        return $RevivalData;
+                    };
+                }
+            }
             $EntityType = $this->GetEntityType();
             $Proxies = $this->ProxyGenerator->GenerateProxies($Domain, $EntityType, $Callbacks);
             return new Collections\Collection($EntityType, $Proxies);
@@ -30,7 +41,17 @@ class CollectionProperty extends RelationshipProperty implements Object\ICollect
         }
     }
     
-    protected function ReviveCallable(Object\Domain $Domain, $Entity, callable $Callback) {
+    protected function ReviveCallable(Object\Domain $Domain, $Entity, callable $Callback, Object\IProperty $BackReferenceProperty = null) {
+        if($BackReferenceProperty !== null) {
+            $Callback = function () use ($Callback, &$BackReferenceProperty, &$Entity) {
+                $RevivalDataArray = call_user_func_array($Callback, func_get_args());
+                foreach($RevivalDataArray as $RevivalData) {
+                    $RevivalData[$BackReferenceProperty] = $Entity;
+                }
+                
+                return $RevivalDataArray;
+            };
+        }
         return new Collections\LazyCollection($Domain, $this->GetEntityType(), $Callback);
     }
     

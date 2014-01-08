@@ -7,17 +7,11 @@ use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
 class ToManyRelation extends ToManyRelationBase {
-    public function __construct(ForeignKey $ForeignKey, Relational\Table $RelatedTable) {
-        parent::__construct($ForeignKey, $RelatedTable,
-                Relational\DependencyOrder::Before, Relational\DependencyOrder::Before);
-    }
-    
-    protected function ParentTable(ForeignKey $ForeignKey) {
-        return $ForeignKey->GetReferencedTable();
-    }
-
-    protected function RelatedColumns(ForeignKey $ForeignKey) {
-        return $ForeignKey->GetParentColumns();
+    public function __construct(ForeignKey $ForeignKey) {
+        parent::__construct($ForeignKey, 
+                $ForeignKey->GetParentTable(),
+                Relational\DependencyOrder::Before, 
+                Relational\DependencyOrder::Before);
     }
     
     protected function FillParentToRelatedRowsMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
@@ -26,14 +20,6 @@ class ToManyRelation extends ToManyRelationBase {
         
         $GroupedRelatedRows = $this->GroupRowsByColumns($RelatedRows, $ParentColumns);
         $this->MapParentRowsToGroupedRelatedRows($Map, $ParentRows, $ReferencedColumns, $GroupedRelatedRows);
-    }
-
-    protected function MapParentRowToRelatedKey(ForeignKey $ForeignKey, Relational\ResultRow $ParentRow) {
-        $ParentKey = $ParentRow->GetDataFromColumns($ForeignKey->GetReferencedColumns());
-        $ReferencedKey = new Relational\ResultRow($ForeignKey->GetParentColumns());
-        $ForeignKey->MapReferencedToParentKey($ParentKey, $ReferencedKey);
-        
-        return $ReferencedKey;
     }
     
     protected function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 

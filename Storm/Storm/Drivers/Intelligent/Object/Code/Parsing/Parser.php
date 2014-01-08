@@ -14,6 +14,10 @@ class Parser {
     public function __construct() {
         $this->PHPParser = new \PHPParser_Parser(new \PHPParser_Lexer());
     }
+    
+    public function Parse($Code) {
+        return $this->PHPParser->parse('<?php ' . $Code . ' ?>');
+    }
 
     /**
      * @return Expression

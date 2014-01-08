@@ -2,6 +2,7 @@
 
 namespace StormTests\One\Domain\Maps;
 
+use \Storm\Core\Object\Domain;
 use \Storm\Drivers\Base\Object;
 use \Storm\Drivers\Base\Object\Properties;
 use \Storm\Drivers\Base\Object\Properties\Accessors;
@@ -20,7 +21,7 @@ class TagMap extends EntityMap {
     public $Id;
     public $Name;
     
-    protected function CreateProperties() {
+    protected function CreateProperties(Domain $Domain) {
         $this->Id = new Properties\DataProperty(new Accessors\Field('Id'), true);
         $this->Name = new Properties\DataProperty(new Accessors\Field('Name'));
     }

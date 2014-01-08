@@ -16,6 +16,27 @@ abstract class Expression {
     }
     
     /**
+     * @return ObjectExpression
+     */
+    final public static function Object($InstanceOrType) {
+        return new ObjectExpression($InstanceOrType);
+    }
+    
+    /**
+     * @return MethodCallExpression
+     */
+    final public static function Construct($ClassType, array $ArgumentValueExpressions = array()) {
+        return new MethodCallExpression(new ObjectExpression($ClassType), '__construct', $ArgumentValueExpressions);
+    }
+    
+    /**
+     * @return MethodCallExpression
+     */
+    final public static function MethodCall(ObjectExpression $ObjectExpression, $Name, array $ArgumentValueExpressions = array()) {
+        return new MethodCallExpression($ObjectExpression, $Name, $ArgumentValueExpressions);
+    }
+    
+    /**
      * @return CastExpression
      */
     final public static function Cast($CastType, Expression $CastValueExpression) {

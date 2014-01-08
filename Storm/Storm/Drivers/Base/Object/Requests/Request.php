@@ -8,7 +8,7 @@ class Request implements Object\IRequest {
     private $EntityType;
     private $Properties = array();
     private $Predicates;
-    private $OrderedColumnsAscendingMap;
+    private $OrderedExpressionsAscendingMap;
     private $IsSingleEntity;
     private $RangeOffset;
     private $RangeAmount;
@@ -21,7 +21,7 @@ class Request implements Object\IRequest {
             $this->AddProperty($Property);
         }
         $this->Predicates = array();
-        $this->OrderedColumnsAscendingMap = new \SplObjectStorage();
+        $this->OrderedExpressionsAscendingMap = new \SplObjectStorage();
         $this->IsSingleEntity = $IsSingleEntity;
         $this->RangeOffset = 0;
         $this->RangeAmount = null;
@@ -71,20 +71,16 @@ class Request implements Object\IRequest {
     
 
     final public function IsOrdered() {
-        return $this->OrderedColumnsAscendingMap->count() > 0;
+        return $this->OrderedExpressionsAscendingMap->count() > 0;
     }
     /**
      * @return \SplObjectStorage
      */
-    final public function GetOrderedPropertiesAscendingMap() {
-        return $this->OrderedColumnsAscendingMap;
+    final public function GetOrderedExpressionsAscendingMap() {
+        return $this->OrderedExpressionsAscendingMap;
     }
-    final public function AddOrderByProperty(Object\IProperty $Property, $Ascending) {
-        if(!$Property->ValidPropertyOf($this->EntityType))
-            throw new \InvalidArgumentException('$Property must be a valid property of ' . $this->EntityType);
-        else {
-            $this->OrderedColumnsAscendingMap[$Property] = $Ascending;
-        }
+    final public function AddOrderByExpression(Object\Expressions\Expression $Expression, $Ascending) {
+        $this->OrderedExpressionsAscendingMap[$Expression] = $Ascending;
     }
     
     final public function IsRanged() {

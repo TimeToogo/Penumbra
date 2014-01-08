@@ -10,13 +10,14 @@ abstract class EntityMap extends Object\EntityMap {
     use \Storm\Drivers\Constant\Helpers\PropertyReflection;
     
     public function __construct() {
-        $this->CreateProperties();
         parent::__construct();
     }
-    protected abstract function CreateProperties();
+    
     protected function RegisterProperties(CoreDomain $Domain, Registrar $Registrar) {
+        $this->CreateProperties($Domain);
         $this->LoadRegistrarFromProperties($Registrar);
     }
+    protected abstract function CreateProperties(CoreDomain $Domain);
 }
 
 ?>

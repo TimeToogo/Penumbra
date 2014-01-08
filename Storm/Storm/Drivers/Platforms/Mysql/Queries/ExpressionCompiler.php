@@ -4,10 +4,12 @@ namespace Storm\Drivers\Platforms\Mysql\Queries;
 
 use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
+use \Storm\Core\Relational\Expressions as EE;
 use \Storm\Drivers\Base\Relational\Expressions as E;
 use \Storm\Drivers\Base\Relational\Expressions\Operators;
 
 final class ExpressionCompiler extends Queries\ExpressionCompiler {
+    
     // <editor-fold defaultstate="collapsed" desc="Binary Operations">
     protected function AppendBinaryOperation(QueryBuilder $QueryBuilder, E\BinaryOperationExpression $Expression) {
         $QueryBuilder->Append('(');
@@ -50,14 +52,10 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Set Operations">
-    protected function AppendSet(QueryBuilder $QueryBuilder, E\SetExpression $Expression) {
-        $QueryBuilder->Append('SET ');
-        parent::AppendSet($QueryBuilder, $Expression);
-    }
-
+    
     protected function GetSetOperatorString($Operator) {
         if ($Operator !== Operators\Assignment::Equal) {
-            throw new \Exception('Mysql only support equal');
+            throw new \Exception('Mysql only supports assignment equal operator');
         }
         return ' = ';
     }
@@ -79,7 +77,7 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
 
     protected function GetUnaryOperatorString($Operator) {
         if (!isset(static::$UnaryOperators[$Operator])) {
-            throw new \Exception;
+            throw new \Exception();
         } 
         else {
             return ' ' . static::$UnaryOperators[$Operator] . ' ';
@@ -87,7 +85,7 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
     }
 
     // </editor-fold>
-
+    
     protected function AppendFunctionCall(QueryBuilder $QueryBuilder, E\FunctionCallExpression $Expression) {
         $QueryBuilder->Append($Expression->GetName());
         
@@ -106,7 +104,7 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
     protected function AppendList(QueryBuilder $QueryBuilder, E\ValueListExpression $Expression) {
         $QueryBuilder->Append('(');
         $First = true;
-        foreach ($Expression->GetArgumentValueExpressions() as $ValueExpression) {
+        foreach ($Expression->GetValueExpressions() as $ValueExpression) {
             if($First) $First = false;
             else
                 $QueryBuilder->Append(', ');

@@ -145,11 +145,21 @@ abstract class DomainDatabaseMap {
      */
     final public function MapProcedure(Object\IProcedure $ObjectProcedure) {
         $EntityRelationalMap = $this->VerifyRelationalMap($ObjectProcedure->GetEntityType());
-        $RelationalProcedure = new Relational\Procedure([$EntityRelationalMap->GetTable()], $ObjectProcedure->IsSingleEntity());
-        
+        $Tables = array();
+        foreach($ObjectProcedure->GetProperties() as $Property) {
+            foreach($EntityRelationalMap->GetMappedPersistColumns($Property) as $Column) {
+                $Table = $Column->GetTable();
+                $TableName = $Table->GetName();
+                if(!isset($Tables[$TableName])) {
+                    $Tables[$TableName] = $Table;
+                }
+            }
+        }
+        $RelationalProcedure = new Relational\Procedure($Tables, $ObjectProcedure->IsSingleEntity());
+ 
         $this->MapRequestData($EntityRelationalMap, $ObjectProcedure, $RelationalProcedure);
-        foreach($ObjectProcedure->GetExpressions() as $Expression) {
-            $RelationalProcedure->AddExpression($this->MapExpression($EntityRelationalMap, $Expression));
+        foreach($this->MapExpressions($EntityRelationalMap, $ObjectProcedure->GetExpressions()) as $MappedExpression) {
+            $RelationalProcedure->AddExpression($MappedExpression);
         }
         
         return $RelationalProcedure;
@@ -196,9 +206,6 @@ abstract class DomainDatabaseMap {
             else if(isset($CollectionPropertyToManyRelationMappings[$PropertyIdentifier])) {
                 $CollectionPropertyToManyRelationMappings[$PropertyIdentifier]->AddToRelationalRequest($this, $RelationalRequest);
             }
-            else {
-                throw new \Storm\Core\Exceptions\UnmappedPropertyException();
-            }
         }
     }
 
@@ -206,17 +213,17 @@ abstract class DomainDatabaseMap {
     private function MapRequestData(IEntityRelationalMap $EntityRelationalMap,
             Object\IRequest $ObjectRequest, Relational\Request $RelationalRequest) {
         if ($ObjectRequest->IsConstrained()) {
-            foreach ($this->MapPredicates($EntityRelationalMap, $ObjectRequest->GetPredicates()) as $Property) {
-                $RelationalRequest->AddPredicate($Property);
+            foreach ($this->MapPredicates($EntityRelationalMap, $ObjectRequest->GetPredicates()) as $Predicate) {
+                $RelationalRequest->AddPredicate($Predicate);
             }
         }
         if ($ObjectRequest->IsOrdered()) {
-            $PropertyAscendingMap = $ObjectRequest->GetOrderedPropertiesAscendingMap();
-            foreach ($PropertyAscendingMap as $Property) {
-                $Ascending = $PropertyAscendingMap[$Property];
-                $Columns = $EntityRelationalMap->GetMappedColumns($Property);
-                foreach($Columns as $Column) {
-                    $RelationalRequest->AddOrderByColumn($Column, $Ascending);
+            $ExpressionAscendingMap = $ObjectRequest->GetOrderedExpressionsAscendingMap();
+            foreach ($ExpressionAscendingMap as $Expression) {
+                $Ascending = $ExpressionAscendingMap[$Expression];
+                $Expressions = $this->MapExpression($EntityRelationalMap, $Expression);
+                foreach($Expressions as $Expression) {
+                    $RelationalRequest->AddOrderByExpression($Expression, $Ascending);
                 }
             }
         }
@@ -256,7 +263,9 @@ abstract class DomainDatabaseMap {
         $RelationalRuleGroup = new Relational\Constraints\RuleGroup(array(), $RuleGroup->IsAllRequired());
 
         foreach ($RuleGroup->GetRules() as $Rule) {
-            $RelationalRuleGroup->AddRule($this->MapRule($EntityRelationalMap, $Rule));
+            foreach($this->MapRule($EntityRelationalMap, $Rule) as $MappedRule) {
+                $RelationalRuleGroup->AddRule($MappedRule);
+            }
         }
         foreach ($RuleGroup->GetRuleGroups() as $RuleGroup) {
             $RelationalRuleGroup->AddRuleGroup($this->MapRuleGroup($EntityRelationalMap, $RuleGroup));
@@ -266,12 +275,24 @@ abstract class DomainDatabaseMap {
     }
 
     private function MapRule(IEntityRelationalMap $EntityRelationalMap, Object\Constraints\IRule $Rule) {
-        return new Relational\Constraints\Rule
-                ($this->MapExpression($EntityRelationalMap, $Rule->GetExpression()));
+        $Rules = array();
+        foreach($this->MapExpression($EntityRelationalMap, $Rule->GetExpression()) as $Expression) {
+            $Rules[] = new Relational\Constraints\Rule($Expression);
+        }
+        
+        return $Rules;
+    }
+    
+    private function MapExpressions(IEntityRelationalMap $EntityRelationalMap, array $Expressions) {
+        return call_user_func_array('array_merge',
+                array_map(
+                        function ($Expression) use (&$EntityRelationalMap) {
+                            return $this->MapExpression($EntityRelationalMap, $Expression);
+                        }, $Expressions));
     }
     
     /**
-     * @return Relational\Expressions\Expression
+     * @return Relational\Expressions\Expression[]
      */
     protected abstract function MapExpression(IEntityRelationalMap $EntityRelationalMap, Object\Expressions\Expression $Expression);
     // </editor-fold>

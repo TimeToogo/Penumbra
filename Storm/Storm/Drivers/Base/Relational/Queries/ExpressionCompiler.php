@@ -22,6 +22,12 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
             case $Expression instanceof E\PersistDataExpression:
                 return $this->Append($QueryBuilder, $Expression->GetPersistExpression());
                 
+            case $Expression instanceof E\MultipleExpression:
+                foreach($Expression->GetExpressions() as $Expression) {
+                    $this->Append($QueryBuilder, $Expression);
+                }
+                return;
+                
             case $Expression instanceof CoreE\ColumnExpression:
                 return $this->AppendColumn($QueryBuilder, $Expression);
                 
@@ -55,8 +61,7 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
     }
     
     protected function AppendColumn(QueryBuilder $QueryBuilder, CoreE\ColumnExpression $Expression) {
-        $Column = $Expression->GetColumn();
-        $QueryBuilder->AppendColumn('#', $Column);
+        $QueryBuilder->AppendColumn('#', $Expression->GetColumn());
     }
 
     protected function AppendConstant(QueryBuilder $QueryBuilder, CoreE\ConstantExpression $Expression) {
@@ -77,7 +82,7 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
     protected abstract function GetUnaryOperatorString($Operator);
 
     protected function AppendKeyword(QueryBuilder $QueryBuilder, E\KeywordExpression $Expression) {
-        $QueryBuilder->Append($Expression->GetKeyword());
+        $QueryBuilder->Append(' ' . $Expression->GetKeyword() . ' ');
     }
 
     protected abstract function AppendCast(QueryBuilder $QueryBuilder, E\CastExpression $Expression);

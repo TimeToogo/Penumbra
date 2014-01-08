@@ -13,20 +13,16 @@ class Accessor extends Accessors\Accessor implements \ArrayAccess {
     private function __construct() { }
     
     /**
-     * @return \stdClass
+     * @return Accessors\Accessor
      */
-    public static function DefineAs(callable $Builder = null) {
-        $Self = (true) ? new static() : null;
-        if($Builder !== null) {
-            $Builder($Self);
-        }
-        else {
-            return $Self;
-        }
+    public static function DefineAs(callable $Builder) {
+        $this->Accessor = null;
+        $Builder($this);
+        
+        return $this->Accessor;
     }
     
     protected function Identifier(&$Identifier) {
-        Accessor::DefineAs(function ($Entity) { $Entity->Data->Foobar['test']; });
         return $this->Accessor->Identifier($Identifier);
     }
 

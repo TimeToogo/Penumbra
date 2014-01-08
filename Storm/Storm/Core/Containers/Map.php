@@ -46,7 +46,9 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
             throw new \InvalidArgumentException('$Instance and $ToInstance must be valid object intances');
         }
         
-        $this->Unmap($Instance);
+        if($this->Storage->contains($Instance) || $this->InversedStorage->contains($Instance)) {
+            $this->Unmap($Instance);
+        }
         $this->MapNew($Instance, $ToInstance);
         
         return $this;

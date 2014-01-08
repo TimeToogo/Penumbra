@@ -14,6 +14,8 @@ class OperatorMapper {
         ObjectOperators\Assignment::BitwiseXor => RelationalOperators\Assignment::BitwiseXor,
         ObjectOperators\Assignment::Concatenate => RelationalOperators\Assignment::Concatenate,
         ObjectOperators\Assignment::Division => RelationalOperators\Assignment::Division,
+        ObjectOperators\Assignment::Equal => RelationalOperators\Assignment::Equal,
+        ObjectOperators\Assignment::EqualReference => RelationalOperators\Assignment::Equal,
         ObjectOperators\Assignment::Modulus => RelationalOperators\Assignment::Modulus,
         ObjectOperators\Assignment::Multiplication => RelationalOperators\Assignment::Multiplication,
         ObjectOperators\Assignment::ShiftLeft => RelationalOperators\Assignment::ShiftLeft,

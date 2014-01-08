@@ -26,8 +26,9 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
     
     final protected function GroupRowsByColumns(array $RelatedRows, array $GroupByColumns) {
         $GroupedRelatedRows = array();
-        foreach($RelatedRows as $RelatedRow) {
-            $Hash = $RelatedRow->GetDataFromColumns($GroupByColumns)->HashData();
+        $GroupByKeys = Relational\ResultRow::GetAllDataFromColumns($RelatedRows, $GroupByColumns);
+        foreach($RelatedRows as $Key => $RelatedRow) {
+            $Hash = $GroupByKeys[$Key]->HashData();
             if(!isset($GroupedRelatedRows[$Hash])) {
                 $GroupedRelatedRows[$Hash] = array();
             }
@@ -38,8 +39,9 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
     }
     
     final protected function MapParentRowsToGroupedRelatedRows(Map $Map, array $ParentRows, array $MapByColumns, array $GroupedRelatedRows) {
-        foreach($ParentRows as $ParentRow) {
-            $Hash = $ParentRow->GetDataFromColumns($MapByColumns)->HashData();
+        $MapByKeys = Relational\ResultRow::GetAllDataFromColumns($ParentRows, $MapByColumns);
+        foreach($ParentRows as $Key => $ParentRow) {
+            $Hash = $MapByKeys[$Key]->HashData();
             if(isset($GroupedRelatedRows[$Hash])) {
                 $Map->Map($ParentRow, new \ArrayObject($GroupedRelatedRows[$Hash]));
             }
@@ -49,7 +51,8 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
         }
     }
     
-    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges) {
+    public function Persist(Relational\Transaction $Transaction, 
+            Relational\ResultRow $ParentData, array $RelationshipChanges) {
         $IdentifyingChildRows = array();
         $Table = $this->GetTable();
         foreach($RelationshipChanges as $RelationshipChange) {

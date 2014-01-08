@@ -110,12 +110,28 @@ class QueryBuilder {
         $this->RequestCompiler->AppendRequest($this, $Request);
     }
     
-    final public function AppendOperation(Procedure $Operation) {
-        $this->RequestCompiler->AppendProcedure($this, $Operation);
+    final public function AppendProcedure(Procedure $Procedure) {
+        $this->RequestCompiler->AppendProcedure($this, $Procedure);
     }
     
     final public function AppendPredicate(Predicate $Predicate) {
         $this->PredicateCompiler->Append($this, $Predicate);
+    }
+    
+    final public function Iterate($Iteratable, $Delimiter) {
+        $Iterator = is_array($Iteratable) ? new \ArrayIterator($Iteratable) : $Iteratable;
+        $First = true;
+        return new \CallbackFilterIterator($Iterator, 
+                function () use (&$First, &$Delimiter) {
+                    if($First) {
+                        $First = false;
+                    }
+                    else {
+                        $this->Append($Delimiter);
+                    }
+                    
+                    return true;
+                });
     }
     
     // <editor-fold defaultstate="collapsed" desc="Identifier Appenders">
@@ -219,9 +235,7 @@ class QueryBuilder {
     }
     
     final public function AppendColumnData(Relational\Columns\Column $Column, $Value) {     
-        $this->ExpressionCompiler->Append($this, 
-                Relational\Expressions\Expression::PersistData($Column,
-                        Relational\Expressions\Expression::Constant($Value)));
+        $this->ExpressionCompiler->Append($this, $Column->GetDataType()->GetPersistExpression(Relational\Expressions\Expression::Constant($Value)));
     }
     
     final public function AppendAllColumnData(\Storm\Core\Relational\ColumnData $Data, $Delimiter) {     
