@@ -6,7 +6,7 @@ class Reader {
     private $Closure;
     private $Reflection;
     private $Parameters;
-    private $UsedVariables;
+    private $UsedVariablesMap;
     private $SourceLines;
     private $Source;
     private $BodySourceLines;
@@ -16,7 +16,7 @@ class Reader {
         $this->Closure = $Closure;
         $this->Reflection = new \ReflectionFunction($Closure);
         $this->Parameters = $this->Reflection->getParameters();
-        $this->UsedVariables = $this->Reflection->getStaticVariables();
+        $this->UsedVariablesMap = $this->Reflection->getStaticVariables();
         $this->SourceLines = $this->LoadSourceLines();
         $this->Source = implode('', $this->SourceLines);
         $this->BodySourceLines = $this->LoadBodySourceLines($this->SourceLines);
@@ -28,14 +28,14 @@ class Reader {
     }
     
     /**
-     * @return \ReflectionParameter
+     * @return \ReflectionParameter[]
      */
     public function GetParameters() {
         return $this->Parameters;
     }
     
-    public function GetUsedVariables() {
-        return $this->UsedVariables;
+    public function GetUsedVariablesMap() {
+        return $this->UsedVariablesMap;
     }
     
     public function GetSourceLines() {

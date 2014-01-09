@@ -29,9 +29,10 @@ class Test implements \StormTests\IStormTest {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
         $Closure = function ($Blog) {
-                    return $Blog->Name === 'Test blog' || $Blog->CreatedDate < new \DateTime();
-                };
-        print_r((new Pinq\Closure\Reader($Closure))->GetSource());
+            $Foo = 'Test';
+            return $Blog->Name === $Foo || $Blog->CreatedDate < new \DateTime();
+        };
+        var_dump((new \Storm\Drivers\Intelligent\Object\Code\Parsing\Parser())->Parse((new Pinq\Closure\Reader($Closure))->GetBodySource()));
                 
         $Action = self::Operation;
         $Amount = 1;

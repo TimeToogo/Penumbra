@@ -64,6 +64,13 @@ abstract class Expression {
     final public static function Constant($Value) {
         return new ConstantExpression($Value);
     }
+    
+    /**
+     * @return ArrayExpression
+     */
+    final public static function NewArray(array $ValueExpressions) {
+        return new ArrayExpression($ValueExpressions);
+    }
 
     /**
      * @return AssignmentExpression

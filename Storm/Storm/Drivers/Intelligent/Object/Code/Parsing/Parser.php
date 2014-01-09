@@ -4,10 +4,70 @@ namespace Storm\Drivers\Intelligent\Object\Code\Parsing;
 
 require __DIR__ . '/PHPParser/bootstrap.php';
 
-use \Storm\Drivers\Intelligent\Object\Code\Expressions\Expression;
-use \Storm\Drivers\Intelligent\Object\Code\Expressions\Members;
-use \Storm\Drivers\Intelligent\Object\Code\Expressions\Operators;
+use \Storm\Core\Object\Expressions\Expression;
+use \Storm\Core\Object\Expressions\Operators;
  
+class VariableResolver extends PHPParser_NodeVisitorAbstract {
+    private $VariableValueMap;
+    private $VariableExpressionMap = array();
+    
+    public function __construct(array $VariableValueMap) {
+        $this->VariableValueMap = $VariableValueMap;
+    }
+        
+    public function leaveNode(\PHPParser_Node $Node) {        
+        $NodeType = str_replace('PHPParser_Node_Expr', '', $FullNodeName);
+
+        switch (true) {
+            case $Node instanceof \PHPParser_Node_Expr_Variable:
+                $Name = $Node->value;
+                if(!is_string($Name)) {
+                    throw new \Exception();
+                }
+                
+                if(isset($this->VariableValueMap[$Name])) {
+                    $Node->setAttribute('Value', $this->VariableValueMap[$Name]);
+                }
+                else if(isset($this->VariableExpressionMap[$Name])) {
+                    return $this->VariableExpressionMap[$Name];
+                }
+                
+            case strpos($Node->getType(), 'Expr_Assign') === 0:
+                if($Node->var instanceof \PHPParser_Node_Expr_Variable) {
+                    
+                    return false;
+                }
+                break;
+            
+            default:
+                return;
+        }
+    }
+    
+    private static $AssigmentBinaryOperatorMap = [
+        'AssignBitwiseAnd' => Operators\Assignment::BitwiseAnd,
+        'AssignBitwiseOr' => Operators\Assignment::BitwiseOr,
+        'AssignBitwiseXor' => Operators\Assignment::BitwiseXor,
+        'AssignConcat' => Operators\Assignment::Concatenate,
+        'AssignDiv' => Operators\Assignment::Division,
+        'AssignMinus' => Operators\Assignment::Subtraction,
+        'AssignMod' => Operators\Assignment::Modulus,
+        'AssignMul' => Operators\Assignment::Multiplication,
+        'AssignPlus' => Operators\Assignment::Addition,
+        'AssignShiftLeft' => Operators\Assignment::ShiftLeft,
+        'AssignShiftRight' => Operators\Assignment::ShiftRight,
+    ];
+    
+    private function AssignmentToExprNode(\PHPParser_Node_Expr $Node, $NodeTypeName) {
+        if(!isset(self::$AssigmentBinaryOperatorMap[$NodeTypeName])) {
+            
+        }
+        else {
+            
+        }
+    }
+}
+
 class Parser {
     private $PHPParser;
 
@@ -15,290 +75,145 @@ class Parser {
         $this->PHPParser = new \PHPParser_Parser(new \PHPParser_Lexer());
     }
     
-    public function Parse($Code) {
-        return $this->PHPParser->parse('<?php ' . $Code . ' ?>');
+    public function Parse($PHPCode) {
+        return $this->PHPParser->parse('<?php ' . $PHPCode . ' ?>');
+    }
+    
+    public function ResolveVariables(array $StatementNodes, array $VariableMap) {
+        foreach($StatementNodes as $StatementNode) {
+            
+        }
+    }
+    
+    public function ParseNodes(array $Nodes) {
+        return array_map([$this, 'ParseNode'], $Nodes);
+    }
+    
+    public function ParseNode(\PHPParser_Node $Node) {
+        switch (true) {
+            case $Node instanceof \PHPParser_Node_Expr:
+                return $this->ParseExpressionNode($Node);
+                
+            case $Node instanceof \PHPParser_Node_Scalar:
+                return $this->ParseScalarNode($Node);
+                
+            default:
+                throw new \Exception();
+        }
     }
 
-    /**
-     * @return Expression
-     */
-    public function GenerateExpression($Code) {
-        $AST = $this->PHPParser->parse($Code);
-        $Expressions = $this->ParseNodes($AST);
+    private function VerifyNameNode(\PHPParser_Node $Node) {
+        if(!($Node->class instanceof \PHPParser_Node_Name)) {
+            throw new \Exception();
+        }
         
-        if(count($Expressions) === 1) {
-            return Expression::Multiple($Expressions);
-        }
-        else {
-            return $Expressions[0];
-        }
+        return $Node->toString();
     }
-
-    private function ParseNodes(array $Nodes) {
-        $Expressions = array();
-        foreach($Nodes as $Node) {
-            $Expressions[] = $this->ParseNode($Node);
-        }
-
-        return $Expressions;
-    }
-
-    private function ParseNode(\PHPParser_Node $Node) {
-        if(false) die();
-        else if($Node instanceof \PHPParser_Node_Stmt) 
-            return $this->ParseStatmentNode($Node);
-        else if($Node instanceof \PHPParser_Node_Expr) 
-            return $this->ParseExpressionNode($Node);
-        else if($Node instanceof \PHPParser_Node_Scalar) 
-            return $this->ParseScalarNode($Node);
-        else if($Node instanceof \PHPParser_Node_Name) 
-            return Expression::Name((string)$Node);
-        else if($Node instanceof \PHPParser_Node_Const) 
-            return Expression::ConstantDeclaration($Node->name, $Node->value);
-        else if($Node instanceof \PHPParser_Node_Param) 
-            return Expression::Parameter(
-                    $Node->name, 
-                    $Node->type ? (string)$Node->type : null,
-                    $Node->byRef, 
-                    $Node->default ? $this->ParseNode($Node->default) : null);
-        else if($Node instanceof \PHPParser_Node_Arg) 
-            return $this->ParseNode($Node->value);
-        else
-            throw new \Exception();
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="Statement node parsers">
-    private function ParseStatmentNode(\PHPParser_Node_Stmt $Node) {
-        if (false)
-            die();
-        else if ($Node instanceof \PHPParser_Node_Stmt_Break)
-            return Expression::BreakStatment($Node->num ? $this->ParseNode($Node->num) : null);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Case) {
-            if ($Node->cond === null)
-                return Expression::SwitchDefault($this->ParseBodyAsMultiple($Node));
-            else
-                return Expression::SwitchCase($this->ParseExpressionNode($Node->cond), 
-                        $this->ParseBodyAsMultiple($Node));
-        }
-        else if ($Node instanceof \PHPParser_Node_Stmt_Catch)
-            return Expression::CatchBlock(Expression::Parameter($Node->type, $Node->name),                  $this->ParseBodyAsBlock($Node));
-        else if ($Node instanceof \PHPParser_Node_Stmt_Class)
-            return $this->ParseClassNode($Node);
-        else if ($Node instanceof \PHPParser_Node_Stmt_ClassConst)
-            return Expression::Multiple($this->ParseNodes($Node->consts));
-        else if ($Node instanceof \PHPParser_Node_Stmt_Const)
-            return Expression::Multiple($this->ParseNodes($Node->consts));
-        else if ($Node instanceof \PHPParser_Node_Stmt_ClassMethod)
-            return $this->ParseMethodNode($Node);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Continue)
-            return Expression::ContinueStatment($Node->num ? $this->ParseNode($Node->num) : null);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Do)
-            return Expression::DoWhileLoop($this->ParseNode($Node), 
-                    $this->ParseBodyAsBlock($Node));
-        else if ($Node instanceof \PHPParser_Node_Stmt_Echo)
-            Expression::EchoStatement($this->ParseNodes($Node->exprs));
-        else if ($Node instanceof \PHPParser_Node_Stmt_For)
-            return Expression::ForLoop($this->ParseBodyAsBlock($Node), 
-                    $Node->init ? $this->ParseNode($Node->init[0]) : null,                     $Node->cond ? $this->ParseNode($Node->cond[0]) : null,                     $Node->loop ? $this->ParseNode($Node->loop[0]) : null);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Foreach)
-            return Expression::ForeachLoop(
-                            $this->ParseNode($Node->exprs),                     $this->ParseNode($Node->valueVar),                     $this->ParseBodyAsBlock($Node),                     $Node->keyVar ? $this->ParseNode($Node->keyVar) : null);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Function)
-            return $this->ParseFunctionNode($Node);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Global)
-            return Expression::GlobalVariableDeclaration($this->ParseNodes($Node->vars));
-        else if ($Node instanceof \PHPParser_Node_Stmt_Goto)
-            return Expression::GotoStatement($Node->name);
-        else if ($Node instanceof \PHPParser_Node_Stmt_If)
-            return $this->ParseIfNode($Node);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Interface)
-            return $this->ParseInterfaceNode($Node);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Label)
-            return Expression::Label($Node->name);
-
-        else if ($Node instanceof \PHPParser_Node_Stmt_Namespace)
-            return Expression::NamespaceDeclaration($Node->name->toString(), $this->ParseNodes($Node->stmts));
-        else if ($Node instanceof \PHPParser_Node_Stmt_Property)
-            return $this->ParsePropertyNode($Node);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Return)
-            return Expression::ReturnStatement($Node->expr ? $this->ParseNode($Node->expr) : null);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Static)
-            return Expression::Multiple($this->ParseNodes($Node->vars));
-        else if ($Node instanceof \PHPParser_Node_Stmt_StaticVar)
-            return Expression::StaticVariableDeclaration($Node->name, 
-                    $Node->default ? $this->ParseNode($Node->default) : null);
-        else if ($Node instanceof \PHPParser_Node_Stmt_Switch) {
-            $Cases = $this->ParseNodes(
-                    array_filter($Node->cases, function ($Case) {
-                        return $Case->cond !== null;
-                    }));
-            $DefaultNode = 
-                    array_filter($Node->cases, function ($Case) {
-                return $Case->cond === null;
-            });
-
-
-            return Expression::SwitchStructure(
-                            $this->ParseNode($Node->cond), 
-                    $Cases, 
-                    $DefaultNode ? $this->ParseNode($DefaultNode) : null);
-        }         else if ($Node instanceof \PHPParser_Node_Stmt_Throw)
-            return Expression::ThrowStatement($this->ParseNode($Node->expr));
-        else if ($Node instanceof \PHPParser_Node_Stmt_TryCatch)
-            return Expression::TryBlock(
-                            $this->ParseBodyAsBlock($Node), 
-                    $this->ParseNodes($Node->catches));
-        else if ($Node instanceof \PHPParser_Node_Stmt_Unset)
-            return Expression::UnsetValues($this->ParseNodes($Node->vars));
-        else if ($Node instanceof \PHPParser_Node_Stmt_Use)
-            return Expression::Multiple($this->ParseNodes($Node->uses));
-        else if ($Node instanceof \PHPParser_Node_Stmt_UseUse)
-            return Expression::UseDeclaration($Node->name, $Node->alias);
-        else if ($Node instanceof \PHPParser_Node_Stmt_While)
-            return Expression::WhileLoop(
-                            $this->ParseNode($Node->cond), 
-                    $this->ParseBodyAsBlock($Node));
-        else
-
-            throw new \Exception();
-    }
-
-    // </editor-fold>
-
+    
     // <editor-fold defaultstate="collapsed" desc="Expression node parsers">
-    private function ParseExpressionNode(\PHPParser_Node_Expr $Node) {
+    
+    public function ParseExpressionNode(\PHPParser_Node_Expr $Node) {
         $FullNodeName = get_class($Node);
         $NodeType = str_replace('PHPParser_Node_Expr', '', $FullNodeName);
         
+        switch (true) {
+            case $Node instanceof \PHPParser_Node_Expr_Array:
+                $ValueExpressions = array();
+                foreach ($Node->items as $Key => $Item) {
+                    $ValueExpressions[$Key] = $this->ParseNode($Item->value);
+                }
+                return Expression::NewArray($ValueExpressions);
+                
+            case isset(static::$AssignOperatorsMap[$NodeType]):
+                return $this->ParseAssignNode($Node, $NodeType);
+                
+            case isset(static::$BinaryOperatorsMap[$NodeType]):
+                return $this->ParseBinaryOperationNode($Node, $NodeType);
+                
+            case isset(static::$UnaryOperatorsMap[$NodeType]):
+                return $this->ParseUnaryOperationNode($Node, $NodeType);
+                
+            case isset(static::$CastOperatorMap[$NodeType]):
+                return $this->ParseCastNode($Node, $NodeType);
+            
+            case $Node instanceof \PHPParser_Node_Expr_ConstFetch:
+                return Expression::Constant(constant($Node->name));
+                
+            case $Node instanceof \PHPParser_Node_Expr_ClassConstFetch:
+                return Expression::Constant(constant($Node->class . '::' . $Node->name));
+                
+            case $Node instanceof \PHPParser_Node_Expr_FuncCall:
+                return Expression::FunctionCall(
+                        $this->VerifyNameNode($Node->name),
+                        $this->ParseNodes($Node->args));
+                
+            case ($Node instanceof \PHPParser_Node_Expr_New):
+                return Expression::Construct(
+                        $this->VerifyNameNode($Node->class),
+                        $this->ParseNodes($Node->args));
+            
+            case $Node instanceof \PHPParser_Node_Expr_StaticCall:
+                if(!is_string($Node->name)) {
+                    throw new \Exception();
+                }
+                return Expression::MethodCall(
+                        Expression::Object($this->VerifyNameNode($Node->class)),
+                        $Node->name,
+                        $this->ParseNodes($Node->args));
+            
+            case $Node instanceof \PHPParser_Node_Expr_StaticPropertyFetch:
+                if(!is_string($Node->class) || !is_string($Node->name)) {
+                    throw new \Exception();
+                }
+                $ClassName = $Node->clas;
+                return Expression::Constant($ClassName::${$Node->name});
+                
+            default:
+                throw new \Exception();
+        }
         if (false)
             die();
-        else if ($Node instanceof \PHPParser_Node_Expr_Array) {
-            $KeyValueExpressions = array();
-            $ValueExpressions = array();
-            foreach ($Node->items as $Key => $Item) {
-                $ValueExpressions[$Key] = $this->ParseNode($Item->value);
-                if (isset($Item->key))
-                    $KeyValueExpressions[$Key] = $this->ParseNode($Item->key);
-            }
-
-
-            return Expression::NewArray(
-                            $KeyValueExpressions, 
-                    $ValueExpressions);
-        }
-        else if ($Node instanceof \PHPParser_Node_Expr_ArrayDimFetch)
-
-            return Expression::Index(
-                            $this->ParseNode($Node->var),                     $this->ParseNode($Node->dim));
-        else if (isset(static::$AssignOperatorsMap[$NodeType]))
-            return $this->ParseAssignNode($Node, $NodeType);
-        else if (isset(static::$BinaryOperatorsMap[$NodeType]))
-            return $this->ParseBinaryOperationNode($Node, $NodeType);
-        else if (isset(static::$UnaryOperatorsMap[$NodeType]))
-            return $this->ParseUnaryOperationNode($Node, $NodeType);
-        else if (isset(static::$CastOperatorMap[$NodeType]))
-            return $this->ParseCastNode($Node, $NodeType);
-        else if ($Node instanceof \PHPParser_Node_Expr_ClassConstFetch)
-
-            return Expression::MemberConstant(
-                            $this->ParseNode($Node->class), 
-                    $Node->name);
-        else if ($Node instanceof \PHPParser_Node_Expr_Clone)
-
-            return Expression::CloneValue($this->ParseNode($Node->expr));
-        else if ($Node instanceof \PHPParser_Node_Expr_Closure)
-
-            return Expression::Closure(
-                            $Node->static,                     $this->ParseNodes($Node->params), 
-                    $this->ParseNodes($Node->uses), 
-                    $Node->byRef,                     $this->ParseBodyAsBlock($Node));
-        else if ($Node instanceof \PHPParser_Node_Expr_ClosureUse)
-
-            return Expression::UsedVariable($Node->var, $Node->byRef);
-        else if ($Node instanceof \PHPParser_Node_Expr_ConstFetch)
-
-            return Expression::NamedConstant($Node->name);
-        else if (isset(static::$ConstructFunctionMap[$NodeType]))
-            return $this->ParseConstructNode($Node, $NodeType);
-        else if ($Node instanceof \PHPParser_Node_Expr_FuncCall)
-
-            return Expression::FunctionCall(
-                            $this->ParseNode($Node->name), 
-                    $this->ParseNode($Node->args));
-        else if ($Node instanceof \PHPParser_Node_Expr_List)
-
-            return Expression::ListVariables($this->ParseNodes($Node->vars));
         else if ($Node instanceof \PHPParser_Node_Expr_MethodCall)
-
             return Expression::MethodCall(
-                            $this->ParseNode($Node->var), 
+                    $this->ParseNode($Node->var), 
                     $this->ParseNameNode($Node->name), 
                     $this->ParseNodes($Node->args));
-        else if ($Node instanceof \PHPParser_Node_Expr_New)
-
-            return Expression::NewInstance(
-                            $this->ParseNode($Node->class), 
-                    $this->ParseNodes($Node->args));
+        
         else if ($Node instanceof \PHPParser_Node_Expr_PropertyFetch)
-
             return Expression::Property(
-                            $this->ParseNode($Node->var), 
+                    $this->ParseNode($Node->var), 
                     $this->ParseNameNode($Node->name));
-        else if ($Node instanceof \PHPParser_Node_Expr_StaticCall)
-
-            return Expression::StaticMethodCall(
-                            $this->ParseNode($Node->class),                     $this->ParseNameNode($Node->name),                     $this->ParseNodes($Node->args));
-        else if ($Node instanceof \PHPParser_Node_Expr_StaticPropertyFetch)
-
-            return Expression::StaticProperty(
-                            $this->ParseNode($Node->class),                     $this->ParseNameNode($Node->name));
+        
         else if ($Node instanceof \PHPParser_Node_Expr_Ternary)
 
             return Expression::Ternary(
-                            $this->ParseNode($Node->cond),                     $Node->if ? $this->ParseNode($Node->if) : null,                     $this->ParseNode($Node->else));
-        else if ($Node instanceof \PHPParser_Node_Expr_Variable)
+                    $this->ParseNode($Node->cond),                     
+                    $Node->if ? $this->ParseNode($Node->if) : null,                     
+                    $this->ParseNode($Node->else));
+        else if ($Node instanceof \PHPParser_Node_Expr_Variable) {
+            if(!is_string($Node->name)) {
+                throw new \Exception();
+            }
             return is_string($Node->name) ?
                     Expression::Variable($Node->name) : $this->ParseNode($Node->name);
+        }
         else
             throw new \Exception();
-    }
-
-    private function ParseNameNode($Node) {
-        return is_string($Node) ?
-
-                Expression::Name($Node) : $this->ParseNode($Node);
     }
 
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Scalar node parsers">
     private function ParseScalarNode(\PHPParser_Node_Scalar $Node) {
-        if (false)
-            die();
-        else if ($Node instanceof \PHPParser_Node_Scalar_ClassConst)
-            return Expression::NamedConstant('__CLASS__');
-        else if ($Node instanceof \PHPParser_Node_Scalar_DirConst)
-            return Expression::NamedConstant('__DIR__');
-        else if ($Node instanceof \PHPParser_Node_Scalar_FileConst)
-            return Expression::NamedConstant('__FILE__');
-        else if ($Node instanceof \PHPParser_Node_Scalar_FuncConst)
-            return Expression::NamedConstant('__FUNCTION__');
-        else if ($Node instanceof \PHPParser_Node_Scalar_LineConst)
-            return Expression::NamedConstant('__LINE__');
-        else if ($Node instanceof \PHPParser_Node_Scalar_MethodConst)
-            return Expression::NamedConstant('__METHOD__');
-        else if ($Node instanceof \PHPParser_Node_Scalar_TraitConst)
-            return Expression::NamedConstant('__TRAIT__');
-        else if ($Node instanceof \PHPParser_Node_Scalar_DNumber)
-            return Expression::Constant($Node->value);
-        else if ($Node instanceof \PHPParser_Node_Scalar_LNumber)
-            return Expression::Constant($Node->value);
-        else if ($Node instanceof \PHPParser_Node_Scalar_String)
-            return Expression::Constant($Node->value);
-        else if ($Node instanceof \PHPParser_Node_Scalar_String)
-            return Expression::Constant($Node->value);
-        else
-            throw new \Exception();
+        switch (true) {
+            case $Node instanceof \PHPParser_Node_Scalar_DNumber:
+            case $Node instanceof \PHPParser_Node_Scalar_LNumber:
+            case $Node instanceof \PHPParser_Node_Scalar_String:
+                return Expression::Constant($Node->value);
+                
+            default:
+                throw new \Exception();
+        }
     }
     // </editor-fold>
 
@@ -457,20 +372,6 @@ class Parser {
     }
 
 
-    private static $ConstructFunctionMap = [
-        'Empty' => 'empty',
-        'Eval' => 'eval',
-        'Exit' => 'exit',
-        'Print' => 'print'
-    ];
-
-    private function ParseConstructNode(\PHPParser_Node_Expr $Node, $NodeTypeName) {
-        return Expression::FunctionCall(
-                        static::$ConstructFunctionMap[$NodeTypeName], 
-                $Node->expr ? [$this->ParseNode($Node->expr)] : null);
-    }
-
-
     private static $CastOperatorMap = [
         'Cast_Array' => Operators\Cast::ArrayCast,
         'Cast_Bool' => Operators\Cast::Boolean,
@@ -539,7 +440,7 @@ class Parser {
 
     private function ParseAssignNode(\PHPParser_Node_Expr $Node, $NodeTypeName) {
         return Expression::Assignment(
-                        $this->ParseNode($Node->var), 
+                $this->ParseNode($Node->var), 
                 static::$AssignOperatorsMap[$NodeTypeName], 
                 $this->ParseNode($Node->expr));
     }
