@@ -3,13 +3,11 @@
 namespace Storm\Drivers\Base\Relational\Queries;
 
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Relational\JoinedRow;
 
 interface IConnection {
     public function SetExpressionCompiler(IExpressionCompiler $ExpressionCompiler);
     public function SetIdentifierEscaper(IIdentifierEscaper $IdentifierEscaper);
-    public function SetRequestCompiler(IRequestCompiler $RequestCompiler);
-    public function SetPredicateCompiler(IPredicateCompiler $PredicateCompiler);
+    public function SetCriterionCompiler(ICriterionCompiler $CriterionCompiler);
     
     public function BeginTransaction();
     public function IsInTransaction();

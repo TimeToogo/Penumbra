@@ -5,7 +5,7 @@ namespace Storm\Drivers\Base\Relational\Traits;
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\RelationalTableTrait;
-use \Storm\Drivers\Base\Relational\Constraints\ForeignKeyPredicate;
+use \Storm\Drivers\Base\Relational\Expressions\ForeignKeyPredicateExpression;
 
 final class ForeignKeyMode {
     const NoAction = 0;
@@ -107,10 +107,10 @@ class ForeignKey extends RelationalTableTrait {
     }
     
     /**
-     * @return Constraints\Predicate
+     * @return ForeignKeyPredicateExpression
      */
     final public function GetConstraintPredicate() {
-        return new ForeignKeyPredicate($this);
+        return new ForeignKeyPredicateExpression($this);
     }
 
     protected function IsRelationalTrait(RelationalTableTrait $OtherTrait) {

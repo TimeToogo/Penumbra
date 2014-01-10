@@ -4,20 +4,25 @@ namespace Storm\Drivers\Intelligent\Object\Properties\Accessors;
 
 use Storm\Drivers\Base\Object\Properties\Accessors;
 
-class Accessor extends Accessors\Accessor implements \ArrayAccess {
+class Builder implements \ArrayAccess {
     /**
      * @var Accessors\Accessor 
      */
     private $Accessor = null;
     
-    private function __construct() { }
+    public function __construct() { }
+    
+    final public function GetAccessor() {
+        return $this->Accessor;
+    }
     
     /**
      * @return Accessors\Accessor
      */
-    public static function DefineAs(callable $Builder) {
+    public static function DefineAs(callable $Definition) {
+        $Builder = new static();
         $this->Accessor = null;
-        $Builder($this);
+        $Definition($Builder);
         
         return $this->Accessor;
     }

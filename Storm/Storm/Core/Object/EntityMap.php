@@ -215,15 +215,7 @@ abstract class EntityMap implements \IteratorAggregate {
         
         return $Entities;
     }
-    
-    
-    final public function ReviveEntityInstances(Domain $Domain, Map $StateInstanceMap) {
-        /*foreach($StateInstanceMap as $State) {
-            $Instance = $StateInstanceMap[$State];
-            $this->LoadEntity($State, $Instance);
-        }*/
-    }
-    
+        
     final public function LoadEntity(Domain $Domain, RevivalData $RevivalData, $Entity) {
         $this->Apply($Domain, $Entity, $RevivalData);
     }

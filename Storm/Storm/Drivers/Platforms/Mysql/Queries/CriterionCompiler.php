@@ -6,28 +6,8 @@ use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
-class RequestCompiler  extends Queries\RequestCompiler {    
-    protected function AppendProcedureStatement(QueryBuilder $QueryBuilder, Relational\Procedure $Procedure) {
-        $QueryBuilder->AppendIdentifiers('UPDATE # SET ', array_map(
-                function ($Table) { 
-                    return $Table->GetName();
-                }, 
-                $Procedure->GetTables()), ',');
-    }
-    
-    protected function AppendProcedureExpressions(QueryBuilder $QueryBuilder, array $Expressions) {
-        $First = true;
-        foreach($Expressions as $Expression) {
-            if($First) $First = false;
-            else
-                $QueryBuilder->Append(', ');
-            
-            $this->AppendProcedureExpression($QueryBuilder, $Expression);
-        }
-    }
-    
+class CriterionCompiler extends Queries\CriterionCompiler {
     protected function AppendPredicates(QueryBuilder $QueryBuilder, array $Predicates) {
-        $QueryBuilder->Append(' WHERE TRUE AND ');
         $QueryBuilder->Append('(');
         $First = true;
         foreach($Predicates as $Predicate) {
@@ -35,7 +15,7 @@ class RequestCompiler  extends Queries\RequestCompiler {
             else
                 $QueryBuilder->Append (' AND ');
             
-            $QueryBuilder->AppendPredicate($Predicate);
+            $QueryBuilder->AppendExpression($Predicate);
         }
         $QueryBuilder->Append(')');
     }
@@ -54,6 +34,11 @@ class RequestCompiler  extends Queries\RequestCompiler {
     protected function AppendRange(QueryBuilder $QueryBuilder, $Offset, $Limit) {
         $QueryBuilder->Append(' ');
         if($Limit === null) {
+            /*
+             * Mysql cannot have an 'OFFSET' clause without a 'LIMIT' clause
+             * 18446744073709551615 is equal to 2^64-1 which is the highest possible value
+             * for the 'LIMIT' clause
+             */
             $QueryBuilder->Append('LIMIT 18446744073709551615');
         }
         else {

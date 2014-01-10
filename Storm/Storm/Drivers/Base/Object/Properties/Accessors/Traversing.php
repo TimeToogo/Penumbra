@@ -28,9 +28,15 @@ class Traversing extends Accessor {
         $this->FinalAccessor = array_pop($this->TraversingAccessors);
     }
     
-    final protected function Identifier(&$Identifier) {
+    final protected function GetterIdentifier(&$Identifier) {
         foreach($this->NestedAccessors as $NestedAccessor) {
-            $Identifier .= $NestedAccessor->GetIdentifier();
+            $NestedAccessor->GetterIdentifier($Identifier);
+        }
+    }
+    
+    final protected function SetterIdentifier(&$Identifier) {
+        foreach($this->NestedAccessors as $NestedAccessor) {
+            $NestedAccessor->SetterIdentifier($Identifier);
         }
     }
     

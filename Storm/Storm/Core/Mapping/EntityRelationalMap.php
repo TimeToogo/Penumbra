@@ -17,16 +17,34 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      */
     private $EntityMap;
     private $EntityType;
+    
     /**
      * @var Relational\Table
      */
     private $PrimaryKeyTable;
     /**
+     * @var Relational\Table[]
+     */
+    private $PersistTables;
+    /**
+     * @var Relational\Table[]
+     */
+    private $ReviveTables;
+    
+    /**
      * @var IProperty[]
      */
     private $MappedProperties = array();
+    
+    /**
+     * @var Relational\IColumn[]
+     */
     private $MappedReviveColumns = array();
+    /**
+     * @var Relational\IColumn[]
+     */
     private $MappedPersistColumns = array();
+    
     /**
      * @var IPropertyMapping
      */
@@ -65,9 +83,19 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         
         $Registrar = new Registrar(IPropertyMapping::IPropertyMappingType);
         $this->RegisterPropertyMappings($Registrar, $this->EntityMap, $Database);
+        
         foreach($Registrar->GetRegistered() as $PropertyMapping) {
             $this->AddPropertyMapping($PropertyMapping);
         }
+        foreach($this->MappedReviveColumns as $MappedReviveColumn) {
+            $Table = $MappedReviveColumn->GetTable();
+            $this->ReviveTables[$Table->GetName()] = $Table;
+        }
+        foreach($this->MappedPersistColumns as $MappedPersistColumn) {
+            $Table = $MappedPersistColumn->GetTable();
+            $this->PersistTables[$Table->GetName()] = $Table;
+        }
+        
         
         $this->OnInitialized($DomainDatabaseMap);
     }
@@ -78,7 +106,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     protected abstract function PrimaryKeyTable(Relational\Database $Database);
     protected abstract function RegisterPropertyMappings(Registrar $Registrar, Object\EntityMap $EntityMap, Relational\Database $Database);
     
-    final protected function AddPropertyMapping(IPropertyMapping $PropertyMapping) {
+    private function AddPropertyMapping(IPropertyMapping $PropertyMapping) {
         $ProperyIdentifier = $PropertyMapping->GetProperty()->GetIdentifier();
         if($PropertyMapping instanceof IDataPropertyColumnMapping) {
             $this->DataPropertyColumnMappings[$ProperyIdentifier] = $PropertyMapping;
@@ -105,8 +133,16 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         return $this->EntityMap;
     }
     
-    public function GetPrimaryKeyTable() {
+    final public function GetPrimaryKeyTable() {
         return $this->PrimaryKeyTable;
+    }
+    
+    final public function GetMappedReviveTables() {
+        return $this->ReviveTables;
+    }
+    
+    final public function GetMappedPersistTables() {
+        return $this->PersistTables;
     }
     
     final public function GetEntityType() {
@@ -137,11 +173,8 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         return new Relational\ResultRow($this->MappedPersistColumns, $ColumnData);
     }
 
-    final public function RelationalRequest(Object\IRequest $ObjectRequest) {
-        $RelationalRequest = new Relational\Request(array(), $ObjectRequest->IsSingleEntity());
-        $this->RelationalRequestConstraints($RelationalRequest);
-        
-        return $RelationalRequest;
+    final public function GetCriterion() {
+        return new Relational\Criterion();
     }
     protected function RelationalRequestConstraints(Relational\Request $RelationalRequest) { }
     

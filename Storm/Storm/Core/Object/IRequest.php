@@ -12,23 +12,10 @@ interface IRequest {
      */
     public function GetProperties();
     
-    public function IsConstrained();
     /**
-     * @return Constraints\IPredicate[]
+     * @return ICriterion
      */
-    public function GetPredicates();
-    
-    public function IsOrdered();
-    
-    /**
-     * @return \SplObjectStorage
-     */
-    public function GetOrderedExpressionsAscendingMap();
-    
-    public function IsSingleEntity();
-    public function IsRanged();
-    public function GetRangeOffset();
-    public function GetRangeAmount();    
+    public function GetCriterion();
 }
 
 ?>

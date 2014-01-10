@@ -50,12 +50,14 @@ final class ExpressionMapper extends E\ExpressionMapper {
             CoreExpression $LeftOperandExpression, 
             $BinaryOperator, 
             CoreExpression $RightOperandExpression) {
-        if($LeftOperandExpression instanceof E\FunctionCallExpression) {
-            if($LeftOperandExpression->GetName() === 'INSTR') {
-                if($RightOperandExpression instanceof EE\ConstantExpression) {
-                    if($RightOperandExpression->GetValue() === false) {
-                        $RightOperandExpression = new EE\ConstantExpression(-1);
-                    }
+        
+        if($LeftOperandExpression instanceof E\BinaryOperationExpression) {
+            $NestedOperand = $LeftOperandExpression->GetLeftOperandExpression();
+            if($NestedOperand instanceof E\FunctionCallExpression
+                    && $NestedOperand->GetName() === 'LOCATE') {
+                if($RightOperandExpression instanceof EE\ConstantExpression
+                        && $RightOperandExpression->GetValue() === false) {
+                    $RightOperandExpression = CoreExpression::Constant(-1);
                 }
             }
         }
@@ -63,6 +65,13 @@ final class ExpressionMapper extends E\ExpressionMapper {
         switch($BinaryOperator) {
             case O\Binary::Concatenation:
                 return new E\FunctionCallExpression('CONCAT', Expression::ValueList([$LeftOperandExpression, $RightOperandExpression]));
+                
+            case O\Binary::Inequality:
+                return Expression::UnaryOperation(O\Unary::Not, 
+                        Expression::BinaryOperation(
+                                $LeftOperandExpression, 
+                                O\Binary::Equality, 
+                                $RightOperandExpression));
             
             default:
                 return new E\BinaryOperationExpression(

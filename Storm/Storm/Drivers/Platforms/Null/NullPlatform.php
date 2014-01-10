@@ -58,7 +58,7 @@ final class NullPlatform implements Relational\IPlatform {
         
     }
 
-    public function GetRequestCompiler() {
+    public function GetCriterionCompiler() {
         
     }
 

@@ -3,9 +3,37 @@
 namespace Storm\Drivers\Base\Relational\Expressions;
 
 use \Storm\Core\Relational\Expressions\Expression;
+use \Storm\Drivers\Base\Relational\Columns\ObjectDataType;
 
 abstract class ObjectMapper implements IObjectMapper {
+    /**
+     * @var ObjectDataType[] 
+     */
+    private $ObjectDataTypes;
+    
+    public function __construct() {
+        $this->ObjectDataTypes = $this->ObjectDataTypes();
+        
+        foreach($this->ObjectDataTypes as $Key => $ObjectDataType) {
+            $this->ObjectDataTypes[$ObjectDataType->GetClassType()] = $ObjectDataType;
+            unset($this->ObjectDataTypes[$Key]);
+        }
+    }
+    
+    /**
+     * @return ObjectDataType[]
+     */
+    protected function ObjectDataTypes() {
+        return [];
+    }
+
+
     final public function MapObjectExpression($Type, $Value) {
+        if(isset($this->ObjectDataTypes[$Type])) {
+            $ObjectDataType = $this->ObjectDataTypes[$Type];
+            return Expression::Constant($ObjectDataType->ToPersistedValue($Value));
+        }
+        
         $MethodName = str_replace('\\', '_', $Type);
         
         if(!method_exists($this, $MethodName)) {
@@ -20,6 +48,11 @@ abstract class ObjectMapper implements IObjectMapper {
     }
     
     final public function MapMethodCallExpression(Expression $ObjectValueExpression = null, $Type, $Name, array $ArgumentValueExpressions = array()) {
+        if(isset($this->ObjectDataTypes[$Type])) {
+            $ObjectDataType = $this->ObjectDataTypes[$Type];
+            return $ObjectDataType->MapMethodCallExpression($ObjectValueExpression, $Name, $ArgumentValueExpressions);
+        }
+        
         $MethodName = str_replace('\\', '_', $Type) . '_' . $Name;
         
         if(!method_exists($this, $MethodName)) {
@@ -31,11 +64,11 @@ abstract class ObjectMapper implements IObjectMapper {
             return $this->$MethodName($ArgumentValueExpressions);
         }
         else {
-            return $this->$MethodName($ObjectExpression, $ArgumentValueExpressions);
+            return $this->$MethodName($ObjectValueExpression, $ArgumentValueExpressions);
         }
     }
     
-    public function MethodCallMappingExample(Expression $ObjectExpression, array $ArgumentExpressions) {
+    public function MethodCallMappingExample(Expression $ObjectValueExpression, array $ArgumentExpressions) {
         //Blah Blah
     }
     

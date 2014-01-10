@@ -39,9 +39,9 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
             
             case $Expression instanceof O\ConstantExpression:
                 return [$ExpressionMapper->MapConstantExpression($Expression->GetValue())];
-            
+                        
             case $Expression instanceof O\ObjectExpression:
-                if(!$ObjectExpression->HasInstance()) {
+                if(!$Expression->HasInstance()) {
                     throw new \Exception();
                 }
                 return [$ExpressionMapper->MapObjectExpression(
@@ -51,9 +51,9 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
             case $Expression instanceof O\MethodCallExpression:
                 $ObjectExpression = $Expression->GetObjectExpression();
                 return [$ExpressionMapper->MapMethodCallExpression(
-                        $ObjectExpression->HasInstance() ? 
-                                $this->MapExpression($EntityRelationalMap, $ObjectExpression) : null,
-                        $ObjectExpression->GetClassType(),
+                        $Expression->IsStatic() ? 
+                                null : $this->MapExpression($EntityRelationalMap, $ObjectExpression)[0],
+                        $Expression->GetClassType(),
                         $Expression->GetName(),
                         array_map(function($Expression) use (&$EntityRelationalMap) {
                             return $this->MapExpression($EntityRelationalMap, $Expression)[0];
@@ -90,7 +90,7 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
             
             case $Expression instanceof O\UnaryOperationExpression:
                 return [$ExpressionMapper->MapUnaryOperationExpression(
-                        $this->OperatorMapper->MapUnaryOperator($Expression->GetExpression()), 
+                        $this->OperatorMapper->MapUnaryOperator($Expression->GetOperator()), 
                         $this->MapExpression($EntityRelationalMap, $Expression->GetOperandExpression())[0])];
             
             case $Expression instanceof O\CastExpression:

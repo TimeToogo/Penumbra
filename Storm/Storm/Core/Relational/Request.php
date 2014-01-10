@@ -5,20 +5,11 @@ namespace Storm\Core\Relational;
 class Request {
     private $Tables = array();
     private $Columns = array();
-    private $Predicates = array();
-    private $OrderedExpressionsAscendingMap;
-    private $IsSingleRow;
-    private $RangeOffset;
-    private $RangeAmount;
+    private $Criterion;
     
-    public function __construct(array $Columns, $IsSingleRow) {
-        foreach($Columns as $Column) {
-            $this->AddColumn($Column);
-        }
-        $this->OrderedExpressionsAscendingMap = new \SplObjectStorage();
-        $this->IsSingleRow = $IsSingleRow;
-        $this->RangeOffset = 0;
-        $this->RangeAmount = null;
+    public function __construct(array $Columns, Criterion $Criterion = null) {
+        $this->AddColumns($Columns);
+        $this->Criterion = $Criterion ?: new Criterion();
     }
     
     final public function AddColumn(IColumn $Column) {
@@ -52,81 +43,15 @@ class Request {
         return $this->Columns;
     }
     
-    
-    final public function IsConstrained() {
-        foreach($this->Predicates as $Predicate) {
-            if(!$Predicate->IsEmpty()) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
     /**
-     * @return Constraints\Predicate
+     * @return Criterion
      */
-    public function Predicate() {
-        return Constraints\Predicate::On($this->Columns);
+    final public function GetCriterion() {
+        return $this->Criterion;
     }
     
-    /**
-     * @return Constraints\Predicate[]
-     */
-    final public function GetPredicates() {
-        return array_filter($this->Predicates, function ($Predicate) { return !$Predicate->IsEmpty(); });
-    }
-    final public function AddPredicate(Constraints\Predicate $Predicate) {
-        $this->Predicates[] = $Predicate;
-    }
-    
-    final public function IsOrdered() {
-        return $this->OrderedExpressionsAscendingMap->count() > 0;
-    }
-    /**
-     * @return \SplObjectStorage
-     */
-    final public function GetOrderedExpressionsAscendingMap() {
-        return $this->OrderedExpressionsAscendingMap;
-    }
-    final public function AddOrderByExpression(Expressions\Expression $Expression, $Ascending) {
-        $this->OrderedExpressionsAscendingMap[$Expression] = $Ascending;
-    }
-    
-    final public function IsSingleRow() {
-        return $this->IsSingleRow;
-    }
-    final public function IsRanged() {
-        if(!$this->IsSingleRow)
-            return $this->RangeOffset !== 0 || $this->RangeAmount !== null;
-        else 
-            return true;
-    }
-    final public function GetRangeOffset() {
-        if($this->IsSingleRow)
-            return 0;
-        else
-            return $this->RangeOffset;
-    }
-   final  public function SetRangeOffset($RangeOffset) {
-        $this->RangeOffset = $RangeOffset;
-    }
-    
-    final public function GetRangeAmount() {
-        if($this->IsSingleRow)
-            return 1;
-        else
-            return $this->RangeAmount;
-    }
-    final public function SetRangeAmount($RangeAmount) {
-        $this->RangeAmount = $RangeAmount;
-    }
-    
-    /**
-     * @return ResultRow
-     */
-    final public function ResultRow(array $ColumnData, $VerifiedData = false) {
-        return new ResultRow($this->Columns, $ColumnData, $VerifiedData);
+    final public function SetCriterion(Criterion $Criterion) {
+        $this->Criterion = $Criterion;
     }
 }
 

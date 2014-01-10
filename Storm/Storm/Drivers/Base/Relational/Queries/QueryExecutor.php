@@ -12,7 +12,6 @@ abstract class QueryExecutor implements IQueryExecutor {
     final public function Select(IConnection $Connection, Relational\Request $Request) {
         $QueryBuilder = $Connection->QueryBuilder();
         $this->SelectQuery($QueryBuilder, $Request);
-        $QueryBuilder->AppendRequest($Request);
         
         return $Connection->LoadResultRows($Request->GetColumns(), $QueryBuilder->Build());
     }

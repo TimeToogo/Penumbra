@@ -20,6 +20,14 @@ interface IEntityRelationalMap {
      * @return Relational\Table
      */
     public function GetPrimaryKeyTable();
+    /**
+     * @return Relational\Table[]
+     */
+    public function GetMappedPersistTables();
+    /**
+     * @return Relational\Table[]
+     */
+    public function GetMappedReviveTables();
     
     public function Initialize(DomainDatabaseMap $DomainDatabaseMap);
     
@@ -55,9 +63,9 @@ interface IEntityRelationalMap {
     public function ResultRow($ColumnData = array());
     
     /**
-     * @return Relational\Request[]
+     * @return Relational\Criterion
      */
-    public function RelationalRequest(Object\IRequest $ObjectRequest);
+    public function GetCriterion();
     
     /**
      * @return Relational\IColumn[]

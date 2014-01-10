@@ -18,7 +18,10 @@ final class NullConnection implements Relational\Queries\IConnection {
     public function SetIdentifierEscaper(Relational\Queries\IIdentifierEscaper $IdentifierEscaper) { }
     public function SetExpressionCompiler(Relational\Queries\IExpressionCompiler $ExpressionCompiler) { }
     public function SetPredicateCompiler(Relational\Queries\IPredicateCompiler $PredicateCompiler) { }
-    public function SetRequestCompiler(Relational\Queries\IRequestCompiler $RequestCompiler) { }
+    public function SetCriterionCompiler(Relational\Queries\ICriterionCompiler $RequestCompiler) { }
+    public function GetLastInsertIncrement() { }
+    public function LoadResultRows(array $Columns, Relational\Queries\IQuery $Query) {}
+
 }
 
 ?>

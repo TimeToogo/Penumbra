@@ -1,29 +1,28 @@
 <?php
 
-namespace Storm\Drivers\Base\Relational\Constraints;
+namespace Storm\Drivers\Base\Relational\Expressions;
 
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
-use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Drivers\Base\Relational\Expressions\Operators\Binary;
 
-class ForeignKeyPredicate extends Predicate {
+class ForeignKeyPredicateExpression extends PredicateExpression {
+    
     public function __construct(ForeignKey $ForeignKey) {
         $ReferencedColumnMap = $ForeignKey->GetReferencedColumnMap();
         
-        $RuleGroup = new RuleGroup(array(), true);
+        $ConstraintExpressions = array();
         
         foreach($ReferencedColumnMap as $PrimaryColumn) {
             $ForeignColumn = $ReferencedColumnMap[$PrimaryColumn];
             
-            $RuleGroup->AddRule(new Rule(
-                    Expression::BinaryOperation(
+            $ConstraintExpressions[] = Expression::BinaryOperation(
                             Expression::Column($PrimaryColumn), 
                             Binary::Equality,
-                            Expression::Column($ForeignColumn))
-                    ));
+                            Expression::Column($ForeignColumn));
+            
         }
         
-        $this->AddRules($RuleGroup);
+        parent::__construct($ConstraintExpressions);
     }
 }
 

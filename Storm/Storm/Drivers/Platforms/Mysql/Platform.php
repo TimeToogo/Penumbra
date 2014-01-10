@@ -17,8 +17,7 @@ final class Platform extends Relational\Platform {
                 new Columns\ColumnSet(),
                 new PrimaryKeys\KeyGeneratorSet(/* TODO */),
                 new Queries\ExpressionCompiler(new Queries\ExpressionOptimizer()),
-                new Queries\RequestCompiler(),
-                new Queries\PredicateCompiler(),
+                new Queries\CriterionCompiler(),
                 new Queries\IdentifierEscaper(),
                 $DevelopmentMode ? 
                         new Platforms\Development\Syncing\DatabaseSyncer

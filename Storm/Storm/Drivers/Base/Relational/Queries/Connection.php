@@ -14,13 +14,9 @@ abstract class Connection implements IConnection {
      */
     protected $ExpressionCompiler;
     /**
-     * @var IRequestCompiler 
+     * @var ICriterionCompiler 
      */
-    protected $RequestCompiler;
-    /**
-     * @var IPredicateCompiler 
-     */
-    protected $PredicateCompiler;
+    protected $CriterionCompiler;
     
     final public function SetExpressionCompiler(IExpressionCompiler $ExpressionCompiler) {
         $this->ExpressionCompiler = $ExpressionCompiler;
@@ -30,12 +26,8 @@ abstract class Connection implements IConnection {
         $this->IdentifierEscaper = $IdentifierEscaper;
     }
     
-    final public function SetRequestCompiler(IRequestCompiler $RequestCompiler) {
-        $this->RequestCompiler = $RequestCompiler;
-    }
-    
-    final public function SetPredicateCompiler(IPredicateCompiler $PredicateCompiler) {
-        $this->PredicateCompiler = $PredicateCompiler;
+    final public function SetCriterionCompiler(ICriterionCompiler $CriterionCompiler) {
+        $this->CriterionCompiler = $CriterionCompiler;
     }
     
     final public function LoadResultRows(array $Columns, IQuery $Query) {

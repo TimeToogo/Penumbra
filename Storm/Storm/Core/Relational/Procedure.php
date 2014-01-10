@@ -2,27 +2,44 @@
 
 namespace Storm\Core\Relational;
 
-use \Storm\Core\Relational\Expressions\Expression;
+use \Storm\Core\Relational\Expressions;
 
-class Procedure extends Request {
+class Procedure {
+    private $Tables;
     private $Expressions;
+    private $Criterion;
     
-    public function __construct(array $Tables, $IsSingleRow) {
-        $Columns = array();
-        foreach($Tables as $Table) {
-            $Columns = array_merge($Table->GetColumns(), $Columns);
-        }
-        parent::__construct($Columns, $IsSingleRow);
+    public function __construct(array $Tables, Criterion $Criterion = null) {
+        $this->Tables = $Tables;
+        $this->Criterion = $Criterion ?: $Criterion;
     }
     
     /**
-     * @return Expression[]
+     * @return Table[]
+     */
+    public function GetTables() {
+        return $this->Tables;
+    }
+
+    /**
+     * @return Expressions\Expression[]
      */
     final public function GetExpressions() {
         return $this->Expressions;
     }
-    final public function AddExpression(Expression $Expression) {
+    final public function AddExpression(Expressions\Expression $Expression) {
         $this->Expressions[] = $Expression;
+    }
+    
+    /**
+     * @return Criterion
+     */
+    final public function GetCriterion() {
+        return $this->Criterion;
+    }
+    
+    final public function SetCriterion(Criterion $Criterion) {
+        $this->Criterion = $Criterion;
     }
 }
 

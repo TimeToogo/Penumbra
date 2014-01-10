@@ -6,10 +6,7 @@ use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
-abstract class ToOneRelationBase extends KeyedRelation implements Relational\IToOneRelation {    
-    final protected function NewRelationRequest() {
-        return new Relational\Request(array(), true);
-    }    
+abstract class ToOneRelationBase extends KeyedRelation implements Relational\IToOneRelation {
     
     final public function MapParentToRelatedRow(array $ParentRows, array $RelatedRows) {
         if(count($RelatedRows) > count($ParentRows)) {

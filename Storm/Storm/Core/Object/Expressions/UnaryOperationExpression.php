@@ -2,7 +2,7 @@
 
 namespace Storm\Core\Object\Expressions;
 
-class UnaryOperationExpression extends ValueExpression {
+class UnaryOperationExpression extends Expression {
     private $Operator;
     private $OperandExpression;
     public function __construct($UnaryOperator, Expression $OperandExpression) {

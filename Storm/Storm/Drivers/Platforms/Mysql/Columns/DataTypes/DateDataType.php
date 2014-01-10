@@ -5,10 +5,25 @@ namespace Storm\Drivers\Platforms\Mysql\Columns\DataTypes;
 use \Storm\Drivers\Base\Relational\Columns;
 use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 
-class DateDataType extends TimestampedDataType {
+class DateDataType extends Columns\ObjectDataType {
+    const DateFormat = 'Y-m-d';
+    
     public function __construct() {
         parent::__construct('DATE');
     }
+    
+    protected function ClassType() {
+        return 'DateTime';
+    }
+
+    protected function PersistedValue($PropertyValue) {
+        return $PropertyValue->format(self::DateFormat);
+    }
+
+    protected function PropertyValue($PersistedValue) {
+        return \DateTime::createFromFormat(self::DateFormat, $PersistedValue);
+    }
+
 }
 
 ?>

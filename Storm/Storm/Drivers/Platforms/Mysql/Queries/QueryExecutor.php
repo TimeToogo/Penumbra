@@ -12,22 +12,7 @@ use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Drivers\Base\Relational\PrimaryKeys\ValueWithReturningDataKeyGenerator;
 
 class QueryExecutor extends Queries\QueryExecutor {
-      
-    protected function SelectQuery(QueryBuilder $QueryBuilder, Relational\Request $Request) {
-        $QueryBuilder->Append('SELECT ');
-        $First = true;
-        foreach($Request->GetColumns() as $Column) {
-            if($First) $First = false;
-            else
-                $QueryBuilder->Append (', ');
-            
-            $QueryBuilder->AppendExpression(Expression::ReviveColumn($Column));
-            $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetIdentifier()]);
-        }
-        
-        $QueryBuilder->AppendIdentifiers(' FROM # ', array_keys($Request->GetTables()), ', ');
-    }
-
+    
     protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys) {
         $this->DeleteQuery($Connection, new Requests\PrimaryKeyRequest($DiscardedPrimaryKeys))->Execute();
     }
@@ -135,7 +120,7 @@ class QueryExecutor extends Queries\QueryExecutor {
                 $QueryBuilder->Append(',');
                 $QueryBuilder->AppendIdentifier('VALUES(#)', $Identifier);
                 $QueryBuilder->Append(',');
-                $QueryBuilder->Append('CAST(\'Could not persist row due to unique constraint other than primary key\' AS CHAR(1)))');
+                $QueryBuilder->Append('CAST(\'Could not persist row due to failed unique constraint other than primary key\' AS CHAR(0)))');
                 
                 $FirstPrimaryKey = false;
             }
@@ -146,10 +131,43 @@ class QueryExecutor extends Queries\QueryExecutor {
         
         return $QueryBuilder->Build();
     }
+          
+    protected function SelectQuery(QueryBuilder $QueryBuilder, Relational\Request $Request) {
+        $QueryBuilder->Append('SELECT ');
+        $First = true;
+        foreach($Request->GetColumns() as $Column) {
+            if($First) $First = false;
+            else
+                $QueryBuilder->Append (', ');
+            
+            $QueryBuilder->AppendExpression(Expression::ReviveColumn($Column));
+            $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetIdentifier()]);
+        }
+        
+        $QueryBuilder->AppendIdentifiers(' FROM # ', array_keys($Request->GetTables()), ', ');
+        $this->AppendCriterion($QueryBuilder, $Request->GetCriterion());
+    }
     
     protected function UpdateQuery(IConnection $Connection, Relational\Procedure $Procedure) {
         $QueryBuilder = $Connection->QueryBuilder();
-        $QueryBuilder->AppendProcedure($Procedure);
+        
+        $TableNames = array_map(
+                function ($Table) { 
+                    return $Table->GetName();
+                }, 
+                $Procedure->GetTables());
+        
+        $QueryBuilder->AppendIdentifiers('UPDATE # SET ', $TableNames, ',');
+        
+        $First = true;
+        foreach($Procedure->GetExpressions() as $Expression) {
+            if($First) $First = false;
+            else
+                $QueryBuilder->Append(', ');
+            
+            $QueryBuilder->AppendExpression($Expression);
+        }
+        $this->AppendCriterion($QueryBuilder, $Procedure->GetCriterion());
         
         return $QueryBuilder->Build();
     }
@@ -159,9 +177,19 @@ class QueryExecutor extends Queries\QueryExecutor {
         $QueryBuilder = $Connection->QueryBuilder();
         
         $QueryBuilder->AppendIdentifier('DELETE FROM # ', [$Table->GetName()]);
-        $QueryBuilder->AppendRequest($QueryBuilder, $Request);
+        if($Request->GetCriterion()->IsConstrained()) {
+            $QueryBuilder->Append('WHERE ');
+        }
+        $this->AppendCriterion($QueryBuilder, $Request->GetCriterion());
         
         return $QueryBuilder->Build();
+    }
+    
+    private function AppendCriterion(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
+        if($Criterion->IsConstrained()) {
+            $QueryBuilder->Append('WHERE ');
+        }
+        $QueryBuilder->AppendCriterion($Criterion);
     }
 }
 

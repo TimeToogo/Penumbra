@@ -23,11 +23,10 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
         Operators\Binary::BitwiseOr => '|',
         Operators\Binary::BitwiseXor => '^',
         Operators\Binary::Division => '/',
-        Operators\Binary::Equality => '=',
+        Operators\Binary::Equality => '<=>',
         Operators\Binary::GreaterThan => '>',
         Operators\Binary::GreaterThanOrEqualTo => '>=',
         Operators\Binary::In => 'IN',
-        Operators\Binary::Inequality => '!=',
         Operators\Binary::LessThan => '<',
         Operators\Binary::LessThanOrEqualTo => '<=',
         Operators\Binary::LogicalAnd => 'AND',
@@ -41,11 +40,11 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
     ];
 
     protected function GetBinaryOperatorString($Operator) {
-        if (!isset(static::$BinaryOperators[$Operator])) {
-            throw new \Exception;
-        }         
-        else {
+        if (isset(static::$BinaryOperators[$Operator])) {
             return ' ' . static::$BinaryOperators[$Operator] . ' ';
+        }
+        else {
+            throw new \Exception;
         }
     }
 
@@ -76,11 +75,11 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
     ];
 
     protected function GetUnaryOperatorString($Operator) {
-        if (!isset(static::$UnaryOperators[$Operator])) {
-            throw new \Exception();
+        if (isset(static::$UnaryOperators[$Operator])) {
+            return static::$UnaryOperators[$Operator];
         } 
         else {
-            return ' ' . static::$UnaryOperators[$Operator] . ' ';
+            throw new \Exception();
         }
     }
 

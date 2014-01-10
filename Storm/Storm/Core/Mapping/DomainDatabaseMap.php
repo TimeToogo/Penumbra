@@ -145,19 +145,11 @@ abstract class DomainDatabaseMap {
      */
     final public function MapProcedure(Object\IProcedure $ObjectProcedure) {
         $EntityRelationalMap = $this->VerifyRelationalMap($ObjectProcedure->GetEntityType());
-        $Tables = array();
-        foreach($ObjectProcedure->GetProperties() as $Property) {
-            foreach($EntityRelationalMap->GetMappedPersistColumns($Property) as $Column) {
-                $Table = $Column->GetTable();
-                $TableName = $Table->GetName();
-                if(!isset($Tables[$TableName])) {
-                    $Tables[$TableName] = $Table;
-                }
-            }
-        }
-        $RelationalProcedure = new Relational\Procedure($Tables, $ObjectProcedure->IsSingleEntity());
+        
+        $RelationalProcedure = new Relational\Procedure(
+                $EntityRelationalMap->GetMappedPersistTables(), $EntityRelationalMap->GetCriterion());
  
-        $this->MapRequestData($EntityRelationalMap, $ObjectProcedure, $RelationalProcedure);
+        $this->MapCriterion($EntityRelationalMap, $ObjectProcedure->GetCriterion(), $RelationalProcedure->GetCriterion());
         foreach($this->MapExpressions($EntityRelationalMap, $ObjectProcedure->GetExpressions()) as $MappedExpression) {
             $RelationalProcedure->AddExpression($MappedExpression);
         }
@@ -172,12 +164,11 @@ abstract class DomainDatabaseMap {
     final public function MapRequest(Object\IRequest $ObjectRequest) {
         $EntityRelationalMap = $this->VerifyRelationalMap($ObjectRequest->GetEntityType());
         
-        $RelationalRequest = $EntityRelationalMap->RelationalRequest($ObjectRequest);
+        $RelationalRequest = new Relational\Request(array(), $EntityRelationalMap->GetCriterion());
         $this->MapPropetiesToRelationalRequest($EntityRelationalMap, $RelationalRequest, $ObjectRequest->GetProperties());
         
-        $this->MapRequestData($EntityRelationalMap, $ObjectRequest, $RelationalRequest);
+        $this->MapCriterion($EntityRelationalMap, $ObjectRequest->GetCriterion(), $RelationalRequest->GetCriterion());
         
-
         return $RelationalRequest;
     }
     
@@ -185,7 +176,7 @@ abstract class DomainDatabaseMap {
      * @internal
      */
     final public function MapEntityToRelationalRequest($EntityType, Relational\Request $RelationalRequest) {
-        $this->MapPropetiesToRelationalRequest($this->EntityRelationMaps[$EntityType], $RelationalRequest);
+        $this->MapPropetiesToRelationalRequest($this->VerifyRelationalMap($EntityType), $RelationalRequest);
     }
     
     private function MapPropetiesToRelationalRequest(IEntityRelationalMap $EntityRelationalMap, Relational\Request $RelationalRequest, array $Properties = null) {
@@ -196,6 +187,7 @@ abstract class DomainDatabaseMap {
         $DataPropertyColumnMappings = $EntityRelationalMap->GetDataPropertyColumnMappings();
         $EntityPropertyToOneRelationMappings = $EntityRelationalMap->GetEntityPropertyToOneRelationMappings();
         $CollectionPropertyToManyRelationMappings = $EntityRelationalMap->GetCollectionPropertyToManyRelationMappings();
+        
         foreach($Properties as $PropertyIdentifier => $Property) {
             if(isset($DataPropertyColumnMappings[$PropertyIdentifier])) {
                 $RelationalRequest->AddColumns($DataPropertyColumnMappings[$PropertyIdentifier]->GetReviveColumns());
@@ -210,77 +202,31 @@ abstract class DomainDatabaseMap {
     }
 
 
-    private function MapRequestData(IEntityRelationalMap $EntityRelationalMap,
-            Object\IRequest $ObjectRequest, Relational\Request $RelationalRequest) {
-        if ($ObjectRequest->IsConstrained()) {
-            foreach ($this->MapPredicates($EntityRelationalMap, $ObjectRequest->GetPredicates()) as $Predicate) {
-                $RelationalRequest->AddPredicate($Predicate);
+    private function MapCriterion(IEntityRelationalMap $EntityRelationalMap,
+            Object\ICriterion $ObjectCriterion, Relational\Criterion $RelationalCriterion) {
+        
+        if ($ObjectCriterion->IsConstrained()) {
+            foreach ($this->MapExpressions($EntityRelationalMap, $ObjectCriterion->GetPredicateExpressions()) as $PredicateExpression) {
+                $RelationalCriterion->AddPredicate($PredicateExpression);
             }
         }
-        if ($ObjectRequest->IsOrdered()) {
-            $ExpressionAscendingMap = $ObjectRequest->GetOrderedExpressionsAscendingMap();
+        
+        if ($ObjectCriterion->IsOrdered()) {
+            $ExpressionAscendingMap = $ObjectCriterion->GetOrderedExpressionsAscendingMap();
+            
             foreach ($ExpressionAscendingMap as $Expression) {
-                $Ascending = $ExpressionAscendingMap[$Expression];
+                $IsAscending = $ExpressionAscendingMap[$Expression];
                 $Expressions = $this->MapExpression($EntityRelationalMap, $Expression);
                 foreach($Expressions as $Expression) {
-                    $RelationalRequest->AddOrderByExpression($Expression, $Ascending);
+                    $RelationalCriterion->AddOrderByExpression($Expression, $IsAscending);
                 }
             }
         }
-        if ($ObjectRequest->IsRanged()) {
-            $RelationalRequest->SetRangeOffset($ObjectRequest->GetRangeOffset());
-            $RelationalRequest->SetRangeAmount($ObjectRequest->GetRangeAmount());
-        }
-    }
-    
-    /**
-     * @param Object\Constraints\IPredicate[] $Predicates
-     * @return Relational\Constraints\Predicate[]
-     */
-    final public function MapPredicates(IEntityRelationalMap $EntityRelationalMap, array $Predicates) {
-        if (count($Predicates) === 0)
-            return array();
         
-        $RelationalPredicates = array();
-        foreach ($Predicates as $Predicate) {
-            $RelationalPredicates[] = $this->MapPredicate($EntityRelationalMap, $Predicate);
+        if ($ObjectCriterion->IsRanged()) {
+            $RelationalCriterion->SetRangeOffset($ObjectCriterion->GetRangeOffset());
+            $RelationalCriterion->SetRangeAmount($ObjectCriterion->GetRangeAmount());
         }
-        
-        return $RelationalPredicates;
-    }
-
-    final public function MapPredicate(IEntityRelationalMap $EntityRelationalMap, Object\Constraints\Predicate $Predicate) {
-        $RelationalPredicate = new Relational\Constraints\Predicate();
-        
-        foreach ($Predicate->GetRuleGroups() as $RuleGroup) {
-            $RelationalPredicate->AddRules($this->MapRuleGroup($EntityRelationalMap, $RuleGroup));
-        }
-        
-        return $RelationalPredicate;
-    }
-
-    private function MapRuleGroup(IEntityRelationalMap $EntityRelationalMap, Object\Constraints\RuleGroup $RuleGroup) {
-        $RelationalRuleGroup = new Relational\Constraints\RuleGroup(array(), $RuleGroup->IsAllRequired());
-
-        foreach ($RuleGroup->GetRules() as $Rule) {
-            foreach($this->MapRule($EntityRelationalMap, $Rule) as $MappedRule) {
-                $RelationalRuleGroup->AddRule($MappedRule);
-            }
-        }
-        foreach ($RuleGroup->GetRuleGroups() as $RuleGroup) {
-            $RelationalRuleGroup->AddRuleGroup($this->MapRuleGroup($EntityRelationalMap, $RuleGroup));
-        }
-
-        return $RelationalRuleGroup;
-    }
-
-    private function MapRule(IEntityRelationalMap $EntityRelationalMap, Object\Constraints\IRule $Rule) {
-        $Rules = array();
-        foreach($this->MapExpression($EntityRelationalMap, $Rule->GetExpression()) as $Expression) {
-            $Rules[] = new Relational\Constraints\Rule($Expression);
-        }
-        
-        return $Rules;
     }
     
     private function MapExpressions(IEntityRelationalMap $EntityRelationalMap, array $Expressions) {

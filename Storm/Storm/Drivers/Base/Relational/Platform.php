@@ -9,7 +9,6 @@ class Platform implements IPlatform {
     private $KeyGeneratorSet;
     private $ExpressionCompiler;
     private $RequestCompiler;
-    private $PredicateCompiler;
     private $IdentifierEscaper;
     private $DatabaseSyncer;
     private $QueryExecutor;
@@ -20,8 +19,7 @@ class Platform implements IPlatform {
             Columns\IColumnSet $ColumnSet,
             PrimaryKeys\IKeyGeneratorSet $KeyGeneratorSet,
             Queries\IExpressionCompiler $ExpressionCompiler, 
-            Queries\IRequestCompiler $RequestCompiler, 
-            Queries\IPredicateCompiler $PredicateCompiler, 
+            Queries\ICriterionCompiler $CriterionCompiler, 
             Queries\IIdentifierEscaper $IdentifierEscaper,
             Syncing\IDatabaseSyncer $DatabaseSyncer, 
             Queries\IQueryExecutor $QueryExecutor) {
@@ -30,12 +28,10 @@ class Platform implements IPlatform {
         $this->ColumnSet = $ColumnSet;
         $this->KeyGeneratorSet = $KeyGeneratorSet;
         $this->ExpressionCompiler = $ExpressionCompiler;
-        $this->RequestCompiler = $RequestCompiler;
-        $this->PredicateCompiler = $PredicateCompiler;
+        $this->RequestCompiler = $CriterionCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
         $this->Connection->SetExpressionCompiler($ExpressionCompiler);
-        $this->Connection->SetRequestCompiler($RequestCompiler);
-        $this->Connection->SetPredicateCompiler($PredicateCompiler);
+        $this->Connection->SetCriterionCompiler($CriterionCompiler);
         $this->Connection->SetIdentifierEscaper($IdentifierEscaper);
         $this->DatabaseSyncer = $DatabaseSyncer;
         $this->QueryExecutor = $QueryExecutor;
@@ -62,12 +58,8 @@ class Platform implements IPlatform {
         return $this->ExpressionCompiler;
     }
     
-    final public function GetRequestCompiler() {
+    final public function GetCriterionCompiler() {
         return $this->RequestCompiler;
-    }
-    
-    final public function GetPredicateCompiler() {
-        return $this->PredicateCompiler;
     }
     
     final public function GetIdentifierEscaper() {

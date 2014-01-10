@@ -14,8 +14,11 @@ class GetterSetter extends Accessor {
         $this->PropertySetter = $PropertySetter;
     }
     
-    protected function Identifier(&$Identifier) {
+    protected function GetterIdentifier(&$Identifier) {
         $this->PropertyGetter->Identifier($Identifier);
+    }
+    
+    protected function SetterIdentifier(&$Identifier) {
         $this->PropertySetter->Identifier($Identifier);
     }
     

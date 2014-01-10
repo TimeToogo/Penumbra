@@ -3,21 +3,37 @@
 namespace Storm\Core\Object\Expressions;
 
 class MethodCallExpression extends FunctionCallExpression {
-    private $ObjectExpression;
-    public function __construct(ObjectExpression $ObjectExpression, $Name, array $ArgumentValueExpressions = array()) {
+    private $IsStatic;
+    private $ClassType;
+    private $ObjectOrNewExpression;
+    public function __construct(Expression $ObjectOrNewExpression, $Name, array $ArgumentValueExpressions = array()) {
         parent::__construct($Name, $ArgumentValueExpressions);
-        $this->ObjectExpression = $ObjectExpression;
+        
+        $IsObjectExpression = $ObjectOrNewExpression instanceof ObjectExpression;
+        if(!$IsObjectExpression && !($ObjectOrNewExpression instanceof NewExpression)) {
+            throw new \Exception();
+        }
+        
+        $this->ObjectOrNewExpression = $ObjectOrNewExpression;
+        $this->IsStatic = $IsObjectExpression ?
+                !$ObjectOrNewExpression->HasInstance() : false;
+        $this->ClassType = $IsObjectExpression ?
+                $ObjectOrNewExpression->GetClassType() : $ObjectOrNewExpression->GetClassType();
     }
     
     public function IsStatic() {
-        return $this->ObjectExpression->HasInstance();
+        return $this->IsStatic;
+    }
+    
+    public function GetClassType() {
+        return $this->ClassType;
     }
     
     /**
-     * @return ObjectExpression
+     * @return Expression
      */
     public function GetObjectExpression() {
-        return $this->ObjectExpression;
+        return $this->ObjectOrNewExpression;
     }
 }
 

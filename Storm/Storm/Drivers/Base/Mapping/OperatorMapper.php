@@ -36,7 +36,7 @@ class OperatorMapper {
         ObjectOperators\Binary::Addition => RelationalOperators\Binary::Addition,
         ObjectOperators\Binary::BitwiseAnd => RelationalOperators\Binary::BitwiseAnd,
         ObjectOperators\Binary::BitwiseOr => RelationalOperators\Binary::BitwiseOr,
-        ObjectOperators\Binary::BitwiseXor => RelationalOperators\Binary::Addition,
+        ObjectOperators\Binary::BitwiseXor => RelationalOperators\Binary::BitwiseXor,
         ObjectOperators\Binary::Concatenation => RelationalOperators\Binary::Concatenation,
         ObjectOperators\Binary::Division => RelationalOperators\Binary::Division,
         ObjectOperators\Binary::Equality => RelationalOperators\Binary::Equality,
@@ -53,7 +53,7 @@ class OperatorMapper {
         ObjectOperators\Binary::Multiplication => RelationalOperators\Binary::Multiplication,
         ObjectOperators\Binary::ShiftLeft => RelationalOperators\Binary::ShiftLeft,
         ObjectOperators\Binary::ShiftRight => RelationalOperators\Binary::ShiftRight,
-        ObjectOperators\Binary::Subtraction => RelationalOperators\Binary::ShiftRight,
+        ObjectOperators\Binary::Subtraction => RelationalOperators\Binary::Subtraction,
     ];
 
     public function MapBinaryOperator($BinaryOperator) {

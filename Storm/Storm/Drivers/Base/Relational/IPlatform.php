@@ -30,14 +30,9 @@ interface IPlatform {
     public function GetExpressionCompiler();
     
     /**
-     * @return Queries\IRequestCompiler
+     * @return Queries\ICriterionCompiler
      */
-    public function GetRequestCompiler();
-    
-    /**
-     * @return Queries\IPredicateCompiler
-     */
-    public function GetPredicateCompiler();
+    public function GetCriterionCompiler();
     
     /**
      * @return Queries\IIdentifierEscaper

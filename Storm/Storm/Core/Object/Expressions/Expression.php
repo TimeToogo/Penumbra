@@ -16,6 +16,13 @@ abstract class Expression {
     }
     
     /**
+     * @return UnaryOperationExpression
+     */
+    final public static function UnaryOperation($UnaryOperator, Expression $OperandExpression) {
+        return new UnaryOperationExpression($UnaryOperator, $OperandExpression);
+    }
+    
+    /**
      * @return ObjectExpression
      */
     final public static function Object($InstanceOrType) {
@@ -23,16 +30,16 @@ abstract class Expression {
     }
     
     /**
-     * @return MethodCallExpression
+     * @return NewExpression
      */
     final public static function Construct($ClassType, array $ArgumentValueExpressions = array()) {
-        return new MethodCallExpression(new ObjectExpression($ClassType), '__construct', $ArgumentValueExpressions);
+        return new NewExpression($ClassType, $ArgumentValueExpressions);
     }
     
     /**
      * @return MethodCallExpression
      */
-    final public static function MethodCall(ObjectExpression $ObjectExpression, $Name, array $ArgumentValueExpressions = array()) {
+    final public static function MethodCall(Expression $ObjectExpression, $Name, array $ArgumentValueExpressions = array()) {
         return new MethodCallExpression($ObjectExpression, $Name, $ArgumentValueExpressions);
     }
     
@@ -75,8 +82,10 @@ abstract class Expression {
     /**
      * @return AssignmentExpression
      */
-    final public static function Assign(Expression $AssignToValueExpression, Expression $AssignmentValueExpression,
-            $AssignmentOperator = Operators\Assignment::Equal) {
+    final public static function Assign(
+            Expression $AssignToValueExpression, 
+            $AssignmentOperator,
+            Expression $AssignmentValueExpression) {
         return new AssignmentExpression($AssignToValueExpression, $AssignmentOperator, $AssignmentValueExpression);
     }
     // </editor-fold>

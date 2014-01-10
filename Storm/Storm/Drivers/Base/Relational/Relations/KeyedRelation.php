@@ -6,6 +6,7 @@ use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Constraints;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
+use \Storm\Drivers\Base\Relational\Expressions;
 
 abstract class KeyedRelation extends Relation {
     private $ForeignKey;
@@ -35,7 +36,7 @@ abstract class KeyedRelation extends Relation {
     }
 
     public function AddConstraintToRequest(Relational\Request $Request) {
-        $Request->AddPredicate($this->ForeignKey->GetConstraintPredicate());
+        $Request->GetCriterion()->AddPredicate($this->ForeignKey->GetConstraintPredicate());
     }
     
     public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows) {
@@ -44,17 +45,16 @@ abstract class KeyedRelation extends Relation {
             $Request->AddTable($ParentTable);
         }
         $Request->AddColumns($this->GetReferencedColumns());
-        $Predicate = new Constraints\Predicate();
-        $RuleGroup = Constraints\RuleGroup::Any();
         
+        $MatchExpressions = array();
         foreach($ParentRows as $ParentRow) {
             $ReferencedKey = $this->MapParentRowToRelatedKey($this->ForeignKey, $ParentRow);
             
-            $RuleGroup->AddRuleGroup(
-                    Constraints\RuleGroup::Matches($ReferencedKey));
+            $MatchExpressions[] = new Expressions\MatchesColumnDataExpression($ReferencedKey);
         }
-        $Predicate->AddRules($RuleGroup);
-        $Request->AddPredicate($Predicate);
+        
+        $Request->GetCriterion()->AddPredicate(
+                new Expressions\PredicateExpression($MatchExpressions, Expressions\Operators\Binary::LogicalOr));
     }
     /**
      * @return Relational\Table

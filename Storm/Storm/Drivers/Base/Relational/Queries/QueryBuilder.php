@@ -3,8 +3,7 @@
 namespace Storm\Drivers\Base\Relational\Queries;
 
 use \Storm\Drivers\Base\Relational;
-use \Storm\Core\Relational\Request;
-use \Storm\Core\Relational\Procedure;
+use \Storm\Core\Relational\Criterion;
 use \Storm\Core\Relational\Constraints\Predicate;
 use \Storm\Core\Relational\Expressions\Expression;
 
@@ -15,8 +14,7 @@ class QueryBuilder {
     private $Bindings;
     private $QueryString = '';
     private $ExpressionCompiler;
-    private $RequestCompiler;
-    private $PredicateCompiler;
+    private $CriterionCompiler;
     private $IdentifierEscaper;
     
     public function __construct(
@@ -24,15 +22,13 @@ class QueryBuilder {
             $ParameterPlaceholder,
             Bindings $Bindings,
             IExpressionCompiler $ExpressionCompiler,
-            IRequestCompiler $RequestCompiler,
-            IPredicateCompiler $PredicateCompiler,
+            ICriterionCompiler $CriterionCompiler,
             IIdentifierEscaper $IdentifierEscaper) {
         $this->Connection = $Connection;
         $this->ParameterPlaceholder = $ParameterPlaceholder;
         $this->Bindings = $Bindings;
         $this->ExpressionCompiler = $ExpressionCompiler;
-        $this->RequestCompiler = $RequestCompiler;
-        $this->PredicateCompiler = $PredicateCompiler;
+        $this->CriterionCompiler = $CriterionCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
     }
     
@@ -66,19 +62,11 @@ class QueryBuilder {
     }
     
     /**
-     * @return IRequestCompiler
+     * @return ICriterionCompiler
      */
-    final public function GetRequestCompiler() {
-        return $this->RequestCompiler;
+    final public function GetCriterionCompiler() {
+        return $this->CriterionCompiler;
     }
-
-    /**
-     * @return IPredicateCompiler
-     */
-    final public function GetPredicateCompiler() {
-        return $this->PredicateCompiler;
-    }
-
        
     /**
      * @return IQuery
@@ -106,16 +94,8 @@ class QueryBuilder {
         }
     }
     
-    final public function AppendRequest(Request $Request) {
-        $this->RequestCompiler->AppendRequest($this, $Request);
-    }
-    
-    final public function AppendProcedure(Procedure $Procedure) {
-        $this->RequestCompiler->AppendProcedure($this, $Procedure);
-    }
-    
-    final public function AppendPredicate(Predicate $Predicate) {
-        $this->PredicateCompiler->Append($this, $Predicate);
+    final public function AppendCriterion(Criterion $Criterion) {
+        $this->CriterionCompiler->AppendCriterion($this, $Criterion);
     }
     
     final public function Iterate($Iteratable, $Delimiter) {

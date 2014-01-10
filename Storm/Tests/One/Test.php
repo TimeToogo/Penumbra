@@ -28,12 +28,6 @@ class Test implements \StormTests\IStormTest {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
-        $Closure = function ($Blog) {
-            $Foo = 'Test';
-            return $Blog->Name === $Foo || $Blog->CreatedDate < new \DateTime();
-        };
-        var_dump((new \Storm\Drivers\Intelligent\Object\Code\Parsing\Parser())->Parse((new Pinq\Closure\Reader($Closure))->GetBodySource()));
-                
         $Action = self::Operation;
         $Amount = 1;
 
@@ -71,16 +65,36 @@ class Test implements \StormTests\IStormTest {
             $BlogMap = $BloggingStorm->GetORM()->GetDomain()->GetEntityMap(Entities\Blog::GetType());
 
             static $Request = null;
-            if ($Request === null && false) {
+            if ($Request === null) {
                 $Request = new Pinq\Request($BlogMap, null, true);
-                $Request->Where(function ($Blog) {
-                    return $Blog->Name === 'Test blog' || $Blog->CreatedDate < new \DateTime();
+                $Outside = new \DateTime();
+                $Outside->sub(new \DateInterval('P1D'));
+                
+                
+                $Request->GetCriterion()->Where(function ($Blog) use($Id, $Outside) {
+                    $Foo = $Id;
+                    $Sandy = 40;
+                    $Sandy += $Id;
+                    
+                    $ADate = new \DateTime();
+                    
+                    $Awaited = $ADate->add(new \DateInterval('P2Y1DT15M')) > new \DateTime();
+                    
+                    $True = null === null && null !== false || false !== true;
+                    
+                    $Possibly = $Foo . 'Hello' <> ';' || $Sandy == time() && $Outside->getTimestamp() > (time() - 3601);
+                    
+                    $Maybe = $Blog->Description != 45 || (~3 - 231 * 77) . $Blog->Name == 'Sandwich' && $True || $Awaited;
+                    
+                    return $Foo === $Blog->Id && ($Blog->Id === $Foo  || $Blog->CreatedDate < new \DateTime() && $Maybe || $Possibly);
                 });
             }
+            
+            
             $Identity = $BlogMap->Identity();
             $Identity->SetProperty($BlogMap->Id, $Id);
             
-            $RevivedBlog = $BlogRepository->Load(new Requests\IdentityRequest($Identity));
+            $RevivedBlog = $BlogRepository->Load($Request);
             if(extension_loaded('xdebug')) {
                 var_dump($RevivedBlog);
             }
@@ -95,13 +109,23 @@ class Test implements \StormTests\IStormTest {
             $Identity = $BlogMap->Identity();
             $Identity->SetProperty($BlogMap->Id, $Id);
             
-            $Procedure = new Procedures\Procedure(Entities\Blog::GetType(), [
+            $Procedure = new Pinq\Procedure($BlogMap, function ($Blog) {
+                $Blog->Description = md5(new \DateTime());
+                $Blog->Name = $Blog->Name . 'Foobar';
+                $Blog->CreatedDate = (new \DateTime())->diff($Blog->CreatedDate, true);
+            });
+            $Procedure->GetCriterion()->Where(function ($Blog) use ($Id) {
+                return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5);
+            });
+            
+            
+            /*$Procedure = new Procedures\Procedure(Entities\Blog::GetType(), [
                     Expression::Assign(
                             Expression::Property($BlogMap->Description), 
                             Expression::FunctionCall('md5', [
                                     Expression::Construct('DateTime')
                             ]))]);
-            $Procedure->AddPredicate((new Requests\IdentityRequest($Identity))->GetPredicates()[0]);
+            $Procedure->AddPredicate((new Requests\IdentityRequest($Identity))->GetPredicates()[0]);*/
             
             $BlogRepository->Execute($Procedure);
             
