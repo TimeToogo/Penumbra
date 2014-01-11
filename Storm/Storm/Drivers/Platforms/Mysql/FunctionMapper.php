@@ -53,15 +53,14 @@ final class FunctionMapper extends E\FunctionMapper {
         $HaystackStringExpression = $ArgumentExpressions[0];
         $NeedleStringExpression = $ArgumentExpressions[1];
         //Flip order
-        $ArgumentExpressions[0] = $HaystackStringExpression;
-        $ArgumentExpressions[1] = $NeedleStringExpression;
+        $ArgumentExpressions[1] = $HaystackStringExpression;
+        $ArgumentExpressions[0] = $NeedleStringExpression;
         if ($CaseSensitive) {
             $ArgumentExpressions[1] = $this->Binary($ArgumentExpressions[1]);
         }
         if (isset($ArgumentExpressions[2])) {
             $ArgumentExpressions[2] = $this->Add($ArgumentExpressions[2], 1);
         }
-
 
         return $this->Subtract($this->FunctionCall($MappedName, $ArgumentExpressions), 1);
     }
@@ -80,11 +79,10 @@ final class FunctionMapper extends E\FunctionMapper {
 
 
         if (!($TrimCharacters instanceof EE\ConstantExpression) ||
-
                 strlen($TrimCharacters->GetValue()) !== 1) {
+            
             throw new \Exception('Mysql does not support trimming multiple characters (only a specified string)');
         }
-
 
         $ArgumentExpressions = [
             Expression::Multiple(
@@ -108,6 +106,10 @@ final class FunctionMapper extends E\FunctionMapper {
 
 
     public function preg_match(&$MappedName, array &$ArgumentExpressions) {
+        if(count($ArgumentExpressions) > 2) {
+            throw new \Exception();
+        }
+        
         return Expression::BinaryOperation(
                         $ArgumentExpressions[1], 
                         O\Binary::MatchesRegularExpression, 

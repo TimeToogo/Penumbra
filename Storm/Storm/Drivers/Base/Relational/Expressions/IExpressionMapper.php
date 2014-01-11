@@ -26,7 +26,7 @@ interface IExpressionMapper {
      * @return Expression
      */
     public function MapAssignmentExpression(
-            Relational\IColumn $Column, 
+            Relational\Expressions\ColumnExpression $Column, 
             $AssignmentOperator, 
             Expression $ValueExpression);
     
@@ -51,7 +51,15 @@ interface IExpressionMapper {
     /**
      * @return Expression
      */
-    public function MapUnaryOperationExpression($ObjectUnaryOperator, Expression $OperandExpression);
+    public function MapIfExpression(
+            Expression $ConditionExpression,
+            Expression $IfTrueExpression, 
+            Expression $IfFalseExpression);
+    
+    /**
+     * @return Expression
+     */
+    public function MapUnaryOperationExpression($UnaryOperator, Expression $OperandExpression);
 }
 
 ?>

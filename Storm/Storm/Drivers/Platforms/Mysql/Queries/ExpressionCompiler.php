@@ -121,6 +121,16 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
         $QueryBuilder->Append(')');
     }
 
+    protected function AppendIf(QueryBuilder $QueryBuilder, E\IfExpression $Expression) {
+        $QueryBuilder->Append('IF');
+        $QueryBuilder->Append('(');
+        $this->Append($QueryBuilder, $Expression->GetConditionExpression());
+        $QueryBuilder->Append(',');
+        $this->Append($QueryBuilder, $Expression->GetIfTrueExpression());
+        $QueryBuilder->Append(',');
+        $this->Append($QueryBuilder, $Expression->GetIfFalseExpression());
+        $QueryBuilder->Append(')');
+    }
 }
 
 ?>

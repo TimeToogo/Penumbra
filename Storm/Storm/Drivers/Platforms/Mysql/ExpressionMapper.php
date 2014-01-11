@@ -25,22 +25,22 @@ final class ExpressionMapper extends E\ExpressionMapper {
         O\Assignment::Subtraction => O\Binary::Subtraction,
     ];
     public function MapAssignmentExpression(
-            Relational\IColumn $Column, 
+            EE\ColumnExpression $ColumnExpression, 
             $AssignmentOperator, 
             CoreExpression $ValueExpression) {
         
         if(isset(static::$AssignmentBinaryOperatorMap[$AssignmentOperator])) {
             return Expression::Set(
-                    $Column, 
+                    $ColumnExpression, 
                     O\Assignment::Equal, 
-                    Expression::BinaryOperation(
-                            Expression::Column($Column), 
+                    $this->MapBinaryOperationExpression(
+                            $ColumnExpression, 
                             static::$AssignmentBinaryOperatorMap[$AssignmentOperator], 
                             $ValueExpression));
         }
         else {
             return Expression::Set(
-                    $Column, 
+                    $ColumnExpression, 
                     O\Assignment::Equal, 
                     $ValueExpression);
         }
@@ -57,7 +57,7 @@ final class ExpressionMapper extends E\ExpressionMapper {
                     && $NestedOperand->GetName() === 'LOCATE') {
                 if($RightOperandExpression instanceof EE\ConstantExpression
                         && $RightOperandExpression->GetValue() === false) {
-                    $RightOperandExpression = CoreExpression::Constant(-1);
+                    $RightOperandExpression = Expression::Constant(-1);
                 }
             }
         }
@@ -115,10 +115,10 @@ final class ExpressionMapper extends E\ExpressionMapper {
     public function MapCastExpression($CastType, CoreExpression $CastValueExpression) {
         switch ($CastType) {
             case O\Cast::Boolean:
-                return Expression::FunctionCall('IF', 
-                        [$CastValueExpression, 
+                return Expression::Conditional(
+                        $CastValueExpression, 
                         Expression::Constant(1), 
-                        Expression::Constant(0)]);
+                        Expression::Constant(0));
             
             case O\Cast::Double:
                 return Expression::BinaryOperation(
@@ -136,6 +136,7 @@ final class ExpressionMapper extends E\ExpressionMapper {
                 throw new \Exception();
         }
     }
+    
 }
 
 ?>

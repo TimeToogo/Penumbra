@@ -57,6 +57,17 @@ abstract class Expression {
         return new FunctionCallExpression($Name, $ArgumentValueExpressions);
     }
     
+    
+    /**
+     * @return TernaryExpression
+     */
+    final public static function Ternary(
+            Expression $ConditionExpression,
+            Expression $IfTrueExpression, 
+            Expression $IfFalseExpression) {
+        return new TernaryExpression($ConditionExpression, $IfTrueExpression, $IfFalseExpression);
+    }
+    
     /**
      * @return PropertyExpression
      */

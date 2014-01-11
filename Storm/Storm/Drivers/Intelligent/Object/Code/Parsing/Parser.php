@@ -8,6 +8,9 @@ use \Storm\Core\Object;
 use \Storm\Core\Object\Expressions\Expression;
 use \Storm\Core\Object\Expressions\Operators;
 
+/*
+ * TODO: Refactor (I wrote this while I jet lagged)
+ */
 class Parser {
     private $PHPParser;
     private $ValueMetadataResolverVisitor;
@@ -171,7 +174,14 @@ class Parser {
                         Expression::Object($this->VerifyNameNode($Node->class)),
                         $Node->name,
                         $this->ParseNodes($EntityMap, $EntityVariableName, $PropertiesAreGetters, $Node->args));
-            
+             
+            case ($Node instanceof \PHPParser_Node_Expr_Ternary):
+                $If = $Node->if ?: $Node->cond;
+                return Expression::Ternary(
+                        $this->ParseNode($EntityMap, $EntityVariableName, $PropertiesAreGetters, $Node->cond),
+                        $this->ParseNode($EntityMap, $EntityVariableName, $PropertiesAreGetters, $If),
+                        $this->ParseNode($EntityMap, $EntityVariableName, $PropertiesAreGetters, $Node->else));
+                                   
             default:
                 throw new \Exception();
         }

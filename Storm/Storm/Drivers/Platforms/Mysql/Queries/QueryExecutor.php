@@ -100,9 +100,10 @@ class QueryExecutor extends Queries\QueryExecutor {
                 /*
                  * Ugly fix/hack to prevent mysql from updating primary key when encountering
                  * a duplicate value on a seperate unique constraint. Sadly Mysql does not support
-                 * the more robust 'MERGE' operation, which is a
+                 * the more robust 'MERGE' operation. Furthermore there is no clean way to throw a 
+                 * conditional runtime error in Mysql reliably.
                  * 
-                 * Example: Persisting a acoount entity with a unique username, if the user changes
+                 * Example: Persisting a account entity with a unique username, if the user changes
                  * their username and and a duplicate username exists, mysql could attempt to update
                  * the other duplicate row with the new values/primary key. This should not be an 
                  * issue as then it will fail with a duplicate primary key but could lead to some 
@@ -120,7 +121,7 @@ class QueryExecutor extends Queries\QueryExecutor {
                 $QueryBuilder->Append(',');
                 $QueryBuilder->AppendIdentifier('VALUES(#)', $Identifier);
                 $QueryBuilder->Append(',');
-                $QueryBuilder->Append('CAST(\'Could not persist row due to failed unique constraint other than primary key\' AS CHAR(0)))');
+                $QueryBuilder->Append('(SELECT 1 UNION ALL SELECT 1))');
                 
                 $FirstPrimaryKey = false;
             }

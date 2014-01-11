@@ -72,38 +72,48 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
                         $EntityRelationalMap->GetMappedPersistColumns($Expression->GetProperty()));
                 $Operator = $this->OperatorMapper->MapAssignmentOperator($Expression->GetOperator());
                 $SetValueExpression = $this->MapExpression($EntityRelationalMap, $Expression->GetRightOperandExpression())[0];
+                
                 return array_map(
-                        function ($ColumnExpression) use (&$Operator, &$SetValueExpression) {
-                            return Expression::Set(
+                        function ($ColumnExpression) use (&$ExpressionMapper, &$Operator, &$SetValueExpression) {
+                            return $ExpressionMapper->MapAssignmentExpression(
                                     $ColumnExpression, 
                                     $Operator, 
-                                    Expression::PersistData(
-                                            $ColumnExpression->GetColumn(), $SetValueExpression)
-                                    );
+                                    $SetValueExpression);
                         }, $ColumnExpressions); 
                         
             case $Expression instanceof O\BinaryOperationExpression:
                 return [$ExpressionMapper->MapBinaryOperationExpression(
                         $this->MapExpression($EntityRelationalMap, $Expression->GetLeftOperandExpression())[0], 
                         $this->OperatorMapper->MapBinaryOperator($Expression->GetOperator()), 
-                        $this->MapExpression($EntityRelationalMap, $Expression->GetRightOperandExpression())[0])];
+                        $this->MapExpression($EntityRelationalMap, $Expression->GetRightOperandExpression())[0]
+                        )];
             
             case $Expression instanceof O\UnaryOperationExpression:
                 return [$ExpressionMapper->MapUnaryOperationExpression(
                         $this->OperatorMapper->MapUnaryOperator($Expression->GetOperator()), 
-                        $this->MapExpression($EntityRelationalMap, $Expression->GetOperandExpression())[0])];
+                        $this->MapExpression($EntityRelationalMap, $Expression->GetOperandExpression())[0]
+                        )];
             
             case $Expression instanceof O\CastExpression:
                 return [$ExpressionMapper->MapCastExpression(
                         $this->OperatorMapper->MapCastOperator($Expression->GetCastType()),
-                        $this->MapExpression($EntityRelationalMap, $Expression->GetCastValueExpression())[0])];
+                        $this->MapExpression($EntityRelationalMap, $Expression->GetCastValueExpression())[0]
+                        )];
             
             case $Expression instanceof O\FunctionCallExpression:
                 return [$ExpressionMapper->MapFunctionCallExpression(
                         $Expression->GetName(),
                         array_map(function($Expression) use (&$EntityRelationalMap) {
                             return $this->MapExpression($EntityRelationalMap, $Expression)[0];
-                        }, $Expression->GetArgumentValueExpressions()))];
+                        }, $Expression->GetArgumentValueExpressions())
+                        )];
+            
+            case $Expression instanceof O\TernaryExpression:
+                return [$ExpressionMapper->MapIfExpression(
+                        $this->MapExpression($EntityRelationalMap, $Expression->GetConditionExpression())[0],
+                        $this->MapExpression($EntityRelationalMap, $Expression->GetIfTrueExpression())[0],
+                        $this->MapExpression($EntityRelationalMap, $Expression->GetIfFalseExpression())[0]
+                        )];
             
             default:
                 throw new \Exception();

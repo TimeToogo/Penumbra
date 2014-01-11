@@ -10,6 +10,7 @@ abstract class EntityMap implements \IteratorAggregate {
     use \Storm\Core\Helpers\Type;   
     
     private $EntityType;
+    
     /**
      * @var IProperty[] 
      */

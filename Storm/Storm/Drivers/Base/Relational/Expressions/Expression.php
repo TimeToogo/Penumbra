@@ -71,6 +71,15 @@ abstract class Expression extends Expressions\Expression {
         return new SetExpression($AssignToColumnExpression, $AssignmentOperator, $AssignmentValueExpression);
     }
     
+    /**
+     * @return IfExpression
+     */
+    public static function Conditional(
+            parent $ConditionExpression, 
+            parent $IfTrueExpression, 
+            parent $IfFalseExpression) {
+        return new IfExpression($ConditionExpression, $IfTrueExpression, $IfFalseExpression);
+    }
     
     /**
      * @return ValueListExpression

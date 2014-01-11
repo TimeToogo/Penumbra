@@ -55,6 +55,10 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
             case $Expression instanceof E\ValueListExpression:
                 return $this->AppendList($QueryBuilder, $Expression);
 
+                                
+            case $Expression instanceof E\IfExpression:
+                return $this->AppendIf($QueryBuilder, $Expression);
+
             default:
                 throw new \Exception();
         }
@@ -90,6 +94,8 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
     protected abstract function AppendFunctionCall(QueryBuilder $QueryBuilder, E\FunctionCallExpression $Expression);
 
     protected abstract function AppendList(QueryBuilder $QueryBuilder, E\ValueListExpression $Expression);
+
+    protected abstract function AppendIf(QueryBuilder $QueryBuilder, E\IfExpression $Expression);
 
     protected function AppendSet(QueryBuilder $QueryBuilder, E\SetExpression $Expression) {
         $this->Append($QueryBuilder, $Expression->GetLeftOperandExpression());
