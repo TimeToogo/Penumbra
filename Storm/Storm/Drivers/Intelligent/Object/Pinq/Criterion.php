@@ -25,13 +25,13 @@ class Criterion extends Object\Criterion {
     
     
     public function OrderBy(\Closure $ExpressionClosure) {
-        $this->AddOrderByProperty($this->ParseReturnExpressionClosure($ExpressionClosure), true);
+        $this->AddOrderByExpression($this->ParseReturnExpressionClosure($ExpressionClosure), true);
         
         return $this;
     }
     
     public function OrderByDescending(\Closure $ExpressionClosure) {
-        $this->AddOrderByProperty($this->ParseReturnExpressionClosure($ExpressionClosure), false);
+        $this->AddOrderByExpression($this->ParseReturnExpressionClosure($ExpressionClosure), false);
         
         return $this;
     }
@@ -43,7 +43,7 @@ class Criterion extends Object\Criterion {
     }
     
     public function Limit($Amount) {
-        $this->SetRangeOffset($Amount);
+        $this->SetRangeAmount($Amount);
         
         return $this;
     }

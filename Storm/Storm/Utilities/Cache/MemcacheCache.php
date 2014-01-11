@@ -1,22 +1,28 @@
 <?php
 
-namespace Putty\Cache;
+namespace Storm\Utilities\Cache;
 
 class MemcacheCache implements ICache {
     private $Memcache;
     
-    public function __construct($Host, $Port = null, $Timeout = null, $PConnect = false) {
+    public function __construct($Host, $Port = 11211, $Timeout = null, $PConnect = false) {
         $this->Memcache = new \Memcache();
         if($PConnect) {
-            $this->Memcache->pconnect($Host, $Port, $Timeout);
+            if($Timeout === null) {
+                $this->Memcache->pconnect($Host, $Port);
+            }
+            else {
+                    $this->Memcache->pconnect($Host, $Port, $Timeout);
+            }
         }
         else {
-            $this->Memcache->connect($Host, $Port, $Timeout);
+            if($Timeout === null) {
+                $this->Memcache->connect($Host, $Port);
+            }
+            else {
+                    $this->Memcache->connect($Host, $Port, $Timeout);
+            }
         }
-    }
-    
-    public function __destruct() {
-        $this->Memcache->close();
     }
     
     public function Retrieve($Key) {
@@ -38,6 +44,10 @@ class MemcacheCache implements ICache {
 
     public function Delete($Key) {
         return $this->Memcache->delete($Key);
+    }
+    
+    public function Clear() {
+        return $this->Memcache->flush();
     }
 }
 

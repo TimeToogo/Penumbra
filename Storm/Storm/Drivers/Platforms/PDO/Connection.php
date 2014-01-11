@@ -31,7 +31,11 @@ class Connection extends Queries\Connection {
     public function CommitTransaction() {
         return $this->PDO->commit();
     }
-
+    public function __sleep() {
+        return [
+            
+        ];
+    }
     public function RollbackTransaction() {
         return $this->PDO->rollBack();
     }

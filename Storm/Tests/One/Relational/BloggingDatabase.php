@@ -3,10 +3,16 @@
 namespace StormTests\One\Relational;
 
 use \Storm\Drivers\Constant\Relational;
-use \Storm\Drivers\Platforms;
-use \Storm\Drivers\Platforms\Development\Logging;
 
 class BloggingDatabase extends Relational\Database {
+    public function __construct() {
+        parent::__construct(static::InitializePlatform());
+    }
+    
+    public static function InitializePlatform() {
+        return \StormTests\One\Test::GetPlatform();
+    }
+    
     public $Blogs;
     public $Posts;
     public $Tags;
@@ -17,24 +23,6 @@ class BloggingDatabase extends Relational\Database {
         $this->Posts = new Tables\Posts();
         $this->Tags = new Tables\Tags();
         $this->PostTags = new Tables\PostTags();
-    }
-
-    protected function Platform() {
-        $Development = 1;
-        
-        if($Development > 0) {
-            return new Platforms\Mysql\Platform(
-                    new Logging\Connection(new Logging\DumpLogger(), 
-                            new Platforms\PDO\Connection(
-                                    new \PDO('mysql:host=localhost;dbname=StormTest', 'root', 'admin'), true)), 
-                    $Development > 1);
-        }
-        else {
-            return new Platforms\Mysql\Platform(
-                            new Platforms\PDO\Connection(
-                                    new \PDO('mysql:host=localhost;dbname=StormTest', 'root', 'admin'), true), 
-                    false);
-        }
     }
 }
 

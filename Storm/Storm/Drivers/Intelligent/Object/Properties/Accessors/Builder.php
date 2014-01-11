@@ -61,6 +61,12 @@ class Builder implements \ArrayAccess {
         return $this;
     }
 
+    public function __call($name, $arguments) {
+        $this->AddAccessor(new Accessors\MethodPair($name, $name));
+        return $this;
+    }
+    
+
     public function __invoke() {
         $this->AddAccessor(new Accessors\Invocation(func_get_args()));
         return $this;

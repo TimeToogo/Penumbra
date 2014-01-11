@@ -24,6 +24,10 @@ class APCCache implements ICache {
     public function Delete($Key) {
         return apc_delete($Key);
     }
+    
+    public function Clear() {
+        return apc_clear_cache();
+    }
 }
 
 ?>

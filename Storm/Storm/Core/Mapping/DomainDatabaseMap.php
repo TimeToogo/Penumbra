@@ -139,6 +139,7 @@ abstract class DomainDatabaseMap {
     }
     
     // <editor-fold defaultstate="collapsed" desc="Request and Operation mappers">
+    
     /**
      * @param Object\IRequest $ObjectProcedure
      * @return Relational\Procedure
@@ -212,7 +213,7 @@ abstract class DomainDatabaseMap {
         }
         
         if ($ObjectCriterion->IsOrdered()) {
-            $ExpressionAscendingMap = $ObjectCriterion->GetOrderedExpressionsAscendingMap();
+            $ExpressionAscendingMap = $ObjectCriterion->GetOrderExpressionsAscendingMap();
             
             foreach ($ExpressionAscendingMap as $Expression) {
                 $IsAscending = $ExpressionAscendingMap[$Expression];

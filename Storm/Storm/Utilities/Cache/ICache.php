@@ -7,6 +7,7 @@ interface ICache {
     public function Contains($Key);
     public function Retrieve($Key);
     public function Delete($Key);
+    public function Clear();
 }
 
 ?>

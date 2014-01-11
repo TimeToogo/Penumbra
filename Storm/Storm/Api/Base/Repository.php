@@ -1,6 +1,6 @@
 <?php
 
-namespace Storm\Core;
+namespace Storm\Api\Base;
 
 use \Storm\Core\Object;
 use \Storm\Core\Mapping\DomainDatabaseMap;
@@ -14,7 +14,7 @@ class Repository {
     private $DiscardedQueue = array();
     private $DiscardedRequestQueue = array();
     
-    final public function __construct(DomainDatabaseMap $ORM, $EntityType, $AutoSave) {
+    public function __construct(DomainDatabaseMap $ORM, $EntityType, $AutoSave) {
         $this->DomainDatabaseMap = $ORM;
         $this->EntityType = $EntityType;
         $this->AutoSave = $AutoSave;

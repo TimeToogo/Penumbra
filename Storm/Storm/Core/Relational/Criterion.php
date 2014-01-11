@@ -58,7 +58,7 @@ class Criterion {
         return $this->RangeAmount;
     }
     final public function SetRangeAmount($RangeAmount) {
-       if(!is_int($RangeAmount)) {
+       if(!is_int($RangeAmount) && $RangeAmount !== null) {
            throw new \InvalidArgumentException('$RangeOffset');
        }
         $this->RangeAmount = $RangeAmount;

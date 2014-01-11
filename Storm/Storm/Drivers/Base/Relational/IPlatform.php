@@ -2,6 +2,8 @@
 
 namespace Storm\Drivers\Base\Relational;
 
+use \Storm\Core;
+
 interface IPlatform {
     
     /**
@@ -48,6 +50,19 @@ interface IPlatform {
      * @return Queries\IQueryExecutor
      */
     public function GetQueryExecutor();
+    
+    
+    public function Sync(Database $Database);
+    
+    /**
+     * @return ResultRow[]
+     */
+    public function Select(Core\Relational\Request $Request);
+    
+    public function Commit(
+            array $TablesOrderedByPersistingDependency,
+            array $TablesOrderedByDiscardingDependency,
+            Core\Relational\Transaction $Transaction);
 }
 
 ?>

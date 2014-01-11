@@ -26,6 +26,10 @@ class PrefixedCache implements ICache {
     public function Save($Key, $Value, $ExpirySeconds = false, $Overwrite = true) {
         return $this->Save($this->Prefix . $Key, $Value, $ExpirySeconds, $Overwrite);
     }
+    
+    public function Clear() {
+        return $this->Cache->Clear();
+    }
 }
 
 ?>

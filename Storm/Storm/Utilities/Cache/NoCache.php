@@ -64,9 +64,9 @@ class NoCache implements ICache {
     private function Now() {
         return new \DateTime('now', new \DateTimeZone('UTC'));
     }
-    
-    public function __destruct() {
-        $this->Cache = null;
+        
+    public function Clear() {
+        $this->Cache = array();
     }
 }
 

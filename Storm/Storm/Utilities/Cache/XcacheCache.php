@@ -29,6 +29,10 @@ class XcacheCache implements ICache {
     public function Delete($Key) {
         return xcache_unset($Key);
     }
+    
+    public function Clear() {
+        return xcache_clear_cache();
+    }
 }
 
 ?>

@@ -31,6 +31,10 @@ class MemcachedCache implements ICache {
     public function Delete($Key) {
         return $this->Memcached->delete($Key);
     }
+    
+    public function Clear() {
+        return $this->Memcached->flush();
+    }
 }
 
 ?>

@@ -20,7 +20,7 @@ abstract class Table extends Relational\Table {
     }
     protected abstract function RegisterColumnStructure(Containers\Registrar $Registrar, IColumnSet $Column);
     
-    protected function OnStructureInitialized(Relational\Database $Context) {
+    protected function OnStructureInitialized(Relational\Database $Database) {
         $Registrar = new Containers\Registrar(StructuralTableTrait::GetType());
         $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
         if(count($PrimaryKeyColumns) > 0) {
@@ -31,26 +31,26 @@ abstract class Table extends Relational\Table {
             $this->AddTrait($Trait);
         }
         
-        $this->KeyGenerator = $this->KeyGenerator($Context->GetPlatform()->GetKeyGeneratorSet());
+        $this->KeyGenerator = $this->KeyGenerator($Database->GetPlatform()->GetKeyGeneratorSet());
         if($this->KeyGenerator !== null) {
             $this->KeyGenerator->SetTable($this);
         }
     }
     protected abstract function RegisterStructuralTraits(Containers\Registrar $Registrar);
     
-    final public function InitializeRelatedStructure(Relational\Database $Context) {
-        $this->OnInitializeRelatedStructure($Context);
+    final public function InitializeRelatedStructure(Relational\Database $Database) {
+        $this->OnInitializeRelatedStructure($Database);
         
         $Registrar = new Containers\Registrar(RelationalTableTrait::GetType());
-        $this->RegisterRelationalTraits($Registrar, $Context);
+        $this->RegisterRelationalTraits($Registrar, $Database);
         foreach($Registrar->GetRegistered() as $Trait) {
             $this->AddTrait($Trait);
         }
         
-        $this->OnRelatedStructureInitialized($Context);
+        $this->OnRelatedStructureInitialized($Database);
     }
-    protected function OnInitializeRelatedStructure(Relational\Database $Context) { }
-    protected function OnRelatedStructureInitialized(Relational\Database $Context) { }
+    protected function OnInitializeRelatedStructure(Relational\Database $Database) { }
+    protected function OnRelatedStructureInitialized(Relational\Database $Database) { }
     
     protected abstract function RegisterRelationalTraits(Containers\Registrar $Registrar, Relational\Database $Context);
     

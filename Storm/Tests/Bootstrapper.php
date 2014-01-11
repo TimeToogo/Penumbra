@@ -18,9 +18,14 @@ $GLOBALS['LoadCount'] = 0;
 $GLOBALS['LoadList'] = array();
 
 function autoload($ClassName) {
-    $FullClass = '\\' . $ClassName;
-    if(class_exists($FullClass) || interface_exists($FullClass))
+    if(strpos($ClassName, ROOT_NAMESPACE) !== 0) {
         return;
+    }
+    
+    $FullClass = '\\' . $ClassName;
+    if(class_exists($FullClass) || interface_exists($FullClass)) {
+        return;
+    }
     
     $ClassName = str_replace(ROOT_NAMESPACE . '\\', '', $ClassName);
     

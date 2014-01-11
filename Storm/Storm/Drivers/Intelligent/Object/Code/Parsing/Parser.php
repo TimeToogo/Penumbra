@@ -207,11 +207,12 @@ class Parser {
         $AccessorBuilderVisitor = new AccessorBuilderVisitor($EntityVariableName);
         $NodeTraverser->addVisitor($AccessorBuilderVisitor);
         $NodeTraverser->traverse([$Node]);
+        $Properties = $EntityMap->GetProperties();
         
         $Accessor = $AccessorBuilderVisitor->GetAccessor();
         $Identifier = $IsGetter ? 
                 $Accessor->GetGetterIdentifier() : $Accessor->GetSetterIdentifier();
-        foreach($EntityMap->GetProperties() as $Property) {
+        foreach($Properties as $Property) {
             if($Property instanceof \Storm\Drivers\Base\Object\Properties\Property) {
                 $OtherAccessor = $Property->GetAccessor();
                 $OtherIdentifier = $IsGetter ? 

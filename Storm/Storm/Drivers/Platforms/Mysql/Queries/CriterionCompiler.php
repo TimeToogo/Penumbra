@@ -22,7 +22,7 @@ class CriterionCompiler extends Queries\CriterionCompiler {
 
     protected function AppendOrderedExpressions(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap) {
         $QueryBuilder->Append(' ORDER BY ');
-        foreach($QueryBuilder->Delimit($ExpressionAscendingMap, ', ') as $Expression) {
+        foreach($QueryBuilder->Iterate($ExpressionAscendingMap, ', ') as $Expression) {
             $Ascending = $ExpressionAscendingMap[$Expression];
             $Direction = $Ascending ? 'ASC' : 'DESC';
             

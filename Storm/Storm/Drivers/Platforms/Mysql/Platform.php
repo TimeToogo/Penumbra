@@ -7,10 +7,12 @@ use \Storm\Drivers\Base\Relational;
 
 final class Platform extends Relational\Platform {
     public function __construct(Relational\Queries\IConnection $Connection, $DevelopmentMode) {
+        
         if($DevelopmentMode) {
             $IdentifiersAreCaseSensitive = 
                     ((int)$Connection->FetchValue('SELECT @@lower_case_table_names')) === 0;
         }
+        
         parent::__construct(
                 $Connection,
                 new ExpressionMapper(new FunctionMapper(), new ObjectMapper()),
@@ -25,6 +27,7 @@ final class Platform extends Relational\Platform {
                         new Platforms\Production\Syncing\DatabaseSyncer(),
                 new Queries\QueryExecutor());
     }
+    
 }
 
 ?>

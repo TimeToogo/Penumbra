@@ -2,13 +2,15 @@
 
 namespace Storm\Drivers\Base\Relational;
 
+use \Storm\Core;
+
 class Platform implements IPlatform {
     private $Connection;
     private $ExpressionMapper;
     private $ColumnSet;
     private $KeyGeneratorSet;
     private $ExpressionCompiler;
-    private $RequestCompiler;
+    private $CriterionCompiler;
     private $IdentifierEscaper;
     private $DatabaseSyncer;
     private $QueryExecutor;
@@ -28,15 +30,16 @@ class Platform implements IPlatform {
         $this->ColumnSet = $ColumnSet;
         $this->KeyGeneratorSet = $KeyGeneratorSet;
         $this->ExpressionCompiler = $ExpressionCompiler;
-        $this->RequestCompiler = $CriterionCompiler;
+        $this->CriterionCompiler = $CriterionCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
-        $this->Connection->SetExpressionCompiler($ExpressionCompiler);
-        $this->Connection->SetCriterionCompiler($CriterionCompiler);
-        $this->Connection->SetIdentifierEscaper($IdentifierEscaper);
         $this->DatabaseSyncer = $DatabaseSyncer;
         $this->QueryExecutor = $QueryExecutor;
+        
+        $this->Connection->SetExpressionCompiler($this->ExpressionCompiler);
+        $this->Connection->SetCriterionCompiler($this->CriterionCompiler);
+        $this->Connection->SetIdentifierEscaper($this->IdentifierEscaper);
     }
-
+    
     
     final public function GetConnection() {
         return $this->Connection;
@@ -59,7 +62,7 @@ class Platform implements IPlatform {
     }
     
     final public function GetCriterionCompiler() {
-        return $this->RequestCompiler;
+        return $this->CriterionCompiler;
     }
     
     final public function GetIdentifierEscaper() {
@@ -72,6 +75,26 @@ class Platform implements IPlatform {
 
     final public function GetQueryExecutor() {
         return $this->QueryExecutor;
+    }
+    
+    final public function Sync(Database $Database) {
+        return $this->DatabaseSyncer->Sync($this->Connection, $Database);
+    }
+    
+    final public function Select(Core\Relational\Request $Request) {
+        return $this->QueryExecutor->Select($this->Connection, $Request);
+    }
+
+    final public function Commit(
+            array $TablesOrderedByPersistingDependency, 
+            array $TablesOrderedByDiscardingDependency, 
+            Core\Relational\Transaction $Transaction) {
+        
+        return $this->QueryExecutor->Commit(
+                $this->Connection, 
+                $TablesOrderedByPersistingDependency, 
+                $TablesOrderedByDiscardingDependency, 
+                $Transaction);
     }
 }
 

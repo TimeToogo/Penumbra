@@ -6,40 +6,44 @@ use \Storm\Core\Relational;
 
 abstract class Database extends Relational\Database {
     private $Platform;
-    private $Connection;
-    private $DatabaseSyncer;
-    private $QueryExecutor;
     
-    public function __construct() {
-        $this->Platform = $this->Platform();        
-        $this->Connection = $this->Platform->GetConnection();
-        $this->DatabaseSyncer = $this->Platform->GetDatabaseSyncer();
-        $this->QueryExecutor = $this->Platform->GetQueryExecutor();
+    public function __construct(IPlatform $Platform) {
+        $this->Platform = $Platform;
         
         parent::__construct();
-        
-        $this->DatabaseSyncer->Sync($this->Connection, $this);
     }
-    /**
-     * @return IPlatform
-     */
-    protected abstract function Platform();
     
     /**
      * @return IPlatform
      */
-    public function GetPlatform() {
+    final public function GetPlatform() {
         return $this->Platform;
     }
     
+    private function VerifyPlatform() {
+        if($this->Platform === null) {
+            throw new \BadMethodCallException('Platform has not been supplied');
+        }
+    }
+    
+    /**
+     * @return IPlatform
+     */
+    final public function SetPlatform(IPlatform $Platform) {
+        $this->Platform = $Platform;
+        $this->Platform->Sync($this);
+    }
+    
     final protected function GetRows(Relational\Request $Request) {
-        return $this->QueryExecutor->Select($this->Connection, $Request);
+        $this->VerifyPlatform();
+        return $this->Platform->Select($Request);
     }
     
     final public function Commit(Relational\Transaction $Transaction) {
-        return $this->QueryExecutor->Commit($this->Connection, 
-                $this->GetTablesOrderedByPersistingDependency(),
-                $this->GetTablesOrderedByDiscardingDependency(),
+        $this->VerifyPlatform();
+        return $this->Platform->Commit(
+                $this->GetTablesOrderedByPersistingDependency(), 
+                $this->GetTablesOrderedByDiscardingDependency(), 
                 $Transaction);
     }
 }

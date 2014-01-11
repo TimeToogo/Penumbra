@@ -23,7 +23,10 @@ final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
         $this->DropUnspecifiedTables = $DropUnspecifiedTables;
         $this->DropUnspecifiedColumns = $DropUnspecifiedColumns;
     }
-
+    
+    final public function SetIdentifiersAreCaseSenstive($IdentifiersAreCaseSenstive) {
+        $this->IdentifiersAreCaseSenstive = $IdentifiersAreCaseSenstive;
+    }
     
     protected function SyncDatabase(
             IConnection $Connection, Relational\Database $Database, 
