@@ -4,14 +4,17 @@ namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
 use \Storm\Drivers\Intelligent\Object\Pinq\Request;
+use  \Storm\Drivers\Intelligent\Object\Closure;
 
 class RequestBuilder extends CriterionBuilder {
-    private $EntityMap;
     private $Properties;
     private $IsSingleEntity;
     
-    public function __construct(Object\EntityMap $EntityMap) {
-        parent::__construct($EntityMap);
+    public function __construct(
+            Object\EntityMap $EntityMap, 
+            Closure\ClosureToASTConverter $ClosureToASTConverter) {
+        parent::__construct($EntityMap, $ClosureToASTConverter);
+        
         $this->EntityMap = $EntityMap;
         $this->Properties = $this->EntityMap->GetProperties();
         $this->IsSingleEntity = false;

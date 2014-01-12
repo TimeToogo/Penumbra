@@ -7,41 +7,46 @@ use \Storm\Drivers\Intelligent\Object\Pinq;
 use \Storm\Drivers\Intelligent\Object\Closure;
 
 class CriterionBuilder {
-    private $EntityMap;
-    private $ClosureReader;
-    private $ClosureParser;
+    protected $EntityType;
+    protected $EntityMap;
+    private $ClosureToASTConverter;
     private $Criterion;
     
     public function __construct(
             Object\EntityMap $EntityMap,
-            Closure\IReader $ClosureReader,
-            Closure\IParser $ClosureParser) {
+            Closure\ClosureToASTConverter $ClosureToASTConverter) {
         $this->EntityMap = $EntityMap;
-        $this->ClosureReader = $ClosureReader;
-        $this->ClosureParser = $ClosureParser;
+        $this->EntityType = $EntityMap->GetEntityType();
+        $this->ClosureToASTConverter = $ClosureToASTConverter;
         $this->Criterion = new Pinq\Criterion($EntityMap->GetEntityType());
     }
     
-    /**
-     * @return CriterionBuilder
-     */
+    final protected function ClosureToExpandedAST(\Closure $Closure) {
+        $AST = $this->ClosureToASTConverter->ClosureToAST($this->EntityMap, $Closure);
+        if(!$AST->IsResolved()) {
+            throw new \Exception('Closure constains unresolved variables: $' . implode(', $', $AST->GetUnresolvedVariables()));
+        }
+        
+        return $AST;
+    }
+    
     final public function Where(\Closure $PredicateClosure) {
-        $this->Criterion->AddPredicateClosure($PredicateClosure);        
+        $this->Criterion->AddPredicateClosure($this->ClosureToExpandedAST($PredicateClosure));        
         return $this;
     }
     
     final public function OrderBy(\Closure $ExpressionClosure) {
-        $this->Criterion->AddOrderByClosure($ExpressionClosure, true);        
+        $this->Criterion->AddOrderByClosure($this->ClosureToExpandedAST($ExpressionClosure), true);        
         return $this;
     }
     
     final public function OrderByDescending(\Closure $ExpressionClosure) {
-        $this->Criterion->AddOrderByClosure($ExpressionClosure, false);        
+        $this->Criterion->AddOrderByClosure($this->ClosureToExpandedAST($ExpressionClosure), false);        
         return $this;
     }
     
     final public function GroupBy(\Closure $ExpressionClosure) {
-        $this->Criterion->AddGroupByClosure($ExpressionClosure);        
+        $this->Criterion->AddGroupByClosure($this->ClosureToExpandedAST($ExpressionClosure));        
         return $this;
     }
     

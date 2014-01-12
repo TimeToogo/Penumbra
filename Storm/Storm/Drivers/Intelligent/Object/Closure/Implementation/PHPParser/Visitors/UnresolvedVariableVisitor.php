@@ -1,6 +1,6 @@
 <?php
 
-namespace Storm\Drivers\Intelligent\Object\Pinq\Closure\Implementation\PHPParser\Visitors;
+namespace Storm\Drivers\Intelligent\Object\Closure\Implementation\PHPParser\Visitors;
 
 class UnresolvedVariableVisitor extends \PHPParser_NodeVisitorAbstract {
     private $UnresolvedVariables;

@@ -15,12 +15,13 @@ class Procedure extends Object\Procedure {
         $EntityType = $AST->GetEntityMap()->GetEntityType();
         
         parent::__construct(
-                $EntityType->GetEntityType(), 
+                $EntityType, 
                 $this->ParseAssignmentExpressions($AST), 
                 $Criterion ?: new Criterion($EntityType));
     }  
     
     private function ParseAssignmentExpressions(Closure\IAST $AST) {
+        $AST->SetPropertyMode(Closure\IAST::PropertiesAreSetters);
         $Expressions = $AST->ParseNodes();
         
         foreach ($Expressions as $Key => $Expression) {

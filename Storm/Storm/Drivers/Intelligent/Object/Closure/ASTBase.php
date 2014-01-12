@@ -55,6 +55,15 @@ abstract class ASTBase implements IAST {
         $this->PropertyMode = $PropertyMode;
     }
     
+    final public function Resolve(array $VariableValueMap) {
+        if(count($VariableValueMap) === 0) {
+            return;
+        }
+        
+        $this->ResolveVariables($VariableValueMap);
+    }
+    protected abstract function ResolveVariables(array $VariableValueMap);
+    
     final public function ParseNodes(array $Nodes = null) {
         if($Nodes === null) {
             $Nodes = $this->Nodes;
@@ -69,8 +78,10 @@ abstract class ASTBase implements IAST {
         if(array_search($Node, $this->Nodes, true) === false) {
             throw new \InvalidArgumentException('AST does not contain supplied node');
         }
+        
+        return $this->ParseNodeAsExpression($Node);
     }
-    protected abstract function ParseNodeInternal(INode $Node);
+    protected abstract function ParseNodeAsExpression(INode $Node);
 }
 
 ?>

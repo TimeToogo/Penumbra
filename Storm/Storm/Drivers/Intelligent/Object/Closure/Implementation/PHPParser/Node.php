@@ -1,6 +1,6 @@
 <?php
 
-namespace Storm\Drivers\Intelligent\Object\Pinq\Closure\Implementation\PHPParser;
+namespace Storm\Drivers\Intelligent\Object\Closure\Implementation\PHPParser;
 
 use \Storm\Drivers\Intelligent\Object\Closure\INode;
 use \Storm\Core\Object;

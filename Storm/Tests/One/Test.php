@@ -34,12 +34,12 @@ class Test implements \StormTests\IStormTest {
     }
     
     public function GetStorm() {     
-        return new Storm(new Mapping\BloggingDomainDatabaseMap());
-        /*return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
+        //return new Storm(new Mapping\BloggingDomainDatabaseMap());
+        return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
                 self::GetPlatform(),
                 function () {
                     return new Storm(new Mapping\BloggingDomainDatabaseMap());
-                });*/
+                });
     }
 
     const Id = 39;
@@ -53,7 +53,7 @@ class Test implements \StormTests\IStormTest {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
-        $Action = self::Retreive;
+        $Action = self::Operation;
         $Amount = 1;
 
         $Last;
@@ -92,28 +92,28 @@ class Test implements \StormTests\IStormTest {
                 
                
             $RevivedBlog = $BlogRepository->Load($BlogRepository->Request()
-                        ->Where(function ($Blog) use($Id, $Outside) {
-                            $Foo = $Id;
-                            $Sandy = 40;
-                            $Sandy += $Id;
+                    ->Where(function ($Blog) use($Id, $Outside) {
+                        $Foo = $Id;
+                        $Sandy = 40;
+                        $Sandy += $Id;
 
-                            $ADate = new \DateTime();
+                        $ADate = new \DateTime();
 
-                            $Awaited = $ADate->add(new \DateInterval('P2Y1DT15M')) > new \DateTime() || 
-                                    acos(atan(tan(sin(pi()))));
+                        $Awaited = $ADate->add(new \DateInterval('P2Y1DT15M')) > new \DateTime() || 
+                                acos(atan(tan(sin(pi()))));
 
-                            $True = null === null && null !== false || false !== true && in_array(1, [1,2,3,4,5,6]);
+                        $True = null === null && null !== false || false !== true && in_array(1, [1,2,3,4,5,6]);
 
-                            $Possibly = $Foo . 'Hello' <> ';' || $Sandy == time() && $Outside->getTimestamp() > (time() - 3601);
+                        $Possibly = $Foo . 'Hello' <> ';' || $Sandy == time() && $Outside->getTimestamp() > (time() - 3601);
 
-                            $Maybe = $Blog->Description != 45 || (~3 - 231 * 77) . $Blog->Name == 'Sandwich' && $True || $Awaited;
+                        $Maybe = $Blog->Description != 45 || (~3 - 231 * 77) . $Blog->Name == 'Sandwich' && $True || $Awaited;
 
-                            return $Foo === $Blog->Id && (true || mt_rand(1, 10) > 10 || $Blog->Id === $Foo  || $Blog->CreatedDate < new \DateTime() && $Maybe || $Possibly);
-                        })
-                        ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
-                        ->OrderByDescending(function ($Blog) { return $Blog->Id; })
-                        ->GroupBy(function ($Blog) { return $Blog->Id; })
-                        ->First());
+                        return $Foo === $Blog->Id && (true || mt_rand(1, 10) > 10 || $Blog->Id === $Foo  || $Blog->CreatedDate < new \DateTime() && $Maybe || $Possibly);
+                    })
+                    ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
+                    ->OrderByDescending(function ($Blog) { return $Blog->Id; })
+                    ->GroupBy(function ($Blog) { return $Blog->Id; })
+                    ->First());
                         
             //$RevivedBlog = $BlogRepository->LoadById($Id);
             if(extension_loaded('xdebug')) {
@@ -125,8 +125,6 @@ class Test implements \StormTests\IStormTest {
             return null;
             
         } else if ($Action === self::Operation) {
-            $BlogMap = $BloggingStorm->GetDomainDatabaseMap()->GetDomain()->GetEntityMap(Entities\Blog::GetType());
-            
             $Procedure = $BlogRepository->Procedure(function ($Blog) {
                         $Blog->Description = md5(new \DateTime());
                         $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?

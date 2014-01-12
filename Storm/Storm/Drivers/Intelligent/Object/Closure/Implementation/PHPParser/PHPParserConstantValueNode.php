@@ -1,16 +1,15 @@
 <?php
 
-namespace Storm\Drivers\Intelligent\Object\Pinq\Closure\Implementation\PHPParser;
+namespace Storm\Drivers\Intelligent\Object\Closure\Implementation\PHPParser;
 
-
-class PHPParserConstantValueNode extends \PHPParser_NodeAbstract {
+class PHPParserConstantValueNode extends \PHPParser_Node_Expr {
     
     public function __construct($Value) {
         parent::__construct(
-                array(), 
-                [
+                array(
                     'Value' => $Value
-                ]);
+                ), 
+                array());
     }
 }
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Storm\Drivers\Intelligent\Object\Pinq\Closure\Implementation\PHPParser\Visitors;
+namespace Storm\Drivers\Intelligent\Object\Closure\Implementation\PHPParser\Visitors;
 
-use \Storm\Drivers\Intelligent\Object\Pinq\Closure\Implementation\PHPParser\PHPParserConstantValueNode;
+use \Storm\Drivers\Intelligent\Object\Closure\Implementation\PHPParser\PHPParserConstantValueNode;
 use \Storm\Drivers\Intelligent\Object\Properties\Accessors;
 
 class AccessorBuilderVisitor extends \PHPParser_NodeVisitorAbstract {

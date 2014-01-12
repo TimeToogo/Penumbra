@@ -3,10 +3,11 @@
 namespace Storm\Api\Caching;
 
 use \Storm\Api\Wrapper;
+use \Storm\Api\Base;
 use \Storm\Utilities\Cache;
 use \Storm\Drivers\Base\Relational\IPlatform;
 
-class Storm extends Wrapper\Storm {
+class Storm extends Base\Storm {
     const StormInstanceKey = 'Storm';
     private $Cache;
     private $EntityExpirySeconds;
@@ -28,15 +29,17 @@ class Storm extends Wrapper\Storm {
         
         $Storm->GetDomainDatabaseMap()->GetDatabase()->SetPlatform($Platform);
         
-        parent::__construct($Storm);
+        parent::__construct($Storm->GetDomainDatabaseMap());
     }
     
     protected function ConstructRepository($EntityType, $AutoSave = false) {
         return new Repository(
+                $this->GetDomainDatabaseMap(),
+                $EntityType, 
+                $AutoSave,
                 $this->Cache,
-                new Cache\BasicArrayCache(),
-                $this->EntityExpirySeconds,
-                parent::ConstructRepository($EntityType, $AutoSave));
+                new Cache\DevelopmentCache(),
+                $this->EntityExpirySeconds);
     }
 }
 
