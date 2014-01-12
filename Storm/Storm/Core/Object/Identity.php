@@ -15,9 +15,8 @@ final class Identity extends PropertyData {
     
     public function Hash() {
         $PropertyData = $this->GetPropertyData();
-        $AllData = array_merge([$this->GetEntityType()], array_keys($PropertyData), array_values($PropertyData));
-        
-        return md5(implode(' ', $AllData));
+        ksort($PropertyData);
+        return md5(json_encode($PropertyData));
     }
 }
 

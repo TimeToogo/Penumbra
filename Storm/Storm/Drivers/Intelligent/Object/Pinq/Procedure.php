@@ -3,59 +3,33 @@
 namespace Storm\Drivers\Intelligent\Object\Pinq;
 
 use \Storm\Drivers\Base\Object;
-use \Storm\Drivers\Constant\Object\EntityMap;
-use \Storm\Drivers\Intelligent\Object\Pinq\Closure\Reader;
-use \Storm\Drivers\Intelligent\Object\Code\Parsing\Parser;
+use \Storm\Core\Object\Expressions\AssignmentExpression;
+use \Storm\Drivers\Intelligent\Object\Closure;
 
 
 class Procedure extends Object\Procedure {
-    private $EntityMap;
-    
-    public function __construct(EntityMap $EntityMap, \Closure $ProcedureClosure) {
-        $AssignmentExpressions = $this->ParseAssignmentExpressions($EntityMap, $ProcedureClosure);
+    public function __construct(
+            Closure\IAST $AST,
+            \Storm\Core\Object\ICriterion $Criterion = null) {
         
-        parent::__construct($EntityMap->GetEntityType(), $AssignmentExpressions, new Criterion($EntityMap));
+        $EntityType = $AST->GetEntityMap()->GetEntityType();
         
-        $this->EntityMap = $EntityMap;
+        parent::__construct(
+                $EntityType->GetEntityType(), 
+                $this->ParseAssignmentExpressions($AST), 
+                $Criterion ?: new Criterion($EntityType));
     }  
     
-    private function ParseAssignmentExpressions(EntityMap $EntityMap, \Closure $Closure) {
-        $ClosureReader = new Reader($Closure);
-        $Parameters = $ClosureReader->GetParameters();
-        if(count($Parameters) !== 1) {
-            throw new \Exception();
-        }
+    private function ParseAssignmentExpressions(Closure\IAST $AST) {
+        $Expressions = $AST->ParseNodes();
         
-        
-        $EntityVariableName = $Parameters[0]->getName();
-        $UsedVariableMap = $ClosureReader->GetUsedVariablesMap();
-        
-        $CodeParser = new Parser();
-        $BodyAST = $CodeParser->Parse($ClosureReader->GetBodySource(), $UsedVariableMap);
-        
-        //$Printer = new \PHPParser_PrettyPrinter_Default();
-        //echo $Printer->prettyPrint($BodyAST);
-        
-        $AssignmentExpressions = array();
-        foreach ($BodyAST as $StatementNode) {
-            if(strpos($StatementNode->getType(), 'Expr_Assign') === 0) {
-                
-                $AssignmentExpression = $CodeParser->ParseExpressionNode($EntityMap, $EntityVariableName, true, $StatementNode);
-                
-                if($AssignmentExpression->GetLeftOperandExpression() instanceof \Storm\Core\Object\Expressions\PropertyExpression) {
-                    $AssignmentExpressions[] = $AssignmentExpression;
-                }
+        foreach ($Expressions as $Key => $Expression) {
+            if(!($Expression instanceof AssignmentExpression)) {
+                unset($Expressions[$Key]);
             }
         }
         
-        return $AssignmentExpressions;
-    }
-    
-    /**
-     * @return Criterion
-     */
-    public function GetCriterion() {
-        return parent::GetCriterion();
+        return $Expressions;
     }
 }
 

@@ -8,8 +8,8 @@ class Request {
     private $Criterion;
     
     public function __construct(array $Columns, Criterion $Criterion = null) {
-        $this->AddColumns($Columns);
         $this->Criterion = $Criterion ?: new Criterion();
+        $this->AddColumns($Columns);
     }
     
     final public function AddColumn(IColumn $Column) {
@@ -30,6 +30,7 @@ class Request {
     
     final public function AddTable(Table $Table) {
         $this->Tables[$Table->GetName()] = $Table;
+        $this->Criterion->AddTable($Table);
     }
     
     final public function AddTables(array $Tables) {
@@ -48,10 +49,6 @@ class Request {
      */
     final public function GetCriterion() {
         return $this->Criterion;
-    }
-    
-    final public function SetCriterion(Criterion $Criterion) {
-        $this->Criterion = $Criterion;
     }
 }
 

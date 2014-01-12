@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
-class InvocationBase {
+class InvocationBase extends FunctionBase {
     protected $ConstantArguments;
     /**
      *
@@ -14,7 +14,7 @@ class InvocationBase {
     }
 
     final public function Identifier(&$Identifier) {
-        $Identifier .= $this->Reflection->getFileName() . $this->Reflection->getStartLine() . $this->Reflection->getEndLine();
+        $Identifier .= $this->Format('__invoke', $this->ConstantArguments);
     }
 
     final public function SetEntityType($EntityType) {

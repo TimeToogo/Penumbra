@@ -13,23 +13,27 @@ abstract class CriterionCompiler implements ICriterionCompiler {
     
     final public function AppendCriterion(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
         if($Criterion->IsConstrained()) {
-            $this->AppendPredicates($QueryBuilder, $Criterion->GetPredicateExpressions());
+            $this->AppendPredicateExpressions($QueryBuilder, $Criterion->GetPredicateExpressions());
         }
+        
+        if($Criterion->IsGrouped()) {
+            $this->AppendGroupByExpressions($QueryBuilder, $Criterion->GetGroupByExpressions());
+        }
+        
         if($Criterion->IsOrdered()) {
-            $this->AppendOrderedExpressions($QueryBuilder, $Criterion->GetOrderedExpressionsAscendingMap());
+            $this->AppendOrderByExpressions($QueryBuilder, $Criterion->GetOrderedExpressionsAscendingMap());
         }
+        
         if($Criterion->IsRanged()) {
             $this->AppendRange($QueryBuilder, $Criterion->GetRangeOffset(), $Criterion->GetRangeAmount());
         }
     }
     
-    protected abstract function AppendPredicates(QueryBuilder $QueryBuilder, array $Predicates);
+    protected abstract function AppendPredicateExpressions(QueryBuilder $QueryBuilder, array $PredicateExpressions);
     
-    final protected function AppendPredicate(QueryBuilder $QueryBuilder, Predicate $Predicate) {
-        $QueryBuilder->AppendPredicate($Predicate);
-    }
+    protected abstract function AppendGroupByExpressions(QueryBuilder $QueryBuilder, array $Expressions);
     
-    protected abstract function AppendOrderedExpressions(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap);
+    protected abstract function AppendOrderByExpressions(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap);
     
     protected abstract function AppendRange(QueryBuilder $QueryBuilder, $Offset, $Limit);
 }

@@ -20,14 +20,18 @@ class Request implements Object\IRequest {
             $IsSingleEntity, 
             Object\ICriterion $Criterion = null) {
         
-        if(is_object($EntityOrType))
+        if(is_object($EntityOrType)) {
             $EntityOrType = get_class($EntityOrType);
+        }
         $this->EntityType = $EntityOrType;
         foreach($Properties as $Property) {
             $this->AddProperty($Property);
         }
         $this->IsSingleEntity = $IsSingleEntity;
-        $this->Criterion = $Criterion ?: new Criterion();
+        $this->Criterion = $Criterion ?: new Criterion($this->EntityType);
+        if($this->Criterion->GetEntityType() !== $this->EntityType) {
+            throw new \Exception();
+        }
     }
     
     private function AddProperty(Object\IProperty $Property) {

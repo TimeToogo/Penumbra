@@ -33,12 +33,13 @@ class Test implements \StormTests\IStormTest {
         }
     }
     
-    public function GetStorm() {        
-        return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
+    public function GetStorm() {     
+        return new Storm(new Mapping\BloggingDomainDatabaseMap());
+        /*return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
                 self::GetPlatform(),
                 function () {
                     return new Storm(new Mapping\BloggingDomainDatabaseMap());
-                });
+                });*/
     }
 
     const Id = 39;
@@ -47,7 +48,6 @@ class Test implements \StormTests\IStormTest {
     const Retreive = 1;
     const Discard = 2;
     const Operation = 3;
-    const Serialize = 4;
 
     public function Run(Storm $BloggingStorm) {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
@@ -87,71 +87,60 @@ class Test implements \StormTests\IStormTest {
 
             $BlogRepository->Discard($Request);
         } else if ($Action === self::Retreive) {
-            $BlogMap = $BloggingStorm->GetDomainDatabaseMap()->GetDomain()->GetEntityMap(Entities\Blog::GetType());
+            $Outside = new \DateTime();
+            $Outside->sub(new \DateInterval('P1D'));
+                
+               
+            $RevivedBlog = $BlogRepository->Load($BlogRepository->Request()
+                        ->Where(function ($Blog) use($Id, $Outside) {
+                            $Foo = $Id;
+                            $Sandy = 40;
+                            $Sandy += $Id;
 
-            static $Request = null;
-            if ($Request === null) {
-                $Request = new Pinq\Request($BlogMap, null, true);
-                $Outside = new \DateTime();
-                $Outside->sub(new \DateInterval('P1D'));
-                
-                
-                $Request->GetCriterion()->Where(function ($Blog) use($Id, $Outside) {
-                    $Foo = $Id;
-                    $Sandy = 40;
-                    $Sandy += $Id;
-                    
-                    $ADate = new \DateTime();
-                    
-                    $Awaited = $ADate->add(new \DateInterval('P2Y1DT15M')) > new \DateTime();
-                    
-                    $True = null === null && null !== false || false !== true && in_array(1, [1,2,3,4,5,6]);
-                    
-                    $Possibly = $Foo . 'Hello' <> ';' || $Sandy == time() && $Outside->getTimestamp() > (time() - 3601);
-                    
-                    $Maybe = $Blog->Description != 45 || (~3 - 231 * 77) . $Blog->Name == 'Sandwich' && $True || $Awaited;
-                    
-                    return $Foo === $Blog->Id && ($Blog->Id === $Foo  || $Blog->CreatedDate->getTimestamp() < new \DateTime() && $Maybe || $Possibly);
-                })
-                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
-                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
-                ;//->Limit(10)->Skip(5);
-            }
-            
-            
-            $Identity = $BlogMap->Identity();
-            $Identity->SetProperty($BlogMap->Id, $Id);
-            
-            $RevivedBlog = $BlogRepository->Load($Request);
+                            $ADate = new \DateTime();
+
+                            $Awaited = $ADate->add(new \DateInterval('P2Y1DT15M')) > new \DateTime() || 
+                                    acos(atan(tan(sin(pi()))));
+
+                            $True = null === null && null !== false || false !== true && in_array(1, [1,2,3,4,5,6]);
+
+                            $Possibly = $Foo . 'Hello' <> ';' || $Sandy == time() && $Outside->getTimestamp() > (time() - 3601);
+
+                            $Maybe = $Blog->Description != 45 || (~3 - 231 * 77) . $Blog->Name == 'Sandwich' && $True || $Awaited;
+
+                            return $Foo === $Blog->Id && (true || mt_rand(1, 10) > 10 || $Blog->Id === $Foo  || $Blog->CreatedDate < new \DateTime() && $Maybe || $Possibly);
+                        })
+                        ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
+                        ->OrderByDescending(function ($Blog) { return $Blog->Id; })
+                        ->GroupBy(function ($Blog) { return $Blog->Id; })
+                        ->First());
+                        
+            //$RevivedBlog = $BlogRepository->LoadById($Id);
             if(extension_loaded('xdebug')) {
                 var_dump($RevivedBlog);
             }
-            ($RevivedBlog->Posts[0]->Tags->ToArray());
-            ($RevivedBlog->Posts[1]->Tags->ToArray());
+            $RevivedBlog->Posts[0]->Tags->ToArray();
+            $RevivedBlog->Posts[1]->Tags->ToArray();
             
             return null;
             
         } else if ($Action === self::Operation) {
             $BlogMap = $BloggingStorm->GetDomainDatabaseMap()->GetDomain()->GetEntityMap(Entities\Blog::GetType());
             
-            $Procedure = new Pinq\Procedure($BlogMap, function ($Blog) {
-                $Blog->Description = md5(new \DateTime());
-                $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?
-                        'Foobar' . (string)$Blog->CreatedDate : $Blog->Name . 'Hi';
-                $Blog->CreatedDate = (new \DateTime())->diff($Blog->CreatedDate, true);
-            });
-            $Procedure->GetCriterion()->Where(function ($Blog) use ($Id) {
-                return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
-            });
+            $Procedure = $BlogRepository->Procedure(function ($Blog) {
+                        $Blog->Description = md5(new \DateTime());
+                        $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?
+                                'Foobar' . (string)$Blog->CreatedDate : $Blog->Name . 'Hi';
+                        $Blog->CreatedDate = (new \DateTime())->diff($Blog->CreatedDate, true);
+                    })
+                    ->Where(function ($Blog) use ($Id) {
+                        return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
+                    }); 
             
             $BlogRepository->Execute($Procedure);
             
             $BlogRepository->SaveChanges();
             
-        } else if ($Action === self::Serialize) {
-            $Serialized = serialize($BloggingStorm);
-            $Foo = unserialize($Serialized);
-            return $Foo;
         }
     }
 

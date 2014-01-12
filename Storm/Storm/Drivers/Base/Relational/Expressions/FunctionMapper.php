@@ -29,7 +29,7 @@ abstract class FunctionMapper implements IFunctionMapper {
                 $this->FunctionCall($MappedName, $ArgumentExpressions) : $OverrideExpression;
     }
     
-    final protected function FunctionCall($MappedName, array $ArgumentExpressions) {
+    final protected function FunctionCall($MappedName, array $ArgumentExpressions = array()) {
         return new FunctionCallExpression($MappedName, new ValueListExpression($ArgumentExpressions));
     }
     

@@ -25,16 +25,18 @@ abstract class QueryExecutor implements IQueryExecutor {
         try {
             $Connection->BeginTransaction();
             
-            $GroupedDiscardedRequests = $this->GroupByTableName($Transaction->GetDiscardedRequests());
             $GroupedDiscardedPrimaryKeys = $this->GroupByTableName($Transaction->GetDiscardedPrimaryKeys());
+            
             foreach($TablesOrderedByDiscardingDependency as $Table) {
                 $TableName = $Table->GetName();
-                if(isset($GroupedDiscardedRequests[$TableName])) {
-                    $this->DeleteWhereQuery($Connection, $Table, $GroupedDiscardedRequests[$TableName]);
-                }
+                
                 if(isset($GroupedDiscardedPrimaryKeys[$TableName])) {
                     $this->DeleteRowsByPrimaryKeysQuery($Connection, $Table, $GroupedDiscardedPrimaryKeys[$TableName]);
                 }
+            }
+            
+            foreach($Transaction->GetDiscardedCriteria() as $Criterion) {
+                $this->DeleteWhereQuery($Connection, $Criterion);
             }
             
             foreach($Transaction->GetProcedures() as $Procedure) {
@@ -46,19 +48,21 @@ abstract class QueryExecutor implements IQueryExecutor {
                 $TableName = $Table->GetName();
                 if(isset($GroupedPersistedRows[$TableName])) {
                     $Transaction->TriggerPrePersistEvent($GroupedPersistedRows[$TableName]);
+                    
                     $this->PersistRows($Connection, $Transaction, $Table, $GroupedPersistedRows[$TableName]);
+                    
                     $Transaction->TriggerPostPersistEvent($GroupedPersistedRows[$TableName]);
                 }
             }
             
             $Connection->CommitTransaction();
         }
-        catch (Exception $Exception) {
+        catch (\Exception $Exception) {
             $Connection->RollbackTransaction();
             throw $Exception;
         }
     }
-    protected abstract function DeleteWhereQuery(IConnection $Connection, Table $Table, array &$DiscardedRequests);
+    protected abstract function DeleteWhereQuery(IConnection $Connection, Table $Table, array &$DiscardedCriteria);
     protected abstract function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys);
     protected abstract function ExecuteUpdate(IConnection $Connection, Relational\Procedure &$ProcedureToExecute);
     private function PersistRows(IConnection $Connection, Relational\Transaction $Transaction, 

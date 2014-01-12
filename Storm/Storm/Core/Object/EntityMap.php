@@ -221,8 +221,8 @@ abstract class EntityMap implements \IteratorAggregate {
         $this->Apply($Domain, $Entity, $RevivalData);
     }
     
-    final public function DiscardWhere(UnitOfWork $UnitOfWork, IRequest $Request) {
-        $UnitOfWork->DiscardWhere($Request);
+    final public function DiscardWhere(UnitOfWork $UnitOfWork, ICriterion $Criterion) {
+        $UnitOfWork->DiscardWhere($Criterion);
     }
     
     final public function GetEntityType() {

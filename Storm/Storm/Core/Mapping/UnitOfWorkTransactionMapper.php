@@ -32,7 +32,7 @@ final class UnitOfWorkTransactionMapper {
             $EntityRelationalMap = $this->EntityRelationMaps[$EntityType];
             $ResultRows = $this->MapEntityDataToTransaction($Transaction, $EntityRelationalMap, $DiscardedIdentityGroup);
         }
-        foreach($UnitOfWork->GetDiscardedRequests() as $DiscardedRequest) {
+        foreach($UnitOfWork->GetDiscardedCriteria() as $DiscardedRequest) {
             $Transaction->DiscardWhere($this->MapRequest($DiscardedRequest));
         }
     }

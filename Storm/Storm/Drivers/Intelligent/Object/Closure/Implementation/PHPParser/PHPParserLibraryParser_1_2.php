@@ -1,32 +1,36 @@
 <?php
 
-namespace Storm\Drivers\Intelligent\Object\Code\Parsing;
+namespace Storm\Drivers\Intelligent\Object\Pinq\Closure\Implementation\PHPParser;
 
-require __DIR__ . '/PHPParser/bootstrap.php';
+require __DIR__ . '/Library/bootstrap.php';
 
+use \Storm\Drivers\Intelligent\Object\Closure\IParser;
 use \Storm\Core\Object;
 use \Storm\Core\Object\Expressions\Expression;
 use \Storm\Core\Object\Expressions\Operators;
 
-/*
- * TODO: Refactor (I wrote this while I jet lagged)
- */
-class Parser {
-    private $PHPParser;
+class PHPParserLibraryParser implements IParser {
+    private static $PHPParser;
     private $ValueMetadataResolverVisitor;
     private $ValueMetadataNodeTraverser;
 
     public function __construct() {
-        $this->PHPParser = new \PHPParser_Parser(new \PHPParser_Lexer());
+        if(self::$PHPParser === null) {
+            $this->PHPParser = new \PHPParser_Parser(new \PHPParser_Lexer());
+        }
         $this->ValueMetadataResolverVisitor = new ValueMetadataResolverVisitor();
         $this->ValueMetadataNodeTraverser = new \PHPParser_NodeTraverser();
         $this->ValueMetadataNodeTraverser->addVisitor($this->ValueMetadataResolverVisitor);
     }
     
+    public function Parse($ClosureBodySource) {
+        return $this->PHPParser->parse('<?php ' . $ClosureBodySource . ' ?>');
+    }
+    
     /**
      * @return \PHPParser_Node[]
      */
-    public function Parse($PHPCode, array $VariableValueMap) {
+    public function Psarse($PHPCode, array $VariableValueMap) {
         $Nodes = $this->PHPParser->parse('<?php ' . $PHPCode . ' ?>');
         
         $this->ValueMetadataResolverVisitor->SetVariableValueMap($VariableValueMap);
@@ -86,7 +90,7 @@ class Parser {
 
     private function VerifyNameNode(\PHPParser_Node $Node) {
         if(!($Node instanceof \PHPParser_Node_Name)) {
-            throw new \Exception();
+            throw new \Exception('Dynamic function calls, method calls, property accessing... are not supported');
         }
         
         return $Node->toString();
@@ -111,7 +115,11 @@ class Parser {
                 while(isset($NestedNode->var)) {
                     if($NestedNode->var instanceof \PHPParser_Node_Expr_Variable 
                             && $NestedNode->var->name === $EntityVariableName) {
-                        return $this->ParsePropertyNode($EntityMap, $EntityVariableName, $PropertiesAreGetters, $Node);
+                        
+                        $PropertyExpression = $this->ParsePropertyNode($EntityMap, $EntityVariableName, $PropertiesAreGetters, $Node);
+                        if($PropertyExpression !== null) {
+                            return $PropertyExpression;
+                        }
                     }
                     $NestedNode = $NestedNode->var;
                 }
@@ -212,6 +220,9 @@ class Parser {
         $Accessor = $AccessorBuilderVisitor->GetAccessor();
         $Identifier = $IsGetter ? 
                 $Accessor->GetGetterIdentifier() : $Accessor->GetSetterIdentifier();
+        
+        $PropertyExpression = null;
+        
         foreach($Properties as $Property) {
             if($Property instanceof \Storm\Drivers\Base\Object\Properties\Property) {
                 $OtherAccessor = $Property->GetAccessor();
@@ -219,27 +230,15 @@ class Parser {
                         $OtherAccessor->GetGetterIdentifier() : $OtherAccessor->GetSetterIdentifier();
                 
                 if($Identifier === $OtherIdentifier) {
-                    return Expression::Property($Property);
+                    $PropertyExpression = Expression::Property($Property);
+                    break;
                 }
             }
         }
-        throw new \Exception();
+        
+        return $PropertyExpression;
     }
     
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Scalar node parsers">
-    private function ParseScalarNode(\PHPParser_Node_Scalar $Node) {
-        switch (true) {
-            case $Node instanceof \PHPParser_Node_Scalar_DNumber:
-            case $Node instanceof \PHPParser_Node_Scalar_LNumber:
-            case $Node instanceof \PHPParser_Node_Scalar_String:
-                return Expression::Constant($Node->value);
-                
-            default:
-                throw new \Exception();
-        }
-    }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Expression node maps">
@@ -254,12 +253,9 @@ class Parser {
     ];
 
     private function ParseUnaryOperationNode(\PHPParser_Node_Expr $Node, $NodeTypeName) {
-        $OperatorInfo = self::$UnaryOperatorsMap[$NodeTypeName];
-        $Operator = is_array($OperatorInfo) ? $OperatorInfo[0] : $OperatorInfo;
-        $NodeFieldName = is_array($OperatorInfo) ? $OperatorInfo[1] : 'expr';
         return Expression::UnaryOperation(
-                $this->ParseNode($Node->$NodeFieldName), 
-                $Operator, 
+                $this->ParseNode($Node->expr), 
+                self::$UnaryOperatorsMap[$NodeTypeName], 
                 $this->ParseNode($Node->right));
     }
 
@@ -308,7 +304,7 @@ class Parser {
 
     private function ParseBinaryOperationNode(\PHPParser_Node_Expr $Node, $NodeTypeName) {
         return Expression::BinaryOperation(
-                        $this->ParseNode($Node->left), 
+                $this->ParseNode($Node->left), 
                 self::$BinaryOperatorsMap[$NodeTypeName], 
                 $this->ParseNode($Node->right));
     }

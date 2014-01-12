@@ -33,8 +33,22 @@ final class FunctionMapper extends E\FunctionMapper {
             'floor' => 'FLOOR',
             'sqrt' => 'SQRT',
             'base_convert' => 'CONV',
+            'deg2rad' => 'RADIANS',
+            'rad2deg' => 'DEGREES',
+            'rad2deg' => 'DEGREES',
+            'acos' => 'ACOS',
+            'asin' => 'ASIN',
+            'atan' => 'ATAN',
+            'atan2' => 'ATAN2',
+            'cos' => 'COS',
+            'log' => 'LOG',
+            'log10' => 'LOG10',
+            'fmod' => 'MOD',
+            'sin' => 'SIN',
+            'tan' => 'TAN',
             
             'crc32' => 'CRC32',
+            'crypt' => 'ENCRYPT',
         ];
     }
     
@@ -195,10 +209,76 @@ final class FunctionMapper extends E\FunctionMapper {
         
         return $this->RawOutput($MappedName, $ArgumentExpressions, 1);
     }
+    
+    
+    public function ParseMcryptArguments(array &$ArgumentExpressions) {
+        if(!($ArgumentExpressions[0] instanceof EE\ConstantExpression)) {
+            throw new \Exception('Cipher algorithm must be constant');
+        }
+        
+        if(!($ArgumentExpressions[3] instanceof EE\ConstantExpression)) {
+            throw new \Exception('Cipher mode must be constant');
+        }
+        
+        if(isset($ArgumentExpressions[4])) {
+            throw new \Exception('Mysql does not support a custom IV');
+        }
+        
+        $Algorithm = $ArgumentExpressions[0]->GetValue();
+        $Mode = $ArgumentExpressions[3]->GetValue();
+        
+        if($Mode !== MCRYPT_MODE_ECB) {
+            throw new \Exception('Mysql only support ECB cipher mode');
+        }
+        
+        unset($ArgumentExpressions[0]);
+        unset($ArgumentExpressions[3]);
+        //Flip key/data order
+        $ArgumentExpressions = array_reverse($ArgumentExpressions);
+        
+        return [$Algorithm, $Mode];
+    }
+    
+    private static $EncryptCipherAlgorithms = [
+        MCRYPT_RIJNDAEL_128 => 'AES_ENCRYPT',
+        MCRYPT_TRIPLEDES => 'DES_ENCRYPT',
+    ];
+    private static $DecryptCipherAlgorithms = [
+        MCRYPT_RIJNDAEL_128 => 'AES_DECRYPT',
+        MCRYPT_TRIPLEDES => 'DES_DECRYPT',
+    ];
+    public function mcrypt_encrypt(&$MappedName, array &$ArgumentExpressions) {
+        list($Algorithm, $Mode) = $this->ParseMcryptArguments($ArgumentExpressions);
+        
+        if(isset(self::$EncryptCipherAlgorithms[$Algorithm])) {
+            $MappedName = self::$EncryptCipherAlgorithms[$Algorithm];
+        }
+        else {
+            throw new \Exception('Unsupported cipher algorithm');
+        }
+    }
+    
+    public function mcrypt_decrypt(&$MappedName, array &$ArgumentExpressions) {
+        list($Algorithm, $Mode) = $this->ParseMcryptArguments($ArgumentExpressions);
+        
+        if(isset(self::$DecryptCipherAlgorithms[$Algorithm])) {
+            $MappedName = self::$DecryptCipherAlgorithms[$Algorithm];
+        }
+        else {
+            throw new \Exception('Unsupported cipher algorithm');
+        }
+    }
 
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Numeric functions">
+    
+    public function pi(&$MappedName, array &$ArgumentExpressions) {
+        return Expression::BinaryOperation(
+                $this->FunctionCall('PI'), 
+                O\Binary::Addition, 
+                Expression::Keyword('0.0000000000000'));
+    }
     
     public function round(&$MappedName, array &$ArgumentExpressions) {
         $MappedName = 'ROUND';
@@ -208,12 +288,15 @@ final class FunctionMapper extends E\FunctionMapper {
     }
     
     private function RandomInt(CoreExpression $Minimum, CoreExpression $Maximum) {
-        $DifferenceExpression = new E\BinaryOperationExpression(
+        //Add one due to flooring the random value
+        $Maximum = $this->Add($Maximum, 1);
+                
+        $DifferenceExpression = Expression::BinaryOperation(
                 $Maximum, 
                 O\Binary::Subtraction, 
                 $Minimum);
 
-        return $this->MapFunctionCallExpression('round', 
+        return $this->MapFunctionCallExpression('floor', 
                 [Expression::BinaryOperation(
                         $Minimum, 
                         O\Binary::Addition, 

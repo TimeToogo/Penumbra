@@ -7,20 +7,23 @@ use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
 class CriterionCompiler extends Queries\CriterionCompiler {
-    protected function AppendPredicates(QueryBuilder $QueryBuilder, array $Predicates) {
+    
+    protected function AppendPredicateExpressions(QueryBuilder $QueryBuilder, array $PredicateExpressions) {
         $QueryBuilder->Append('(');
-        $First = true;
-        foreach($Predicates as $Predicate) {
-            if($First) $First = false;
-            else
-                $QueryBuilder->Append (' AND ');
-            
-            $QueryBuilder->AppendExpression($Predicate);
+        foreach($QueryBuilder->Iterate($PredicateExpressions, ' AND ') as $PredicateExpression) {
+            $QueryBuilder->AppendExpression($PredicateExpression);
         }
         $QueryBuilder->Append(')');
     }
+    
+    protected function AppendGroupByExpressions(QueryBuilder $QueryBuilder, array $Expressions) {
+        $QueryBuilder->Append(' GROUP BY ');
+        foreach($QueryBuilder->Iterate($Expressions, ', ') as $Expression) {            
+            $QueryBuilder->AppendExpression($Expression);
+        }
+    }
 
-    protected function AppendOrderedExpressions(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap) {
+    protected function AppendOrderByExpressions(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap) {
         $QueryBuilder->Append(' ORDER BY ');
         foreach($QueryBuilder->Iterate($ExpressionAscendingMap, ', ') as $Expression) {
             $Ascending = $ExpressionAscendingMap[$Expression];
@@ -48,7 +51,6 @@ class CriterionCompiler extends Queries\CriterionCompiler {
         $QueryBuilder->Append(' ');
         $QueryBuilder->AppendValue('OFFSET #', $Offset, Queries\ParameterType::Integer);
     }
-
 }
 
 ?>

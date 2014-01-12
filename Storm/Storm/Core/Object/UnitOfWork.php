@@ -13,7 +13,7 @@ final class UnitOfWork {
     private $Procedures = array();
     private $DiscardenceData = array();
     private $DiscardedIdentityGroups = array();
-    private $DiscardedRequests = array();
+    private $DiscardedCriteria = array();
     
     public function __construct(Domain $Domain) {
         $this->PersistenceDataEntityMap = new \Storm\Core\Containers\Map();
@@ -88,8 +88,8 @@ final class UnitOfWork {
         return $DiscardenceData;
     }
     
-    public function DiscardWhere(IRequest $Request) {
-        $this->DiscardedRequests[spl_object_hash($Request)] = $Request;
+    public function DiscardWhere(ICriterion $Criterion) {
+        $this->DiscardedCriteria[spl_object_hash($Criterion)] = $Criterion;
     }
     
     /**
@@ -128,10 +128,10 @@ final class UnitOfWork {
     }
     
     /**
-     * @return IRequest[]
+     * @return ICriterion[]
      */
-    public function GetDiscardedRequests() {
-        return $this->DiscardedRequests;
+    public function GetDiscardedCriteria() {
+        return $this->DiscardedCriteria;
     }
 }
 

@@ -5,6 +5,8 @@ namespace Storm\Core\Object;
 interface ICriterion {
     const ICriterionType = __CLASS__;
     
+    public function GetEntityType();
+    
     public function IsConstrained();
     /**
      * @return Expressions\Expression[]
@@ -15,7 +17,13 @@ interface ICriterion {
     /**
      * @return \SplObjectStorage
      */
-    public function GetOrderExpressionsAscendingMap();
+    public function GetOrderByExpressionsAscendingMap();
+    
+    public function IsGrouped();
+    /**
+     * @return Expressions\Expression[]
+     */
+    public function GetGroupByExpressions();
     
     public function IsRanged();
     public function GetRangeOffset();

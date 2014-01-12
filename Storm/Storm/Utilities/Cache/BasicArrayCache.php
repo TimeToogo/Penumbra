@@ -2,7 +2,7 @@
 
 namespace Storm\Utilities\Cache;
 
-class NoCache implements ICache {
+class BasicArrayCache implements ICache {
     private $Cache = array();
     const ValueKey = 'Value';
     const ExpiryKey = 'Expiry';
@@ -25,8 +25,9 @@ class NoCache implements ICache {
     }
     
     public function Save($Key, $Value, $ExpirySeconds = false, $Overwrite = true) {
-        if(!$Overwrite && $this->Retrieve($Key) !== null)
+        if(!$Overwrite && $this->Retrieve($Key) !== null) {
             return false;
+        }
         
         $ExpiryTime = $this->GetExpiryTime($ExpirySeconds);
         $this->Cache[$Key] = [self::ValueKey => $Value, self::ExpiryKey => $ExpiryTime];

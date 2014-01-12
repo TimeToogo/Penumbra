@@ -91,8 +91,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
     
     public function Matches(ColumnData $Data) {
-        asort($this->ColumnData);
-        asort($Data->ColumnData);
+        ksort($PropertyData);
         return $this->ColumnData === $Data->ColumnData;
     }
 }

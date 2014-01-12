@@ -36,7 +36,7 @@ abstract class KeyedRelation extends Relation {
     }
 
     public function AddConstraintToRequest(Relational\Request $Request) {
-        $Request->GetCriterion()->AddPredicate($this->ForeignKey->GetConstraintPredicate());
+        $Request->GetCriterion()->AddPredicateExpression($this->ForeignKey->GetConstraintPredicate());
     }
     
     public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows) {
@@ -53,7 +53,7 @@ abstract class KeyedRelation extends Relation {
             $MatchExpressions[] = new Expressions\MatchesColumnDataExpression($ReferencedKey);
         }
         
-        $Request->GetCriterion()->AddPredicate(
+        $Request->GetCriterion()->AddPredicateExpression(
                 new Expressions\PredicateExpression($MatchExpressions, Expressions\Operators\Binary::LogicalOr));
     }
     /**

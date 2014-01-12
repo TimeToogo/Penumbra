@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
-abstract class MethodBase {
+abstract class MethodBase extends FunctionBase {
     private $MethodName;
     protected $ConstantArguments;
     /**
@@ -19,10 +19,10 @@ abstract class MethodBase {
         return $this->MethodName;
     }
     
-    public function Identifier(&$Identifier) {
-        $Identifier .= $this->MethodName;
+    final public function Identifier(&$Identifier) {
+        $Identifier .= $this->Format($this->MethodName, $this->ConstantArguments);
     }
-
+    
     public function SetEntityType($EntityType) { 
         $this->Reflection = new \ReflectionMethod($EntityType, $this->MethodName);
         $this->Reflection->setAccessible(true);

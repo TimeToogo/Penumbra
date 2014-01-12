@@ -1,8 +1,10 @@
 <?php
 
-namespace Storm\Drivers\Intelligent\Object\Pinq\Closure;
+namespace Storm\Drivers\Intelligent\Object\Pinq\Closure\Implementation;
 
-class Reader {
+use \Storm\Drivers\Intelligent\Object\Closure\IReader;
+
+class FileReader implements IReader {
     private $Closure;
     private $Reflection;
     private $Parameters;
@@ -17,10 +19,6 @@ class Reader {
         $this->Reflection = new \ReflectionFunction($Closure);
         $this->Parameters = $this->Reflection->getParameters();
         $this->UsedVariablesMap = $this->Reflection->getStaticVariables();
-        $this->SourceLines = $this->LoadSourceLines();
-        $this->Source = implode('', $this->SourceLines);
-        $this->BodySourceLines = $this->LoadBodySourceLines($this->SourceLines);
-        $this->BodySource = implode('', $this->BodySourceLines);
     }
     
     public function GetReflection() {
@@ -39,22 +37,45 @@ class Reader {
     }
     
     public function GetSourceLines() {
+        if($this->BodySource === null) {
+            $this->LoadSource();
+        }
         return $this->SourceLines;
     }
     
     public function GetSource() {
+        if($this->BodySource === null) {
+            $this->LoadSource();
+        }
         return $this->Source;
     }
     
     public function GetBodySourceLines() {
+        if($this->BodySource === null) {
+            $this->LoadSource();
+        }
         return $this->BodySourceLines;
     }
     
     public function GetBodySource() {
+        if($this->BodySource === null) {
+            $this->LoadSource();
+        }
         return $this->BodySource;
     }
     
+    private function LoadSource() {
+        $this->SourceLines = $this->LoadSourceLines();
+        $this->Source = implode('', $this->SourceLines);
+        $this->BodySourceLines = $this->LoadBodySourceLines($this->SourceLines);
+        $this->BodySource = implode('', $this->BodySourceLines);
+    }
+    
     private function LoadSourceLines() {
+        $FileName = $this->Reflection->getFileName();
+        if(!file_exists($FileName)) {
+            throw new \Exception('Cannot parse closure: Closure does not belong to a valid file');
+        }
         $SourceLines = array();
         $File = new \SplFileObject($this->Reflection->getFileName());
         $StartLine = $this->Reflection->getStartLine() - 2;

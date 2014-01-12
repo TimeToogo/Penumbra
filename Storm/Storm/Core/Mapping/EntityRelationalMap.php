@@ -174,9 +174,13 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     }
 
     final public function GetCriterion() {
-        return new Relational\Criterion();
+        $RelationalCriterion = new Relational\Criterion();
+        $RelationalCriterion->AddTables($this->GetMappedReviveTables());
+        $this->RelationalCriterion($RelationalCriterion);
+        
+        return $RelationalCriterion;
     }
-    protected function RelationalRequestConstraints(Relational\Request $RelationalRequest) { }
+    protected function RelationalCriterion(Relational\Criterion $RelationalCriterion) { }
     
     private function VerifyDataPropertyColumnMapping(IProperty $Property) {
         $PropertyIdentifier = $Property->GetIdentifier();

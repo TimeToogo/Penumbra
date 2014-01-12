@@ -124,13 +124,13 @@ abstract class DomainDatabaseMap {
             array $EntitiesToPersist,
             array $ProceduresToExecute,
             array $EntitiesToDiscard,
-            array $RequestsToDiscard) {
+            array $CriteriaToDiscard) {
         
         $UnitOfWork = $this->Domain->BuildUnitOfWork(
                 $EntitiesToPersist, 
                 $ProceduresToExecute, 
                 $EntitiesToDiscard, 
-                $RequestsToDiscard);
+                $CriteriaToDiscard);
         
         $Transaction = new Relational\Transaction();
         $this->MapUnitOfWorkToTransaction($UnitOfWork, $Transaction);
@@ -201,19 +201,30 @@ abstract class DomainDatabaseMap {
             }
         }
     }
-
+    
+    private function MapObjectCriterion(Object\ICriterion $ObjectCriterion) {
+        $EntityRelationalMap = $this->VerifyRelationalMap($ObjectCriterion->GetEntityType());
+        
+        $RelationalCriterion = $EntityRelationalMap->GetCriterion();
+        $this->MapCriterion(
+                $EntityRelationalMap, 
+                $ObjectCriterion, 
+                $RelationalCriterion);
+        
+        return $RelationalCriterion;
+    }
 
     private function MapCriterion(IEntityRelationalMap $EntityRelationalMap,
             Object\ICriterion $ObjectCriterion, Relational\Criterion $RelationalCriterion) {
         
         if ($ObjectCriterion->IsConstrained()) {
             foreach ($this->MapExpressions($EntityRelationalMap, $ObjectCriterion->GetPredicateExpressions()) as $PredicateExpression) {
-                $RelationalCriterion->AddPredicate($PredicateExpression);
+                $RelationalCriterion->AddPredicateExpression($PredicateExpression);
             }
         }
         
         if ($ObjectCriterion->IsOrdered()) {
-            $ExpressionAscendingMap = $ObjectCriterion->GetOrderExpressionsAscendingMap();
+            $ExpressionAscendingMap = $ObjectCriterion->GetOrderByExpressionsAscendingMap();
             
             foreach ($ExpressionAscendingMap as $Expression) {
                 $IsAscending = $ExpressionAscendingMap[$Expression];
@@ -221,6 +232,12 @@ abstract class DomainDatabaseMap {
                 foreach($Expressions as $Expression) {
                     $RelationalCriterion->AddOrderByExpression($Expression, $IsAscending);
                 }
+            }
+        }
+        
+        if ($ObjectCriterion->IsGrouped()) {
+            foreach ($this->MapExpressions($EntityRelationalMap, $ObjectCriterion->GetGroupByExpressions()) as $GroupByExpression) {
+                $RelationalCriterion->AddGroupByExpression($GroupByExpression);
             }
         }
         
@@ -306,8 +323,8 @@ abstract class DomainDatabaseMap {
                 $Transaction->DiscardAll($ResultRow->GetPrimaryKeys());
             }            
         }
-        foreach($UnitOfWork->GetDiscardedRequests() as $DiscardedRequest) {
-            $Transaction->DiscardWhere($this->MapRequest($DiscardedRequest));
+        foreach($UnitOfWork->GetDiscardedCriteria() as $DiscardedCriterion) {
+            $Transaction->DiscardWhere($this->MapObjectCriterion($DiscardedCriterion));
         }
     }
     
@@ -488,81 +505,6 @@ abstract class DomainDatabaseMap {
     }
 
     // </editor-fold>
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Entity Identification Helpers">
-    final public function EnsureIdentifiable(array $Entities) {
-        if(count($Entities) === 0)
-            return;
-        
-        $EntityTypes = array_unique(array_map('get_class', $Entities));
-        foreach ($EntityTypes as $EntityType) {
-            $EntitiesOfType = array_filter($Entities, 
-                    function ($Entity) use($EntityType) 
-                    {
-                        return $Entity instanceof $EntityType;
-                    });
-            
-            $EntityRelationalMap = $this->GetRelationMap($EntityType);
-            $EntityMap = $EntityRelationalMap->GetEntityMap();
-            
-            $IdentityProperties = $EntityMap->GetIdentityProperties();
-            $PrimaryKeyColumns = $EntityRelationalMap->GetAllMappedReviveColumns($IdentityProperties);
-            $Table = null;
-            foreach($PrimaryKeyColumns as $Column) {
-                if($Table === null) {
-                    $Table = $Column->GetTable();
-                }
-                else if(!$Column->GetTable()->Is($Table)) {
-                    throw new \Exception('Identity properties cannot map to columns across multiple tables');
-                }
-            }
-            
-            $UnidentifiableEntities = $this->GetUnidentifiable($EntityMap, $EntitiesOfType);
-            
-            $NewPrimaryKeys = $this->Database->GeneratePrimaryKeys($Table, count($UnidentifiableEntities));
-            
-            $NewIdentities = array_fill_keys(array_keys($NewPrimaryKeys), null);
-            array_walk($NewIdentities, 
-                    function (&$Value, $Key) use (&$EntityMap) {
-                        $Value = $EntityMap->Identity();
-                    });
-                    
-            array_walk($NewPrimaryKeys, 
-                    function ($PrimaryKey, $Key) use (&$NewIdentities, &$EntityRelationalMap) {
-                        $EntityRelationalMap->MapColumnDataToPropertyData($PrimaryKey, $NewIdentities[$Key]);
-                    });
-
-
-            $Count = 0;
-            $NewIdentities = array_values($NewIdentities);
-            foreach ($UnidentifiableEntities as $Entity) {
-                $EntityMap->Apply($Entity, $NewIdentities[$Count]);
-                $Count++;
-            }
-        }
-    
-    }
-    
-    private function GetUnidentifiable(Object\EntityMap $EntityMap, array $Entities) {
-        $UnidentifiableEntities = array();
-        foreach ($Entities as $Entity) {
-            if (!$EntityMap->HasIdentity($Entity)) {
-                $UnidentifiableEntities[] = $Entity;
-            }
-        }
-        
-        return $UnidentifiableEntities;
-    }
-
-    final public function IsIdenitifiable($Entity) {
-        return $this->Domain->HasIdentity($Entity);
-    }
-    
-    final public function VerifyIdentifiable(array $Entities) {
-        if (count(array_filter($Entities, [$this, 'IsIdenitifiable'])) !== count($Entities))
-            throw new \Storm\Core\Exceptions\UnidentifiableEntityException();
-    }
     // </editor-fold>
 }
 

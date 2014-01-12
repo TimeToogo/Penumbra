@@ -29,15 +29,21 @@ class Traversing extends Accessor {
     }
     
     final protected function GetterIdentifier(&$Identifier) {
+        $Identifiers = array();
         foreach($this->NestedAccessors as $NestedAccessor) {
-            $NestedAccessor->GetterIdentifier($Identifier);
+            $Identifiers[] = $NestedAccessor->GetGetterIdentifier();
         }
+        
+        $Identifier .= implode('->', $Identifiers);
     }
     
     final protected function SetterIdentifier(&$Identifier) {
+        $Identifiers = array();
         foreach($this->NestedAccessors as $NestedAccessor) {
-            $NestedAccessor->SetterIdentifier($Identifier);
+            $Identifiers[] = $NestedAccessor->GetSetterIdentifier();
         }
+        
+        $Identifier .= implode('->', $Identifiers);
     }
     
     public function __clone() {

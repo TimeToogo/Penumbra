@@ -20,11 +20,15 @@ class Procedure implements Object\IProcedure {
         
         $this->EntityType = $EntityOrType;
         $this->AssignmentExpressions = $AssignmentExpressions;
-        $this->Criterion = $Criterion ?: new Criterion();
+        $this->Criterion = $Criterion ?: new Criterion($this->EntityType);
+        
+        if($this->Criterion->GetEntityType() !== $this->EntityType) {
+            throw new \Exception();
+        }
     }
     
     final public function GetEntityType() {
-        return $this->EntityType;;
+        return $this->EntityType;
     }
     
     final public function GetExpressions() {

@@ -157,8 +157,8 @@ abstract class Domain {
         return $EntityMap->LoadEntity($this, $RevivalData, $Entity);
     }
     
-    final public function DiscardWhere(UnitOfWork $UnitOfWork, IRequest $Request) {
-        $this->GetEntityMap($Request->GetEntityType())->DiscardWhere($UnitOfWork, $Request);
+    final public function DiscardWhere(UnitOfWork $UnitOfWork, ICriterion $Criterion) {
+        $this->GetEntityMap($Criterion->GetEntityType())->DiscardWhere($UnitOfWork, $Criterion);
     }
     
     /**
@@ -168,7 +168,7 @@ abstract class Domain {
             array $EntitiesToPersist = array(),
             array $ProceduresToExecute = array(),
             array $EntitiesToDiscard = array(), 
-            array $RequestsToDiscard = array()) {
+            array $CriterionToDiscard = array()) {
         $UnitOfWork = new UnitOfWork($this);
         
         foreach($EntitiesToPersist as $Entity) {
@@ -180,8 +180,8 @@ abstract class Domain {
         foreach($EntitiesToDiscard as $Entity) {
             $UnitOfWork->Discard($Entity);
         }
-        foreach($RequestsToDiscard as $Request) {
-            $UnitOfWork->DiscardWhere($Request);
+        foreach($CriterionToDiscard as $Criterion) {
+            $UnitOfWork->DiscardWhere($Criterion);
         }
         
         return $UnitOfWork;

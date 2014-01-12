@@ -173,15 +173,14 @@ class QueryExecutor extends Queries\QueryExecutor {
         return $QueryBuilder->Build();
     }
     
-    protected function DeleteQuery(IConnection $Connection, Relational\Request $Request) {
-        $Table = $Request->GetTables();
+    protected function DeleteQuery(IConnection $Connection, Relational\Criterion $Criterion) {
         $QueryBuilder = $Connection->QueryBuilder();
         
-        $QueryBuilder->AppendIdentifier('DELETE FROM # ', [$Table->GetName()]);
-        if($Request->GetCriterion()->IsConstrained()) {
+        $QueryBuilder->AppendIdentifiers('DELETE # FROM # ', array_keys($Criterion->GetTables()), ',');
+        if($Criterion->GetCriterion()->IsConstrained()) {
             $QueryBuilder->Append('WHERE ');
         }
-        $this->AppendCriterion($QueryBuilder, $Request->GetCriterion());
+        $this->AppendCriterion($QueryBuilder, $Criterion);
         
         return $QueryBuilder->Build();
     }

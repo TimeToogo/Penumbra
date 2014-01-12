@@ -12,7 +12,7 @@ final class Transaction {
     private $Procedures = array();
     private $DiscardedPrimaryKeys = array();
     private $DiscardedPrimaryKeyGroups = array();
-    private $DiscardedRequests = array();
+    private $DiscardedCriteria = array();
     
     public function __construct() {
         $this->PrePersistRowEventMap = new Map;
@@ -55,10 +55,10 @@ final class Transaction {
     }
     
     /**
-     * @return Request[]
+     * @return Criterion[]
      */
-    public function GetDiscardedRequests() {
-        return $this->DiscardedRequests;
+    public function GetDiscardedCriteria() {
+        return $this->DiscardedCriteria;
     }
     
     public function Persist(Row $Row) {
@@ -133,8 +133,8 @@ final class Transaction {
         array_walk($PrimaryKeys, [$this, 'Discard']);
     }
     
-    public function DiscardWhere(Request $Request) {
-        $this->DiscardedRequests[] = $Request;
+    public function DiscardWhere(Criterion $Criterion) {
+        $this->DiscardedCriteria[] = $Criterion;
     }
 }
 

@@ -3,82 +3,41 @@
 namespace Storm\Drivers\Intelligent\Object\Pinq;
 
 use \Storm\Drivers\Base\Object;
-use \Storm\Drivers\Constant\Object\EntityMap;
-use \Storm\Drivers\Intelligent\Object\Pinq\Closure\Reader;
-use \Storm\Drivers\Intelligent\Object\Code\Parsing\Parser;
-
+use \Storm\Drivers\Intelligent\Object\Closure;
 
 class Criterion extends Object\Criterion {
-    private $EntityMap;
     
-    public function __construct(EntityMap $EntityMap) {
-        parent::__construct();
-        
-        $this->EntityMap = $EntityMap;
+    public function __construct($EntityType) {
+        parent::__construct($EntityType);
     }
     
-    public function Where(\Closure $PredicateClosure) {
-        $this->AddPredicate($this->ParseReturnExpressionClosure($PredicateClosure));
-        
-        return $this;
+    public function AddPredicateClosure(Closure\IAST $AST) {
+        $this->AddPredicate($this->ParseReturnExpression($AST));
     }
     
-    
-    public function OrderBy(\Closure $ExpressionClosure) {
-        $this->AddOrderByExpression($this->ParseReturnExpressionClosure($ExpressionClosure), true);
-        
-        return $this;
+    public function AddOrderByClosure(Closure\IAST $AST, $Ascending) {
+        $this->AddOrderByExpression($this->ParseReturnExpressionClosure($ExpressionClosure), $Ascending);
     }
     
-    public function OrderByDescending(\Closure $ExpressionClosure) {
-        $this->AddOrderByExpression($this->ParseReturnExpressionClosure($ExpressionClosure), false);
-        
-        return $this;
+    public function AddGroupByClosure(Closure\IAST $AST) {
+        $this->AddGroupByExpression($this->ParseReturnExpressionClosure($ExpressionClosure));
     }
     
-    public function Skip($Amount) {
-        $this->SetRangeOffset($Amount);
-        
-        return $this;
-    }
-    
-    public function Limit($Amount) {
-        $this->SetRangeAmount($Amount);
-        
-        return $this;
-    }
-    
-    private function ParseReturnExpressionClosure(\Closure $Closure) {
-        $ClosureReader = new Reader($Closure);
-        $Parameters = $ClosureReader->GetParameters();
-        if(count($Parameters) !== 1) {
-            throw new \Exception();
+    private function ParseReturnExpression(Closure\IAST $AST) {
+        if($AST->GetEntityMap()->GetEntityType() !== $this->GetEntityType()) {
+            throw new \Exception('Closure must be for entity of type: ' . $this->GetEntityType());
+        }        
+        if(!$AST->HasReturnNode()) {
+            throw new \Exception('Closure must contain a valid \'return\' statement for criterion');
+        }
+        $ReturnNodes = $AST->GetReturnNodes();
+        if(count($ReturnNodes) > 1) {
+            throw new \Exception('Closure must contain a single \'return\' statement for criterion');
         }
         
+        $AST->SetPropertyMode(Closure\IAST::PropertiesAreGetters);
         
-        $EntityVariableName = $Parameters[0]->getName();
-        $UsedVariableMap = $ClosureReader->GetUsedVariablesMap();
-        
-        $CodeParser = new Parser();
-        $BodyAST = $CodeParser->Parse($ClosureReader->GetBodySource(), $UsedVariableMap);
-        
-        //$Printer = new \PHPParser_PrettyPrinter_Default();
-        //echo $Printer->prettyPrint($BodyAST);
-        
-        $ReturnExpression = null;
-        foreach ($BodyAST as $Key => $StatementNode) {
-            if($StatementNode instanceof \PHPParser_Node_Stmt_Return) {
-                $ReturnExpression = $StatementNode;
-                unset($BodyAST[$Key]);
-            }
-        }
-        if($ReturnExpression === null) {
-            throw new \Exception('Closure must return value');
-        }
-        
-        $RuleExpression = $CodeParser->ParseExpressionNode($this->EntityMap, $EntityVariableName, true, $ReturnExpression->expr);
-        
-        return $RuleExpression;
+        return $AST->ParseNode($ReturnNodes[0]);
     }
 }
 
