@@ -8,13 +8,12 @@ use \Storm\Core\Object\Expressions\Expression;
 interface IParser {
     
     /**
-     * @return \IAST
+     * @return IAST
      */
     public function Parse(
             $ClosureBodySource,
             Object\EntityMap $EntityMap,
-            $EntityVariableName,
-            $PropertyMode);
+            $EntityVariableName);
 }
 
 ?>

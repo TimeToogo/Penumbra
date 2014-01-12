@@ -4,21 +4,23 @@ namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
 use \Storm\Drivers\Intelligent\Object\Pinq\Procedure;
+use \Storm\Drivers\Intelligent\Object\Closure;
 
 class ProcedureBuilder extends CriterionBuilder {
-    private $EntityMap;
     private $ProcedureClosure;
     
-    public function __construct(Object\EntityMap $EntityMap, \Closure $ProcedureClosure) {
-        parent::__construct($EntityMap);
-        $this->EntityMap = $EntityMap;
+    public function __construct(
+            Object\EntityMap $EntityMap, 
+            Closure\ClosureToASTConverter $ClosureToASTConverter,
+            \Closure $ProcedureClosure) {
+        parent::__construct($EntityMap, $ClosureToASTConverter);
+        
         $this->ProcedureClosure = $ProcedureClosure;
     }
     
     final public function BuildProcedure() {
         return new Procedure(
-            $this->EntityMap, 
-            $this->ProcedureClosure, 
+            $this->ClosureToExpandedAST($this->ProcedureClosure), 
             $this->BuildCriterion());
     }
 }

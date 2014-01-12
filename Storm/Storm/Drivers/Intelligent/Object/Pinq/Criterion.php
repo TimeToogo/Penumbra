@@ -11,16 +11,16 @@ class Criterion extends Object\Criterion {
         parent::__construct($EntityType);
     }
     
-    public function AddPredicateClosure(Closure\IAST $AST) {
-        $this->AddPredicate($this->ParseReturnExpression($AST));
+    public function AddPredicateClosure(Closure\IAST $PredicateAST) {
+        $this->AddPredicate($this->ParseReturnExpression($PredicateAST));
     }
     
-    public function AddOrderByClosure(Closure\IAST $AST, $Ascending) {
-        $this->AddOrderByExpression($this->ParseReturnExpressionClosure($ExpressionClosure), $Ascending);
+    public function AddOrderByClosure(Closure\IAST $OrderByAST, $Ascending) {
+        $this->AddOrderByExpression($this->ParseReturnExpression($OrderByAST), $Ascending);
     }
     
-    public function AddGroupByClosure(Closure\IAST $AST) {
-        $this->AddGroupByExpression($this->ParseReturnExpressionClosure($ExpressionClosure));
+    public function AddGroupByClosure(Closure\IAST $GroupByAST) {
+        $this->AddGroupByExpression($this->ParseReturnExpression($GroupByAST));
     }
     
     private function ParseReturnExpression(Closure\IAST $AST) {

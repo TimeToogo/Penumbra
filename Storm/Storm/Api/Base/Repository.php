@@ -5,6 +5,7 @@ namespace Storm\Api\Base;
 use \Storm\Core\Object;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base;
+use \Storm\Drivers\Intelligent\Object\Closure;
 
 class Repository {
     /**
@@ -49,25 +50,37 @@ class Repository {
         }
     }
     
+    //TODO: Dependency Injection
+    protected function GetClosureToASTConverter() {
+        static $ClosureToASTConverter = null;
+        if($ClosureToASTConverter === null) {
+            $ClosureToASTConverter = new Closure\ClosureToASTConverter(
+                new Closure\Implementation\File\Reader(), 
+                new Closure\Implementation\PHPParser\Parser());
+        }
+        
+        return $ClosureToASTConverter;
+    }
+    
     /**
      * @return Fluent\RequestBuilder
      */
-    public function Request() {
-        return new Fluent\RequestBuilder($this->EntityMap);
+    final public function Request() {
+        return new Fluent\RequestBuilder($this->EntityMap, $this->GetClosureToASTConverter());
     }
     
     /**
      * @return Fluent\ProcedureBuilder
      */
-    public function Procedure(\Closure $ProcedureClosure) {
-        return new Fluent\ProcedureBuilder($this->EntityMap, $ProcedureClosure);
+    final function Procedure(\Closure $ProcedureClosure) {
+        return new Fluent\ProcedureBuilder($this->EntityMap, $this->GetClosureToASTConverter(), $ProcedureClosure);
     }
     
     /**
      * @return Fluent\CriterionBuilder
      */
-    public function Criterion() {
-        return new Fluent\CriterionBuilder($this->EntityMap);
+    final function Criterion() {
+        return new Fluent\CriterionBuilder($this->EntityMap, $this->GetClosureToASTConverter());
     }
     
     public function Load(Fluent\RequestBuilder $RequestBuilder) {

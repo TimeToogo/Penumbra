@@ -1,6 +1,6 @@
 <?php
 
-namespace Storm\Drivers\Intelligent\Object\Pinq\Closure\Implementation\PHPParser\Visitors;
+namespace Storm\Drivers\Intelligent\Object\Closure\Implementation\PHPParser\Visitors;
 
 class VariableExpanderVisitor extends \PHPParser_NodeVisitorAbstract {
     private $Traverser;
@@ -58,6 +58,7 @@ class VariableExpanderVisitor extends \PHPParser_NodeVisitorAbstract {
         }
         else {
             return $this->Traverser->traverse([$Node])[0];
+            
         }
     }
     

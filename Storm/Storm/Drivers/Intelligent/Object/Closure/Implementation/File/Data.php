@@ -1,10 +1,10 @@
 <?php
 
-namespace Storm\Drivers\Intelligent\Object\Pinq\Closure\Implementation;
+namespace Storm\Drivers\Intelligent\Object\Closure\Implementation\File;
 
-use \Storm\Drivers\Intelligent\Object\Closure\IReader;
+use \Storm\Drivers\Intelligent\Object\Closure\IData;
 
-class FileReader implements IReader {
+class Data implements IData {
     private $Closure;
     private $Reflection;
     private $Parameters;

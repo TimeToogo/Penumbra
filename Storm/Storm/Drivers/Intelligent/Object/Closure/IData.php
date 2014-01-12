@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Intelligent\Object\Closure;
 
-interface IReader {
+interface IData {
     /**
      * @return \ReflectionFunction
      */

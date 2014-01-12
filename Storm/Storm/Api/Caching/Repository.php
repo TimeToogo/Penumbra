@@ -7,7 +7,7 @@ use \Storm\Api\Base;
 use \Storm\Core\Object;
 use \Storm\Utilities\Cache\ICache;
 
-class Repository extends Wrapper\Repository {
+class Repository extends Base\Repository {
     private $Cache;
     private $EntityCache;
     private $EntityExpirySeconds;
@@ -16,22 +16,19 @@ class Repository extends Wrapper\Repository {
             ICache $Cache, 
             ICache $EntityCache, 
             $EntityExpirySeconds,
-            Base\Repository $Repository) {
-        parent::__construct($Repository);
-        
+            \Storm\Core\Mapping\DomainDatabaseMap $DomainDatabaseMap, $EntityType, $AutoSave) {
+        parent::__construct($DomainDatabaseMap, $EntityType, $AutoSave);
         $this->Cache = $Cache;
         $this->EntityCache = $EntityCache;
-        $this->EntityExpirySeconds = $EntityExpirySeconds;        
+        $this->EntityExpirySeconds = $EntityExpirySeconds;    
     }
     
-    private function HashCallSite(array $TraceInfo)
-    {
-        return md5(json_encode($TraceInfo));
+    protected function GetClosureToASTConverter() {
+        return new ClosureToASTConverter($this->Cache, parent::GetClosureToASTConverter());
     }
     
-    
-    public function Load(Object\IRequest $Request) {
-        $Entities = parent::Load($Request);
+    public function LoadRequest(Object\IRequest $Request) {
+        $Entities = parent::LoadRequest($Request);
         
         if(is_array($Entities)) {
             $this->CacheEntities($Entities);
@@ -107,7 +104,7 @@ class Repository extends Wrapper\Repository {
     private function CacheEntity($Entity, Object\Identity $Identity = null) {
         $Identity = $Identity ? : $this->EntityMap->Identity($Entity);
         $IdentityHash = $Identity->Hash();
-        $this->Cache->Save($IdentityHash, $Entity, $this->EntityExpirySeconds);
+        $this->EntityCache->Save($IdentityHash, $Entity, $this->EntityExpirySeconds);
     }
 
     // </editor-fold>

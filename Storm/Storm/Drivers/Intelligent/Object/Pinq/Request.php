@@ -17,7 +17,7 @@ class Request extends Object\Request {
                 $EntityMap->GetEntityType(),
                 $Properties ?: $EntityMap->GetProperties(),
                 $IsSingleEntity,
-                $Criterion ?: new Criterion($EntityMap));
+                $Criterion ?: new Criterion($EntityMap->GetEntityType()));
     }
 }
 

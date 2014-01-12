@@ -34,12 +34,12 @@ class Test implements \StormTests\IStormTest {
     }
     
     public function GetStorm() {     
-        return new Storm(new Mapping\BloggingDomainDatabaseMap());
-        /*return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
+        //return new Storm(new Mapping\BloggingDomainDatabaseMap());
+        return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
                 self::GetPlatform(),
                 function () {
                     return new Storm(new Mapping\BloggingDomainDatabaseMap());
-                });*/
+                });
     }
 
     const Id = 39;
@@ -53,7 +53,7 @@ class Test implements \StormTests\IStormTest {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
-        $Action = self::Retreive;
+        $Action = self::Operation;
         $Amount = 1;
 
         $Last;
@@ -125,8 +125,6 @@ class Test implements \StormTests\IStormTest {
             return null;
             
         } else if ($Action === self::Operation) {
-            $BlogMap = $BloggingStorm->GetDomainDatabaseMap()->GetDomain()->GetEntityMap(Entities\Blog::GetType());
-            
             $Procedure = $BlogRepository->Procedure(function ($Blog) {
                         $Blog->Description = md5(new \DateTime());
                         $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?
