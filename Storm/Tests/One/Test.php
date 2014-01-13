@@ -16,7 +16,7 @@ use \Storm\Drivers\Platforms\Development\Logging;
 class Test implements \StormTests\IStormTest {
     
     public static function GetPlatform() {
-        $Development = 2;
+        $Development = 1;
         
         if($Development > 0) {
             return new Platforms\Mysql\Platform(
@@ -53,7 +53,7 @@ class Test implements \StormTests\IStormTest {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
-        $Action = self::Operation;
+        $Action = self::Retreive;
         $Amount = 1;
 
         $Last;
