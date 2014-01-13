@@ -10,8 +10,9 @@ use \Storm\Core\Relational;
 
 final class LoadingMode {
     const Eager = 0;
-    const Lazy = 1;
-    const ExtraLazy = 2;
+    const SemiLazy = 1;
+    const Lazy = 2;
+    const ExtraLazy = 3;
 }
 
 abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
@@ -77,6 +78,8 @@ final class FluentPropertyMapping {
         switch ($LoadingMode) {
             case LoadingMode::Eager:
                 return new Mappings\EagerEntityPropertyToOneRelationMapping($this->Property, $ToOneRelation);
+            case LoadingMode::SemiLazy:
+                return new Mappings\SemiLazyEntityPropertyToOneRelationMapping($this->Property, $ToOneRelation);
             case LoadingMode::Lazy:
                 return new Mappings\LazyEntityPropertyToOneRelationMapping($this->Property, $ToOneRelation);
             case LoadingMode::ExtraLazy:
@@ -94,6 +97,8 @@ final class FluentPropertyMapping {
         switch ($LoadingMode) {
             case LoadingMode::Eager:
                 return new Mappings\EagerCollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation);
+            case LoadingMode::SemiLazy:
+                return new Mappings\SemiLazyCollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation);
             case LoadingMode::Lazy:
                 return new Mappings\LazyCollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation);
             case LoadingMode::ExtraLazy:
