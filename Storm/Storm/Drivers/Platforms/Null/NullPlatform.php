@@ -62,6 +62,18 @@ final class NullPlatform implements Relational\IPlatform {
         
     }
 
+    public function Commit(array $TablesOrderedByPersistingDependency, array $TablesOrderedByDiscardingDependency, \Storm\Core\Relational\Transaction $Transaction) {
+        
+    }
+
+    public function Select(\Storm\Core\Relational\Request $Request) {
+        
+    }
+
+    public function Sync(Relational\Database $Database) {
+        
+    }
+
 }
 
 ?>

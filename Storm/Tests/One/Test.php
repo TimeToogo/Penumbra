@@ -16,7 +16,7 @@ use \Storm\Drivers\Platforms\Development\Logging;
 class Test implements \StormTests\IStormTest {
     
     public static function GetPlatform() {
-        $Development = 1;
+        $Development = 2;
         
         if($Development > 0) {
             return new Platforms\Mysql\Platform(
@@ -34,7 +34,7 @@ class Test implements \StormTests\IStormTest {
     }
     
     public function GetStorm() {     
-        //return new Storm(new Mapping\BloggingDomainDatabaseMap());
+        return new Storm(new Mapping\BloggingDomainDatabaseMap());
         return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
                 self::GetPlatform(),
                 function () {
