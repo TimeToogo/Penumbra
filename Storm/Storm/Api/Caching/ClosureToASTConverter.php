@@ -3,7 +3,7 @@
 namespace Storm\Api\Caching;
 
 use \Storm\Core\Object;
-use \Storm\Drivers\Intelligent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Closure;
 use \Storm\Utilities\Cache\ICache;
 
 class ClosureToASTConverter extends Closure\ClosureToASTConverter {

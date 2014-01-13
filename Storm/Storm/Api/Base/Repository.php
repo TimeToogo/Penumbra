@@ -5,7 +5,7 @@ namespace Storm\Api\Base;
 use \Storm\Core\Object;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base;
-use \Storm\Drivers\Intelligent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Closure;
 
 class Repository {
     /**

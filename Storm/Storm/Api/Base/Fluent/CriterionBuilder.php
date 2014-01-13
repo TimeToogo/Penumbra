@@ -3,8 +3,8 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
-use \Storm\Drivers\Intelligent\Object\Pinq;
-use \Storm\Drivers\Intelligent\Object\Closure;
+use \Storm\Drivers\Fluent\Object;
+use \Storm\Drivers\Fluent\Object\Closure;
 
 class CriterionBuilder {
     protected $EntityType;

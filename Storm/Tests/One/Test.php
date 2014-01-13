@@ -9,7 +9,7 @@ use \Storm\Api\Base\Repository;
 use \Storm\Core\Object;
 use \Storm\Drivers\Base\Object\Procedures;
 use \Storm\Drivers\Base\Object\Requests;
-use \Storm\Drivers\Intelligent\Object\Pinq;
+use \Storm\Drivers\Fluent\Object;
 use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
