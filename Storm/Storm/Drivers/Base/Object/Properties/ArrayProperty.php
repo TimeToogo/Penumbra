@@ -4,18 +4,13 @@ namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
 
-class CollectionProperty extends MultipleEntityProperty {
+class ArrayProperty extends MultipleEntityProperty {
     protected function ReviveProxies(Object\Domain $Domain, $Entity, array $Proxies) {
-        return new Collections\Collection($this->GetEntityType(), $Proxies);
-    }
-    
-    protected function ReviveCallableProperty(Object\Domain $Domain, $Entity, callable $Callback) {
-        return new Collections\LazyCollection($Domain, $this->GetEntityType(), $Callback);
+        return $Proxies;
     }
     
     protected function ReviveArrayOfRevivalData(Object\Domain $Domain, $Entity, array $RevivalDataArray) {
-        $EntityType = $this->GetEntityType();
-        return new Collections\Collection($EntityType, $Domain->ReviveEntities($EntityType, $RevivalDataArray));
+        return $Domain->ReviveEntities($this->GetEntityType(), $RevivalDataArray);
     }
     
     protected function PersistRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,
@@ -26,25 +21,20 @@ class CollectionProperty extends MultipleEntityProperty {
         $CurrentEntities = array();
         
         if($HasOriginalValue) {
-            $OriginalEntities = $OriginalValue->ToArray();
+            $OriginalEntities =& $OriginalValue;
         }
         
-        if(!($CurrentValue instanceof Collections\ICollection)) {
-            if(!($CurrentValue instanceof \Traversable)) {
-                throw new \Exception;//TODO:error message
-            }
-            foreach($CurrentValue as $Entity) {
-                if($this->IsValidEntity($Entity)) {
-                    $CurrentEntities[] = $Entity;
-                }
-            }
-        }
-        else if($CurrentValue == $OriginalValue && !$CurrentValue->__IsAltered()) {
-            
+        if(is_array($CurrentValue)) {
+            $CurrentEntities =& $CurrentValue;
         }
         else {
-            $CurrentEntities = $CurrentValue->ToArray();
+            throw new \Exception();
         }
+        
+        if($CurrentEntities === $OriginalEntities) {
+            return $RelationshipChanges;
+        }
+        
         $NewEntities = array_udiff($CurrentEntities, $OriginalEntities, [$this, 'ObjectComparison']);
         $RemovedEntities = array_udiff($OriginalEntities, $CurrentEntities, [$this, 'ObjectComparison']);
         
@@ -68,10 +58,10 @@ class CollectionProperty extends MultipleEntityProperty {
     protected function DiscardRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
             $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
         
-        $DiscardedRelationships = array();
+        $DiscarededRelationships = array();
         if($HasOriginalValue) {
-            foreach($OriginalValue->ToArray() as $RemovedEntity) {
-                $DiscardedRelationships[] = new Object\RelationshipChange(
+            foreach($OriginalValue as $RemovedEntity) {
+                $DiscarededRelationships[] = new Object\RelationshipChange(
                         null, 
                         $this->RelationshipType->GetDiscardedRelationship(
                                 $Domain, $UnitOfWork, 
@@ -79,7 +69,7 @@ class CollectionProperty extends MultipleEntityProperty {
             }
         }
         
-        return $DiscardedRelationships;
+        return $DiscarededRelationships;
     }
     
     public function ObjectComparison(&$Object1, &$Object2) {

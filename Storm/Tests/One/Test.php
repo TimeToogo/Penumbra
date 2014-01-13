@@ -6,10 +6,7 @@ use \StormTests\One\Entities;
 use \Storm\Api;
 use \Storm\Api\Base\Storm;
 use \Storm\Api\Base\Repository;
-use \Storm\Core\Object;
-use \Storm\Drivers\Base\Object\Procedures;
-use \Storm\Drivers\Base\Object\Requests;
-use \Storm\Drivers\Fluent\Object;
+use \Storm\Drivers\Base\Object\Properties\Collections\Collection;
 use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
@@ -78,14 +75,12 @@ class Test implements \StormTests\IStormTest {
             
             return $Blog;
         } else if ($Action === self::Discard) {
-            $BlogMap = $BloggingStorm->GetDomainDatabaseMap()->GetDomain()->GetEntityMap(Entities\Blog::GetType());
 
-            $Request = new Pinq\Request($BlogMap);
-            $Request->Where(function ($Blog) use(&$Id) {
-                return $Blog->Id === $Id;
-            });
-
-            $BlogRepository->Discard($Request);
+            $BlogRepository->Discard($BlogRepository->Criterion()
+                    ->Where(function ($Blog) use(&$Id) {
+                        return $Blog->Id === $Id;
+                    }));
+            
         } else if ($Action === self::Retreive) {
             $Outside = new \DateTime();
             $Outside->sub(new \DateInterval('P1D'));
@@ -147,7 +142,7 @@ class Test implements \StormTests\IStormTest {
         $Blog->Name = 'Test blog';
         $Blog->Description = 'The tested blog';
         $Blog->CreatedDate = new \DateTime();
-        $Blog->Posts = new \Storm\Drivers\Base\Object\Properties\Collections\Collection(Entities\Post::GetType());
+        $Blog->Posts = new Collection(Entities\Post::GetType());
         $this->CreatePosts($Blog);
 
         return $Blog;
@@ -159,7 +154,7 @@ class Test implements \StormTests\IStormTest {
         $Post1->Title = 'Hello World';
         $Post1->Content = 'What\'s up?';
         $Post1->CreatedDate = new \DateTime();
-        $Post1->Tags = new \Storm\Drivers\Base\Object\Properties\Collections\Collection(Entities\Tag::GetType());
+        $Post1->Tags = new Collection(Entities\Tag::GetType());
         $this->AddTags($Post1);
         $Blog->Posts[] = $Post1;
 
@@ -168,7 +163,7 @@ class Test implements \StormTests\IStormTest {
         $Post2->Title = 'Hello Neptune';
         $Post2->Content = 'What\'s going on nup?';
         $Post2->CreatedDate = new \DateTime();
-        $Post2->Tags = new \Storm\Drivers\Base\Object\Properties\Collections\Collection(Entities\Tag::GetType());
+        $Post2->Tags = new Collection(Entities\Tag::GetType());
         $this->AddTags($Post2);
         $Blog->Posts[] = $Post2;
     }
