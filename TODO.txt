@@ -1,0 +1,34 @@
+The near future:
+ - Finish implementing discarding of entities
+ - Begin to document existing functionality
+ - Implement a to relationship as an array property type
+ - Break apart the DomainDatabaseMap into more concise classes
+ - Redo all exceptions with meaningful exception classes and intuitive error messages
+ - Release to the public
+ - 
+
+The future:
+ - Extend fluent request functionality (maybe the having clause)
+ - Implement CodeFirst and DatabaseFirst drivers
+ - Concrete the API
+ - Begin writing a test suite for the major parts of the application
+ - Implement an active record flavour of Storm (This could be quite sexy coupled with our fluent requests)
+ - Implement various platforms for SQL Server, PostgreSQL, SQLite, Oracle
+ - Restructure UnitOfWork / Transaction such that the order of operations is preserved
+ - Native support for optimistic / pessimistic locking ?
+ - 
+
+The far future:
+ - Introduce migrations and advanced database syncing
+ - Extend fluent request functionality via relationship properties (allowing subqueries and joins)
+ - Begin a peformance lockdown, make sure Storm is peformant as possible, (milliseconds matter)
+ - Begin to investigate possible edge cases and tie up any loose ends
+ - Extend the test suite to cover >80% of code
+ - 
+
+The very far future:
+ - Build a wiki with the complete API and many tutorials.
+ - Build a website for the community
+ - Cli? Gui?
+ - Rewrite the fluent request API back-end with specialized parser (remove dependency of Nikic's PHPParser)
+ - 
