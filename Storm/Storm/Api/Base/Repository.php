@@ -141,18 +141,19 @@ class Repository {
         $this->AutoSave();
     }
     
-    public function Discard(&$Entity) {
-        $this->VerifyEntity($Entity);
-        $this->DiscardedQueue[] = $Entity;
-        $this->AutoSave();
-    }
-    public function DiscardAll(array $Entities) {
-        $this->DiscardedQueue = array_merge($this->DiscardedQueue, $Entities);
+    public function Discard($EntityOrCriterion) {
+        if($EntityOrCriterion instanceof Object\ICriterion) {
+            $this->DiscardedCriterionQueue[] = $EntityOrCriterion;
+        }
+        else {
+            $this->VerifyEntity($EntityOrCriterion);
+            $this->DiscardedQueue[] = $EntityOrCriterion;
+        }
         $this->AutoSave();
     }
     
-    public function DiscardWhere(Object\ICriterion $Criterion) {
-        $this->DiscardedCriterionQueue[] = $Criterion;
+    public function DiscardAll(array $Entities) {
+        $this->DiscardedQueue = array_merge($this->DiscardedQueue, $Entities);
         $this->AutoSave();
     }
     
