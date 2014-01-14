@@ -1,7 +1,6 @@
 The near future:
  - Finish implementing discarding of entities
  - Begin to document existing functionality
- - Implement a to relationship as an array property type
  - Break apart the DomainDatabaseMap into more concise classes
  - Redo all exceptions with meaningful exception classes and intuitive error messages
  - Release to the public
