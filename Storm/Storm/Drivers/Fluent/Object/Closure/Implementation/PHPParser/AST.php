@@ -109,9 +109,8 @@ class AST extends ASTBase {
     protected function ParseNodeInternal(\PHPParser_Node $Node) {        
         switch (true) {
             case $Node instanceof PHPParserConstantValueNode:
-                $Value = $Node->Value;
-                return is_object($Value) ? Expression::Object($Value) : Expression::Constant($Value);
-            
+                return $this->ParseResolvedValue($Node->Value);
+                
             case $Node instanceof \PHPParser_Node_Stmt:
                 return $this->ParseStatmentNode($Node);
         
@@ -123,6 +122,23 @@ class AST extends ASTBase {
                 
             default:
                 throw new \Exception('Unknown node type: ' . get_class($Node));
+        }
+    }
+    
+    private function ParseResolvedValue($Value) {
+        if(is_object($Value)) {
+            return Expression::Object($Value);
+        }
+        else if(is_array($Value)) {
+            return Expression::NewArray(
+                    array_map(
+                            function ($Value) { 
+                                return $this->ParseResolvedValue($Value); 
+                            }, 
+                            $Value));
+        }
+        else {
+            return  Expression::Constant($Value);
         }
     }
     

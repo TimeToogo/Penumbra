@@ -85,9 +85,9 @@ class Test implements \StormTests\IStormTest {
             $Outside = new \DateTime();
             $Outside->sub(new \DateInterval('P1D'));
                 
-               
+            $Array = [1,2,3,4,5,6];
             $RevivedBlog = $BlogRepository->Load($BlogRepository->Request()
-                    ->Where(function ($Blog) use($Id, $Outside) {
+                    ->Where(function ($Blog) use($Id, $Outside, $Array) {
                         $Foo = $Id;
                         $Sandy = 40;
                         $Sandy += $Id;
@@ -97,7 +97,7 @@ class Test implements \StormTests\IStormTest {
                         $Awaited = $ADate->add(new \DateInterval('P2Y1DT15M')) > new \DateTime() || 
                                 acos(atan(tan(sin(pi()))));
 
-                        $True = null === null && null !== false || false !== true && in_array(1, [1,2,3,4,5,6]);
+                        $True = null === null && null !== false || false !== true && in_array(1, $Array);
 
                         $Possibly = $Foo . 'Hello' <> ';' || $Sandy == time() && $Outside->getTimestamp() > (time() - 3601);
 
@@ -122,8 +122,10 @@ class Test implements \StormTests\IStormTest {
         } else if ($Action === self::Operation) {
             $Procedure = $BlogRepository->Procedure(function ($Blog) {
                         $Blog->Description = md5(new \DateTime());
+                        
                         $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?
                                 'Foobar' . (string)$Blog->CreatedDate : $Blog->Name . 'Hi';
+                        
                         $Blog->CreatedDate = (new \DateTime())->diff($Blog->CreatedDate, true);
                     })
                     ->Where(function ($Blog) use ($Id) {
