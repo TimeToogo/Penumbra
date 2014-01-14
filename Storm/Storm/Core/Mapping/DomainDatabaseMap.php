@@ -448,7 +448,8 @@ abstract class DomainDatabaseMap {
                 continue;
             }
             if($ParentPrimaryKey === null) {
-                $ParentPrimaryKey = $ObjectPersistedRelationship->GetParentIdentity();
+                $ParentPrimaryKey = $this->MapIdentityToPrimaryKey(
+                        $ObjectPersistedRelationship->GetParentIdentity());
             }            
             if ($ObjectPersistedRelationship->IsIdentifying()) {
                 $ChildPersistenceData[$Key] = $ObjectPersistedRelationship->GetChildPersistenceData();
