@@ -14,13 +14,11 @@ use \Storm\Drivers\Base\Relational\PrimaryKeys\ValueWithReturningDataKeyGenerato
 class QueryExecutor extends Queries\QueryExecutor {
     
     protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys) {
-        $this->DeleteQuery($Connection, new Requests\PrimaryKeyRequest($DiscardedPrimaryKeys))->Execute();
+        $this->DeletePrimaryKeysQuery($Connection, $Table, $DiscardedPrimaryKeys)->Execute();
     }
 
-    protected function DeleteWhereQuery(IConnection $Connection, Table $Table, array &$DiscardedRequests) {
-        foreach($DiscardedRequests as $Request) {
-            $this->DeleteQuery($Connection, $Request)->Execute();
-        }
+    protected function DeleteWhereQuery(IConnection $Connection, Relational\Criterion $DiscardedRequest) {
+        $this->DeleteQuery($Connection, $DiscardedRequest)->Execute();
     }
 
     protected function ExecuteUpdate(IConnection $Connection, Relational\Procedure &$ProcedureToExecute) {
@@ -177,10 +175,23 @@ class QueryExecutor extends Queries\QueryExecutor {
         $QueryBuilder = $Connection->QueryBuilder();
         
         $QueryBuilder->AppendIdentifiers('DELETE # FROM # ', array_keys($Criterion->GetTables()), ',');
-        if($Criterion->GetCriterion()->IsConstrained()) {
-            $QueryBuilder->Append('WHERE ');
-        }
+        
         $this->AppendCriterion($QueryBuilder, $Criterion);
+        
+        return $QueryBuilder->Build();
+    }
+    
+    protected function DeletePrimaryKeysQuery(IConnection $Connection, Table $Table, array $PrimaryKeys) {
+        $QueryBuilder = $Connection->QueryBuilder();
+        
+        $QueryBuilder->AppendIdentifier('DELETE # FROM # WHERE ', [$Table->GetName()]);
+        
+        foreach($QueryBuilder->Iterate($PrimaryKeys, ' OR ') as $PrimaryKey) {
+            foreach($QueryBuilder->Iterate($PrimaryKey, ' AND ') as $ColumnIdentifier => $Value) {
+                $QueryBuilder->AppendIdentifier('# <=> ', [$ColumnIdentifier]);
+                $QueryBuilder->AppendValue('#', $Value);
+            }
+        }
         
         return $QueryBuilder->Build();
     }

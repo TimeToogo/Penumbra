@@ -39,7 +39,7 @@ class Test implements \StormTests\IStormTest {
                 });
     }
 
-    const Id = 39;
+    const Id = 107;
     
     const Persist = 0;
     const Retreive = 1;
@@ -50,15 +50,25 @@ class Test implements \StormTests\IStormTest {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
-        $Action = self::Retreive;
+        $Action = self::Discard;
         $Amount = 1;
-
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
             $Last = $this->Act($Action, $BloggingStorm, $BlogRepository, $TagRepository);
         }
 
         return $Last;
+    }
+    
+    private function SimpleExample(Repository $Repository) {
+        $Id = 40;
+        
+        $Blog = $Repository->Load($Repository->Request()
+                ->Where(function (Entities\Blog $Blog) use ($Id) {
+                    return $Blog->Id === $Id;
+                }));
+                
+        return $Blog;
     }
 
     private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
@@ -76,10 +86,10 @@ class Test implements \StormTests\IStormTest {
             return $Blog;
         } else if ($Action === self::Discard) {
 
-            $BlogRepository->Discard($BlogRepository->Criterion()
-                    ->Where(function ($Blog) use(&$Id) {
-                        return $Blog->Id === $Id;
-                    }));
+            $Blog = $BlogRepository->LoadById($Id);
+            $BlogRepository->Discard($Blog);
+            
+            $BlogRepository->SaveChanges();
             
         } else if ($Action === self::Retreive) {
             $Outside = new \DateTime();
@@ -173,7 +183,7 @@ class Test implements \StormTests\IStormTest {
     public function AddTags(Entities\Post $Post) {
         $Names = ['Tagged', 'Tummy', 'Tailgater', 'Food Fight', 'Andy'];
         
-        for ($Count = 100; $Count > 0; $Count--) {
+        for ($Count = 10000; $Count > 0; $Count--) {
             $Tag = new Entities\Tag();
             $Tag->Name = $Names[rand(0, count($Names) - 1)];
             $Post->Tags[] = $Tag;

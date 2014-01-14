@@ -101,7 +101,7 @@ abstract class Domain {
      */
     final public function DiscardedIdentifyingRelationship($ParentEntity, $ChildEntity, UnitOfWork $UnitOfWork) {
         $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
-        $ChildIdentity = $this->VerifyEntity($ChildEntity)->Discard($UnitOfWork, $ChildEntity);
+        $ChildIdentity = $this->VerifyEntity($ChildEntity)->Discard($UnitOfWork, $ChildEntity)->GetIdentity();
         
         return new DiscardedRelationship(false, $ParentIdentity, $ChildIdentity);
     }

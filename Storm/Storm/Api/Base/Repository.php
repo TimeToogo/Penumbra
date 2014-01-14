@@ -142,8 +142,8 @@ class Repository {
     }
     
     public function Discard($EntityOrCriterion) {
-        if($EntityOrCriterion instanceof Object\ICriterion) {
-            $this->DiscardedCriterionQueue[] = $EntityOrCriterion;
+        if($EntityOrCriterion instanceof Fluent\CriterionBuilder) {
+            $this->DiscardedCriterionQueue[] = $EntityOrCriterion->BuildCriterion();
         }
         else {
             $this->VerifyEntity($EntityOrCriterion);

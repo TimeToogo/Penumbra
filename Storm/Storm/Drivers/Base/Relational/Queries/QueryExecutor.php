@@ -62,7 +62,7 @@ abstract class QueryExecutor implements IQueryExecutor {
             throw $Exception;
         }
     }
-    protected abstract function DeleteWhereQuery(IConnection $Connection, Table $Table, array &$DiscardedCriteria);
+    protected abstract function DeleteWhereQuery(IConnection $Connection, Relational\Criterion $DiscardedCriteria);
     protected abstract function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys);
     protected abstract function ExecuteUpdate(IConnection $Connection, Relational\Procedure &$ProcedureToExecute);
     private function PersistRows(IConnection $Connection, Relational\Transaction $Transaction, 

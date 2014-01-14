@@ -20,7 +20,7 @@ class Criterion {
      * @return Table[]
      */
     final public function GetTables() {
-        $this->Tables;
+        return $this->Tables;
     }    
     
     final public function AddTable(Table $Table) {

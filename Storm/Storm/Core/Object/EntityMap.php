@@ -89,6 +89,10 @@ abstract class EntityMap implements \IteratorAggregate {
         return isset($this->IdentityProperties[$Identifier]);
     }
     
+    final public function HasRelationshipProperty($Identifier) {
+        return isset($this->EntityProperties[$Identifier]) || isset($this->CollectionProperties[$Identifier]);
+    }
+    
     final public function GetProperty($Identifier) {
         return $this->HasProperty($Identifier) ? $this->Properties[$Identifier] : null;
     }
@@ -174,22 +178,25 @@ abstract class EntityMap implements \IteratorAggregate {
         
         return $PersistenceData;
     }
-
+    
+    /**
+     * @return DiscardenceData
+     */
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
         
-        $PersistenceData = new DiscardenceData($this);
+        $DiscardingData = new DiscardenceData($this);
         foreach($this->IdentityProperties as $IdentityProperty) {
-            $PersistenceData[$IdentityProperty] = $IdentityProperty->GetValue($Entity);
+            $DiscardingData[$IdentityProperty] = $IdentityProperty->GetValue($Entity);
         }
         foreach($this->EntityProperties as $EntityProperty) {
-            $PersistenceData[$EntityProperty] = $EntityProperty->Discard($UnitOfWork, $Entity);
+            $DiscardingData[$EntityProperty] = $EntityProperty->Discard($UnitOfWork, $Entity);
         }
         foreach($this->CollectionProperties as $CollectionProperty) {
-            $PersistenceData[$CollectionProperty] = $CollectionProperty->Discard($UnitOfWork, $Entity);
+            $DiscardingData[$CollectionProperty] = $CollectionProperty->Discard($UnitOfWork, $Entity);
         }
         
-        return $PersistenceData;
+        return $DiscardingData;
     }
     
     final public function Apply(Domain $Domain, $Entity, PropertyData $PropertyData) {
