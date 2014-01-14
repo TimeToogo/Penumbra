@@ -99,7 +99,8 @@ class QueryBuilder {
     }
     
     final public function Iterate($Iteratable, $Delimiter) {
-        $Iterator = is_array($Iteratable) ? new \ArrayIterator($Iteratable) : $Iteratable;
+        $Iterator = is_array($Iteratable) ? 
+                new \ArrayIterator($Iteratable) : new \IteratorIterator($Iteratable);
         $First = true;
         return new \CallbackFilterIterator($Iterator, 
                 function () use (&$First, &$Delimiter) {
