@@ -39,7 +39,7 @@ class Test implements \StormTests\IStormTest {
                 });
     }
 
-    const Id = 107;
+    const Id = 109;
     
     const Persist = 0;
     const Retreive = 1;
@@ -66,7 +66,8 @@ class Test implements \StormTests\IStormTest {
         $Blog = $Repository->Load($Repository->Request()
                 ->Where(function (Entities\Blog $Blog) use ($Id) {
                     return $Blog->Id === $Id;
-                }));
+                })
+                ->First());
                 
         return $Blog;
     }
@@ -85,9 +86,12 @@ class Test implements \StormTests\IStormTest {
             
             return $Blog;
         } else if ($Action === self::Discard) {
-
-            $Blog = $BlogRepository->LoadById($Id);
-            $BlogRepository->Discard($Blog);
+            $Range = range(100, 110);
+            $Blogs = $BlogRepository->Load($BlogRepository->Request()
+                    ->Where(function (Entities\Blog $Blog) use ($Range) {
+                        return in_array($Blog->Id, $Range);
+                    }));
+            $BlogRepository->DiscardAll($Blogs);
             
             $BlogRepository->SaveChanges();
             

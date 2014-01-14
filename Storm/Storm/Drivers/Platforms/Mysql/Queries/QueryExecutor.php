@@ -184,14 +184,34 @@ class QueryExecutor extends Queries\QueryExecutor {
     protected function DeletePrimaryKeysQuery(IConnection $Connection, Table $Table, array $PrimaryKeys) {
         $QueryBuilder = $Connection->QueryBuilder();
         
-        $QueryBuilder->AppendIdentifier('DELETE # FROM # WHERE ', [$Table->GetName()]);
+        $TableName = $Table->GetName();
+        $QueryBuilder->AppendIdentifier('DELETE # FROM # WHERE ', [$TableName]);
         
-        foreach($QueryBuilder->Iterate($PrimaryKeys, ' OR ') as $PrimaryKey) {
-            foreach($QueryBuilder->Iterate($PrimaryKey, ' AND ') as $ColumnIdentifier => $Value) {
-                $QueryBuilder->AppendIdentifier('# <=> ', [$ColumnIdentifier]);
-                $QueryBuilder->AppendValue('#', $Value);
-            }
+        $PrimaryKeysColumns = $Table->GetPrimaryKeyColumns();
+        $PrimaryKeyNames = array_keys($PrimaryKeysColumns);
+        $QueryBuilder->Append('(');
+        
+        foreach($QueryBuilder->Iterate($PrimaryKeyNames, ', ') as $PrimaryKeyName) {
+            $QueryBuilder->AppendIdentifier('#', [$TableName, $PrimaryKeyName]);
         }
+        
+        $QueryBuilder->Append(') IN (');
+        
+        foreach($QueryBuilder->Iterate($PrimaryKeys, ',') as $PrimaryKey) {
+            $QueryBuilder->Append('(');
+            foreach($QueryBuilder->Iterate($PrimaryKeysColumns, ',') as $PrimaryKeysColumn) {
+                if(isset($PrimaryKey[$PrimaryKeysColumn])) {
+                    $QueryBuilder->AppendColumnData($PrimaryKeysColumn, $PrimaryKey[$PrimaryKeysColumn]);
+                }
+                else {
+                    throw new \Exception();
+                }
+            }
+            $QueryBuilder->Append(')');
+        }
+        
+        $QueryBuilder->Append(')');
+        
         
         return $QueryBuilder->Build();
     }
