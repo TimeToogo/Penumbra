@@ -15,13 +15,13 @@ trait EntityProxyFunctionality {
     private $__UnsetQueue = array();
     private $__LoadRevivalDataFunction;
     
-    private static $__Reflection;
-    private static $__ClassName;
-    private static $__EntityClassName;
-    private static $__EntityReflection;
-    private static $__EntityProperties = array();
-    private static $__EntityMethods = array();
-    private static $__IsInitialized = false;
+    protected static $__Reflection;
+    protected static $__ClassName;
+    protected static $__EntityClassName;
+    protected static $__EntityReflection;
+    protected static $__EntityProperties = array();
+    protected static $__EntityMethods = array();
+    protected static $__IsInitialized = false;
     
     private function __ConstructProxy(Domain $Domain, callable $LoadRevivalDataFunction) {
         $this->Initialize();
