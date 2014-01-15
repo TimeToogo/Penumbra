@@ -31,8 +31,11 @@ class Collection extends \ArrayObject implements ICollection {
         return $this->RemovedEntities;
     }
 
-    public function __IsAltered() {
+    final public function __IsAltered() {
         return $this->IsAltered;
+    }
+    final protected function SetIsAltered($IsAltered) {
+        $this->IsAltered = $IsAltered;
     }
     
     final public function __GetOriginalEntities() {

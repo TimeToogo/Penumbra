@@ -4,54 +4,12 @@ namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
 
-class CollectionProperty extends RelationshipProperty implements Object\ICollectionProperty {
-    private $RelationshipType;
-    private $ProxyGenerator;
-    
-    public function __construct(
-            Accessors\Accessor $Accessor,
-            $EntityType,
-            IRelationshipType $RelationshipType,
-            Object\IProperty $BackReferenceProperty = null,
-            Proxies\IProxyGenerator $ProxyGenerator = null) {
-        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying(), $BackReferenceProperty);
-        
-        $this->RelationshipType = $RelationshipType;
-        $this->ProxyGenerator = $ProxyGenerator;
+class CollectionProperty extends MultipleEntityProperty {
+    protected function ReviveProxies(Object\Domain $Domain, $Entity, array $Proxies) {
+        return new Collections\Collection($this->GetEntityType(), $Proxies);
     }
     
-    protected function ReviveArrayOfCallables(Object\Domain $Domain, $Entity, array $Callbacks, Object\IProperty $BackReferenceProperty = null) {
-        if($this->ProxyGenerator !== null) {
-            if($BackReferenceProperty !== null) {
-                foreach($Callbacks as $Key => $Callback) {
-                    $Callbacks[$Key] = function() use($Callback, &$BackReferenceProperty, $Entity) {
-                        $RevivalData = call_user_func_array($Callback, func_get_args());
-                        $RevivalData[$BackReferenceProperty] = $Entity;
-                        
-                        return $RevivalData;
-                    };
-                }
-            }
-            $EntityType = $this->GetEntityType();
-            $Proxies = $this->ProxyGenerator->GenerateProxies($Domain, $EntityType, $Callbacks);
-            return new Collections\Collection($EntityType, $Proxies);
-        }
-        else {
-            throw new \Exception;//TODO:error
-        }
-    }
-    
-    protected function ReviveCallable(Object\Domain $Domain, $Entity, callable $Callback, Object\IProperty $BackReferenceProperty = null) {
-        if($BackReferenceProperty !== null) {
-            $Callback = function () use ($Callback, &$BackReferenceProperty, &$Entity) {
-                $RevivalDataArray = call_user_func_array($Callback, func_get_args());
-                foreach($RevivalDataArray as $RevivalData) {
-                    $RevivalData[$BackReferenceProperty] = $Entity;
-                }
-                
-                return $RevivalDataArray;
-            };
-        }
+    protected function ReviveCallableProperty(Object\Domain $Domain, $Entity, callable $Callback) {
         return new Collections\LazyCollection($Domain, $this->GetEntityType(), $Callback);
     }
     
@@ -60,13 +18,8 @@ class CollectionProperty extends RelationshipProperty implements Object\ICollect
         return new Collections\Collection($EntityType, $Domain->ReviveEntities($EntityType, $RevivalDataArray));
     }
     
-    public function Persist(Object\UnitOfWork $UnitOfWork, $ParentEntity) {
-        $Domain = $UnitOfWork->GetDomain();
-        list(
-                $CurrentValue, 
-                $HasOriginalValue, 
-                $OriginalValue) = $this->GetEntityRelationshipData($ParentEntity);
-        
+    protected function PersistRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,
+            $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
         $RelationshipChanges = array();
         
         $OriginalEntities = array();
@@ -112,18 +65,13 @@ class CollectionProperty extends RelationshipProperty implements Object\ICollect
         
         return $RelationshipChanges;
     }
-    
-    public function Discard(Object\UnitOfWork $UnitOfWork, $ParentEntity) {
-        $Domain = $UnitOfWork->GetDomain();
-        list(
-                $CurrentValue, 
-                $HasOriginalValue, 
-                $OriginalValue) = $this->GetEntityRelationshipData($ParentEntity);
+    protected function DiscardRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
+            $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
         
-        $DiscarededRelationships = array();
+        $DiscardedRelationships = array();
         if($HasOriginalValue) {
             foreach($OriginalValue->ToArray() as $RemovedEntity) {
-                $DiscarededRelationships[] = new Object\RelationshipChange(
+                $DiscardedRelationships[] = new Object\RelationshipChange(
                         null, 
                         $this->RelationshipType->GetDiscardedRelationship(
                                 $Domain, $UnitOfWork, 
@@ -131,7 +79,7 @@ class CollectionProperty extends RelationshipProperty implements Object\ICollect
             }
         }
         
-        return $DiscarededRelationships;
+        return $DiscardedRelationships;
     }
     
     public function ObjectComparison(&$Object1, &$Object2) {

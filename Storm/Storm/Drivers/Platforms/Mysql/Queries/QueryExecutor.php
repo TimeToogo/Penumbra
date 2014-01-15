@@ -14,13 +14,11 @@ use \Storm\Drivers\Base\Relational\PrimaryKeys\ValueWithReturningDataKeyGenerato
 class QueryExecutor extends Queries\QueryExecutor {
     
     protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys) {
-        $this->DeleteQuery($Connection, new Requests\PrimaryKeyRequest($DiscardedPrimaryKeys))->Execute();
+        $this->DeletePrimaryKeysQuery($Connection, $Table, $DiscardedPrimaryKeys)->Execute();
     }
 
-    protected function DeleteWhereQuery(IConnection $Connection, Table $Table, array &$DiscardedRequests) {
-        foreach($DiscardedRequests as $Request) {
-            $this->DeleteQuery($Connection, $Request)->Execute();
-        }
+    protected function DeleteWhereQuery(IConnection $Connection, Relational\Criterion $DiscardedRequest) {
+        $this->DeleteQuery($Connection, $DiscardedRequest)->Execute();
     }
 
     protected function ExecuteUpdate(IConnection $Connection, Relational\Procedure &$ProcedureToExecute) {
@@ -177,10 +175,43 @@ class QueryExecutor extends Queries\QueryExecutor {
         $QueryBuilder = $Connection->QueryBuilder();
         
         $QueryBuilder->AppendIdentifiers('DELETE # FROM # ', array_keys($Criterion->GetTables()), ',');
-        if($Criterion->GetCriterion()->IsConstrained()) {
-            $QueryBuilder->Append('WHERE ');
-        }
+        
         $this->AppendCriterion($QueryBuilder, $Criterion);
+        
+        return $QueryBuilder->Build();
+    }
+    
+    protected function DeletePrimaryKeysQuery(IConnection $Connection, Table $Table, array $PrimaryKeys) {
+        $QueryBuilder = $Connection->QueryBuilder();
+        
+        $TableName = $Table->GetName();
+        $QueryBuilder->AppendIdentifier('DELETE # FROM # WHERE ', [$TableName]);
+        
+        $PrimaryKeysColumns = $Table->GetPrimaryKeyColumns();
+        $PrimaryKeyNames = array_keys($PrimaryKeysColumns);
+        $QueryBuilder->Append('(');
+        
+        foreach($QueryBuilder->Iterate($PrimaryKeyNames, ', ') as $PrimaryKeyName) {
+            $QueryBuilder->AppendIdentifier('#', [$TableName, $PrimaryKeyName]);
+        }
+        
+        $QueryBuilder->Append(') IN (');
+        
+        foreach($QueryBuilder->Iterate($PrimaryKeys, ',') as $PrimaryKey) {
+            $QueryBuilder->Append('(');
+            foreach($QueryBuilder->Iterate($PrimaryKeysColumns, ',') as $PrimaryKeysColumn) {
+                if(isset($PrimaryKey[$PrimaryKeysColumn])) {
+                    $QueryBuilder->AppendColumnData($PrimaryKeysColumn, $PrimaryKey[$PrimaryKeysColumn]);
+                }
+                else {
+                    throw new \Exception();
+                }
+            }
+            $QueryBuilder->Append(')');
+        }
+        
+        $QueryBuilder->Append(')');
+        
         
         return $QueryBuilder->Build();
     }

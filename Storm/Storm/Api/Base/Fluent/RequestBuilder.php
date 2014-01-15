@@ -3,8 +3,8 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
-use \Storm\Drivers\Intelligent\Object\Pinq\Request;
-use  \Storm\Drivers\Intelligent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Request;
+use  \Storm\Drivers\Fluent\Object\Closure;
 
 class RequestBuilder extends CriterionBuilder {
     private $Properties;

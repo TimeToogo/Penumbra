@@ -441,18 +441,22 @@ abstract class DomainDatabaseMap {
             Object\UnitOfWork $UnitOfWork, Relational\Transaction $Transaction,             
             array $ObjectPersistedRelationships) {
         
+        $ParentPrimaryKey = null;
         $ChildPersistenceData = array();
         foreach($ObjectPersistedRelationships as $Key => $ObjectPersistedRelationship) {
             if($ObjectPersistedRelationship === null) {
                 continue;
             }
+            if($ParentPrimaryKey === null) {
+                $ParentPrimaryKey = $this->MapIdentityToPrimaryKey(
+                        $ObjectPersistedRelationship->GetParentIdentity());
+            }            
             if ($ObjectPersistedRelationship->IsIdentifying()) {
                 $ChildPersistenceData[$Key] = $ObjectPersistedRelationship->GetChildPersistenceData();
             }
         }
         $ChildResultRows = $this->MapPersistenceDataToTransaction($UnitOfWork, $Transaction, $ChildPersistenceData);
         
-        $ParentPrimaryKey = $this->MapIdentityToPrimaryKey($ObjectPersistedRelationship->GetParentIdentity());
 
         $RelationalPersistedRelationships = array();
         foreach($ObjectPersistedRelationships as $Key => $ObjectPersistedRelationship) {
@@ -482,15 +486,15 @@ abstract class DomainDatabaseMap {
     final public function MapRelationshipChanges(
             Object\UnitOfWork $UnitOfWork, Relational\Transaction $Transaction,
             array $ObjectRelationshipChanges) {
+        
         $ObjectPersistedRelationships = array();
         $ObjectDiscardedRelationships = array();
+        
         foreach($ObjectRelationshipChanges as $Key => $ObjectRelationshipChange) {
             $ObjectPersistedRelationships[$Key] = $ObjectRelationshipChange->GetPersistedRelationship();
             $ObjectDiscardedRelationships[$Key] = $ObjectRelationshipChange->GetDiscardedRelationship();
-            if ($ObjectRelationshipChange->HasDiscardedRelationship()) {
-                $ObjectPersistedRelationships[$Key] = $this->MapDiscardedRelationship($ObjectRelationshipChange->GetDiscardedRelationship());
-            }
         }
+        
         $RelationalPersistedRelationships = $this->MapPersistedRelationships($UnitOfWork, $Transaction, 
                 $ObjectPersistedRelationships);
         $RelationalDiscardedRelationships = $this->MapDiscardedRelationships($ObjectDiscardedRelationships);

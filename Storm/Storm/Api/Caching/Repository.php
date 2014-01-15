@@ -6,6 +6,7 @@ use \Storm\Api\Wrapper;
 use \Storm\Api\Base;
 use \Storm\Core\Object;
 use \Storm\Utilities\Cache\ICache;
+use \Storm\Core\Mapping\DomainDatabaseMap;
 
 class Repository extends Base\Repository {
     private $Cache;
@@ -13,10 +14,12 @@ class Repository extends Base\Repository {
     private $EntityExpirySeconds;
     
     public function __construct(
+            DomainDatabaseMap $DomainDatabaseMap, 
+            $EntityType, 
+            $AutoSave,
             ICache $Cache, 
             ICache $EntityCache, 
-            $EntityExpirySeconds,
-            \Storm\Core\Mapping\DomainDatabaseMap $DomainDatabaseMap, $EntityType, $AutoSave) {
+            $EntityExpirySeconds) {
         parent::__construct($DomainDatabaseMap, $EntityType, $AutoSave);
         $this->Cache = $Cache;
         $this->EntityCache = $EntityCache;

@@ -3,8 +3,8 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
-use \Storm\Drivers\Intelligent\Object\Pinq;
-use \Storm\Drivers\Intelligent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Criterion;
+use \Storm\Drivers\Fluent\Object\Closure;
 
 class CriterionBuilder {
     protected $EntityType;
@@ -18,7 +18,7 @@ class CriterionBuilder {
         $this->EntityMap = $EntityMap;
         $this->EntityType = $EntityMap->GetEntityType();
         $this->ClosureToASTConverter = $ClosureToASTConverter;
-        $this->Criterion = new Pinq\Criterion($EntityMap->GetEntityType());
+        $this->Criterion = new Criterion($EntityMap->GetEntityType());
     }
     
     final protected function ClosureToExpandedAST(\Closure $Closure) {

@@ -3,8 +3,8 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
-use \Storm\Drivers\Intelligent\Object\Pinq\Procedure;
-use \Storm\Drivers\Intelligent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Procedure;
+use \Storm\Drivers\Fluent\Object\Closure;
 
 class ProcedureBuilder extends CriterionBuilder {
     private $ProcedureClosure;

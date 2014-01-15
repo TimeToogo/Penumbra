@@ -8,8 +8,12 @@ final class DiscardenceData extends EntityData {
     }
     
     protected function AddProperty(IProperty $Property, $Data) {
-        if(!$this->GetEntityMap()->HasIdentityProperty($Property->GetIdentifier()))
-            throw new \InvalidArgumentException('$PropertyName must be a valid Identity property of ' . get_class($this->GetEntityMap()));
+        $EntityMap = $this->GetEntityMap();
+        $Identifier = $Property->GetIdentifier();
+        if(!$EntityMap->HasIdentityProperty($Identifier) &&
+                !$EntityMap->HasRelationshipProperty($Identifier)) {
+            throw new \InvalidArgumentException('$PropertyName must be a valid Identity or Relationship property of ' . get_class($this->GetEntityMap()));
+        }
         
         parent::AddProperty($Property, $Data);
     }

@@ -26,17 +26,12 @@ class LazyCollection extends Collection {
         $RevivalData = $Loader();
         $Entities = $this->Domain->ReviveEntities($this->GetEntityType(), $RevivalData);
         $this->exchangeArray($Entities);
+        $this->SetIsAltered(false);
         $this->OriginalEntities = $Entities;
     }
     
     final public function __IsLoaded() {
         return $this->IsLoaded;
-    }
-    public function __IsAltered() {
-        if(!$this->IsLoaded)
-            return false;
-        else
-            return parent::__IsAltered();
     }
     
     public function count() {

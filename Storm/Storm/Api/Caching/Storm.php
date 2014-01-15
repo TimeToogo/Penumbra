@@ -34,11 +34,12 @@ class Storm extends Base\Storm {
     
     protected function ConstructRepository($EntityType, $AutoSave = false) {
         return new Repository(
+                $this->GetDomainDatabaseMap(),
+                $EntityType, 
+                $AutoSave,
                 $this->Cache,
                 new Cache\DevelopmentCache(),
-                $this->EntityExpirySeconds,
-                $this->GetDomainDatabaseMap(),
-                $EntityType, $AutoSave);
+                $this->EntityExpirySeconds);
     }
 }
 

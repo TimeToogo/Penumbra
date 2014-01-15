@@ -5,7 +5,7 @@ namespace Storm\Api\Base;
 use \Storm\Core\Object;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base;
-use \Storm\Drivers\Intelligent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Closure;
 
 class Repository {
     /**
@@ -141,18 +141,19 @@ class Repository {
         $this->AutoSave();
     }
     
-    public function Discard(&$Entity) {
-        $this->VerifyEntity($Entity);
-        $this->DiscardedQueue[] = $Entity;
-        $this->AutoSave();
-    }
-    public function DiscardAll(array $Entities) {
-        $this->DiscardedQueue = array_merge($this->DiscardedQueue, $Entities);
+    public function Discard($EntityOrCriterion) {
+        if($EntityOrCriterion instanceof Fluent\CriterionBuilder) {
+            $this->DiscardedCriterionQueue[] = $EntityOrCriterion->BuildCriterion();
+        }
+        else {
+            $this->VerifyEntity($EntityOrCriterion);
+            $this->DiscardedQueue[] = $EntityOrCriterion;
+        }
         $this->AutoSave();
     }
     
-    public function DiscardWhere(Object\ICriterion $Criterion) {
-        $this->DiscardedCriterionQueue[] = $Criterion;
+    public function DiscardAll(array $Entities) {
+        $this->DiscardedQueue = array_merge($this->DiscardedQueue, $Entities);
         $this->AutoSave();
     }
     

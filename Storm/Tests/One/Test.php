@@ -6,10 +6,7 @@ use \StormTests\One\Entities;
 use \Storm\Api;
 use \Storm\Api\Base\Storm;
 use \Storm\Api\Base\Repository;
-use \Storm\Core\Object;
-use \Storm\Drivers\Base\Object\Procedures;
-use \Storm\Drivers\Base\Object\Requests;
-use \Storm\Drivers\Intelligent\Object\Pinq;
+use \Storm\Drivers\Base\Object\Properties\Collections\Collection;
 use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
@@ -33,8 +30,8 @@ class Test implements \StormTests\IStormTest {
         }
     }
     
-    public function GetStorm() {     
-        //return new Storm(new Mapping\BloggingDomainDatabaseMap());
+    public function GetStorm() {
+        return new Storm(new Mapping\BloggingDomainDatabaseMap());
         return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
                 self::GetPlatform(),
                 function () {
@@ -42,12 +39,12 @@ class Test implements \StormTests\IStormTest {
                 });
     }
 
-    const Id = 39;
+    const Id = 19;
     
     const Persist = 0;
     const Retreive = 1;
     const Discard = 2;
-    const Operation = 3;
+    const Procedure = 3;
 
     public function Run(Storm $BloggingStorm) {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
@@ -55,7 +52,6 @@ class Test implements \StormTests\IStormTest {
         
         $Action = self::Operation;
         $Amount = 1;
-
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
             $Last = $this->Act($Action, $BloggingStorm, $BlogRepository, $TagRepository);
@@ -63,91 +59,132 @@ class Test implements \StormTests\IStormTest {
 
         return $Last;
     }
+    
+    private function SimpleExample(Repository $Repository) {
+        $Id = 40;
+        
+        $Blog = $Repository->Load($Repository->Request()
+                ->Where(function (Entities\Blog $Blog) use ($Id) {
+                    return $Blog->Id === $Id;
+                })
+                ->First());
+                
+        return $Blog;
+    }
 
     private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
         $Id = self::Id;
-        if ($Action === self::Persist) {
-            $Blog = $this->CreateBlog();
-            foreach ($Blog->Posts as $Post) {
-                $TagRepository->PersistAll($Post->Tags->ToArray());
-            }
-            $TagRepository->SaveChanges();
+        switch ($Action) {
+            case self::Persist:
+                return $this->Persist($Id, $BloggingStorm, $BlogRepository, $TagRepository);
 
-            $BlogRepository->Persist($Blog);
-            $BlogRepository->SaveChanges();
-            
-            return $Blog;
-        } else if ($Action === self::Discard) {
-            $BlogMap = $BloggingStorm->GetDomainDatabaseMap()->GetDomain()->GetEntityMap(Entities\Blog::GetType());
 
-            $Request = new Pinq\Request($BlogMap);
-            $Request->Where(function ($Blog) use(&$Id) {
-                return $Blog->Id === $Id;
-            });
+            case self::Procedure:
+                return $this->Procedure($Id, $BloggingStorm, $BlogRepository, $TagRepository);
 
-            $BlogRepository->Discard($Request);
-        } else if ($Action === self::Retreive) {
-            $Outside = new \DateTime();
-            $Outside->sub(new \DateInterval('P1D'));
-                
-               
-            $RevivedBlog = $BlogRepository->Load($BlogRepository->Request()
-                        ->Where(function ($Blog) use($Id, $Outside) {
-                            $Foo = $Id;
-                            $Sandy = 40;
-                            $Sandy += $Id;
 
-                            $ADate = new \DateTime();
+            case self::Retreive:
+                return $this->Retreive($Id, $BloggingStorm, $BlogRepository, $TagRepository);
 
-                            $Awaited = $ADate->add(new \DateInterval('P2Y1DT15M')) > new \DateTime() || 
-                                    acos(atan(tan(sin(pi()))));
 
-                            $True = null === null && null !== false || false !== true && in_array(1, [1,2,3,4,5,6]);
+            case self::Discard:
+                return $this->Discard($Id, $BloggingStorm, $BlogRepository, $TagRepository);
 
-                            $Possibly = $Foo . 'Hello' <> ';' || $Sandy == time() && $Outside->getTimestamp() > (time() - 3601);
-
-                            $Maybe = $Blog->Description != 45 || (~3 - 231 * 77) . $Blog->Name == 'Sandwich' && $True || $Awaited;
-
-                            return $Foo === $Blog->Id && (true || mt_rand(1, 10) > 10 || $Blog->Id === $Foo  || $Blog->CreatedDate < new \DateTime() && $Maybe || $Possibly);
-                        })
-                        ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
-                        ->OrderByDescending(function ($Blog) { return $Blog->Id; })
-                        ->GroupBy(function ($Blog) { return $Blog->Id; })
-                        ->First());
-                        
-            //$RevivedBlog = $BlogRepository->LoadById($Id);
-            if(extension_loaded('xdebug')) {
-                var_dump($RevivedBlog);
-            }
-            $RevivedBlog->Posts[0]->Tags->ToArray();
-            $RevivedBlog->Posts[1]->Tags->ToArray();
-            
-            return null;
-            
-        } else if ($Action === self::Operation) {
-            $Procedure = $BlogRepository->Procedure(function ($Blog) {
-                        $Blog->Description = md5(new \DateTime());
-                        $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?
-                                'Foobar' . (string)$Blog->CreatedDate : $Blog->Name . 'Hi';
-                        $Blog->CreatedDate = (new \DateTime())->diff($Blog->CreatedDate, true);
-                    })
-                    ->Where(function ($Blog) use ($Id) {
-                        return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
-                    }); 
-            
-            $BlogRepository->Execute($Procedure);
-            
-            $BlogRepository->SaveChanges();
-            
+            default:
+                return null;
         }
     }
+    
+    private function Persist($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+        
+        $Blog = $this->CreateBlog();
+        foreach ($Blog->Posts as $Post) {
+            $TagRepository->PersistAll($Post->Tags->ToArray());
+        }
+        $TagRepository->SaveChanges();
 
+        $BlogRepository->Persist($Blog);
+        $BlogRepository->SaveChanges();
+
+        return $Blog;
+    }
+    
+    private function Retreive($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+        $Outside = new \DateTime();
+        $Outside->sub(new \DateInterval('P1D'));
+
+        $Array = [1,2,3,4,5,6];
+        $RevivedBlog = $BlogRepository->Load($BlogRepository->Request()
+                ->Where(function ($Blog) use($Id, $Outside, $Array) {
+                    $Foo = $Id;
+                    $Sandy = 40;
+                    $Sandy += $Id;
+
+                    $ADate = new \DateTime();
+
+                    $Awaited = $ADate->add(new \DateInterval('P2Y1DT15M')) > new \DateTime() || 
+                            acos(atan(tan(sin(pi()))));
+
+                    $True = null === null && null !== false || false !== true && in_array(1, $Array);
+
+                    $Possibly = $Foo . 'Hello' <> ';' || $Sandy == time() && $Outside->getTimestamp() > (time() - 3601);
+
+                    $Maybe = $Blog->Description != 45 || (~3 - 231 * 77) . $Blog->Name == 'Sandwich' && $True || $Awaited;
+
+                    return $Foo === $Blog->Id && (true || mt_rand(1, 10) > 10 || $Blog->Id === $Foo  || $Blog->CreatedDate < new \DateTime() && $Maybe || $Possibly);
+                })
+                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
+                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
+                ->GroupBy(function ($Blog) { return $Blog->Id; })
+                ->First());
+
+        //$RevivedBlog = $BlogRepository->LoadById($Id);
+        if(extension_loaded('xdebug')) {
+            var_dump($RevivedBlog);
+        }
+        $RevivedBlog->Posts[0]->Tags->ToArray();
+        $RevivedBlog->Posts[1]->Tags->ToArray();
+
+        return null;
+    }
+    
+    private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+        $Procedure = $BlogRepository->Procedure(function ($Blog) {
+                    $Blog->Description = md5(new \DateTime());
+
+                    $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?
+                            'Foobar' . (string)$Blog->CreatedDate : $Blog->Name . 'Hi';
+
+                    $Blog->CreatedDate = (new \DateTime())->diff($Blog->CreatedDate, true);
+                })
+                ->Where(function ($Blog) use ($Id) {
+                    return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
+                }); 
+
+        $BlogRepository->Execute($Procedure);
+
+        $BlogRepository->SaveChanges();
+    }
+    
+    private function Discard($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+        $Range = range(100, 110);
+        
+        $Blogs = $BlogRepository->Load($BlogRepository->Request()
+                ->Where(function (Entities\Blog $Blog) use ($Range) {
+                    return in_array($Blog->Id, $Range);
+                }));
+        $BlogRepository->DiscardAll($Blogs);
+
+        $BlogRepository->SaveChanges();
+    }
+    
+    
     private function CreateBlog() {
         $Blog = new Entities\Blog();
         $Blog->Name = 'Test blog';
         $Blog->Description = 'The tested blog';
         $Blog->CreatedDate = new \DateTime();
-        $Blog->Posts = new \Storm\Drivers\Base\Object\Properties\Collections\Collection(Entities\Post::GetType());
+        $Blog->Posts = new Collection(Entities\Post::GetType());
         $this->CreatePosts($Blog);
 
         return $Blog;
@@ -159,7 +196,7 @@ class Test implements \StormTests\IStormTest {
         $Post1->Title = 'Hello World';
         $Post1->Content = 'What\'s up?';
         $Post1->CreatedDate = new \DateTime();
-        $Post1->Tags = new \Storm\Drivers\Base\Object\Properties\Collections\Collection(Entities\Tag::GetType());
+        $Post1->Tags = new Collection(Entities\Tag::GetType());
         $this->AddTags($Post1);
         $Blog->Posts[] = $Post1;
 
@@ -168,7 +205,7 @@ class Test implements \StormTests\IStormTest {
         $Post2->Title = 'Hello Neptune';
         $Post2->Content = 'What\'s going on nup?';
         $Post2->CreatedDate = new \DateTime();
-        $Post2->Tags = new \Storm\Drivers\Base\Object\Properties\Collections\Collection(Entities\Tag::GetType());
+        $Post2->Tags = new Collection(Entities\Tag::GetType());
         $this->AddTags($Post2);
         $Blog->Posts[] = $Post2;
     }

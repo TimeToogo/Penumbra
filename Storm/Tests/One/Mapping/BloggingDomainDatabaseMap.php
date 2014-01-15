@@ -16,7 +16,8 @@ class BloggingDomainDatabaseMap extends Mapping\DomainDatabaseMap {
     
     protected function MappingConfiguration() {
         return new MappingConfiguration(
-                Mapping\LoadingMode::Lazy);
+                Mapping\LoadingMode::Lazy
+                );
     }
     
     public $BlogRelationalMap;
@@ -28,7 +29,6 @@ class BloggingDomainDatabaseMap extends Mapping\DomainDatabaseMap {
         $this->PostRelationalMap = new Maps\PostRelationalMap();
         $this->TagRelationalMap = new Maps\TagRelationalMap();
     }
-
 }
 
 ?>

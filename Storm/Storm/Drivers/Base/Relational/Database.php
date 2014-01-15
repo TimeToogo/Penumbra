@@ -11,6 +11,8 @@ abstract class Database extends Relational\Database {
         $this->Platform = $Platform;
         
         parent::__construct();
+        
+        $this->Platform->Sync($this);
     }
     
     /**

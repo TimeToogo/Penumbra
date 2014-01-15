@@ -11,15 +11,8 @@ class PrimaryKeyRequest extends Relational\Request {
         if(count($PrimaryKeys) === 0) {
             throw new \Exception;//TODO: error message
         }
-        parent::__construct(reset($PrimaryKeys)->GetTable()->GetColumns(), true);
         
-        $Predicate = new Predicate();
-        $RuleGroup = RuleGroup::Any();
-        foreach($PrimaryKeys as $PrimaryKey) {
-            $RuleGroup->AddRuleGroup(RuleGroup::Matches($PrimaryKey));
-        }
-        $Predicate->AddRules($RuleGroup);
-        $this->AddPredicate($Predicate);
+        parent::__construct(reset($PrimaryKeys)->GetTable()->GetColumns(), true);
     }
 }
 

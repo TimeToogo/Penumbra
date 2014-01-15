@@ -65,6 +65,7 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
     final protected function PersistIdentifyingRelationship(
             Relational\Transaction $Transaction, 
             Relational\Row $ParentRow, Relational\Row $ChildRow) {
+        
         if($this->IsInversed()) {
             if($ParentRow->HasPrimaryKey()) {
                 $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildRow);

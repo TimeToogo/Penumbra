@@ -44,7 +44,8 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
             $Entity->{$this->OriginalValueStorageKey} = $RevivedPropertyValue->__CloneProxyInstance();
         }
         else {
-            $Entity->{$this->OriginalValueStorageKey} = clone $RevivedPropertyValue;
+            $Entity->{$this->OriginalValueStorageKey} = is_object($RevivedPropertyValue) ?
+                    clone $RevivedPropertyValue : $RevivedPropertyValue;
         }
         $this->GetAccessor()->SetValue($Entity, $RevivedPropertyValue);
     }
