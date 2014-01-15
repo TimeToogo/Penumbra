@@ -92,7 +92,7 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
     public function DropComment(IConnection $Connection, 
             QueryBuilder $QueryBuilder, Table $Table, Traits\Comment $Trait) {
         QueryBuilderExtensions::AppendAlterTable($QueryBuilder, $Table);
-        $QueryBuilder->AppendEscaped('COMMENT \'\'');
+        $QueryBuilder->Append('COMMENT \'\'');
     }
     // </editor-fold>
 

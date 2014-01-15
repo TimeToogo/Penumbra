@@ -40,7 +40,7 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
             }
             $EntityType = $this->GetEntityType();
             $Proxies = $this->ProxyGenerator->GenerateProxies($Domain, $EntityType, $Callbacks);
-            return $this->ReviveProxies($Proxies);
+            return $this->ReviveProxies($Domain, $Proxies, $Entity);
         }
         else {
             throw new \Exception;//TODO:error

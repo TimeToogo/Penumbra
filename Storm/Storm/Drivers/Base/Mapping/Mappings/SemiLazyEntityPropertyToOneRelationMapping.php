@@ -19,7 +19,6 @@ class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRela
         }
         
         parent::__construct($EntityProperty, $ToOneRelation);
-        $this->ParentRowRevivalDataMapToRelatedRowsMap = new Map();
     }
     
     public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap) {

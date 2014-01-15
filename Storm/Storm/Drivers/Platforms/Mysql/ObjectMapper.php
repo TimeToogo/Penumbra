@@ -15,6 +15,7 @@ final class ObjectMapper extends E\ObjectMapper {
             new Columns\DataTypes\DateTimeDataType(),
         ];
     }
+    
     // <editor-fold defaultstate="collapsed" desc="Date and Time">
     
     

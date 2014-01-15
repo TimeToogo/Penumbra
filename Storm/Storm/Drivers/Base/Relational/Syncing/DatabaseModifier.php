@@ -35,7 +35,7 @@ abstract class DatabaseModifier implements IDatabaseModifier {
 
     final public function DropTable(IConnection $Connection, Table $Table) {
         $QueryBuilder = $Connection->QueryBuilder();
-        $QueryBuilder->AppendDropTableQuery($QueryBuilder, $Table);
+        $this->AppendDropTableQuery($QueryBuilder, $Table);
         $QueryBuilder->Build()->Execute();
     }
     protected abstract function AppendDropTableQuery(QueryBuilder $QueryBuilder, Table $Table);

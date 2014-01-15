@@ -9,7 +9,7 @@ use \Storm\Core\Containers\Registrar;
 
 class Database extends Relational\Database {
     public function __construct(Domain $Domain, IPlatform $Platform) {
-        parent::__construct($Platform, $Tables);
+        parent::__construct($Platform, $this->GenerateTables($Domain));
     }
     
     /**

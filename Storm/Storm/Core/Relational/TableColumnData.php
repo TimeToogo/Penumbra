@@ -17,11 +17,13 @@ abstract class TableColumnData extends ColumnData {
         return $this->Table;
     }
     
-    final public function Matches(TableColumnData $OtherTableColumnData) {
-        if(!$this->Table->Is($OtherTableColumnData->Table))
+    final public function Matches(ColumnData $OtherColumnData) {
+        if($OtherColumnData instanceof self && !$this->Table->Is($OtherColumnData->Table)) {
             return false;
-        else
-            return parent::Matches($OtherTableColumnData);
+        }
+        else {
+            return parent::Matches($OtherColumnData);
+        }
     }
 }
 

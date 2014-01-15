@@ -316,14 +316,6 @@ class AST extends ASTBase {
         'UnaryMinus' => Operators\Unary::Negation,
     ];
 
-    private function ParseUnaryOperationNode(\PHPParser_Node_Expr $Node, $NodeTypeName) {
-        return Expression::UnaryOperation(
-                $this->ParseNode($Node->expr), 
-                self::$UnaryOperatorsMap[$NodeTypeName], 
-                $this->ParseNode($Node->right));
-    }
-
-
     private static $CastOperatorMap = [
         'Cast_Array' => Operators\Cast::ArrayCast,
         'Cast_Bool' => Operators\Cast::Boolean,
@@ -366,13 +358,6 @@ class AST extends ASTBase {
         'GreaterOrEqual' => Operators\Binary::GreaterThanOrEqualTo,
     ];
 
-    private function ParseBinaryOperationNode(\PHPParser_Node_Expr $Node, $NodeTypeName) {
-        return Expression::BinaryOperation(
-                $this->ParseNode($Node->left), 
-                self::$BinaryOperatorsMap[$NodeTypeName], 
-                $this->ParseNode($Node->right));
-    }
-
 
     private static $AssignOperatorsMap = [
         'Assign' => Operators\Assignment::Equal,
@@ -390,12 +375,6 @@ class AST extends ASTBase {
         'AssignShiftRight' => Operators\Assignment::ShiftRight,
     ];
 
-    private function ParseAssignNode(\PHPParser_Node_Expr $Node, $NodeTypeName) {
-        return Expression::Assignment(
-                $this->ParseNode($Node->var), 
-                self::$AssignOperatorsMap[$NodeTypeName], 
-                $this->ParseNode($Node->expr));
-    }
     // </editor-fold>
 }
 

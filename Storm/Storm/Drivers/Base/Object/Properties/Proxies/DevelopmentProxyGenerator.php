@@ -190,9 +190,12 @@ NOW;
         $DefaultValue = '';
         if($MethodParameter->isDefaultValueAvailable()) {
             $DefaultValue .= '= '; 
-            if($MethodParameter->isDefaultValueConstant())
-                $DefaultValue .= '\\' . $MethodParameter->getDefaultValueConstantName();
-            else
+            /**
+             *  -- CANT USE DUE TO COMPATIBILITY 5.4 -- 
+                if($MethodParameter->isDefaultValueConstant()) 
+                    $DefaultValue .= '\\' . $MethodParameter->getDefaultValueConstantName();
+                else
+             */
                 $DefaultValue .= var_export($MethodParameter->getDefaultValue(), true);
         }
 

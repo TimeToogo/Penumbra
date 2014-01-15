@@ -6,6 +6,7 @@ use \Storm\Drivers\Base\Relational\Columns;
 use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Drivers\Base\Relational\Expressions\Operators;
 
 class DateTimeDataType extends Columns\ObjectDataType {
     const DateTimeFormat = 'Y-m-d H:i:s';
@@ -54,9 +55,9 @@ class DateTimeDataType extends Columns\ObjectDataType {
     private function AddDateTimeInterval(CoreExpression &$ObjectExpression, $Value, $Unit) {
         if ($Value !== 0) {
             $ObjectExpression = Expression::FunctionCall('TIMESTAMPADD', Expression::ValueList([
-                                Expression::Keyword($Unit),
-                                Expression::Constant($Value),
-                                $ObjectExpression
+                    Expression::Keyword($Unit),
+                    Expression::Constant($Value),
+                    $ObjectExpression
             ]));
         }
     }
@@ -86,19 +87,18 @@ class DateTimeDataType extends Columns\ObjectDataType {
 
     public function sub(CoreExpression $ObjectExpression, array $ArgumentExpressions) {
         $IntervalExpression = $ArgumentExpressions[0];
-        if ($IntervalExpression instanceof EE\ConstantExpression 
-                && $IntervalExpression->GetValue() instanceof \DateInterval) {
+        if ($IntervalExpression instanceof \DateInterval) {
             
             $IntervalValue = $ArgumentExpressions[0]->GetValue();
             $IntervalValue->invert = $IntervalValue->invert === 1 ? 0 : 1;
             
-            $ArgumentExpressions[0] = $this->DateInterval($IntervalValue);
+            $ArgumentExpressions[0] = $IntervalValue;
         }         
         else {
-            $ArgumentExpressions[0] = Expression::UnaryOperation(O\Unary::Negation, $IntervalExpression);
+            $ArgumentExpressions[0] = Expression::UnaryOperation(Operators\Unary::Negation, $IntervalExpression);
         }
         
-        return $this->DateTime_add($ObjectExpression, $ArgumentExpressions);
+        return $this->add($ObjectExpression, $ArgumentExpressions);
     }
 
     // </editor-fold>

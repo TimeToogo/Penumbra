@@ -74,10 +74,6 @@ class Connection implements Queries\IConnection {
         return $this->Connection->SetIdentifierEscaper($IdentifierEscaper);
     }
 
-    public function SetPredicateCompiler(Queries\IPredicateCompiler $PredicateCompiler) {
-        return $this->Connection->SetPredicateCompiler($PredicateCompiler);
-    }
-
     public function SetCriterionCompiler(Queries\ICriterionCompiler $RequestCompiler) {
         return $this->Connection->SetCriterionCompiler($RequestCompiler);
     }

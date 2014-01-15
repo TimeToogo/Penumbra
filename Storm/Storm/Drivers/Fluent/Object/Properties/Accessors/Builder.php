@@ -21,10 +21,9 @@ class Builder implements \ArrayAccess {
      */
     public static function DefineAs(callable $Definition) {
         $Builder = new static();
-        $this->Accessor = null;
         $Definition($Builder);
         
-        return $this->Accessor;
+        return $Builder->Accessor;
     }
     
     protected function Identifier(&$Identifier) {
