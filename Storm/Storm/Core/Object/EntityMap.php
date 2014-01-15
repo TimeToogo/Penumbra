@@ -239,6 +239,10 @@ abstract class EntityMap implements \IteratorAggregate {
     final public function getIterator() {
         return new \ArrayIterator($this->Properties);
     }
+    
+    final public function Is(EntityMap $OtherEntityMap) {
+        return $this->EntityType === $OtherEntityMap->EntityType;
+    }
 }
 
 ?>
