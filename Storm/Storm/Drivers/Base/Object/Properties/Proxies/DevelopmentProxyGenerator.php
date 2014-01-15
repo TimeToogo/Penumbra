@@ -191,7 +191,7 @@ NOW;
         if($MethodParameter->isDefaultValueAvailable()) {
             $DefaultValue .= '= '; 
             /**
-             *  -- CANT USE DUE TO COMPATIBILITY 5.4 -- 
+             *  -- CANT USE DUE TO COMPATIBILITY WITH PHP 5.4 -- 
                 if($MethodParameter->isDefaultValueConstant()) 
                     $DefaultValue .= '\\' . $MethodParameter->getDefaultValueConstantName();
                 else
