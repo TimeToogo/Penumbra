@@ -49,7 +49,7 @@ class Repository extends Base\Repository {
             return $CachedEntity;
         }
         
-        $Entity = parent::LoadByIdentitiy($Identity);
+        $Entity = parent::LoadByIdentity($Identity);
         if($Entity instanceof $this->EntityType) {
             $this->CacheEntity($Entity, $Identity);
         }
