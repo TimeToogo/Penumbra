@@ -7,6 +7,7 @@ use \Storm\Drivers\Base\Relational\Expressions\Operators as RelationalOperators;
 
 class OperatorMapper {
     // <editor-fold defaultstate="collapsed" desc="Assignment">
+    
     private static $AssignmentOperatorMap = [
         ObjectOperators\Assignment::Addition => RelationalOperators\Assignment::Addition,
         ObjectOperators\Assignment::BitwiseAnd => RelationalOperators\Assignment::BitwiseAnd,
@@ -25,13 +26,14 @@ class OperatorMapper {
 
 
     public function MapAssignmentOperator($AssignmentOperator) {
-        return isset(static::$AssignmentOperatorMap[$AssignmentOperator]) ?
-                static::$AssignmentOperatorMap[$AssignmentOperator] : null;
+        return isset(self::$AssignmentOperatorMap[$AssignmentOperator]) ?
+                self::$AssignmentOperatorMap[$AssignmentOperator] : null;
     }
 
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Binary">
+    
     private static $BinaryOperatorMap = [
         ObjectOperators\Binary::Addition => RelationalOperators\Binary::Addition,
         ObjectOperators\Binary::BitwiseAnd => RelationalOperators\Binary::BitwiseAnd,
@@ -57,13 +59,14 @@ class OperatorMapper {
     ];
 
     public function MapBinaryOperator($BinaryOperator) {
-        return isset(static::$BinaryOperatorMap[$BinaryOperator]) ?
-                static::$BinaryOperatorMap[$BinaryOperator] : null;
+        return isset(self::$BinaryOperatorMap[$BinaryOperator]) ?
+                self::$BinaryOperatorMap[$BinaryOperator] : null;
     }
 
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Unary">
+    
     private static $UnaryOperatorMap = [
         ObjectOperators\Unary::BitwiseNot => RelationalOperators\Unary::BitwiseNot,
         ObjectOperators\Unary::Decrement => RelationalOperators\Unary::Decrement,
@@ -75,13 +78,14 @@ class OperatorMapper {
     ];
 
     public function MapUnaryOperator($UnaryOperator) {
-        return isset(static::$UnaryOperatorMap[$UnaryOperator]) ?
-                static::$UnaryOperatorMap[$UnaryOperator] : null;
+        return isset(self::$UnaryOperatorMap[$UnaryOperator]) ?
+                self::$UnaryOperatorMap[$UnaryOperator] : null;
     }
 
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Cast">
+    
     private static $CastOperatorMap = [
         ObjectOperators\Cast::Boolean => RelationalOperators\Cast::Boolean,
         ObjectOperators\Cast::Double => RelationalOperators\Cast::Double,
@@ -90,8 +94,8 @@ class OperatorMapper {
     ];
     
     public function MapCastOperator($CastOperator) {
-        return isset(static::$CastOperatorMap[$CastOperator]) ?
-                static::$CastOperatorMap[$CastOperator] : null;
+        return isset(self::$CastOperatorMap[$CastOperator]) ?
+                self::$CastOperatorMap[$CastOperator] : null;
     }
     // </editor-fold>
 }
