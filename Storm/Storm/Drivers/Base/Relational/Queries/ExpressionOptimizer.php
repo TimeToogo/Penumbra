@@ -62,29 +62,31 @@ abstract class ExpressionOptimizer implements IExpressionOptimizer {
     }
     
     final protected function IsExpressionConstant(CoreExpression $Expression) {
-        if($Expression instanceof ConstantExpression) {
-            return true;
+        switch (true) {
+            case $Expression instanceof ConstantExpression:
+                return true;
+                
+            case $Expression instanceof ColumnExpression:
+                return false;
+            
+            case $Expression instanceof UnaryOperationExpression:
+                return $this->IsExpressionConstant($Expression->GetOperandExpression());
+            
+            case $Expression instanceof BinaryOperationExpression:
+                return $this->IsExpressionConstant($Expression->GetLeftOperandExpression())
+                        && $this->IsExpressionConstant($Expression->GetRightOperandExpression());
+            
+            case $Expression instanceof FunctionCallExpression:
+                foreach($Expression->GetArgumentValueListExpression()->GetValueExpressions() as $ArgumentExpression) {
+                    if(!$this->IsExpressionConstant($ArgumentExpression)) {
+                        return false;
+                    }
+                }
+                return true;
+            
+            default:
+                return false;
         }
-        if($Expression instanceof ColumnExpression) {
-            return false;
-        }
-        if($Expression instanceof UnaryOperationExpression) 
-            return $this->IsExpressionConstant($Expression->GetOperandExpression());
-        
-        if($Expression instanceof FunctionCallExpression) {
-            foreach($Expression->GetArgumentValueListExpression()->GetValueExpressions() as $ArgumentExpression) {
-                if(!$this->IsExpressionConstant($ArgumentExpression))
-                    return false;
-            }
-            return true;
-        }
-        
-        if($Expression instanceof BinaryOperationExpression) {
-            return $this->IsExpressionConstant($Expression->GetLeftOperandExpression())
-                    && $this->IsExpressionConstant($Expression->GetRightOperandExpression());
-        }
-        
-        return false;
     }
 
     protected function OptimizeUnaryOperationExpression(UnaryOperationExpression $Expression) {
