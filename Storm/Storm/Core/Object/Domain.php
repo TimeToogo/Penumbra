@@ -55,7 +55,7 @@ abstract class Domain {
     
     /**
      * @param object $Entity
-     * @return Identity
+     * @return boolean
      */
     final public function HasIdentity($Entity) {
         return $this->VerifyEntity($Entity)->HasIdentity($Entity);

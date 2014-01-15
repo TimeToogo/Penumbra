@@ -31,7 +31,7 @@ final class Row extends TableColumnData {
     }
     
     /**
-     * @return PrimaryKey
+     * @return boolean
      */
     final public function HasPrimaryKey() {
         return count(array_filter($this->PrimaryKey->GetColumnData(),
