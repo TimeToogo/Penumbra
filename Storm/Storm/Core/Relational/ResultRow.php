@@ -78,7 +78,7 @@ class ResultRow extends ColumnData {
     }
     
     /**
-     * @return Row
+     * @return PrimaryKey
      */
     final public function GetPrimaryKey(Table $Table) {
         if(!$this->IsOf($Table)) {
