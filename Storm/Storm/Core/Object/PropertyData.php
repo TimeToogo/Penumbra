@@ -64,7 +64,7 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     }
     
     final public function Matches(PropertyData $Data) {
-        if(!$this->GetEntityType !== $Data->GetEntityType()) {
+        if($this->EntityType !== $Data->EntityType) {
             return false;
         }
         
