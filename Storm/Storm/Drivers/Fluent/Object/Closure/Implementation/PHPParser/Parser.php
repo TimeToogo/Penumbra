@@ -2,8 +2,6 @@
 
 namespace Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser;
 
-require_once __DIR__ . '/Library/bootstrap.php';
-
 use \Storm\Core\Object;
 use \Storm\Drivers\Fluent\Object\Closure\IParser;
 

@@ -52,6 +52,8 @@ function ShowTests() {
     }
 }
 
+require_once '../vendor/autoload.php';
+
 $Success = false;
 if(isset($_GET['Test'])) {
     $TestDir = $_GET['Test'];
@@ -64,7 +66,7 @@ if(isset($_GET['Test'])) {
         if($TestInstance instanceof IStormTest)
         {
             require_once 'UBench.php';
-            require_once '../StormLoader.php';
+            require_once '../Storm/Loader.php';
             
             $Benchmark = new \Ubench();
             

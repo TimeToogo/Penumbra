@@ -1,5 +1,5 @@
 The near future:
- - Finish implementing discarding of entities
+ - Finish implementing discarding of entities ~
  - Begin to document existing functionality
  - Break apart the DomainDatabaseMap into more concise classes
  - Redo all exceptions with meaningful exception classes and intuitive error messages
@@ -7,14 +7,14 @@ The near future:
  - 
 
 The future:
- - Extend fluent request functionality (maybe the having clause)
+ - Extend fluent request functionality (maybe the having clause + others)
  - Implement CodeFirst and DatabaseFirst drivers
- - Concrete the API
+ - Concrete/Finalize the API
  - Begin writing a test suite for the major parts of the application
- - Implement an active record flavour of Storm (This could be quite sexy coupled with our fluent requests)
- - Implement various platforms for SQL Server, PostgreSQL, SQLite, Oracle
+ - Implement an active record flavour of Storm (This could be quite sexy coupled with fluent requests)
+ - Implement other platforms for SQL Server, PostgreSQL, SQLite, Oracle
  - Restructure UnitOfWork / Transaction such that the order of operations is preserved
- - Native support for optimistic / pessimistic locking ?
+ - Built-in support for optimistic / pessimistic locking ?
  - 
 
 The far future:
