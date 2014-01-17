@@ -19,16 +19,12 @@ class Repository extends Base\Repository {
         return $this->WrappedRepository;
     }
 
-    public function Discard(&$Entity) {
-        return $this->WrappedRepository->Discard($Entity);
+    public function Discard($EntityOrCriterion) {
+        return $this->WrappedRepository->Discard($EntityOrCriterion);
     }
 
     public function DiscardAll(array $Entities) {
         return $this->WrappedRepository->DiscardAll($Entities);
-    }
-    
-    public function DiscardWhere(Object\IRequest $Request) {
-        return $this->WrappedRepository->DiscardWhere($Request);
     }
 
     public function Execute(Object\IProcedure $Procedure) {

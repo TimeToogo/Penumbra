@@ -3,7 +3,7 @@
 namespace Storm\Drivers\Base\Relational\Expressions;
 
 use \Storm\Core\Relational;
-use \Storm\Core\Relational\Expressions\Expression;
+use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
 
 interface IObjectMapper {
     /**
@@ -14,7 +14,7 @@ interface IObjectMapper {
     /**
      * @return Expression
      */
-    public function MapMethodCallExpression(Expression $ObjectValueExpression = null, $Type, $Name, array $ArgumentValueExpressions = array());
+    public function MapMethodCallExpression(CoreExpression $ObjectValueExpression = null, $Type, $Name, array $ArgumentValueExpressions = array());
 }
 
 ?>

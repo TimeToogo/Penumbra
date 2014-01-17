@@ -3,7 +3,6 @@
 namespace Storm\Drivers\Base\Relational\Expressions;
 
 use \Storm\Core\Relational;
-use \Storm\Core\Relational\Expressions\Expression;
 
 interface IFunctionMapper {
     /**

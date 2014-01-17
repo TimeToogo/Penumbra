@@ -171,24 +171,24 @@ class AST extends ASTBase {
                 }
                 return Expression::NewArray($ValueExpressions);
                 
-            case isset(static::$AssignOperatorsMap[$NodeType]):
+            case isset(self::$AssignOperatorsMap[$NodeType]):
                 return Expression::Assign(
                         $this->ParseNodeInternal($Node->var), 
                         self::$AssignOperatorsMap[$NodeType], 
                         $this->ParseNodeInternal($Node->expr));
                 
-            case isset(static::$BinaryOperatorsMap[$NodeType]):
+            case isset(self::$BinaryOperatorsMap[$NodeType]):
                 return Expression::BinaryOperation(
                         $this->ParseNodeInternal($Node->left), 
                         self::$BinaryOperatorsMap[$NodeType], 
                         $this->ParseNodeInternal($Node->right));
                 
-            case isset(static::$UnaryOperatorsMap[$NodeType]):
+            case isset(self::$UnaryOperatorsMap[$NodeType]):
                 return Expression::UnaryOperation( 
                         self::$UnaryOperatorsMap[$NodeType], 
                         $this->ParseNodeInternal($Node->expr));
                 
-            case isset(static::$CastOperatorMap[$NodeType]):
+            case isset(self::$CastOperatorMap[$NodeType]):
                 return Expression::Cast(
                         self::$CastOperatorMap[$NodeType], 
                         $this->ParseNodeInternal($Node->expr));

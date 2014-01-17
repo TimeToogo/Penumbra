@@ -25,7 +25,8 @@ class SequenceGenerator extends PrimaryKeys\PreInsertKeyGenerator {
         }
     }
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
-        $PrimaryKeyColumn = reset($this->GetPrimaryKeyColumns());
+        $PriamryKeyColumns = $this->GetPrimaryKeyColumns();
+        $PrimaryKeyColumn = reset($PriamryKeyColumns);
         
         $QueryBuilder = $Connection->QueryBuilder();
         $QueryBuilder->AppendIdentifier('INSERT INTO # ', [$this->SequenceTable->GetName()]);

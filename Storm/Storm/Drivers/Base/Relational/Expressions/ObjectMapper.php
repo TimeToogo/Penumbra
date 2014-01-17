@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Base\Relational\Expressions;
 
-use \Storm\Core\Relational\Expressions\Expression;
+use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Columns\ObjectDataType;
 
 abstract class ObjectMapper implements IObjectMapper {
@@ -47,7 +47,7 @@ abstract class ObjectMapper implements IObjectMapper {
         //Blah Blah
     }
     
-    final public function MapMethodCallExpression(Expression $ObjectValueExpression = null, $Type, $Name, array $ArgumentValueExpressions = array()) {
+    final public function MapMethodCallExpression(CoreExpression $ObjectValueExpression = null, $Type, $Name, array $ArgumentValueExpressions = array()) {
         if(isset($this->ObjectDataTypes[$Type])) {
             $ObjectDataType = $this->ObjectDataTypes[$Type];
             return $ObjectDataType->MapMethodCallExpression($ObjectValueExpression, $Name, $ArgumentValueExpressions);
@@ -68,7 +68,7 @@ abstract class ObjectMapper implements IObjectMapper {
         }
     }
     
-    public function MethodCallMappingExample(Expression $ObjectValueExpression, array $ArgumentExpressions) {
+    public function MethodCallMappingExample(CoreExpression $ObjectValueExpression, array $ArgumentExpressions) {
         //Blah Blah
     }
     

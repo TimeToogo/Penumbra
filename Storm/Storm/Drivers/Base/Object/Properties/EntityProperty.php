@@ -43,7 +43,8 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
             return $this->ProxyGenerator->GenerateProxy($Domain, $this->GetEntityType(), $LoadFunction);
         }
         else {
-            reset($Domain->ReviveEntities($this->GetEntityType(), [$RevivalData]));
+            $RevivedEntities = $Domain->ReviveEntities($this->GetEntityType(), [$RevivalData]);
+            return reset($RevivedEntities);
         }
     }
     

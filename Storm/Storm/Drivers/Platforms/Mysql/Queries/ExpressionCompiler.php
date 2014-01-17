@@ -40,8 +40,8 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
     ];
 
     protected function GetBinaryOperatorString($Operator) {
-        if (isset(static::$BinaryOperators[$Operator])) {
-            return ' ' . static::$BinaryOperators[$Operator] . ' ';
+        if (isset(self::$BinaryOperators[$Operator])) {
+            return ' ' . self::$BinaryOperators[$Operator] . ' ';
         }
         else {
             throw new \Exception;
@@ -75,8 +75,8 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
     ];
 
     protected function GetUnaryOperatorString($Operator) {
-        if (isset(static::$UnaryOperators[$Operator])) {
-            return static::$UnaryOperators[$Operator];
+        if (isset(self::$UnaryOperators[$Operator])) {
+            return self::$UnaryOperators[$Operator];
         } 
         else {
             throw new \Exception();

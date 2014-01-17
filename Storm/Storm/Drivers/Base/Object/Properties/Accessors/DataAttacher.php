@@ -8,8 +8,12 @@ class DataAttacher extends Accessor {
     public function __construct($FieldName) {        
         $this->PropertyKey = '__' . $FieldName;
     }
-    
-    protected function Identifier(&$Identifier) {
+
+    protected function GetterIdentifier(&$Identifier) {
+        $Identifier .= $this->PropertyKey;
+    }
+
+    protected function SetterIdentifier(&$Identifier) {
         $Identifier .= $this->PropertyKey;
     }
     
@@ -20,6 +24,7 @@ class DataAttacher extends Accessor {
     final public function SetValue($Entity, $Value) {
         $Entity->{$this->PropertyKey} =& $Value;
     }
+
 }
 
 ?>

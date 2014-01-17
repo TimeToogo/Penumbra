@@ -3,63 +3,63 @@
 namespace Storm\Drivers\Base\Relational\Expressions;
 
 use \Storm\Core\Relational;
-use \Storm\Core\Relational\Expressions\Expression;
+use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
 
 interface IExpressionMapper {
     
     /**
-     * @return Expression
+     * @return CoreExpression
      */
     public function MapConstantExpression($Value);
     
     /**
-     * @return Expression
+     * @return CoreExpression
      */
     public function MapObjectExpression($Type, $Value);
         
     /**
-     * @return Expression
+     * @return CoreExpression
      */
-    public function MapMethodCallExpression(Expression $ObjectExpression, $Type, $Name, array $ArgumentValueExpressions);
+    public function MapMethodCallExpression(CoreExpression $ObjectExpression, $Type, $Name, array $ArgumentValueExpressions);
     
     /**
-     * @return Expression
+     * @return CoreExpression
      */
     public function MapAssignmentExpression(
             Relational\Expressions\ColumnExpression $Column, 
             $AssignmentOperator, 
-            Expression $ValueExpression);
+            CoreExpression $ValueExpression);
     
     /**
-     * @return Expression
+     * @return CoreExpression
      */
     public function MapBinaryOperationExpression(
-            Expression $LeftOperandExpression, 
+            CoreExpression $LeftOperandExpression, 
             $BinaryOperator, 
-            Expression $RightOperandExpression);
+            CoreExpression $RightOperandExpression);
     
     /**
-     * @return Expression
+     * @return CoreExpression
      */
-    public function MapCastExpression($CastType, Expression $CastValueExpression);
+    public function MapCastExpression($CastType, CoreExpression $CastValueExpression);
     
     /**
-     * @return Expression
+     * @return CoreExpression
      */
     public function MapFunctionCallExpression($FunctionName, array $ArgumentValueExpression);
     
     /**
-     * @return Expression
+     * @return CoreExpression
      */
     public function MapIfExpression(
-            Expression $ConditionExpression,
-            Expression $IfTrueExpression, 
-            Expression $IfFalseExpression);
+            CoreExpression $ConditionExpression,
+            CoreExpression $IfTrueExpression, 
+            CoreExpression $IfFalseExpression);
     
     /**
-     * @return Expression
+     * @return CoreExpression
      */
-    public function MapUnaryOperationExpression($UnaryOperator, Expression $OperandExpression);
+    public function MapUnaryOperationExpression($UnaryOperator, CoreExpression $OperandExpression);
 }
 
 ?>

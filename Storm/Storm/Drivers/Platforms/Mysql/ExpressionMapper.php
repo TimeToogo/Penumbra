@@ -29,13 +29,13 @@ final class ExpressionMapper extends E\ExpressionMapper {
             $AssignmentOperator, 
             CoreExpression $ValueExpression) {
         
-        if(isset(static::$AssignmentBinaryOperatorMap[$AssignmentOperator])) {
+        if(isset(self::$AssignmentBinaryOperatorMap[$AssignmentOperator])) {
             return Expression::Set(
                     $ColumnExpression, 
                     O\Assignment::Equal, 
                     $this->MapBinaryOperationExpression(
                             $ColumnExpression, 
-                            static::$AssignmentBinaryOperatorMap[$AssignmentOperator], 
+                            self::$AssignmentBinaryOperatorMap[$AssignmentOperator], 
                             $ValueExpression));
         }
         else {

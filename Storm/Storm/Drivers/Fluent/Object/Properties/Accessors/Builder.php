@@ -26,22 +26,6 @@ class Builder implements \ArrayAccess {
         return $Builder->Accessor;
     }
     
-    protected function Identifier(&$Identifier) {
-        return $this->Accessor->Identifier($Identifier);
-    }
-
-    public function GetValue($Entity) {
-        return $this->Accessor->GetValue($Entity);
-    }
-
-    public function SetValue($Entity, $PropertyValue) {
-        return $this->Accessor->SetEntityType($Entity, $PropertyValue);
-    }
-    
-    public function SetEntityType($EntityType) {
-        return $this->Accessor->SetEntityType($EntityType);
-    }
-    
     private function AddAccessor(Accessors\Accessor $NewAccessor) {
         if($this->Accessor === null) {
             $this->Accessor = $NewAccessor;

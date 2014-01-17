@@ -50,7 +50,7 @@ class Test implements \StormTests\IStormTest {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
-        $Action = self::Persist;
+        $Action = self::Retreive;
         $Amount = 1;
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
