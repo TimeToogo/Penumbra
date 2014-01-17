@@ -1,0 +1,21 @@
+{
+    "name": "timetoogo/storm",
+    "description": "Domain oriented ORM, crafted for PHP 5.4+",
+    "keywords": ["orm", "database", "object", "relational", "mapper"],
+    "homepage": "http://www.github.com/TimeToogo/Storm",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Elliot Levin",
+            "email": "elliot@aanet.com.au"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4.0",
+        "nikic/php-parser": "0.9.4"
+    },
+    "autoload": {
+        "psr-0": { "Storm": "Storm/" }
+    }
+}
