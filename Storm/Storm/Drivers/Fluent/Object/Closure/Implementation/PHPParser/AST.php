@@ -324,12 +324,6 @@ class AST extends ASTBase {
         'Cast_Object' => Operators\Cast::Object,
         'Cast_String' => Operators\Cast::String,
     ];
-
-    private function ParseCastNode(\PHPParser_Node_Expr_Cast $Node, $NodeTypeName) {
-        return Expression::Cast(
-                self::$CastOperatorMap[$NodeTypeName], 
-                $this->ParseNode($Node));
-    }
     
     private static $BinaryOperatorsMap = [
         'BitwiseAnd' => Operators\Binary::BitwiseAnd,
