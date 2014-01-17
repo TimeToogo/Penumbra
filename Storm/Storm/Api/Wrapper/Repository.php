@@ -27,12 +27,12 @@ class Repository extends Base\Repository {
         return $this->WrappedRepository->DiscardAll($Entities);
     }
 
-    public function Execute(Object\IProcedure $Procedure) {
-        return $this->WrappedRepository->Execute($Procedure);
+    public function Execute(Base\Fluent\ProcedureBuilder $ProcedureBuilder) {
+        return $this->WrappedRepository->Execute($ProcedureBuilder);
     }
 
-    public function Load(Object\IRequest $Request) {
-        return $this->WrappedRepository->Load($Request);
+    public function Load(Base\Fluent\RequestBuilder $RequestBuilder) {
+        return $this->WrappedRepository->Load($RequestBuilder);
     }
 
     public function Persist($Entity) {
