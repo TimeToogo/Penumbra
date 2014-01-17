@@ -9,6 +9,7 @@ class Reader implements IReader {
     public function Read(\Closure $Closure) {
         return new Data($Closure);
     }
+
 }
 
 ?>

@@ -18,7 +18,7 @@ abstract class TableColumnData extends ColumnData {
     }
     
     final public function Matches(ColumnData $OtherColumnData) {
-        if($OtherColumnData instanceof self && !$this->Table->Is($OtherColumnData->Table)) {
+        if($OtherColumnData instanceof TableColumnData && !$this->Table->Is($OtherColumnData->Table)) {
             return false;
         }
         else {
