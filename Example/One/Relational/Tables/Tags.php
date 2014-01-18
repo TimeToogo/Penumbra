@@ -1,6 +1,6 @@
 <?php
 
-namespace StormTests\One\Relational\Tables;
+namespace StormExamples\One\Relational\Tables;
 
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational\Database;

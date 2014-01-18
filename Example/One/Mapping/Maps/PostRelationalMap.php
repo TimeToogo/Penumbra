@@ -1,9 +1,9 @@
 <?php
 
-namespace StormTests\One\Mapping\Maps;
+namespace StormExamples\One\Mapping\Maps;
 
 use \Storm\Drivers\Constant\Mapping;
-use \StormTests\One\Entities\Post;
+use \StormExamples\One\Entities\Post;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
@@ -18,8 +18,8 @@ final class PostRelationalMap extends Mapping\EntityRelationalMap {
     }
     
     protected function InitializeMappings(Object\EntityMap $EntityMap, Relational\Database $Database) {
-        /* @var $EntityMap \StormTests\One\Domain\Maps\PostMap */
-        /* @var $Table \StormTests\One\Relational\Tables\Posts */
+        /* @var $EntityMap \StormExamples\One\Domain\Maps\PostMap */
+        /* @var $Table \StormExamples\One\Relational\Tables\Posts */
         $Table = $Database->Posts;
         
         $this->Map($EntityMap->Title)->ToColumn($Table->Title);

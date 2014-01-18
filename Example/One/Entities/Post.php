@@ -1,6 +1,6 @@
 <?php
 
-namespace StormTests\One\Entities;
+namespace StormExamples\One\Entities;
 
 class Post extends Entity {
     public $Blog;

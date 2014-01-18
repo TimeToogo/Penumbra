@@ -1,6 +1,6 @@
 <?php
 
-namespace StormTests\One\Domain;
+namespace StormExamples\One\Domain;
 
 use \Storm\Drivers\Constant\Object;
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace StormTests\One\Mapping\Maps;
+namespace StormExamples\One\Mapping\Maps;
 
 use \Storm\Drivers\Constant\Mapping;
-use \StormTests\One\Entities\Tag;
+use \StormExamples\One\Entities\Tag;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
@@ -18,8 +18,8 @@ final class TagRelationalMap extends Mapping\EntityRelationalMap {
     }
     
     protected function InitializeMappings(Object\EntityMap $EntityMap, Relational\Database $Database) {
-        /* @var $EntityMap \StormTests\One\Domain\Maps\TagMap */
-        /* @var $Table \StormTests\One\Relational\Tables\Tags */
+        /* @var $EntityMap \StormExamples\One\Domain\Maps\TagMap */
+        /* @var $Table \StormExamples\One\Relational\Tables\Tags */
         $Table = $Database->Tags;
         
         $this->Map($EntityMap->Id)->ToColumn($Table->Id);

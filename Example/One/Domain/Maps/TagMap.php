@@ -1,13 +1,13 @@
 <?php
 
-namespace StormTests\One\Domain\Maps;
+namespace StormExamples\One\Domain\Maps;
 
 use \Storm\Core\Object\Domain;
 use \Storm\Drivers\Base\Object;
 use \Storm\Drivers\Base\Object\Properties;
 use \Storm\Drivers\Base\Object\Properties\Accessors;
 use \Storm\Drivers\Constant\Object\EntityMap;
-use \StormTests\One\Entities\Tag;
+use \StormExamples\One\Entities\Tag;
 
 class TagMap extends EntityMap {
     protected function EntityType() {

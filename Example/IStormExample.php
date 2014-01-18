@@ -1,6 +1,6 @@
 <?php
 
-namespace StormTests;
+namespace StormExamples;
 
 use \Storm\Api\Base\Storm;
 use \Storm\Api\Base\Repository;

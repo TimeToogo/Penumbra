@@ -1,6 +1,6 @@
 <?php
 
-namespace StormTests\One\Relational;
+namespace StormExamples\One\Relational;
 
 use \Storm\Drivers\Constant\Relational;
 
@@ -10,7 +10,7 @@ class BloggingDatabase extends Relational\Database {
     }
     
     public static function InitializePlatform() {
-        return \StormTests\One\One::GetPlatform();
+        return \StormExamples\One\One::GetPlatform();
     }
     
     public $Blogs;

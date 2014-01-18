@@ -1,6 +1,6 @@
 <?php
 
-namespace StormTests;
+namespace StormExamples;
 
 echo '<pre>';
             

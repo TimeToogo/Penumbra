@@ -1,8 +1,8 @@
 <?php
 
-namespace StormTests\One;
+namespace StormExamples\One;
 
-use \StormTests\One\Entities;
+use \StormExamples\One\Entities;
 use \Storm\Api;
 use \Storm\Api\Base\Storm;
 use \Storm\Api\Base\Repository;
@@ -10,7 +10,7 @@ use \Storm\Drivers\Base\Object\Properties\Collections\Collection;
 use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
-class One implements \StormTests\IStormExample {
+class One implements \StormExamples\IStormExample {
     
     public static function GetPlatform() {
         $Development = 1;
@@ -31,7 +31,7 @@ class One implements \StormTests\IStormExample {
     }
     
     public function GetStorm() {
-        //return new Storm(new Mapping\BloggingDomainDatabaseMap());
+        return new Storm(new Mapping\BloggingDomainDatabaseMap());
         return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
                 self::GetPlatform(),
                 function () {

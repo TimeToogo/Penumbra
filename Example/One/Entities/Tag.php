@@ -1,6 +1,6 @@
 <?php
 
-namespace StormTests\One\Entities;
+namespace StormExamples\One\Entities;
 
 class Tag extends Entity {
     public $Id;

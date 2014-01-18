@@ -1,13 +1,13 @@
 <?php
 
-namespace StormTests\One\Domain\Maps;
+namespace StormExamples\One\Domain\Maps;
 
 use \Storm\Core\Object\Domain;
 use \Storm\Drivers\Base\Object;
 use \Storm\Drivers\Base\Object\Properties;
 use \Storm\Drivers\Base\Object\Properties\Accessors;
 use \Storm\Drivers\Constant\Object\EntityMap;
-use \StormTests\One\Entities\Post;
+use \StormExamples\One\Entities\Post;
 
 class PostMap extends EntityMap {
     protected function EntityType() {
@@ -37,7 +37,7 @@ class PostMap extends EntityMap {
         $this->Blog = new Properties\DataProperty(new Accessors\Field('Blog'));
         
         $this->Tags = new Properties\CollectionProperty(new Accessors\Field('Tags'), 
-                \StormTests\One\Entities\Tag::GetType(),
+                \StormExamples\One\Entities\Tag::GetType(),
                 new Properties\Relationships\NonIdentifying(), 
                 null,
                 $ProxyGenerator);

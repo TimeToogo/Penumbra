@@ -1,17 +1,17 @@
 <?php
 
-namespace StormTests\One\Mapping;
+namespace StormExamples\One\Mapping;
 
 use \Storm\Drivers\Base\Mapping\MappingConfiguration;
 use \Storm\Drivers\Constant\Mapping;
 
 class BloggingDomainDatabaseMap extends Mapping\DomainDatabaseMap {
     protected function Domain() {
-        return new \StormTests\One\Domain\BloggingDomain();
+        return new \StormExamples\One\Domain\BloggingDomain();
     }
     
     protected function Database() {
-        return new \StormTests\One\Relational\BloggingDatabase();
+        return new \StormExamples\One\Relational\BloggingDatabase();
     }
     
     protected function MappingConfiguration() {

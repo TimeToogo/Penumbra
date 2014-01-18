@@ -1,6 +1,6 @@
 <?php
 
-namespace StormTests\One\Entities;
+namespace StormExamples\One\Entities;
 
 abstract class Entity {
     public static $Instances = array();
