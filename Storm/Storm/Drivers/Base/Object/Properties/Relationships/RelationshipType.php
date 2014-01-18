@@ -3,12 +3,12 @@
 namespace Storm\Drivers\Base\Object\Properties\Relationships;
 
 use \Storm\Drivers\Base\Object\Properties\IRelationshipType;
-use \Storm\Core\Object;
+use \Storm\Drivers\Base\Object\Properties\Proxies\IProxy;
 
 abstract class RelationshipType implements IRelationshipType {
         
     final protected function IsEntityAltered($Entity) {
-        if($Entity instanceof Proxies\IProxy) {
+        if($Entity instanceof IProxy) {
             return $Entity->__IsAltered();
         }
         else {
