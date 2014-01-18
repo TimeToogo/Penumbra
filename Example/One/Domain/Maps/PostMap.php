@@ -38,7 +38,7 @@ class PostMap extends EntityMap {
         
         $this->Tags = new Properties\CollectionProperty(new Accessors\Field('Tags'), 
                 \StormExamples\One\Entities\Tag::GetType(),
-                new Properties\Relationships\NonIdentifying(), 
+                new Properties\Relationships\CascadeNonIdentifying(), 
                 null,
                 $ProxyGenerator);
     }

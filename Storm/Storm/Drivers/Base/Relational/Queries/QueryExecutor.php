@@ -77,7 +77,10 @@ abstract class QueryExecutor implements IQueryExecutor {
             $KeyGenerator = $Table->GetKeyGenerator();
             $KeyGeneratorMode = $KeyGenerator->GetKeyGeneratorMode();
             
-            if($KeyGeneratorMode === PrimaryKeys\KeyGeneratorMode::PreInsert) {
+            if(count($UnkeyedRows) === 0) {
+                $KeyGeneratorMode = null;
+            }
+            else if($KeyGeneratorMode === PrimaryKeys\KeyGeneratorMode::PreInsert) {
                 /* @var $KeyGenerator PrimaryKeys\PreInsertKeyGenerator */
                 
                 $KeyGenerator->FillPrimaryKeys($Connection, $UnkeyedRows);

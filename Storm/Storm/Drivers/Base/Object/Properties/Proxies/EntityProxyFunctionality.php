@@ -121,7 +121,7 @@ trait EntityProxyFunctionality {
         $this->__Load();
         if($this->HasParentMethod(__FUNCTION__))
             return $this->FowardMethodCall(__FUNCTION__, func_get_args());
-        else if(property_exists($this, $Name) || isset($this->$Name))
+        else if(isset($this->$Name) || property_exists($this, $Name))
             return $this->$Name;
         else
             trigger_error(sprintf('Undefined property: %s::$%s', static::$__EntityClassName, $Name), E_USER_NOTICE);

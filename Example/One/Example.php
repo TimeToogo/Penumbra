@@ -39,18 +39,19 @@ class One implements \StormExamples\IStormExample {
                 });
     }
 
-    const Id = 19;
+    const Id = 26;
     
     const Persist = 0;
     const Retreive = 1;
-    const Discard = 2;
-    const Procedure = 3;
+    const PersistExisting = 2;
+    const Discard = 3;
+    const Procedure = 4;
 
     public function Run(Storm $BloggingStorm) {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
-        $Action = self::Retreive;
+        $Action = self::PersistExisting;
         $Amount = 1;
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
@@ -79,12 +80,16 @@ class One implements \StormExamples\IStormExample {
                 return $this->Persist($Id, $BloggingStorm, $BlogRepository, $TagRepository);
 
 
-            case self::Procedure:
-                return $this->Procedure($Id, $BloggingStorm, $BlogRepository, $TagRepository);
-
-
             case self::Retreive:
                 return $this->Retreive($Id, $BloggingStorm, $BlogRepository, $TagRepository);
+
+                
+            case self::PersistExisting:
+                return $this->PersistExisting($Id, $BloggingStorm, $BlogRepository, $TagRepository);
+
+                
+            case self::Procedure:
+                return $this->Procedure($Id, $BloggingStorm, $BlogRepository, $TagRepository);
 
 
             case self::Discard:
@@ -98,9 +103,6 @@ class One implements \StormExamples\IStormExample {
     private function Persist($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
         
         $Blog = $this->CreateBlog();
-        foreach ($Blog->Posts as $Post) {
-            $TagRepository->PersistAll($Post->Tags->ToArray());
-        }
         $TagRepository->SaveChanges();
 
         $BlogRepository->Persist($Blog);
@@ -146,6 +148,17 @@ class One implements \StormExamples\IStormExample {
         $RevivedBlog->Posts[1]->Tags->ToArray();
 
         return null;
+    }
+    
+    private function PersistExisting($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+        
+        $Blog = $BlogRepository->LoadById($Id);
+        $Blog->Posts[0]->Content .= 'foobar';
+        
+        $BlogRepository->Persist($Blog);
+        $BlogRepository->SaveChanges();
+
+        return $Blog;
     }
     
     private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {

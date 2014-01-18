@@ -5,7 +5,7 @@ namespace Storm\Drivers\Base\Object\Properties\Relationships;
 use \Storm\Drivers\Base\Object\Properties\IRelationshipType;
 use \Storm\Core\Object;
 
-class NonIdentifying implements IRelationshipType {
+class NonIdentifying extends RelationshipType {
     private $CascadePersist;
     private $CascadeDiscard;
     function __construct($CascadePersist = false, $CascadeDiscard = false) {
@@ -27,7 +27,7 @@ class NonIdentifying implements IRelationshipType {
 
     public function GetPersistedRelationship(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
             $ParentEntity, $RelatedEntity) {
-        if($this->CascadePersist) {
+        if($this->CascadePersist && $this->IsEntityAltered($RelatedEntity)) {
             $UnitOfWork->Persist($RelatedEntity);
         }
         return $Domain->PersistedRelationship($ParentEntity, $RelatedEntity);

@@ -9,6 +9,11 @@ namespace Storm\Core\Relational;
  */
 final class DiscardedRelationship {
     /**
+     * @var boolean 
+     */
+    private $IsIdentifying;
+    
+    /**
      * @var PrimaryKey 
      */
     private $ParentPrimaryKey;
@@ -18,11 +23,19 @@ final class DiscardedRelationship {
      */
     private $ChildPrimaryKey;
     
-    public function __construct(PrimaryKey $ParentPrimaryKey, PrimaryKey $ChildPrimaryKey) {
+    public function __construct($IsIdentifying, PrimaryKey $ParentPrimaryKey, PrimaryKey $ChildPrimaryKey) {
+        $this->IsIdentifying = $IsIdentifying;
         $this->ParentPrimaryKey = $ParentPrimaryKey;
         $this->ChildPrimaryKey = $ChildPrimaryKey;
     }
     
+    /**
+     * @return boolean
+     */
+    public function IsIdentifying() {
+        return $this->IsIdentifying;
+    }
+
     /**
      * @return PrimaryKey
      */

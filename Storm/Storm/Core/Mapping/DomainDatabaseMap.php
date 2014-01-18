@@ -612,7 +612,10 @@ abstract class DomainDatabaseMap {
             $ParentPrimaryKey = $this->MapIdentityToPrimaryKey($DiscardedRelationship->GetParentIdentity());
             $ChildPrimaryKey = $this->MapIdentityToPrimaryKey($DiscardedRelationship->GetRelatedIdentity());
             
-            $RelationalDiscardedRelationships[$Key] = new Relational\DiscardedRelationship($ParentPrimaryKey, $ChildPrimaryKey);
+            $RelationalDiscardedRelationships[$Key] = new Relational\DiscardedRelationship(
+                    $DiscardedRelationship->IsIdentifying(),
+                    $ParentPrimaryKey, 
+                    $ChildPrimaryKey);
         }
         
         return $RelationalDiscardedRelationships; 

@@ -21,6 +21,15 @@ class Identifying implements IRelationshipType {
         return $Domain->DiscardedIdentifyingRelationship($ParentEntity, $ChildEntity, $UnitOfWork);
     }
 
+    
+    final protected function IsEntityAltered($Entity) {
+        if($Entity instanceof Proxies\IProxy) {
+            return $Entity->__IsAltered();
+        }
+        else {
+            return true;
+        }
+    }
 }
 
 

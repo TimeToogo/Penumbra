@@ -8,6 +8,7 @@ class Collection extends \ArrayObject implements ICollection {
     private $EntityType;
     private $IsAltered = false;
     protected $OriginalEntities = array();
+    private $AddedEntities = array();
     private $RemovedEntities = array();
     
     public function __construct($EntityType, array $Entities = array()) {        
@@ -41,6 +42,9 @@ class Collection extends \ArrayObject implements ICollection {
     final public function __GetOriginalEntities() {
         return $this->OriginalEntities;
     }
+    final public function __GetNewEntities() {
+        return $this->AddedEntities;
+    }
     
     public function append($Entity) {
         $this->VerifyEntity($Entity);
@@ -54,6 +58,8 @@ class Collection extends \ArrayObject implements ICollection {
 
     public function exchangeArray($Input) {
         $this->IsAltered = true;
+        $this->RemovedEntities = array_merge($this->RemovedEntities, $this->getArrayCopy());
+        $this->AddedEntities = array_merge($this->AddedEntities, $Input);
         parent::exchangeArray($Input);
     }
     

@@ -2,17 +2,28 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Collections;
 
+use \Storm\Core\Object;
 use \Storm\Core\Object\Domain;
+use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 
 class LazyCollection extends Collection {
     private $Domain;
+    /**
+     * @var IProxyGenerator|null
+     */
+    private $ProxyGenerator;
     private $ArrayLoaderFunction;
     private $IsLoaded = false;
     
-    public function __construct(Domain $Domain, $EntityType, callable $ArrayLoaderFunction) {
+    public function __construct(
+            Domain $Domain, 
+            $EntityType, 
+            callable $ArrayLoaderFunction,
+            IProxyGenerator $ProxyGenerator = null) {
         parent::__construct($EntityType, array());
         $this->ArrayLoaderFunction = $ArrayLoaderFunction;
         $this->Domain = $Domain;
+        $this->ProxyGenerator = $ProxyGenerator;
     }
     private function Load() {
         if($this->IsLoaded) {
@@ -24,10 +35,29 @@ class LazyCollection extends Collection {
         
         $Loader = $this->ArrayLoaderFunction;
         $RevivalData = $Loader();
-        $Entities = $this->Domain->ReviveEntities($this->GetEntityType(), $RevivalData);
-        $this->exchangeArray($Entities);
+        $Entities = $this->LoadEntities($RevivalData);
+        $this->exchangeArray($this->LoadEntities($RevivalData));
         $this->SetIsAltered(false);
         $this->OriginalEntities = $Entities;
+    }
+    private function LoadEntities(array $RevivalData) {
+        if($this->ProxyGenerator !== null) {
+            $LoaderFunctions = array_map(
+                    function (Object\RevivalData $RevivalData) {
+                        return function () use ($RevivalData) {
+                            return $RevivalData;
+                        };
+                    }, 
+                    $RevivalData);
+            
+            return $this->ProxyGenerator->GenerateProxies(
+                    $this->Domain, 
+                    $this->GetEntityType(), 
+                    $LoaderFunctions);
+        }
+        else {
+            return $this->Domain->ReviveEntities($this->GetEntityType(), $RevivalData);
+        }
     }
     
     final public function __IsLoaded() {

@@ -164,10 +164,10 @@ class Repository {
     }
     
     /**
-     * Loads an entity or null from given identity values.
+     * Loads an entity from given identity values or null if entity does not exist.
      * 
-     * @param mixed ... The identity values  
-     * @return object|null
+     * @param mixed ... The identity value(s)  
+     * @return object|null The returned entity or null
      * @throws \Exception
      */
     public function LoadById($_) {

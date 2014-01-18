@@ -81,8 +81,13 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
         else if(!$CurrentIsValidEntity && !$OriginalIsValidEntity) {
             
         }
-        else if($CurrentValue == $OriginalValue || $Domain->DoShareIdentity($CurrentValue, $OriginalValue)) {
+        else if($CurrentValue == $OriginalValue) {
             
+        }
+        else if($Domain->DoShareIdentity($CurrentValue, $OriginalValue)) {
+            $PersistedRelationship = $this->RelationshipType->GetPersistedRelationship(
+                    $Domain, $UnitOfWork, 
+                    $ParentEntity, $CurrentValue);
         }
         else {
             if($OriginalIsValidEntity) {

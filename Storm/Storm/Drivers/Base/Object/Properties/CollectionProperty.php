@@ -10,7 +10,7 @@ class CollectionProperty extends MultipleEntityProperty {
     }
     
     protected function ReviveCallableProperty(Object\Domain $Domain, $Entity, callable $Callback) {
-        return new Collections\LazyCollection($Domain, $this->GetEntityType(), $Callback);
+        return new Collections\LazyCollection($Domain, $this->GetEntityType(), $Callback, $this->ProxyGenerator);
     }
     
     protected function ReviveArrayOfRevivalData(Object\Domain $Domain, $Entity, array $RevivalDataArray) {
@@ -25,10 +25,6 @@ class CollectionProperty extends MultipleEntityProperty {
         $OriginalEntities = array();
         $CurrentEntities = array();
         
-        if($HasOriginalValue) {
-            $OriginalEntities = $OriginalValue->ToArray();
-        }
-        
         if(!($CurrentValue instanceof Collections\ICollection)) {
             if(!($CurrentValue instanceof \Traversable)) {
                 throw new \Exception;//TODO:error message
@@ -40,15 +36,19 @@ class CollectionProperty extends MultipleEntityProperty {
             }
         }
         else if($CurrentValue == $OriginalValue && !$CurrentValue->__IsAltered()) {
-            
+            return array();
         }
         else {
             $CurrentEntities = $CurrentValue->ToArray();
         }
-        $NewEntities = array_udiff($CurrentEntities, $OriginalEntities, [$this, 'ObjectComparison']);
-        $RemovedEntities = array_udiff($OriginalEntities, $CurrentEntities, [$this, 'ObjectComparison']);
         
-        foreach($NewEntities as $NewEntity) {
+        if($HasOriginalValue) {
+            $OriginalEntities = $OriginalValue->ToArray();
+        }
+        $NewOrAlteredEntities = $this->ComputeDifference($CurrentEntities, $OriginalEntities);
+        $RemovedEntities = $this->ComputeIdentityDifference($Domain, $OriginalEntities, $CurrentEntities);
+        
+        foreach($NewOrAlteredEntities as $NewEntity) {
             $RelationshipChanges[] = new Object\RelationshipChange(
                     $this->RelationshipType->GetPersistedRelationship(
                             $Domain, $UnitOfWork, 
@@ -82,8 +82,31 @@ class CollectionProperty extends MultipleEntityProperty {
         return $DiscardedRelationships;
     }
     
-    public function ObjectComparison(&$Object1, &$Object2) {
-        return $Object1 == $Object2;
+    private function ComputeDifference(array $Objects, array $OtherObjects) {
+        $Difference = array();
+        foreach($Objects as $Object) {
+            if(!in_array($Object, $OtherObjects)) {
+                $Difference[] = $Object;
+            }
+        }
+        
+        return $Difference;
+    }
+    
+    private function ComputeIdentityDifference(Object\Domain $Domain, array $Objects, array $OtherObjects) {
+        $this->IndexEntitiesByIdentity($Domain, $Objects);
+        $this->IndexEntitiesByIdentity($Domain, $OtherObjects);
+        
+        return array_diff_key($Objects, $OtherObjects);
+    }
+    
+    private function IndexEntitiesByIdentity(Object\Domain $Domain, array &$Entities) {
+        $IndexedEntities = array();
+        foreach($Entities as $Key => $Entity) {
+            $IndexedEntities[$Domain->Identity($Entity)->Hash()] = $Entity;
+        }
+        
+        $Entities = $IndexedEntities;
     }
 }
 

@@ -59,6 +59,14 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
                     $IdentifyingChildRows[] = $PersistedRelationship->GetChildResultRow()->GetRow($Table);
                 }
             }
+            if($RelationshipChange->HasDiscardedRelationship()) {
+                $DiscardedRelationship = $RelationshipChange->GetDiscardedRelationship();
+                if($DiscardedRelationship->IsIdentifying()) {
+                    $PrimaryKeyToDiscard = $DiscardedRelationship->GetRelatedPrimaryKey();
+                    $this->GetForeignKey()->MapReferencedToParentKey($ParentData, $PrimaryKeyToDiscard);
+                    $Transaction->Discard($PrimaryKeyToDiscard);
+                }
+            }
         }
         $ParentRow = $ParentData->GetRow($this->GetParentTable());
         $this->PersistIdentifyingRelationship($Transaction, $ParentRow, $IdentifyingChildRows);
