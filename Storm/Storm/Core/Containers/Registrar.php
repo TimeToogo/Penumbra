@@ -2,6 +2,11 @@
 
 namespace Storm\Core\Containers;
 
+/**
+ * This class provides simple interface to a type safe and write-only collection.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 final class Registrar {
     private $RegistrableType;
     private $Instances = array();
@@ -16,9 +21,10 @@ final class Registrar {
 
     public function Register($Instance) {
         if($this->RegistrableType !== null) {
-            if(!($Instance instanceof $this->RegistrableType))
+            if(!($Instance instanceof $this->RegistrableType)) {
                 throw new \InvalidArgumentException
                     ('$Instance must be an instance of ' . $this->RegistrableType);
+            }
         }
         
         $this->Instances[] = $Instance;

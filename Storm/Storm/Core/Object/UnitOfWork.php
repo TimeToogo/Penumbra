@@ -2,17 +2,50 @@
 
 namespace Storm\Core\Object;
 
-/*
- * TODO: make the order of operations relavent
+/**
+ * This unit of work contains data for taking actions against entities in a given domain.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
  */
 final class UnitOfWork {
+    /**
+     * @var Domain 
+     */
     private $Domain;
+    
+    /**
+     * @var Map 
+     */
     private $PersistenceDataEntityMap;
+    
+    /**
+     * @var PersistenceData[] 
+     */
     private $PersistenceData = array();
+    
+    /**
+     * @var PersistenceData[][]
+     */
     private $PersistenceDataGroups = array();
-    private $Procedures = array();
+    
+    /**
+     * @var IProcedure[] 
+     */
+    private $ProcedureToExecute = array();
+    
+    /**
+     * @var DiscardenceData[] 
+     */
     private $DiscardenceData = array();
+    
+    /**
+     * @var Identity[][] 
+     */
     private $DiscardedIdentityGroups = array();
+    
+    /**
+     * @var ICriterion[] 
+     */
     private $DiscardedCriteria = array();
     
     public function __construct(Domain $Domain) {
@@ -28,7 +61,10 @@ final class UnitOfWork {
     }
     
     /**
-     * @return PersistanceData
+     * Persist an entity to the unit of work.
+     * 
+     * @param type $Entity The entity to persist
+     * @return void 
      */
     public function Persist($Entity) {
         $Hash = spl_object_hash($Entity);
@@ -45,10 +81,14 @@ final class UnitOfWork {
             $this->PersistenceDataGroups[$EntityType] = array();
         }
         $this->PersistenceDataGroups[$EntityType][] = $PersistenceData;
-            
-        return $PersistenceData;
     }
     
+    /**
+     * Sets a generated identity to to the entity mapped with the supplied persistence data.
+     * 
+     * @param PersistenceData $PersistenceData The persistence data of the entity
+     * @param Identity $Identity The identity to supply the entity
+     */
     public function SupplyIdentity(PersistenceData $PersistenceData, Identity $Identity) {
         if(isset($this->PersistenceDataEntityMap[$PersistenceData])) {
             $Entity = $this->PersistenceDataEntityMap[$PersistenceData];
@@ -56,16 +96,28 @@ final class UnitOfWork {
         }
     }
     
+    /**
+     * @return object[]
+     */
     public function GetEntities() {
         return $this->PersistenceDataEntityMap->GetToInstances();
     }
     
+    /**
+     * Add a procedure to be executed.
+     * 
+     * @param IProcedure $Procedure The procedure to execute
+     * @return void
+     */
     public function Execute(IProcedure $Procedure) {
-        $this->Procedures[] = $Procedure;
+        $this->ProcedureToExecute[] = $Procedure;
     }
     
     /**
-     * @return DiscardenceData
+     * Discards the supplied entity 
+     * 
+     * @param object $Entity The entity to discard
+     * @return void
      */
     public function Discard($Entity) {
         $Hash = spl_object_hash($Entity);
@@ -73,7 +125,7 @@ final class UnitOfWork {
             return $this->DiscardenceData[$Hash];
         }
         if(!$this->Domain->HasIdentity($Entity)) {
-            return null;
+            return;
         }
         
         $DiscardenceData = $this->Domain->Discard($this, $Entity);
@@ -84,10 +136,13 @@ final class UnitOfWork {
             $this->DiscardedIdentityGroups[$EntityType] = array();
         }
         $this->DiscardedIdentityGroups[$EntityType][] = $DiscardenceData;
-        
-        return $DiscardenceData;
     }
     
+    /**
+     * Discard all entities matching the supplied criterion.
+     * 
+     * @param ICriterion $Criterion The criterion to discard by
+     */
     public function DiscardWhere(ICriterion $Criterion) {
         $this->DiscardedCriteria[spl_object_hash($Criterion)] = $Criterion;
     }
@@ -110,7 +165,7 @@ final class UnitOfWork {
      * @return IProcedure[]
      */
     public function GetExecutedProcedures() {
-        return $this->Procedures;
+        return $this->ProcedureToExecute;
     }
     
     /**

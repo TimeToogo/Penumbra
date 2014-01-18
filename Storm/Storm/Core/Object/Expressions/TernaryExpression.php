@@ -2,6 +2,9 @@
 
 namespace Storm\Core\Object\Expressions;
 
+/**
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class TernaryExpression extends Expression {
     private $ConditionExpression;
     private $IfTrueExpression;
@@ -16,14 +19,23 @@ class TernaryExpression extends Expression {
         $this->IfFalseExpression = $IfFalseExpression;
     }
     
+    /**
+     * @return Expression
+     */
     public function GetConditionExpression() {
         return $this->ConditionExpression;
     }
 
+    /**
+     * @return Expression
+     */
     public function GetIfTrueExpression() {
         return $this->IfTrueExpression;
     }
 
+    /**
+     * @return Expression
+     */
     public function GetIfFalseExpression() {
         return $this->IfFalseExpression;
     }

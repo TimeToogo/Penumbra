@@ -2,10 +2,30 @@
 
 namespace Storm\Core\Object;
 
+/**
+ * This class represents a relationship between two entities which has been persisted.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 final class PersistedRelationship {
+    /**
+     * @var boolean
+     */
     private $IsIdentifying;
+    
+    /**
+     * @var Identity
+     */
     private $ParentIdentity;
+    
+    /**
+     * @var Identity|null
+     */
     private $RelatedIdentity;
+    
+    /**
+     * @var PersistenceData|null
+     */
     private $ChildPersistenceData;
     
     public function __construct(Identity $ParentIdentity, 
@@ -22,6 +42,9 @@ final class PersistedRelationship {
         $this->ChildPersistenceData = $ChildPersistenceData;
     }
     
+    /**
+     * @return boolean
+     */
     public function IsIdentifying() {
         return $this->IsIdentifying;
     }
@@ -32,9 +55,10 @@ final class PersistedRelationship {
     public function GetParentIdentity() {
         return $this->ParentIdentity;
     }
-       
+    
     /**
      * @return Identity
+     * @throws \BadMethodCallException
      */
     public function GetRelatedIdentity() {
         if($this->IsIdentifying) {
@@ -42,9 +66,10 @@ final class PersistedRelationship {
         }
         return $this->RelatedIdentity;
     }
-
+    
     /**
-     * @return PersistenceData
+     * @return Identity
+     * @throws \BadMethodCallException
      */
     public function GetChildPersistenceData() {
         if(!$this->IsIdentifying) {

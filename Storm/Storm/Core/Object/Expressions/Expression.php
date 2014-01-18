@@ -4,6 +4,11 @@ namespace Storm\Core\Object\Expressions;
 
 use Storm\Core\Object\IProperty;
 
+/**
+ * The base class for object expressions.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 abstract class Expression {
     use \Storm\Core\Helpers\Type;
     

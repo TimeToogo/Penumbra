@@ -4,9 +4,31 @@ namespace Storm\Core\Relational;
 
 use \Storm\Core\Relational\Expressions;
 
+/**
+ * The procedure represents a set of changes to columns values to
+ * a variable amount of rows defined by a criterion.
+ * This can be thought of an UPDATE statement
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class Procedure {
+    /**
+     * The tables to update.
+     * 
+     * @var Table[]
+     */
     private $Tables;
+    
+    /**
+     * The set expressions.
+     * 
+     * @var Expressions\Expression[] 
+     */
     private $Expressions;
+    
+    /**
+     * @var Criterion
+     */
     private $Criterion;
     
     public function __construct(array $Tables, Criterion $Criterion = null) {
@@ -38,6 +60,11 @@ class Procedure {
         return $this->Criterion;
     }
     
+    /**
+     * Set the procedure's criterion.
+     * 
+     * @param Criterion $Criterion The criterion to set
+     */
     final public function SetCriterion(Criterion $Criterion) {
         $this->Criterion = $Criterion;
     }

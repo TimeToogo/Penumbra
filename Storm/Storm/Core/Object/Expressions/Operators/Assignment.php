@@ -2,6 +2,11 @@
 
 namespace Storm\Core\Object\Expressions\Operators;
 
+/**
+ * The class containing php level assignment operators
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 final class Assignment {
     const Equal = '=';
     const EqualReference = '=&';

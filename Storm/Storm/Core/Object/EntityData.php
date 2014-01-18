@@ -2,7 +2,10 @@
 
 namespace Storm\Core\Object;
 
-class EntityData extends PropertyData {
+/**
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
+abstract class EntityData extends PropertyData {
     public function __construct(EntityMap $EntityMap, array $EntityData = array()) {
         parent::__construct($EntityMap, $EntityData);
     }

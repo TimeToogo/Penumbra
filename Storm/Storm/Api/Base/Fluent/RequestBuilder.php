@@ -6,6 +6,11 @@ use \Storm\Core\Object;
 use \Storm\Drivers\Fluent\Object\Request;
 use  \Storm\Drivers\Fluent\Object\Closure;
 
+/**
+ * The RequestBuilder provides a fluent interface for building requests
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class RequestBuilder extends CriterionBuilder {
     private $Properties;
     private $IsSingleEntity;
@@ -20,6 +25,11 @@ class RequestBuilder extends CriterionBuilder {
         $this->IsSingleEntity = false;
     }
     
+    /**
+     * Builds the request from specified parameters
+     * 
+     * @return Request
+     */
     final public function BuildRequest() {
         return new Request(
             $this->EntityMap, 
@@ -28,6 +38,12 @@ class RequestBuilder extends CriterionBuilder {
             $this->BuildCriterion());
     }
     
+    /**
+     * Sets the request to return only the first entity or null if 
+     * none exists.
+     * 
+     * @return RequestBuilder
+     */
     public function First() {
         $this->IsSingleEntity = true;
         $this->Limit(1);
@@ -35,6 +51,11 @@ class RequestBuilder extends CriterionBuilder {
         return $this;
     }
     
+    /**
+     * Sets the request to return the retrieved entities as an array
+     * 
+     * @return RequestBuilder
+     */
     public function AsArray() {  
         $this->IsSingleEntity = false;
         

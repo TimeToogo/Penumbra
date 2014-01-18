@@ -2,9 +2,25 @@
 
 namespace Storm\Core\Relational;
 
+/**
+ * This class represents the data of column from one or many tables.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class ResultRow extends ColumnData {
+    /**
+     * @var Table[] 
+     */
     private $Tables = array();
+    
+    /**
+     * @var Row[] 
+     */
     private $Rows = array();
+    
+    /**
+     * @var PrimaryKey[] 
+     */
     private $PrimaryKeys = array();
     public function __construct(array $Columns, array $ColumnData = array()) {
         foreach($Columns as $Column) {
@@ -42,7 +58,7 @@ class ResultRow extends ColumnData {
     }
     
     /**
-     * @return Table
+     * @return Table[]
      */
     final public function GetTables() {
         return $this->Tables;
@@ -67,7 +83,11 @@ class ResultRow extends ColumnData {
     }
     
     /**
-     * @return Row
+     * Get a the row of the supplied table
+     * 
+     * @param Table $Table The table of the row to retreive
+     * @return Row The matching row
+     * @throws \InvalidArgumentException If the table is not part of this result row
      */
     final public function GetRow(Table $Table) {
         if(!$this->IsOf($Table)) {
@@ -78,7 +98,11 @@ class ResultRow extends ColumnData {
     }
     
     /**
-     * @return PrimaryKey
+     * Get a the primary key of the supplied table
+     * 
+     * @param Table $Table The table of the primary key to retreive
+     * @return PrimaryKey The matching primary key
+     * @throws \InvalidArgumentException If the table is not part of this result row
      */
     final public function GetPrimaryKey(Table $Table) {
         if(!$this->IsOf($Table)) {
@@ -89,7 +113,10 @@ class ResultRow extends ColumnData {
     }
     
     /**
-     * @return ResultRow
+     * Gets the data from the supplied columns
+     * 
+     * @param IColumn[] $Columns The columns to get the from
+     * @return ResultRow The data of the supplied columns
      */
     final public function GetDataFromColumns(array $Columns) {
         $ColumnData = $this->GetColumnData();
@@ -99,8 +126,14 @@ class ResultRow extends ColumnData {
         return new ResultRow($Columns, array_intersect_key($ColumnData, $ColumnIdentifiers));
     }
     
+    
     /**
-     * @return ResultRow[]
+     * Gets the data from the supplied columns from all of the supplied result rows
+     * NOTE: Keys are preserved.
+     * 
+     * @param ResultRow[] $ResultRows The result rows to get the data from
+     * @param IColumn[] $Columns The columns to get the from
+     * @return ResultRow[] The data of the supplied columns
      */
     final public static function GetAllDataFromColumns(array $ResultRows, array $Columns) {
         $NewResultRow = new ResultRow($Columns);

@@ -4,11 +4,28 @@ namespace Storm\Core\Relational;
 
 use \Storm\Core\Containers\Registrar;
 
+/**
+ * This is the base class representing the database of the application.
+ * The databse represents a group of tables, their columns and relations.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 abstract class Database {
     use \Storm\Core\Helpers\Type;
     
+    /**
+     * @var Table[] 
+     */
     private $Tables = array();
+    
+    /**
+     * @var Table[] 
+     */
     private $TablesOrderedByPersistingDependency = array();
+    
+    /**
+     * @var Table[] 
+     */
     private $TablesOrderedByDiscardingDependency = array();
     
     public function __construct() {
@@ -16,9 +33,21 @@ abstract class Database {
         $this->RegisterTables($Registrar);
         $this->AddTables($Registrar->GetRegistered());
     }
+    
+    /**
+     * The method to specify the tables in the current database.
+     * 
+     * @param Registrar $Registrar The registrar to register the tables
+     * @return void
+     */
     protected abstract function RegisterTables(Registrar $Registrar);
     
-    final protected function AddTables(array $Tables) {
+    /**
+     * Adds an array of tables.
+     * 
+     * @param Table[] $Tables The tables to add
+     */
+    private function AddTables(array $Tables) {
         foreach($Tables as $Key => $Table) {
             $Table->InitializeStructure($this);
             
@@ -41,6 +70,14 @@ abstract class Database {
         }
     }
     
+    /**
+     * Adds a table to an array in a specified dependency order.
+     * 
+     * @param Table $Table The table to add
+     * @param Tables[] $OrderedTables The array to add to
+     * @param int $DependencyMode The dependency mode to sort by
+     * @return void
+     */
     private function AddTableToOrderedTables(Table $Table, array &$OrderedTables, $DependencyMode) {
         $Count = 0;
         foreach($OrderedTables as $OtherTable) {
@@ -54,23 +91,35 @@ abstract class Database {
     }
     
     /**
-     * @param string $Name
-     * @return bool
+     * Whether or not a table has been registered.
+     * 
+     * @param string $Name The name of the table
+     * @return boolean
      */
     final public function HasTable($Name) {
         return isset($this->Tables[$Name]);
     }
+    
     /**
-     * @param string $Name
-     * @return Table
+     * Gets a table by name.
+     * 
+     * @param string $Name The name of the table
+     * @return Table|null The matching table or null if it has not been registered
      */
     final public function GetTable($Name) {
         return $this->HasTable($Name) ? $this->Tables[$Name] : null;
     }
     
+    /**
+     * Verifies a table is registered in this database.
+     * 
+     * @param Table $Table The table to verify
+     * @throws \InvalidArgumentException If the table is not registered
+     */
     private function VerifyTable(Table $Table) {
-        if(!$this->HasTable($Table->GetName()))
+        if(!$this->HasTable($Table->GetName())) {
             throw new \InvalidArgumentException('$Table must be of this database');
+        }
     }
     
     /**
@@ -95,7 +144,10 @@ abstract class Database {
     }
     
     /**
-     * @return ResultRow[]
+     * Load the rows specified by the request.
+     * 
+     * @param Request $Request The request to load
+     * @return ResultRow[] The loaded result rows
      */
     final public function Load(Request $Request) {
         foreach($Request->GetTables() as $Table) {
@@ -103,8 +155,22 @@ abstract class Database {
         }
         return $this->GetRows($Request);
     }
+    /**
+     * This method should be implemented such that is returns the rows specified
+     * by the request from the underlying database.
+     * 
+     * @param Request $Request The request to load
+     * @return ResultRow[] The loaded result rows
+     */
     protected abstract function GetRows(Request $Request);
     
+    /**
+     * This method should be implemented such that it commits the supplied transaction
+     * to the underlying database.
+     * 
+     * @param Transaction $Transaction The transaction to commit
+     * @return void
+     */
     public abstract function Commit(Transaction $Transaction);
 }
 

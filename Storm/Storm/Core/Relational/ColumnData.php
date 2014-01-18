@@ -2,8 +2,20 @@
 
 namespace Storm\Core\Relational;
 
+/**
+ * The base class for representing data stored in columns.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
+    /**
+     * @var IColumn[] 
+     */
     private $Columns = array();
+    
+    /**
+     * @var array
+     */
     private $ColumnData;
     
     protected function __construct(array $Columns, array $ColumnData) {
@@ -13,33 +25,51 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         $this->ColumnData = $ColumnData;
     }
     
+    /**
+     * @return IColumn[] 
+     */
     final public function GetColumns() {
         return $this->Columns;
     }
     
+    /**
+     * @return array
+     */
     final public function GetColumnData() {
         return $this->ColumnData;
     }
     
+    /**
+     * Get another column data instance with new data
+     * 
+     * @param array $ColumnData
+     * @return ColumnData
+     */
     final public function Another(array $ColumnData) {
         $ClonedColumnData = clone $this;
         $ClonedColumnData->ColumnData = $ColumnData;
         return $ClonedColumnData;
     }
     
+    /**
+     * Get the column with the supplied identifier
+     * 
+     * @param string $Identifier The column identifier
+     * @return IColumn|null The matched column or null if it does not exist
+     */
     final public function GetColumn($Identifier) {
-        return $this->Columns[$Identifier];
+        return isset($this->Columns[$Identifier]) ? $this->Columns[$Identifier] : null;
     }
     
+    /**
+     * Sets the column to a supplied value
+     * 
+     * @param IColumn $Column The column to set the value to
+     * @param mixed $Data The value to set
+     * @return void
+     */
     final public function SetColumn(IColumn $Column, $Data) {
         $this->AddColumn($Column, $Data);
-    }
-    
-    final public function SetData(ColumnData $ColumnData) {
-        foreach($ColumnData as $Identifier => $Data) {
-            $Column = $ColumnData->GetColumn($Identifier);
-            $this->AddColumn($Column, $Data);
-        }
     }
     
     protected function AddColumn(IColumn $Column, $Data) {
@@ -50,10 +80,6 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         }
         
         $this->ColumnData[$ColumnIdentifier] = $Data;
-    }
-    
-    protected function RemoveColumn(IColumn $Column) {
-        unset($this->ColumnData[$Column->GetIdentifier()]);
     }
     
     final public function Hash() {
@@ -87,11 +113,18 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
 
     final public function offsetUnset($Column) {
-        $this->RemoveColumn($Column);
+        unset($this->ColumnData[$Column->GetIdentifier()]);
     }
     
+    /**
+     * Whether or not the column data matches
+     * 
+     * @param ColumnData $Data The other column data
+     * @return boolean
+     */
     public function Matches(ColumnData $Data) {
-        ksort($PropertyData);
+        ksort($this->ColumnData);
+        ksort($Data->ColumnData);
         return $this->ColumnData === $Data->ColumnData;
     }
 }

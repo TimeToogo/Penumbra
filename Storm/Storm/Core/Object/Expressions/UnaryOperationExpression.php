@@ -2,6 +2,9 @@
 
 namespace Storm\Core\Object\Expressions;
 
+/**
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class UnaryOperationExpression extends Expression {
     private $Operator;
     private $OperandExpression;
@@ -10,10 +13,13 @@ class UnaryOperationExpression extends Expression {
         $this->OperandExpression = $OperandExpression;
     }
     
+    /**
+     * @return string
+     */
     public function GetOperator() {
         return $this->Operator;
     }
-        
+    
     /**
      * @return Expression
      */

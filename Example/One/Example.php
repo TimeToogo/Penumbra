@@ -10,7 +10,7 @@ use \Storm\Drivers\Base\Object\Properties\Collections\Collection;
 use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
-class Test implements \StormTests\IStormTest {
+class One implements \StormTests\IStormExample {
     
     public static function GetPlatform() {
         $Development = 1;
@@ -31,7 +31,7 @@ class Test implements \StormTests\IStormTest {
     }
     
     public function GetStorm() {
-        return new Storm(new Mapping\BloggingDomainDatabaseMap());
+        //return new Storm(new Mapping\BloggingDomainDatabaseMap());
         return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
                 self::GetPlatform(),
                 function () {
@@ -222,5 +222,5 @@ class Test implements \StormTests\IStormTest {
 
 }
 
-return new Test();
+return new One();
 ?>

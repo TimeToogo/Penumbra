@@ -70,11 +70,10 @@ NOW;
         $EntityReflection = new \ReflectionClass($EntityType);
         $ProxyClassName = $this->GenerateProxyClassName($EntityReflection->getName());
         $FullProxyName = $this->GetProxyFullName($ProxyClassName);
-        $EntityMap = $Domain->GetEntityMap($EntityType);
         
         $Proxies = array();
         foreach($RevivalDataLoaderFunctions as $RevivalDataLoaderFunction) {
-            $Proxies[] = $this->GenerateProxyInstance($EntityMap, $EntityReflection, $ProxyClassName, $FullProxyName, $RevivalDataLoaderFunction);
+            $Proxies[] = $this->GenerateProxyInstance($Domain, $EntityReflection, $ProxyClassName, $FullProxyName, $RevivalDataLoaderFunction);
         }
         
         return $Proxies;

@@ -5,6 +5,11 @@ namespace Storm\Api\Wrapper;
 use \Storm\Api\Base;
 use \Storm\Core\Object;
 
+/**
+ * This class simply provides a wrapper for all methods of another repository.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class Repository extends Base\Repository {
     private $WrappedRepository;
     

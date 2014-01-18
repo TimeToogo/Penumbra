@@ -4,6 +4,11 @@ namespace Storm\Api\Wrapper;
 
 use \Storm\Api\Base;
 
+/**
+ * This class provides a wrapper for all methods of a storm instance.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class Storm extends Base\Storm {
     private $WrappedStorm;
     

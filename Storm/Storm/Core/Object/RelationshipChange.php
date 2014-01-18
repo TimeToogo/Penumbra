@@ -2,8 +2,20 @@
 
 namespace Storm\Core\Object;
 
+/**
+ * The class that represents a change in a relationship between entities.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 final class RelationshipChange {
+    /**
+     * @var PersistedRelationship|null 
+     */
     private $PersistedRelationship;
+    
+    /**
+     * @var DiscardedRelationship|null 
+     */
     private $DiscardedRelationship;
     
     public function __construct(PersistedRelationship $PersistedRelationship = null, DiscardedRelationship $DiscardedRelationship = null) {
@@ -11,6 +23,9 @@ final class RelationshipChange {
         $this->DiscardedRelationship = $DiscardedRelationship;
     }
     
+    /**
+     * @return boolean
+     */
     public function HasPersistedRelationship() {
         return $this->PersistedRelationship !== null;
     }
@@ -22,6 +37,9 @@ final class RelationshipChange {
         return $this->PersistedRelationship;
     }
     
+    /**
+     * @return boolean
+     */
     public function HasDiscardedRelationship() {
         return $this->DiscardedRelationship !== null;
     }

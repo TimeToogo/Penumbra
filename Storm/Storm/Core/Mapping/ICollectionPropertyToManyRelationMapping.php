@@ -5,21 +5,57 @@ namespace Storm\Core\Mapping;
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
 
+/**
+ * The interface representing an collectioon property mapped to a to many relation.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 interface ICollectionPropertyToManyRelationMapping extends IPropertyMapping {
     const ICollectionPropertyToManyRelationMappingType = __CLASS__;
     
     /**
+     * The mapped collection property.
+     * 
      * @return Object\ICollectionProperty
      */
     public function GetCollectionProperty();
     
     /**
+     * The mapped to many relation.
+     * 
      * @return Relational\IToManyRelation
      */
-    public function GetToManyRelation();    
+    public function GetToManyRelation(); 
     
+    /**
+     * Adds any constraints and/or properties to the reqeuest required for loading the relation.
+     * 
+     * @param DomainDatabaseMap $DomainDatabaseMap The parent domain database map
+     * @param Relational\Request $RelationalRequest The request to map to
+     * @return void
+     */
     public function AddToRelationalRequest(DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest);
+    
+    /**
+     * This method should be implemented such that it sets the revival data of the mapped property
+     * with the appropriate data to revive the related entity.
+     * 
+     * @param \StDomainDatabaseMap $DomainDatabaseMap The parent domain database map
+     * @param Map $ResultRowRevivalDataMap The map containing the parent loaded result rows and 
+     * respective revival data
+     * @return void
+     */
     public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ResultRowRevivalDataMap);
+    
+    /**
+     * This method should be implemented such that it saves the relationships between
+     * the parent data and related data in the supplied transaction.
+     * 
+     * @param Relational\Transaction $Transaction The transaction context
+     * @param Relational\ColumnData $ParentData The column data of the parent
+     * @param Relational\RelationshipChange[] $RelationshipChanges The change in the relationship state
+     * @return void
+     */
     public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, array $RelationshipChanges);
 }
 

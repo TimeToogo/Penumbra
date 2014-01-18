@@ -2,6 +2,11 @@
 
 namespace Storm\Core\Object\Expressions\Operators;
 
+/**
+ * The class containing php level binary operators
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 final class Binary {
     //Arthmetic
     const Addition = '+';

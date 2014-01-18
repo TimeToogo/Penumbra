@@ -10,7 +10,7 @@ class BloggingDatabase extends Relational\Database {
     }
     
     public static function InitializePlatform() {
-        return \StormTests\One\Test::GetPlatform();
+        return \StormTests\One\One::GetPlatform();
     }
     
     public $Blogs;

@@ -18,7 +18,7 @@ class EagerEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelatio
             $this->GetToOneRelation()->AddRelationToRequest($RelationalRequest);
         }
     }
-
+    
     public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ResultRowRevivalDataMap) {
         if(!$this->GetEntityProperty()->IsOptional()) {
             $JoinedRows = $ResultRowRevivalDataMap->GetInstances();

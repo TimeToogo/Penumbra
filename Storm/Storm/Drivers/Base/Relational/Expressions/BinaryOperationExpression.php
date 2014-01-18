@@ -3,7 +3,6 @@
 namespace Storm\Drivers\Base\Relational\Expressions;
 
 use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
-use \Storm\Core\Relational\Expressions\ColumnExpression;
 
 class BinaryOperationExpression extends Expression {
     private $LeftOperandExpression;

@@ -58,12 +58,12 @@ $Success = false;
 if(isset($_GET['Test'])) {
     $TestDir = $_GET['Test'];
     
-    $TestFile = BASE_PATH . $TestDir . DIRECTORY_SEPERATOR . 'Test.php';
+    $TestFile = BASE_PATH . $TestDir . DIRECTORY_SEPERATOR . 'Example.php';
     var_dump($TestDir);
     if(file_exists($TestFile)) {
         var_dump('Running Test From Dir: ' . $TestDir);
         $TestInstance = require_once $TestFile;
-        if($TestInstance instanceof IStormTest)
+        if($TestInstance instanceof IStormExample)
         {
             require_once 'UBench.php';
             require_once '../Storm/Loader.php';

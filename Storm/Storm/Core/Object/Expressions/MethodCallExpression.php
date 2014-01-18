@@ -2,6 +2,9 @@
 
 namespace Storm\Core\Object\Expressions;
 
+/**
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class MethodCallExpression extends FunctionCallExpression {
     private $IsStatic;
     private $ClassType;
@@ -21,16 +24,22 @@ class MethodCallExpression extends FunctionCallExpression {
                 $ObjectOrNewExpression->GetClassType() : $ObjectOrNewExpression->GetClassType();
     }
     
+    /**
+     * @return boolean
+     */
     public function IsStatic() {
         return $this->IsStatic;
     }
     
+    /**
+     * @return string
+     */
     public function GetClassType() {
         return $this->ClassType;
     }
     
     /**
-     * @return Expression
+     * @return ObjectExpression|NewExpression
      */
     public function GetObjectExpression() {
         return $this->ObjectOrNewExpression;

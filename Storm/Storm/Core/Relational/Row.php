@@ -2,9 +2,22 @@
 
 namespace Storm\Core\Relational;
 
+/**
+ * The row represents the column data from a row in a specific table.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 final class Row extends TableColumnData {
+    /**
+     * @var int
+     */
     private $PrimaryKeyColumnsAmount;
+    
+    /**
+     * @var PrimaryKey
+     */
     private $PrimaryKey;
+    
     public function __construct(Table $Table, array $RowData = array()) {
         parent::__construct($Table, $RowData);
         $this->PrimaryKey = new PrimaryKey($Table, 
@@ -31,6 +44,8 @@ final class Row extends TableColumnData {
     }
     
     /**
+     * Whether or not the row has a complete primary key.
+     * 
      * @return boolean
      */
     final public function HasPrimaryKey() {

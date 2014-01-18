@@ -2,6 +2,11 @@
 
 namespace Storm\Core\Object\Expressions;
 
+/**
+ * Expression representing a class type or an instance value.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class ObjectExpression extends Expression {
     private $ClassType;
     private $HasInstance;
@@ -16,14 +21,23 @@ class ObjectExpression extends Expression {
         $this->Instance = $this->HasInstance ? $InstanceOrType : null;
     }
     
+    /**
+     * @return string
+     */
     public function GetClassType() {
         return $this->ClassType;
     }
 
+    /**
+     * @return boolean
+     */
     public function HasInstance() {
         return $this->HasInstance;
     }
     
+    /**
+     * @return object|null
+     */
     public function GetInstance() {
         return $this->Instance;
     }

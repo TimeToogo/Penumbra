@@ -2,6 +2,9 @@
 
 namespace Storm\Core\Object\Expressions;
 
+/**
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class BinaryOperationExpression extends Expression {
     private $LeftOperandExpression;
     private $Operator;
@@ -12,6 +15,9 @@ class BinaryOperationExpression extends Expression {
         $this->RightOperandExpression = $RightOperandExpression;
     }
     
+    /**
+     * @return string The binary operator
+     */
     public function GetOperator() {
         return $this->Operator;
     }

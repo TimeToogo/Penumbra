@@ -38,7 +38,7 @@ class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
         return $this->Database;
     }
 
-    final protected function RegisterEntityRelationMaps(Registrar $Regisrar) {
+    final protected function RegisterEntityRelationalMaps(Registrar $Regisrar) {
         $Regisrar->RegisterAll($this->EntityMaps);
     }
 

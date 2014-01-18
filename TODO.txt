@@ -7,9 +7,9 @@ The near future:
  - 
 
 The future:
- - Extend fluent request functionality (maybe the having clause + others)
+ - Extend fluent request functionality (multiple types of joins, maybe the having clause + others)
  - Implement CodeFirst and DatabaseFirst drivers
- - Concrete/Finalize the API
+ - Finalize the API
  - Begin writing a test suite for the major parts of the application
  - Implement an active record flavour of Storm (This could be quite sexy coupled with fluent requests)
  - Implement other platforms for SQL Server, PostgreSQL, SQLite, Oracle
@@ -19,8 +19,8 @@ The future:
 
 The far future:
  - Introduce migrations and advanced database syncing
- - Extend fluent request functionality via relationship properties (allowing subqueries and joins)
- - Begin a peformance lockdown, make sure Storm is peformant as possible, (milliseconds matter)
+ - Extend fluent request functionality via relationship properties (with subqueries and joins)
+ - Begin a peformance lockdown, make sure Storm is peformant as possible. (milliseconds matter)
  - Begin to investigate possible edge cases and tie up any loose ends
  - Extend the test suite to cover >80% of code
  - 

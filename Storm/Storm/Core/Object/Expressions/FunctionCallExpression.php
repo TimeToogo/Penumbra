@@ -2,6 +2,9 @@
 
 namespace Storm\Core\Object\Expressions;
 
+/**
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class FunctionCallExpression extends Expression {
     private $Name;
     private $ArgumentValueExpressions;
@@ -10,6 +13,9 @@ class FunctionCallExpression extends Expression {
         $this->ArgumentValueExpressions = $ArgumentValueExpressions;
     }
     
+    /**
+     * @return string
+     */
     public function GetName() {
         return $this->Name;
     }

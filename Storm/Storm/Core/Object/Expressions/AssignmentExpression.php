@@ -4,6 +4,11 @@ namespace Storm\Core\Object\Expressions;
 
 use \Storm\Core\Object\IProperty;
 
+/**
+ * Expression representing an assignment to an entity property.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class AssignmentExpression extends BinaryOperationExpression {
     private $AssignToPropertyExpression;
     
@@ -14,7 +19,7 @@ class AssignmentExpression extends BinaryOperationExpression {
     }
     
     /**
-     * @return IProperty
+     * @return IProperty The assigned property
      */
     public function GetProperty() {
         return $this->AssignToPropertyExpression->GetProperty();

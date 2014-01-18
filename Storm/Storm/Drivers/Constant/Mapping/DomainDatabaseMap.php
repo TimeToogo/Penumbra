@@ -14,7 +14,7 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
     }
     protected abstract function CreateRelationalMaps();
 
-    final protected function RegisterEntityRelationMaps(Registrar $Registrar) {
+    final protected function RegisterEntityRelationalMaps(Registrar $Registrar) {
         $this->LoadRegistrarFromProperties($Registrar);
     }
 

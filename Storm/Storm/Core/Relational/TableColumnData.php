@@ -2,7 +2,15 @@
 
 namespace Storm\Core\Relational;
 
+/**
+ * Table column data represents column data from a specific table.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 abstract class TableColumnData extends ColumnData {
+    /**
+     * @var Table
+     */
     private $Table;
     
     protected function __construct(Table $Table, array $ColumnData = array()) {

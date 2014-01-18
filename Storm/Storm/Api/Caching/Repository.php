@@ -8,6 +8,11 @@ use \Storm\Core\Object;
 use \Storm\Utilities\Cache\ICache;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 
+/**
+ * This class provides a caching layer over a repository, reducing unnessecary queries.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class Repository extends Base\Repository {
     private $Cache;
     private $EntityCache;
@@ -68,11 +73,11 @@ class Repository extends Base\Repository {
         
         parent::PersistAll($Entities);
     }
-    
-    public function Discard(&$Entity) {
-        $this->RemoveFromCache($Entity);
-        
-        parent::Discard($Entity);
+    public function Discard($EntityOrCriterion) {
+        parent::Discard($EntityOrCriterion);
+        if($EntityOrCriterion instanceof $this->EntityType) {
+            $this->RemoveFromCache($EntityOrCriterion);
+        }
     }
     
     public function DiscardAll(array $Entities) {

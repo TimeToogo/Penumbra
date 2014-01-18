@@ -4,9 +4,13 @@ namespace Storm\Api\Caching;
 
 use \Storm\Core\Object;
 use \Storm\Drivers\Fluent\Object\Closure;
-
 use \Storm\Utilities\Cache\ICache;
 
+/**
+ * This class allows caching the resulting AST from a given closure, reducing parsing overhead.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 class ClosureToASTConverter extends Closure\ClosureToASTConverter {
     private $Cache;
     private $WrappedClosureToASTConverter;
