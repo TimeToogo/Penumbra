@@ -57,5 +57,20 @@ abstract class ObjectDataType extends DataType {
             return $this->$MapperMethodName($ObjectValueExpression, $ArgumentValueExpressions);
         }
     }
+    
+    final public function MapPropertyFetchExpression(Expression $ObjectValueExpression = null, $Name) {
+        $MapperMethodName = 'Prop_' . $Name;
+        if(!method_exists($this, $MapperMethodName)) {
+            throw new \Exception('Unimplemented property mapper');
+        }
+
+        $IsStatic = $ObjectValueExpression === null;
+        if($IsStatic) {
+            return $this->$MapperMethodName();
+        }
+        else {
+            return $this->$MapperMethodName($ObjectValueExpression);
+        }
+    }
 }
 ?>

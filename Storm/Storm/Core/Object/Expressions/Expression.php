@@ -49,6 +49,13 @@ abstract class Expression {
     }
     
     /**
+     * @return PropertyFetchExpression
+     */
+    final public static function PropertyFetch(Expression $ObjectExpression, $Name) {
+        return new PropertyFetchExpression($ObjectExpression, $Name);
+    }
+    
+    /**
      * @return CastExpression
      */
     final public static function Cast($CastType, Expression $CastValueExpression) {

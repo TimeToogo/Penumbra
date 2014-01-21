@@ -20,7 +20,13 @@ interface IExpressionMapper {
     /**
      * @return CoreExpression
      */
-    public function MapMethodCallExpression(CoreExpression $ObjectExpression, $Type, $Name, array $ArgumentValueExpressions);
+    public function MapMethodCallExpression(CoreExpression $ObjectExpression = null, $Type, $Name, array $ArgumentValueExpressions);
+    
+        
+    /**
+     * @return CoreExpression
+     */
+    public function MapPropertyFetchExpression(CoreExpression $ObjectExpression = null, $Type, $Name);
     
     /**
      * @return CoreExpression

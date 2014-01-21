@@ -39,7 +39,7 @@ class One implements \StormExamples\IStormExample {
                 });
     }
 
-    const Id = 26;
+    const Id = 27;
     
     const Persist = 0;
     const Retreive = 1;
@@ -51,7 +51,7 @@ class One implements \StormExamples\IStormExample {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
-        $Action = self::PersistExisting;
+        $Action = self::Retreive;
         $Amount = 1;
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
@@ -103,6 +103,9 @@ class One implements \StormExamples\IStormExample {
     private function Persist($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
         
         $Blog = $this->CreateBlog();
+        foreach ($Blog->Posts as $Post) {
+            $TagRepository->PersistAll($Post->Tags->ToArray());
+        }
         $TagRepository->SaveChanges();
 
         $BlogRepository->Persist($Blog);
@@ -162,7 +165,7 @@ class One implements \StormExamples\IStormExample {
     }
     
     private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $Procedure = $BlogRepository->Procedure(function ($Blog) {
+        $Procedure = $BlogRepository->Procedure(function (Entities\Blog $Blog) {
                     $Blog->Description = md5(new \DateTime());
 
                     $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?
@@ -180,11 +183,11 @@ class One implements \StormExamples\IStormExample {
     }
     
     private function Discard($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $Range = range(100, 110);
+        
         
         $Blogs = $BlogRepository->Load($BlogRepository->Request()
-                ->Where(function (Entities\Blog $Blog) use ($Range) {
-                    return in_array($Blog->Id, $Range);
+                ->Where(function (Entities\Blog $Blog) use ($Id) {
+                    return in_array($Blog->Id, [$Id]);
                 }));
         $BlogRepository->DiscardAll($Blogs);
 

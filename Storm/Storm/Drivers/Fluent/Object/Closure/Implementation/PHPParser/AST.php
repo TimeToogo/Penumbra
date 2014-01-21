@@ -212,6 +212,14 @@ class AST extends ASTBase {
                         $Node->name,
                         $this->ParseNodesInternal($Node->args));
             
+            case $Node instanceof \PHPParser_Node_Expr_PropertyFetch:
+                if(!is_string($Node->name)) {
+                    throw new \Exception();
+                }
+                return Expression::PropertyFetch(
+                        $this->ParseNodeInternal($Node->var),
+                        $Node->name);
+            
             case $Node instanceof \PHPParser_Node_Expr_StaticCall:
                 if(!is_string($Node->name)) {
                     throw new \Exception();

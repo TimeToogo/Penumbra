@@ -68,11 +68,40 @@ abstract class ObjectMapper implements IObjectMapper {
         }
     }
     
-    public function MethodCallMappingExample(CoreExpression $ObjectValueExpression, array $ArgumentExpressions) {
+    final public function MapPropertyFetchExpression(CoreExpression $ObjectValueExpression = null, $Type, $Name) {
+        if(isset($this->ObjectDataTypes[$Type])) {
+            $ObjectDataType = $this->ObjectDataTypes[$Type];
+            return $ObjectDataType->MapPropertyFetchExpression($ObjectValueExpression, $Name);
+        }
+        
+        $MethodName = str_replace('\\', '_', $Type) . '_Prop_' . $Name;
+        
+        if(!method_exists($this, $MethodName)) {
+            throw new \Exception('Unimplemented method mapper');
+        }
+        
+        $IsStatic = $ObjectValueExpression === null;
+        if($IsStatic) {
+            return $this->$MethodName();
+        }
+        else {
+            return $this->$MethodName($ObjectValueExpression);
+        }
+    }
+    
+    public function Type_MethodCallMappingExample(CoreExpression $ObjectValueExpression, array $ArgumentExpressions) {
         //Blah Blah
     }
     
-    public function StaticMethodCallMappingExample(array $ArgumentExpressions) {
+    public function Type_StaticMethodCallMappingExample(array $ArgumentExpressions) {
+        //Blah Blah
+    }
+    
+    public function Type_Prop_PropertyExample(CoreExpression $ObjectValueExpression) {
+        //Blah Blah
+    }
+    
+    public function Type_Prop_StaticPropertyExample() {
         //Blah Blah
     }
 }

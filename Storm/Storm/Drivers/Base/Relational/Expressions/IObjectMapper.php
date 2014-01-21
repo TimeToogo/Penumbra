@@ -15,6 +15,12 @@ interface IObjectMapper {
      * @return Expression
      */
     public function MapMethodCallExpression(CoreExpression $ObjectValueExpression = null, $Type, $Name, array $ArgumentValueExpressions = array());
+ 
+    /**
+     * @return CoreExpression
+     */
+    public function MapPropertyFetchExpression(CoreExpression $ObjectExpression = null, $Type, $Name);
+    
 }
 
 ?>

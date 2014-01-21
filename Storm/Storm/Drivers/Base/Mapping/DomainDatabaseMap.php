@@ -48,6 +48,14 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
                         $Expression->GetClassType(), 
                         $Expression->GetInstance())];
             
+            case $Expression instanceof O\PropertyFetchExpression:
+                $ObjectExpression = $Expression->GetObjectExpression();
+                return [$ExpressionMapper->MapPropertyFetchExpression(
+                        $Expression->IsStatic() ? 
+                                null : $this->MapExpression($EntityRelationalMap, $ObjectExpression)[0],
+                        $Expression->GetClassType(),
+                        $Expression->GetName())];
+            
             case $Expression instanceof O\MethodCallExpression:
                 $ObjectExpression = $Expression->GetObjectExpression();
                 return [$ExpressionMapper->MapMethodCallExpression(

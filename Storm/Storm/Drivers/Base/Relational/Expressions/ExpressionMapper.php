@@ -70,6 +70,17 @@ abstract class ExpressionMapper implements IExpressionMapper {
         return $this->ObjectMapper->MapObjectExpression($Type, $Value);
     }
     
+    final public function MapPropertyFetchExpression(
+            CoreExpression $ObjectExpression = null,
+            $Type, 
+            $Name) {
+        
+        return $this->ObjectMapper->MapPropertyFetchExpression(
+                $ObjectExpression, 
+                $Type, 
+                $Name);
+    }
+    
     final public function MapMethodCallExpression(
             CoreExpression $ObjectValueExpression = null, 
             $Type, 
