@@ -35,7 +35,7 @@ class ClosureToASTConverter extends Base\ClosureToASTConverter {
         
         if(!($AST instanceof Closure\IAST)) {
             $AST = parent::ClosureToAST($EntityMap, $Closure, false);
-            $this->Cache->Save($ClosureHash, $AST);
+            $this->Cache->Save('ClosureAST-' . $ClosureHash, $AST);
         }
         
         if($ResolveVariables) {

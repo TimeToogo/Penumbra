@@ -49,6 +49,7 @@ class QueryExecutor extends Queries\QueryExecutor {
         $PrimaryKeyColumnNames = array_keys($PrimaryKeyColumns);
         $TableName = $Table->GetName();
         $Identifiers = array();
+        
         foreach($ColumnNames as $ColumnName) {
             $Identifiers[] = [$TableName, $ColumnName];
         }
@@ -66,26 +67,38 @@ class QueryExecutor extends Queries\QueryExecutor {
             else
                 $QueryBuilder->Append(', ');
             
-            $QueryBuilder->Append('(');
-            $First1 = true;
-            foreach($Columns as $Column) {
-                if($First1) $First1 = false;
-                else
-                    $QueryBuilder->Append(', ');
-                
-                if(isset($Row[$Column])) {
-                    $QueryBuilder->AppendColumnData($Column, $Row[$Column]);
-                }
-                else {
-                    $QueryBuilder->Append('DEFAULT');
-                }
-            }
-            $QueryBuilder->Append(')');
+            $this->AppendRow($QueryBuilder, $Columns, $Row);
         }
         
+        $this->AppendOnDuplicateKeyUpdate($QueryBuilder, $TableName, $Row, $PrimaryKeyIdentifiers);
+        
+        return $QueryBuilder->Build();
+    }
+    
+    private function AppendRow(QueryBuilder $QueryBuilder, array $Columns, Relational\Row $Row) {
+        $QueryBuilder->Append('(');
+        $First1 = true;
+        foreach($Columns as $Column) {
+            if($First1) $First1 = false;
+            else
+                $QueryBuilder->Append(', ');
+
+            if(isset($Row[$Column])) {
+                $QueryBuilder->AppendColumnData($Column, $Row[$Column]);
+            }
+            else {
+                $QueryBuilder->Append('DEFAULT');
+            }
+        }
+        $QueryBuilder->Append(')');
+    }
+    
+    private function AppendOnDuplicateKeyUpdate(
+            QueryBuilder $QueryBuilder, $TableName, 
+            array $Columns, array $PrimaryKeyIdentifiers) {
         $First = true;
         $FirstPrimaryKey = true;
-        foreach($Table->GetColumns() as $Column) {
+        foreach($Columns as $Column) {
             if($First) {
                 $QueryBuilder->Append(' ON DUPLICATE KEY UPDATE ');
                 $First = false;
@@ -127,8 +140,6 @@ class QueryExecutor extends Queries\QueryExecutor {
                 $QueryBuilder->AppendIdentifier('# = VALUES(#)', $Identifier);
             }
         }
-        
-        return $QueryBuilder->Build();
     }
           
     protected function SelectQuery(QueryBuilder $QueryBuilder, Relational\Request $Request) {

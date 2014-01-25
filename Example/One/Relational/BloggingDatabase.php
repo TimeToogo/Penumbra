@@ -6,11 +6,7 @@ use \Storm\Drivers\Constant\Relational;
 
 class BloggingDatabase extends Relational\Database {
     public function __construct() {
-        parent::__construct(static::InitializePlatform());
-    }
-    
-    public static function InitializePlatform() {
-        return \StormExamples\One\One::GetPlatform();
+        parent::__construct(\StormExamples\One\One::GetPlatform());
     }
     
     public $Blogs;

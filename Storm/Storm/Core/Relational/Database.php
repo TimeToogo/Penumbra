@@ -12,12 +12,7 @@ use \Storm\Core\Containers\Registrar;
  */
 abstract class Database {
     use \Storm\Core\Helpers\Type;
-    
-    /**
-     * @var boolean 
-     */
-    private $IsInitalized = false;
-    
+        
     /**
      * @var Table[] 
      */
@@ -39,28 +34,7 @@ abstract class Database {
         $this->RegisterTables($Registrar);
         $this->AddTables($Registrar->GetRegistered());
     }
-    
-    final protected function VerifyInitialized() {
-        if(!$this->IsInitalized) {
-            throw new \Exception();
-        }
-    }
-    
-    /**
-     * This method must be called when it is appropriate
-     * to initialize the database instance.
-     * 
-     * @return void
-     */
-    protected function Initialize() {
-        if($this->IsInitalized) {
-            return;
-        }
         
-    }
-    
-    
-    
     /**
      * The method to specify the tables in the current database.
      * 
@@ -124,7 +98,6 @@ abstract class Database {
      * @return boolean
      */
     final public function HasTable($Name) {
-        $this->VerifyInitialized();
         return isset($this->Tables[$Name]);
     }
     
@@ -135,7 +108,6 @@ abstract class Database {
      * @return Table|null The matching table or null if it has not been registered
      */
     final public function GetTable($Name) {
-        $this->VerifyInitialized();
         return $this->HasTable($Name) ? $this->Tables[$Name] : null;
     }
     
@@ -155,7 +127,6 @@ abstract class Database {
      * @return Table[]
      */
     final public function GetTables() {
-        $this->VerifyInitialized();
         return $this->Tables;
     }
     
@@ -163,7 +134,6 @@ abstract class Database {
      * @return Table[]
      */
     public function GetTablesOrderedByPersistingDependency() {
-        $this->VerifyInitialized();
         return $this->TablesOrderedByPersistingDependency;
     }
 
@@ -171,7 +141,6 @@ abstract class Database {
      * @return Table[]
      */
     public function GetTablesOrderedByDiscardingDependency() {
-        $this->VerifyInitialized();
         return $this->TablesOrderedByDiscardingDependency;
     }
     
@@ -182,7 +151,6 @@ abstract class Database {
      * @return ResultRow[] The loaded result rows
      */
     final public function Load(Request $Request) {
-        $this->VerifyInitialized();
         foreach($Request->GetTables() as $Table) {
             $this->VerifyTable($Table);
         }

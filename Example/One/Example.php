@@ -11,41 +11,43 @@ use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
 class One implements \StormExamples\IStormExample {
+    const DevelopmentMode = 1;
+    const UseCache = true;
     
     public static function GetPlatform() {
-        $Development = 1;
-        
-        if($Development > 0) {
-            return new Platforms\Mysql\Platform(
-                    new Logging\Connection(new Logging\DumpLogger(), 
-                            new Platforms\PDO\Connection(
-                                    new \PDO('mysql:host=localhost;dbname=StormTest', 'root', 'admin'), true)), 
-                    $Development > 1);
+        return new Platforms\Mysql\Platform(self::DevelopmentMode > 1);
+    }
+    
+    public static function GetConnection() {
+        $PDOConnection = Platforms\PDO\Connection::Connect('mysql:host=localhost;dbname=StormTest', 'root', 'admin');
+              
+        if(self::DevelopmentMode > 0) {
+            return new Logging\Connection(new Logging\DumpLogger(), $PDOConnection);
         }
         else {
-            return new Platforms\Mysql\Platform(
-                            new Platforms\PDO\Connection(
-                                    new \PDO('mysql:host=localhost;dbname=StormTest', 'root', 'admin'), true), 
-                    false);
+            return $PDOConnection;
         }
     }
     
     public function GetStorm() {
-        return new Storm(new Mapping\BloggingDomainDatabaseMap());
-        return new Api\Caching\Storm(new \Storm\Utilities\Cache\MemcacheCache('localhost'),
-                self::GetPlatform(),
-                function () {
-                    return new Storm(new Mapping\BloggingDomainDatabaseMap());
-                });
+        $Cache = self::UseCache && class_exists('Memcache', false) ? new \Storm\Utilities\Cache\MemcacheCache('localhost') : null;
+        
+        $Configuration = new Api\DefaultConfiguration(
+                Mapping\BloggingDomainDatabaseMap::Factory(), 
+                self::GetConnection(), 
+                $Cache);
+        
+        return $Configuration->Storm();
     }
 
-    const Id = 27;
+    const Id = 30;
     
     const Persist = 0;
     const Retreive = 1;
-    const PersistExisting = 2;
-    const Discard = 3;
-    const Procedure = 4;
+    const RetreiveComplex = 2;
+    const PersistExisting = 3;
+    const Discard = 4;
+    const Procedure = 5;
 
     public function Run(Storm $BloggingStorm) {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
@@ -83,6 +85,10 @@ class One implements \StormExamples\IStormExample {
             case self::Retreive:
                 return $this->Retreive($Id, $BloggingStorm, $BlogRepository, $TagRepository);
 
+
+            case self::RetreiveComplex:
+                return $this->RetreiveComplex($Id, $BloggingStorm, $BlogRepository, $TagRepository);
+
                 
             case self::PersistExisting:
                 return $this->PersistExisting($Id, $BloggingStorm, $BlogRepository, $TagRepository);
@@ -115,6 +121,17 @@ class One implements \StormExamples\IStormExample {
     }
     
     private function Retreive($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+        $RevivedBlog = $BlogRepository->LoadById($Id);
+        if(extension_loaded('xdebug')) {
+            var_dump($RevivedBlog);
+        }
+        $RevivedBlog->Posts[0]->Tags->ToArray();
+        $RevivedBlog->Posts[1]->Tags->ToArray();
+
+        return null;
+    }
+    
+    private function RetreiveComplex($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
         $Outside = new \DateTime();
         $Outside->sub(new \DateInterval('P1D'));
 

@@ -20,7 +20,7 @@ class Connection extends Queries\Connection {
     /**
      * @return Connection
      */
-    public static function Connect($DSN, $Username = null, $Password = null, array $DriverOptions = null, $EmulatePreparedStatements = false) {
+    public static function Connect($DSN, $Username = null, $Password = null, array $DriverOptions = null, $EmulatePreparedStatements = true) {
         return new self(new \PDO($DSN, $Username, $Password, $DriverOptions), $EmulatePreparedStatements);
     }
     

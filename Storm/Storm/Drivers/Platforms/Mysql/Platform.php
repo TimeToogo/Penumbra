@@ -8,15 +8,9 @@ use \Storm\Drivers\Base\Relational;
 final class Platform extends Relational\Platform {
     private $DevelopmentMode;
     
-    public function __construct(Relational\Queries\IConnection $Connection, $DevelopmentMode) {
-        $this->DevelopmentMode = $DevelopmentMode;
-        if($DevelopmentMode) {
-            $IdentifiersAreCaseSensitive = 
-                    ((int)$Connection->FetchValue('SELECT @@lower_case_table_names')) === 0;
-        }
-        
+    public function __construct($DevelopmentMode) {
+        $this->DevelopmentMode = $DevelopmentMode;        
         parent::__construct(
-                $Connection,
                 new ExpressionMapper(new FunctionMapper(), new ObjectMapper()),
                 new Columns\ColumnSet(),
                 new PrimaryKeys\KeyGeneratorSet(),
@@ -25,13 +19,13 @@ final class Platform extends Relational\Platform {
                 new Queries\IdentifierEscaper(),
                 $DevelopmentMode ? 
                         new Platforms\Development\Syncing\DatabaseSyncer
-                                (new Syncing\DatabaseBuilder(), new Syncing\DatabaseModifier(), $IdentifiersAreCaseSensitive) : 
+                                (new Syncing\DatabaseBuilder(), new Syncing\DatabaseModifier(), true) : 
                         new Platforms\Production\Syncing\DatabaseSyncer(),
                 new Queries\QueryExecutor());
     }
     
     protected function OnSetConnection(Relational\Queries\IConnection $Connection) {
-        if($DevelopmentMode) {
+        if($this->DevelopmentMode) {
             $IdentifiersAreCaseSensitive = 
                     ((int)$Connection->FetchValue('SELECT @@lower_case_table_names')) === 0;
             $this->GetDatabaseSyncer()->SetIdentifiersAreCaseSensitive($IdentifiersAreCaseSensitive);

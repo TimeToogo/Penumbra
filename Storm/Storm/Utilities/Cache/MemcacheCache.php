@@ -12,7 +12,7 @@ class MemcacheCache implements ICache {
                 $this->Memcache->pconnect($Host, $Port);
             }
             else {
-                    $this->Memcache->pconnect($Host, $Port, $Timeout);
+                $this->Memcache->pconnect($Host, $Port, $Timeout);
             }
         }
         else {
@@ -20,7 +20,7 @@ class MemcacheCache implements ICache {
                 $this->Memcache->connect($Host, $Port);
             }
             else {
-                    $this->Memcache->connect($Host, $Port, $Timeout);
+                $this->Memcache->connect($Host, $Port, $Timeout);
             }
         }
     }

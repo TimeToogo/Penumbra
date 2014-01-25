@@ -3,6 +3,7 @@
 namespace Storm\Api;
 
 use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Utilities\Cache\ICache;
 
 /**
@@ -20,6 +21,11 @@ interface IConfiguration {
      * @return static
      */
     public function SetDomainDatabaseMapFactory(callable $DomainDatabaseMapFactory);
+    
+    /**
+     * @return static
+     */
+    public function SetConnection(IConnection $Connection);
     
     /**
      * @return static

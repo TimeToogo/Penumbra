@@ -5,6 +5,7 @@ namespace Storm\Drivers\Base\Relational;
 use \Storm\Core;
 
 class Platform implements IPlatform {
+    private $Connection;
     private $ExpressionMapper;
     private $ColumnSet;
     private $KeyGeneratorSet;
@@ -53,7 +54,7 @@ class Platform implements IPlatform {
         }
     }
     
-    public function __sleep() {
+    final public function __sleep() {
         return array_diff(array_keys((array)$this), ['Connection']);
     }
     

@@ -86,7 +86,7 @@ class Repository {
     /**
      * The cache to use as the identity map for the repository
      * 
-     * @var Cache\ICache 
+     * @var IdentityMap
      */
     private $IdentityMap;    
     
@@ -99,7 +99,7 @@ class Repository {
         $this->IdentityProperties = $this->EntityMap->GetIdentityProperties();
         $this->ClosureToASTConverter = $ClosureToASTConverter;
         $this->EntityType = $EntityType;
-        $this->IdentityMap = new \Storm\Utilities\Cache\MemoryCache();
+        $this->IdentityMap = new IdentityMap($this->EntityMap, new \Storm\Utilities\Cache\MemoryCache());
     }
     
     /**
@@ -170,15 +170,15 @@ class Repository {
      */
     public function LoadRequest(Object\IRequest $Request) {
         if($Request->GetEntityType() !== $this->EntityType) {
-            throw new \Exception();//TODO: error messages;
+            throw new \Exception();//TODO: error messages
         }
         $Entities = $this->DomainDatabaseMap->Load($Request);
         
         if(is_array($Entities)) {
-            $this->CacheEntities($Entities);
+            $this->IdentityMap->CacheEntities($Entities);
         }
         else if ($Entities instanceof $this->EntityType) {
-            $this->CacheEntity($Entities);
+            $this->IdentityMap->CacheEntity($Entities);
         }
         
         return $Entities;
@@ -214,7 +214,7 @@ class Repository {
      * @return object|null
      */
     protected function LoadByIdentity(Object\Identity $Identity) {
-        $CachedEntity = $this->GetFromCache($Identity);
+        $CachedEntity = $this->IdentityMap->GetFromCache($Identity);
         if($CachedEntity instanceof $this->EntityType) {
             return $CachedEntity;
         }
@@ -227,7 +227,7 @@ class Repository {
                         new Base\Object\Criteria\MatchesCriterion($Identity)));
         
         if($Entity instanceof $this->EntityType) {
-            $this->CacheEntity($Entity, $Identity);
+            $this->IdentityMap->CacheEntity($Entity, $Identity);
         }
         
         return $Entity;
@@ -304,7 +304,7 @@ class Repository {
         }
         else {
             $this->VerifyEntity($EntityOrCriterion);
-            $this->RemoveFromCache($EntityOrCriterion);
+            $this->IdentityMap->RemoveFromCache($EntityOrCriterion);
             $this->DiscardedQueue[] = $EntityOrCriterion;
         }
         
@@ -319,7 +319,7 @@ class Repository {
      * @return void
      */
     public function DiscardAll(array $Entities) {
-        $this->RemoveAllFromCache($Entities);
+        $this->IdentityMap->RemoveAllFromCache($Entities);
         $this->DiscardedQueue = array_merge($this->DiscardedQueue, $Entities);
         $this->AutoSave();
     }
@@ -359,37 +359,6 @@ class Repository {
         $this->DiscardedQueue = array();
         $this->DiscardedCriterionQueue = array();
     }
-    
-    // <editor-fold defaultstate="collapsed" desc="Caching methods">
-    
-    private function GetFromCache(Object\Identity $Identity) {
-        $IdentityHash = $Identity->Hash();
-
-        return $this->IdentityMap->Contains($IdentityHash) ?
-                $this->IdentityMap->Retrieve($IdentityHash) : null;
-    }
-
-    private function RemoveAllFromCache(array $Entities) {
-        array_walk($Entities, [$this, 'RemoveFromCache']);
-    }
-
-    private function RemoveFromCache($Entity) {
-        $IdentityHash = $this->EntityMap->Identity($Entity)->Hash();
-
-        $this->IdentityMap->Delete($IdentityHash);
-    }
-
-    private function CacheEntities(array $Entities) {
-        array_walk($Entities, [$this, 'CacheEntity']);
-    }
-
-    private function CacheEntity($Entity, Object\Identity $Identity = null) {
-        $Identity = $Identity ?: $this->EntityMap->Identity($Entity);
-        $IdentityHash = $Identity->Hash();
-        $this->IdentityMap->Save($IdentityHash, $Entity);
-    }
-
-    // </editor-fold>
 }
 
 ?>

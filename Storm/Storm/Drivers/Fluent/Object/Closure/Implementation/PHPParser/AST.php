@@ -92,7 +92,7 @@ class AST extends ASTBase {
     public function IsResolved() {
         return count($this->UnresolvedVariables) === 0;
     }
-
+    
     public function ResolveVariables(array $VariableValueMap) {
         $this->VariableResolverVisiter->SetVariableValueMap($VariableValueMap);
         $this->Traverse($this->VariableResolver);
@@ -164,6 +164,9 @@ class AST extends ASTBase {
         }
         
         switch (true) {
+            case $MappedNode = $this->ParseOperatorNode($Node, $NodeType):
+                return $MappedNode;
+                
             case $Node instanceof \PHPParser_Node_Expr_Array:
                 $ValueExpressions = array();
                 foreach ($Node->items as $Key => $Item) {
@@ -171,28 +174,6 @@ class AST extends ASTBase {
                 }
                 return Expression::NewArray($ValueExpressions);
                 
-            case isset(self::$AssignOperatorsMap[$NodeType]):
-                return Expression::Assign(
-                        $this->ParseNodeInternal($Node->var), 
-                        self::$AssignOperatorsMap[$NodeType], 
-                        $this->ParseNodeInternal($Node->expr));
-                
-            case isset(self::$BinaryOperatorsMap[$NodeType]):
-                return Expression::BinaryOperation(
-                        $this->ParseNodeInternal($Node->left), 
-                        self::$BinaryOperatorsMap[$NodeType], 
-                        $this->ParseNodeInternal($Node->right));
-                
-            case isset(self::$UnaryOperatorsMap[$NodeType]):
-                return Expression::UnaryOperation( 
-                        self::$UnaryOperatorsMap[$NodeType], 
-                        $this->ParseNodeInternal($Node->expr));
-                
-            case isset(self::$CastOperatorMap[$NodeType]):
-                return Expression::Cast(
-                        self::$CastOperatorMap[$NodeType], 
-                        $this->ParseNodeInternal($Node->expr));
-            
             case $Node instanceof \PHPParser_Node_Expr_FuncCall:
                 return Expression::FunctionCall(
                         $this->VerifyNameNode($Node->name),
@@ -282,6 +263,9 @@ class AST extends ASTBase {
     }
     
     private function ParsePropertyNode(\PHPParser_Node_Expr $Node) {
+        if($this->EntityMap === null) {
+            throw new \Exception();
+        }
         $Properties = $this->EntityMap->GetProperties();
         
         $this->AccessorBuilder->traverse([$Node]);
@@ -312,7 +296,36 @@ class AST extends ASTBase {
     
     // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Expression node maps">
+    // <editor-fold defaultstate="collapsed" desc="Operater node maps">
+    
+    private function ParseOperatorNode(\PHPParser_Node_Expr $Node, $NodeType) {
+        switch (true) {
+            case isset(self::$AssignOperatorsMap[$NodeType]):
+                return Expression::Assign(
+                        $this->ParseNodeInternal($Node->var), 
+                        self::$AssignOperatorsMap[$NodeType], 
+                        $this->ParseNodeInternal($Node->expr));
+                
+            case isset(self::$BinaryOperatorsMap[$NodeType]):
+                return Expression::BinaryOperation(
+                        $this->ParseNodeInternal($Node->left), 
+                        self::$BinaryOperatorsMap[$NodeType], 
+                        $this->ParseNodeInternal($Node->right));
+                
+            case isset(self::$UnaryOperatorsMap[$NodeType]):
+                return Expression::UnaryOperation( 
+                        self::$UnaryOperatorsMap[$NodeType], 
+                        $this->ParseNodeInternal($Node->expr));
+                
+            case isset(self::$CastOperatorMap[$NodeType]):
+                return Expression::Cast(
+                        self::$CastOperatorMap[$NodeType], 
+                        $this->ParseNodeInternal($Node->expr));
+                
+            default:
+                return null;
+        }
+    }
     
     private static $UnaryOperatorsMap = [
         'BitwiseNot' => Operators\Unary::BitwiseNot,

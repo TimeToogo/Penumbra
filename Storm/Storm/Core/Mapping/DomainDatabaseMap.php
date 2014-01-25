@@ -18,6 +18,7 @@ use \Storm\Core\Containers\Map;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 abstract class DomainDatabaseMap {
+    
     /**
      * The Domain instance representing the domain of this map.
      * 
@@ -48,12 +49,28 @@ abstract class DomainDatabaseMap {
     public function __construct() {
         $this->Domain = $this->Domain();
         $this->Database = $this->Database();
-        
+
         $Registrar = new Registrar(IEntityRelationalMap::IEntityRelationalMapType);
         $this->RegisterEntityRelationalMaps($Registrar);
         foreach($Registrar->GetRegistered() as $EntityRelationalMap) {
             $this->AddEntityRelationMap($EntityRelationalMap);
         }
+    }
+    
+    /**
+     * This class can be very expensive to instantiate, so this 
+     * provides a factory closure if required.
+     * 
+     * @param ... mixed The constructor arguments
+     */
+    final public static function Factory() {
+        $Arguments = func_get_args();
+        $CalledClass = get_called_class();
+        return function () use (&$Arguments, $CalledClass) {
+            $Reflection = new \ReflectionClass($CalledClass);
+            
+            return $Reflection->newInstanceArgs($Arguments);
+        };
     }
     
     /**

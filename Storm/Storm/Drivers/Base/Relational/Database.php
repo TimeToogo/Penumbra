@@ -11,11 +11,9 @@ abstract class Database extends Relational\Database {
     private $Platform;
     
     public function __construct(IPlatform $Platform) {
-        //$this->Platform = $Platform;
+        $this->Platform = $Platform;
         
         parent::__construct();
-        
-        //$this->Platform->Sync($this);
     }
     
     /**
@@ -34,9 +32,11 @@ abstract class Database extends Relational\Database {
     /**
      * @return void
      */
-    final public function SetPlatform(IPlatform $Platform) {
-        $this->Platform = $Platform;
-        $this->Initialize();
+    final public function SetConnection(Queries\IConnection $Connection) {
+        if($Connection === $this->Platform->GetConnection()) {
+            return;
+        }
+        $this->Platform->SetConnection($Connection);
         $this->Platform->Sync($this);
     }
     

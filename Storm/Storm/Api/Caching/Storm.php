@@ -4,6 +4,7 @@ namespace Storm\Api\Caching;
 
 use \Storm\Api\Base;
 use \Storm\Core\Mapping\DomainDatabaseMap;
+use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Fluent\Object\Closure;
 use \Storm\Utilities\Cache;
 use \Storm\Drivers\Base\Relational\IPlatform;
@@ -25,8 +26,8 @@ class Storm extends Base\Storm {
     private $Cache;
     
     public function __construct(
-            IPlatform $Platform, 
             callable $DomainDatabaseMapFactory,
+            IConnection $Connection,
             Closure\IReader $ClosureReader, 
             Closure\IParser $ClosureParser,
             Cache\ICache $Cache) {
@@ -39,9 +40,7 @@ class Storm extends Base\Storm {
             $this->Cache->Save(self::DomainDatabaseMapInstanceKey, $DomainDatabaseMap);
         }
         
-        $DomainDatabaseMap->GetDatabase()->SetPlatform($Platform);
-        
-        parent::__construct($DomainDatabaseMap, $ClosureReader, $ClosureParser);
+        parent::__construct($DomainDatabaseMap, $Connection, $ClosureReader, $ClosureParser);
     }
     
     protected function GetClosureToASTConverter(Closure\IReader $ClosureReader, Closure\IParser $ClosureParser) {

@@ -13,6 +13,10 @@ interface IAST {
      * @return Object\EntityMap
      */
     public function GetEntityMap();
+    /**
+     * @return Object\EntityMap
+     */
+    public function SetEntityMap(Object\EntityMap $EntityMap);
     public function GetEntityVariableName();
     public function GetPropertyMode();
     public function SetPropertyMode($PropertyMode);

@@ -3,6 +3,7 @@
 namespace Storm\Api\Base;
 
 use \Storm\Core\Mapping\DomainDatabaseMap;
+use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Fluent\Object\Closure;
 
 /**
@@ -24,11 +25,13 @@ class Storm {
     protected $ClosureToASTConverter;
     
     public function __construct(
-            DomainDatabaseMap $DomainDatabaseMap
-            /*Closure\IReader $ClosureReader, 
-            Closure\IParser $ClosureParser*/) {
+            DomainDatabaseMap $DomainDatabaseMap,
+            IConnection $Connection,
+            Closure\IReader $ClosureReader, 
+            Closure\IParser $ClosureParser) {
         $this->DomainDatabaseMap = $DomainDatabaseMap;
-        $this->ClosureToASTConverter = new ClosureToASTConverter(new Closure\Implementation\File\Reader(), new Closure\Implementation\PHPParser\Parser()); //$this->GetClosureToASTConverter($ClosureReader, $ClosureParser);
+        $this->DomainDatabaseMap->GetDatabase()->SetConnection($Connection);
+        $this->ClosureToASTConverter = $this->GetClosureToASTConverter($ClosureReader, $ClosureParser);
     }
     
     protected function GetClosureToASTConverter(
