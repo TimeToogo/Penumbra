@@ -242,7 +242,7 @@ class Repository {
      */
     public function Persist($Entity) {
         $this->VerifyEntity($Entity);
-        $this->CacheEntity($Entity);
+        $this->IdentityMap->CacheEntity($Entity);
         
         $this->PersistedQueue[] = $Entity;
         $this->AutoSave();
@@ -256,7 +256,7 @@ class Repository {
      * @return void
      */
     public function PersistAll(array $Entities) {
-        $this->CacheEntities($Entities);
+        $this->IdentityMap->CacheEntities($Entities);
         
         $this->PersistedQueue = array_merge($this->PersistedQueue, $Entities);
         $this->AutoSave();

@@ -70,7 +70,7 @@ class QueryExecutor extends Queries\QueryExecutor {
             $this->AppendRow($QueryBuilder, $Columns, $Row);
         }
         
-        $this->AppendOnDuplicateKeyUpdate($QueryBuilder, $TableName, $Row, $PrimaryKeyIdentifiers);
+        $this->AppendOnDuplicateKeyUpdate($QueryBuilder, $TableName, $Columns, $PrimaryKeyIdentifiers);
         
         return $QueryBuilder->Build();
     }

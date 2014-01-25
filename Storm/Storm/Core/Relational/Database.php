@@ -29,7 +29,6 @@ abstract class Database {
     private $TablesOrderedByDiscardingDependency = array();
     
     public function __construct() {
-        $this->IsInitalized = true;
         $Registrar = new Registrar(Table::GetType());
         $this->RegisterTables($Registrar);
         $this->AddTables($Registrar->GetRegistered());
@@ -172,7 +171,6 @@ abstract class Database {
      * @return void
      */
     final public function Commit(Transaction $Transaction) {
-        $this->VerifyInitialized();
         $this->CommitTransaction($Transaction);
     }
     /**
