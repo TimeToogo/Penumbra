@@ -1,20 +1,21 @@
 <?php
 
-namespace Storm\Drivers\Fluent\Object\Closure;
+namespace Storm\Api\Base;
 
 use \Storm\Core\Object;
+use \Storm\Drivers\Fluent\Object\Closure;
 
 class ClosureToASTConverter {
     /**
-     * @var IReader 
+     * @var Closure\IReader 
      */
     private $Reader;
     /**
-     * @var IParser 
+     * @var Closure\IParser 
      */
     private $Parser;
     
-    public function __construct(IReader $Reader, IParser $Parser) {
+    public function __construct(Closure\IReader $Reader, Closure\IParser $Parser) {
         $this->Reader = $Reader;
         $this->Parser = $Parser;
     }
@@ -29,7 +30,7 @@ class ClosureToASTConverter {
     }
     
     /**
-     * @return IAST
+     * @return Closure\IAST
      */
     public function ClosureToAST(Object\EntityMap $EntityMap, \Closure $Closure, $ResolveVariables = true) {
         $ClosureData = $this->Reader->Read($Closure);

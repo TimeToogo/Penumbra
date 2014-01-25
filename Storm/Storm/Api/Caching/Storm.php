@@ -2,19 +2,20 @@
 
 namespace Storm\Api\Caching;
 
-use \Storm\Api\Wrapper;
 use \Storm\Api\Base;
+use \Storm\Core\Mapping\DomainDatabaseMap;
+use \Storm\Drivers\Fluent\Object\Closure;
 use \Storm\Utilities\Cache;
 use \Storm\Drivers\Base\Relational\IPlatform;
 
 /**
  * This class provides a caching to an instance of DomainDatabaseMap, which can be very
- * expensive to fully instantiate.
+ * expensive to instantiate.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class Storm extends Base\Storm {
-    const StormInstanceKey = 'Storm';
+    const DomainDatabaseMapInstanceKey = 'DomainDatabaseMap';
     
     /**
      * The supplied cache.
@@ -23,41 +24,28 @@ class Storm extends Base\Storm {
      */
     private $Cache;
     
-    /**
-     * The amount of time an entity should remain cached after retreival.
-     * 
-     * @var int 
-     */
-    private $EntityExpirySeconds;
-    
     public function __construct(
-            Cache\ICache $Cache, 
             IPlatform $Platform, 
-            callable $StormConstructor,
-            $EntityExpirySeconds = 300) {
+            callable $DomainDatabaseMapFactory,
+            Closure\IReader $ClosureReader, 
+            Closure\IParser $ClosureParser,
+            Cache\ICache $Cache) {
         $this->Cache = $Cache;
-        $this->EntityExpirySeconds = $EntityExpirySeconds;
         
-        $Storm = $this->Cache->Retrieve(self::StormInstanceKey);
+        $DomainDatabaseMap = $this->Cache->Retrieve(self::DomainDatabaseMapInstanceKey);
         
-        if(!($Storm instanceof \Storm\Api\Base\Storm)) {
-            $Storm = $StormConstructor();
-            $this->Cache->Save(self::StormInstanceKey, $Storm);
+        if(!($DomainDatabaseMap instanceof \Storm\Core\Mapping\DomainDatabaseMap)) {
+            $DomainDatabaseMap = $DomainDatabaseMapFactory();
+            $this->Cache->Save(self::DomainDatabaseMapInstanceKey, $DomainDatabaseMap);
         }
         
-        $Storm->GetDomainDatabaseMap()->GetDatabase()->SetPlatform($Platform);
+        $DomainDatabaseMap->GetDatabase()->SetPlatform($Platform);
         
-        parent::__construct($Storm->GetDomainDatabaseMap());
+        parent::__construct($DomainDatabaseMap, $ClosureReader, $ClosureParser);
     }
     
-    protected function ConstructRepository($EntityType, $AutoSave = false) {
-        return new Repository(
-                $this->GetDomainDatabaseMap(),
-                $EntityType, 
-                $AutoSave,
-                $this->Cache,
-                new Cache\DevelopmentCache(),
-                $this->EntityExpirySeconds);
+    protected function GetClosureToASTConverter(Closure\IReader $ClosureReader, Closure\IParser $ClosureParser) {
+        return new ClosureToASTConverter($this->Cache, $ClosureReader, $ClosureParser);
     }
 }
 

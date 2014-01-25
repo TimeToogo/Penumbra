@@ -2,6 +2,7 @@
 
 namespace Storm\Api\Base;
 
+use \Storm\Api\IConfiguration;
 use \Storm\Core\Object;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base;
@@ -22,7 +23,12 @@ class Repository {
     protected $DomainDatabaseMap;
     
     /**
-     * The type of entities for this repository.
+     * @var ClosureToASTConverter
+     */
+    protected $ClosureToASTConverter;
+    
+    /**
+     * The type of entity represented by this repository.
      * 
      * @var string
      */
@@ -47,7 +53,7 @@ class Repository {
      * 
      * @var boolean 
      */
-    private $AutoSave;
+    private $AutoSave = false;
     
     /**
      * Entities that are awaiting persistence
@@ -75,17 +81,25 @@ class Repository {
      * 
      * @var array 
      */
-    private $DiscardedCriterionQueue = array();
+    private $DiscardedCriterionQueue = array();    
+    
+    /**
+     * The cache to use as the identity map for the repository
+     * 
+     * @var Cache\ICache 
+     */
+    private $IdentityMap;    
     
     public function __construct(
-            DomainDatabaseMap $DomainDatabaseMap, 
-            $EntityType, 
-            $AutoSave) {
+            DomainDatabaseMap $DomainDatabaseMap,
+            ClosureToASTConverter $ClosureToASTConverter,
+            $EntityType) {
         $this->DomainDatabaseMap = $DomainDatabaseMap;
-        $this->EntityType = $EntityType;
         $this->EntityMap = $this->DomainDatabaseMap->GetDomain()->GetEntityMap($EntityType);
         $this->IdentityProperties = $this->EntityMap->GetIdentityProperties();
-        $this->AutoSave = $AutoSave;
+        $this->ClosureToASTConverter = $ClosureToASTConverter;
+        $this->EntityType = $EntityType;
+        $this->IdentityMap = new \Storm\Utilities\Cache\MemoryCache();
     }
     
     /**
@@ -96,20 +110,18 @@ class Repository {
      */
     final protected function VerifyEntity($Entity) {
         if(!($Entity instanceof $this->EntityType)) {
-            throw new \InvalidArgumentException('$Entity must be a valid instance of ' . $this->EntityType);
+            throw new \InvalidArgumentException('');
         }
     }
     
-    //TODO: Dependency Injection
-    protected function GetClosureToASTConverter() {
-        static $ClosureToASTConverter = null;
-        if($ClosureToASTConverter === null) {
-            $ClosureToASTConverter = new Closure\ClosureToASTConverter(
-                new Closure\Implementation\File\Reader(), 
-                new Closure\Implementation\PHPParser\Parser());
-        }
-        
-        return $ClosureToASTConverter;
+    /**
+     * Set whether or not to automatically commit every change.
+     * 
+     * @param boolean $AutoSave
+     * @return void
+     */
+    final public function SetAutoSave($AutoSave) {
+        $this->AutoSave = $AutoSave;
     }
     
     /**
@@ -118,7 +130,7 @@ class Repository {
      * @return Fluent\RequestBuilder 
      */
     final public function Request() {
-        return new Fluent\RequestBuilder($this->EntityMap, $this->GetClosureToASTConverter());
+        return new Fluent\RequestBuilder($this->EntityMap, $this->ClosureToASTConverter);
     }
     
     /**
@@ -127,7 +139,7 @@ class Repository {
      * @return Fluent\ProcedureBuilder
      */
     final function Procedure(\Closure $ProcedureClosure) {
-        return new Fluent\ProcedureBuilder($this->EntityMap, $this->GetClosureToASTConverter(), $ProcedureClosure);
+        return new Fluent\ProcedureBuilder($this->EntityMap, $this->ClosureToASTConverter, $ProcedureClosure);
     }
     
     /**
@@ -136,7 +148,7 @@ class Repository {
      * @return Fluent\CriterionBuilder
      */
     final function Criterion() {
-        return new Fluent\CriterionBuilder($this->EntityMap, $this->GetClosureToASTConverter());
+        return new Fluent\CriterionBuilder($this->EntityMap, $this->ClosureToASTConverter);
     }
     
     /**
@@ -160,7 +172,16 @@ class Repository {
         if($Request->GetEntityType() !== $this->EntityType) {
             throw new \Exception();//TODO: error messages;
         }
-        return $this->DomainDatabaseMap->Load($Request);
+        $Entities = $this->DomainDatabaseMap->Load($Request);
+        
+        if(is_array($Entities)) {
+            $this->CacheEntities($Entities);
+        }
+        else if ($Entities instanceof $this->EntityType) {
+            $this->CacheEntity($Entities);
+        }
+        
+        return $Entities;
     }
     
     /**
@@ -193,12 +214,23 @@ class Repository {
      * @return object|null
      */
     protected function LoadByIdentity(Object\Identity $Identity) {
-        return $this->DomainDatabaseMap->Load(
+        $CachedEntity = $this->GetFromCache($Identity);
+        if($CachedEntity instanceof $this->EntityType) {
+            return $CachedEntity;
+        }
+        
+        $Entity = $this->DomainDatabaseMap->Load(
                 new Base\Object\Request(
                         $this->EntityType, 
                         $this->EntityMap->GetProperties(), 
                         true, 
                         new Base\Object\Criteria\MatchesCriterion($Identity)));
+        
+        if($Entity instanceof $this->EntityType) {
+            $this->CacheEntity($Entity, $Identity);
+        }
+        
+        return $Entity;
     }
     
     /**
@@ -210,6 +242,8 @@ class Repository {
      */
     public function Persist($Entity) {
         $this->VerifyEntity($Entity);
+        $this->CacheEntity($Entity);
+        
         $this->PersistedQueue[] = $Entity;
         $this->AutoSave();
     }
@@ -222,6 +256,8 @@ class Repository {
      * @return void
      */
     public function PersistAll(array $Entities) {
+        $this->CacheEntities($Entities);
+        
         $this->PersistedQueue = array_merge($this->PersistedQueue, $Entities);
         $this->AutoSave();
     }
@@ -268,8 +304,10 @@ class Repository {
         }
         else {
             $this->VerifyEntity($EntityOrCriterion);
+            $this->RemoveFromCache($EntityOrCriterion);
             $this->DiscardedQueue[] = $EntityOrCriterion;
         }
+        
         $this->AutoSave();
     }
     
@@ -281,6 +319,7 @@ class Repository {
      * @return void
      */
     public function DiscardAll(array $Entities) {
+        $this->RemoveAllFromCache($Entities);
         $this->DiscardedQueue = array_merge($this->DiscardedQueue, $Entities);
         $this->AutoSave();
     }
@@ -320,6 +359,37 @@ class Repository {
         $this->DiscardedQueue = array();
         $this->DiscardedCriterionQueue = array();
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Caching methods">
+    
+    private function GetFromCache(Object\Identity $Identity) {
+        $IdentityHash = $Identity->Hash();
+
+        return $this->IdentityMap->Contains($IdentityHash) ?
+                $this->IdentityMap->Retrieve($IdentityHash) : null;
+    }
+
+    private function RemoveAllFromCache(array $Entities) {
+        array_walk($Entities, [$this, 'RemoveFromCache']);
+    }
+
+    private function RemoveFromCache($Entity) {
+        $IdentityHash = $this->EntityMap->Identity($Entity)->Hash();
+
+        $this->IdentityMap->Delete($IdentityHash);
+    }
+
+    private function CacheEntities(array $Entities) {
+        array_walk($Entities, [$this, 'CacheEntity']);
+    }
+
+    private function CacheEntity($Entity, Object\Identity $Identity = null) {
+        $Identity = $Identity ?: $this->EntityMap->Identity($Entity);
+        $IdentityHash = $Identity->Hash();
+        $this->IdentityMap->Save($IdentityHash, $Entity);
+    }
+
+    // </editor-fold>
 }
 
 ?>

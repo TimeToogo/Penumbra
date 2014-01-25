@@ -3,6 +3,7 @@
 namespace Storm\Api\Caching;
 
 use \Storm\Core\Object;
+use \Storm\Api\Base;
 use \Storm\Drivers\Fluent\Object\Closure;
 use \Storm\Utilities\Cache\ICache;
 
@@ -11,15 +12,18 @@ use \Storm\Utilities\Cache\ICache;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class ClosureToASTConverter extends Closure\ClosureToASTConverter {
+class ClosureToASTConverter extends Base\ClosureToASTConverter {
     private $Cache;
-    private $WrappedClosureToASTConverter;
     
-    public function __construct(ICache $Cache, Closure\ClosureToASTConverter $WrappedClosureToASTConverter) {
+    public function __construct(
+            ICache $Cache,
+            Closure\IReader $Reader, 
+            Closure\IParser $Parser) {
+        parent::__construct($Reader, $Parser);
+        
         $this->Cache = $Cache;
-        $this->WrappedClosureToASTConverter = $WrappedClosureToASTConverter;
     }
-    
+
     public function ClosureToAST(Object\EntityMap $EntityMap, \Closure $Closure, $ResolveVariables = true) {
         $Reflection = new \ReflectionFunction($Closure);
         $ClosureHash = $this->ClosureHash($Reflection);
@@ -30,7 +34,7 @@ class ClosureToASTConverter extends Closure\ClosureToASTConverter {
         }
         
         if(!($AST instanceof Closure\IAST)) {
-            $AST = $this->WrappedClosureToASTConverter->ClosureToAST($EntityMap, $Closure, false);
+            $AST = parent::ClosureToAST($EntityMap, $Closure, false);
             $this->Cache->Save($ClosureHash, $AST);
         }
         

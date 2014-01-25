@@ -5,7 +5,6 @@ namespace Storm\Drivers\Base\Relational;
 use \Storm\Core;
 
 class Platform implements IPlatform {
-    private $Connection;
     private $ExpressionMapper;
     private $ColumnSet;
     private $KeyGeneratorSet;
@@ -16,7 +15,6 @@ class Platform implements IPlatform {
     private $QueryExecutor;
     
     public function __construct(
-            Queries\IConnection $Connection,
             Expressions\IExpressionMapper $ExpressionMapper,
             Columns\IColumnSet $ColumnSet,
             PrimaryKeys\IKeyGeneratorSet $KeyGeneratorSet,
@@ -25,7 +23,6 @@ class Platform implements IPlatform {
             Queries\IIdentifierEscaper $IdentifierEscaper,
             Syncing\IDatabaseSyncer $DatabaseSyncer, 
             Queries\IQueryExecutor $QueryExecutor) {
-        $this->Connection = $Connection;
         $this->ExpressionMapper = $ExpressionMapper;
         $this->ColumnSet = $ColumnSet;
         $this->KeyGeneratorSet = $KeyGeneratorSet;
@@ -34,15 +31,30 @@ class Platform implements IPlatform {
         $this->IdentifierEscaper = $IdentifierEscaper;
         $this->DatabaseSyncer = $DatabaseSyncer;
         $this->QueryExecutor = $QueryExecutor;
-        
-        $this->Connection->SetExpressionCompiler($this->ExpressionCompiler);
-        $this->Connection->SetCriterionCompiler($this->CriterionCompiler);
-        $this->Connection->SetIdentifierEscaper($this->IdentifierEscaper);
     }
     
     
     final public function GetConnection() {
         return $this->Connection;
+    }
+    
+    public function SetConnection(Queries\IConnection $Connection) {
+        $this->Connection = $Connection;
+        $this->Connection->SetExpressionCompiler($this->ExpressionCompiler);
+        $this->Connection->SetCriterionCompiler($this->CriterionCompiler);
+        $this->Connection->SetIdentifierEscaper($this->IdentifierEscaper);
+        $this->OnSetConnection($Connection);
+    }
+    protected function OnSetConnection(Queries\IConnection $Connection) { }
+    
+    final protected function VerifyConnection() {
+        if(!($this->Connection instanceof Queries\IConnection)) {
+            throw new \Exception();
+        }
+    }
+    
+    public function __sleep() {
+        return array_diff(array_keys((array)$this), ['Connection']);
     }
     
     final public function GetExpressionMapper() {
@@ -78,10 +90,14 @@ class Platform implements IPlatform {
     }
     
     final public function Sync(Database $Database) {
+        $this->VerifyConnection();
+        
         return $this->DatabaseSyncer->Sync($this->Connection, $Database);
     }
     
     final public function Select(Core\Relational\Request $Request) {
+        $this->VerifyConnection();
+        
         return $this->QueryExecutor->Select($this->Connection, $Request);
     }
 
@@ -89,6 +105,7 @@ class Platform implements IPlatform {
             array $TablesOrderedByPersistingDependency, 
             array $TablesOrderedByDiscardingDependency, 
             Core\Relational\Transaction $Transaction) {
+        $this->VerifyConnection();
         
         return $this->QueryExecutor->Commit(
                 $this->Connection, 

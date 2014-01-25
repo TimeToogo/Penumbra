@@ -3,6 +3,7 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
+use \Storm\Api\Base\ClosureToASTConverter;
 use \Storm\Drivers\Fluent\Object\Procedure;
 use \Storm\Drivers\Fluent\Object\Closure;
 
@@ -16,7 +17,7 @@ class ProcedureBuilder extends CriterionBuilder {
     
     public function __construct(
             Object\EntityMap $EntityMap, 
-            Closure\ClosureToASTConverter $ClosureToASTConverter,
+            ClosureToASTConverter $ClosureToASTConverter,
             \Closure $ProcedureClosure) {
         parent::__construct($EntityMap, $ClosureToASTConverter);
         

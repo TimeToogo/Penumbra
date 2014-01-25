@@ -55,7 +55,7 @@ abstract class Table extends Relational\Table {
     protected abstract function RegisterRelationalTraits(Containers\Registrar $Registrar, Relational\Database $Context);
     
     /**
-     * @return IKeyGenerator
+     * @return IKeyGenerator|null
      */
     protected function KeyGenerator(IKeyGeneratorSet $KeyGenerator) {
         return null;

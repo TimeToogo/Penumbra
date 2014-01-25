@@ -6,8 +6,10 @@ use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Base\Relational;
 
 final class Platform extends Relational\Platform {
+    private $DevelopmentMode;
+    
     public function __construct(Relational\Queries\IConnection $Connection, $DevelopmentMode) {
-        
+        $this->DevelopmentMode = $DevelopmentMode;
         if($DevelopmentMode) {
             $IdentifiersAreCaseSensitive = 
                     ((int)$Connection->FetchValue('SELECT @@lower_case_table_names')) === 0;
@@ -17,7 +19,7 @@ final class Platform extends Relational\Platform {
                 $Connection,
                 new ExpressionMapper(new FunctionMapper(), new ObjectMapper()),
                 new Columns\ColumnSet(),
-                new PrimaryKeys\KeyGeneratorSet(/* TODO */),
+                new PrimaryKeys\KeyGeneratorSet(),
                 new Queries\ExpressionCompiler(new Queries\ExpressionOptimizer()),
                 new Queries\CriterionCompiler(),
                 new Queries\IdentifierEscaper(),
@@ -28,6 +30,13 @@ final class Platform extends Relational\Platform {
                 new Queries\QueryExecutor());
     }
     
+    protected function OnSetConnection(Relational\Queries\IConnection $Connection) {
+        if($DevelopmentMode) {
+            $IdentifiersAreCaseSensitive = 
+                    ((int)$Connection->FetchValue('SELECT @@lower_case_table_names')) === 0;
+            $this->GetDatabaseSyncer()->SetIdentifiersAreCaseSensitive($IdentifiersAreCaseSensitive);
+        }
+    }
 }
 
 ?>

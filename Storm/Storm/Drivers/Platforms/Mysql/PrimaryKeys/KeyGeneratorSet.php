@@ -5,11 +5,10 @@ namespace Storm\Drivers\Platforms\Mysql\PrimaryKeys;
 use \Storm\Drivers\Base\Relational\PrimaryKeys;
 
 class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
-    private $SequenceTable;
-    function __construct(SequenceTable $SequenceTable = null) {
+    
+    public function SetSequenceTable(SequenceTable $SequenceTable) {
         $this->SequenceTable = $SequenceTable;
     }
-
     
     public function Guid() {
         return new UUIDGenerator();

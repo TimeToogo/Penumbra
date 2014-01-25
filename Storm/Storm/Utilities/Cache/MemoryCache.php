@@ -2,7 +2,7 @@
 
 namespace Storm\Utilities\Cache;
 
-class DevelopmentCache implements ICache {
+class MemoryCache implements ICache {
     private $Cache = array();
     const ValueKey = 'Value';
     const ExpiryKey = 'Expiry';

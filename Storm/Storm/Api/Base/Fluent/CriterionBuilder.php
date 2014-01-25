@@ -3,6 +3,7 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
+use \Storm\Api\Base\ClosureToASTConverter;
 use \Storm\Drivers\Fluent\Object\Criterion;
 use \Storm\Drivers\Fluent\Object\Closure;
 
@@ -19,7 +20,7 @@ class CriterionBuilder {
     
     public function __construct(
             Object\EntityMap $EntityMap,
-            Closure\ClosureToASTConverter $ClosureToASTConverter) {
+            ClosureToASTConverter $ClosureToASTConverter) {
         $this->EntityMap = $EntityMap;
         $this->EntityType = $EntityMap->GetEntityType();
         $this->ClosureToASTConverter = $ClosureToASTConverter;

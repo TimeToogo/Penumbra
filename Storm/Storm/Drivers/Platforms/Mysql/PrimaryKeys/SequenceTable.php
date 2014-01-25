@@ -22,11 +22,7 @@ class SequenceTable extends Relational\Table {
         
         parent::__construct();
     }
-    
-    protected function KeyGenerator() {
-        return new \Storm\Drivers\Platforms\Null\NullKeyGenerator();
-    }
-    
+        
     protected function Name() {
         return $this->Name;
     }

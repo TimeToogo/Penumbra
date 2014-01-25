@@ -12,6 +12,16 @@ interface IPlatform {
     public function GetConnection();
     
     /**
+     * @return void
+     */
+    public function SetConnection(Queries\IConnection $Connection);
+    
+    /**
+     * The connection should not be serialized.
+     */
+    public function __sleep();
+    
+    /**
      * @return Expressions\IExpressionMapper
      */
     public function GetExpressionMapper();

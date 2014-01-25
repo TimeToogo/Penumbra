@@ -5,14 +5,17 @@ namespace Storm\Drivers\Base\Relational;
 use \Storm\Core\Relational;
 
 abstract class Database extends Relational\Database {
+    /**
+     * @var IPlatform
+     */
     private $Platform;
     
     public function __construct(IPlatform $Platform) {
-        $this->Platform = $Platform;
+        //$this->Platform = $Platform;
         
         parent::__construct();
         
-        $this->Platform->Sync($this);
+        //$this->Platform->Sync($this);
     }
     
     /**
@@ -29,19 +32,20 @@ abstract class Database extends Relational\Database {
     }
     
     /**
-     * @return IPlatform
+     * @return void
      */
     final public function SetPlatform(IPlatform $Platform) {
         $this->Platform = $Platform;
+        $this->Initialize();
         $this->Platform->Sync($this);
     }
     
-    final protected function GetRows(Relational\Request $Request) {
+    final protected function LoadRows(Relational\Request $Request) {
         $this->VerifyPlatform();
         return $this->Platform->Select($Request);
     }
     
-    final public function Commit(Relational\Transaction $Transaction) {
+    final public function CommitTransaction(Relational\Transaction $Transaction) {
         $this->VerifyPlatform();
         return $this->Platform->Commit(
                 $this->GetTablesOrderedByPersistingDependency(), 

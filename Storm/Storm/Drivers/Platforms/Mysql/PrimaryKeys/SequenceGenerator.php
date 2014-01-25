@@ -6,7 +6,10 @@ use \Storm\Drivers\Base\Relational;
 use \Storm\Drivers\Base\Relational\PrimaryKeys;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 
-//Should be safe as MyISAM uses table level locking for writes
+/**
+ * Should be safe as MyISAM uses table level locking for writes.
+ * This should mean that the inserted increments will be sequential.
+ */
 class SequenceGenerator extends PrimaryKeys\PreInsertKeyGenerator {
     private $SequenceName;
     private $SequenceTable;
@@ -42,7 +45,7 @@ class SequenceGenerator extends PrimaryKeys\PreInsertKeyGenerator {
         $IncrementValue = $Connection->FetchValue('SELECT LAST_INSERT_ID()');
         
         foreach($UnkeyedRows as $UnkeyedRow) {
-            $UnkeyedRow[$PrimaryKeyColumn] = $IncrementValue;
+            $PrimaryKeyColumn->Store($UnkeyedRow, $IncrementValue);
             $IncrementValue++;
         }
     }

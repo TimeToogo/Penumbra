@@ -14,6 +14,11 @@ abstract class Database {
     use \Storm\Core\Helpers\Type;
     
     /**
+     * @var boolean 
+     */
+    private $IsInitalized = false;
+    
+    /**
      * @var Table[] 
      */
     private $Tables = array();
@@ -29,10 +34,32 @@ abstract class Database {
     private $TablesOrderedByDiscardingDependency = array();
     
     public function __construct() {
+        $this->IsInitalized = true;
         $Registrar = new Registrar(Table::GetType());
         $this->RegisterTables($Registrar);
         $this->AddTables($Registrar->GetRegistered());
     }
+    
+    final protected function VerifyInitialized() {
+        if(!$this->IsInitalized) {
+            throw new \Exception();
+        }
+    }
+    
+    /**
+     * This method must be called when it is appropriate
+     * to initialize the database instance.
+     * 
+     * @return void
+     */
+    protected function Initialize() {
+        if($this->IsInitalized) {
+            return;
+        }
+        
+    }
+    
+    
     
     /**
      * The method to specify the tables in the current database.
@@ -97,6 +124,7 @@ abstract class Database {
      * @return boolean
      */
     final public function HasTable($Name) {
+        $this->VerifyInitialized();
         return isset($this->Tables[$Name]);
     }
     
@@ -107,6 +135,7 @@ abstract class Database {
      * @return Table|null The matching table or null if it has not been registered
      */
     final public function GetTable($Name) {
+        $this->VerifyInitialized();
         return $this->HasTable($Name) ? $this->Tables[$Name] : null;
     }
     
@@ -126,6 +155,7 @@ abstract class Database {
      * @return Table[]
      */
     final public function GetTables() {
+        $this->VerifyInitialized();
         return $this->Tables;
     }
     
@@ -133,6 +163,7 @@ abstract class Database {
      * @return Table[]
      */
     public function GetTablesOrderedByPersistingDependency() {
+        $this->VerifyInitialized();
         return $this->TablesOrderedByPersistingDependency;
     }
 
@@ -140,6 +171,7 @@ abstract class Database {
      * @return Table[]
      */
     public function GetTablesOrderedByDiscardingDependency() {
+        $this->VerifyInitialized();
         return $this->TablesOrderedByDiscardingDependency;
     }
     
@@ -150,10 +182,11 @@ abstract class Database {
      * @return ResultRow[] The loaded result rows
      */
     final public function Load(Request $Request) {
+        $this->VerifyInitialized();
         foreach($Request->GetTables() as $Table) {
             $this->VerifyTable($Table);
         }
-        return $this->GetRows($Request);
+        return $this->LoadRows($Request);
     }
     /**
      * This method should be implemented such that is returns the rows specified
@@ -162,8 +195,18 @@ abstract class Database {
      * @param Request $Request The request to load
      * @return ResultRow[] The loaded result rows
      */
-    protected abstract function GetRows(Request $Request);
+    protected abstract function LoadRows(Request $Request);
     
+    /**
+     * Commits the supplied transaction.
+     * 
+     * @param Transaction $Transaction The transaction to commit
+     * @return void
+     */
+    final public function Commit(Transaction $Transaction) {
+        $this->VerifyInitialized();
+        $this->CommitTransaction($Transaction);
+    }
     /**
      * This method should be implemented such that it commits the supplied transaction
      * to the underlying database.
@@ -171,7 +214,7 @@ abstract class Database {
      * @param Transaction $Transaction The transaction to commit
      * @return void
      */
-    public abstract function Commit(Transaction $Transaction);
+    protected abstract function CommitTransaction(Transaction $Transaction);
 }
 
 ?>
