@@ -67,19 +67,19 @@ class Traversing extends Accessor {
         $Value = $Entity;
         foreach($this->TraversingAccessors as $TraversingAccessor) {
             $TraversingAccessor->SetEntityType(get_class($Value));
-            $Value =& $TraversingAccessor->GetValue($Value);
+            $Value = $TraversingAccessor->GetValue($Value);
         }
         return $Value;
     }
     final public function GetValue($Entity) {
-        $Value =& $this->GetTraversedValue($Entity);
+        $Value = $this->GetTraversedValue($Entity);
         $this->FinalAccessor->SetEntityType(get_class($Value));
         
         return $this->FinalAccessor->GetValue($Value);
     }
 
     final public function SetValue($Entity, $Value) {
-        $TraversedValue =& $this->GetTraversedValue($Entity);
+        $TraversedValue = $this->GetTraversedValue($Entity);
         $this->FinalAccessor->SetEntityType(get_class($TraversedValue));
                 
         $this->FinalAccessor->SetValue($TraversedValue, $Value);
