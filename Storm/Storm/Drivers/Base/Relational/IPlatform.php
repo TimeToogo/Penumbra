@@ -67,8 +67,7 @@ interface IPlatform {
      * @return Queries\IQueryExecutor
      */
     public function GetQueryExecutor();
-    
-    
+        
     public function Sync(Database $Database);
     
     /**
