@@ -30,19 +30,19 @@ class QueryExecutor extends Queries\QueryExecutor {
         }
         
         $QueryBuilder->AppendIdentifier('INSERT OR REPLACE INTO #', [$TableName]);
-        $QueryBuilder->AppendIdentifiers('(#)', $ColumnNames, ',');
-        $QueryBuilder->Append(' VALUES ');
+        $QueryBuilder->AppendIdentifiers(' (#) ', $ColumnNames, ',');
         $First = true;
         foreach($Rows as $Row) {
+            $Alias = $First;
             if($First) $First = false;
             else
                 $QueryBuilder->Append(' UNION ALL ');
             
-            $this->AppendRow($QueryBuilder, $Columns, $Row);
+            $this->AppendRow($QueryBuilder, $Columns, $Row, $Alias);
         }
     }
     
-    private function AppendRow(QueryBuilder $QueryBuilder, array $Columns, Relational\Row $Row) {
+    private function AppendRow(QueryBuilder $QueryBuilder, array $Columns, Relational\Row $Row, $Alias = false) {
         $QueryBuilder->Append('SELECT ');
         $First1 = true;
         foreach($Columns as $Column) {
@@ -56,7 +56,9 @@ class QueryExecutor extends Queries\QueryExecutor {
             else {
                 $QueryBuilder->Append('NULL');
             }
-            $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetName()]);
+            if($Alias) {
+                $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetName()]);
+            }
         }
         $QueryBuilder->Append(')');
     }
