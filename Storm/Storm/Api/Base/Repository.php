@@ -103,6 +103,15 @@ class Repository {
     }
     
     /**
+     * Gets the identity map used for this repository.
+     * 
+     * @return IdentityMap
+     */
+    public function GetIdentityMap() {
+        return $this->IdentityMap;
+    }
+
+    /**
      * Verifies an entity to be valid for use in this repository.
      * 
      * @param object $Entity The entity to verify

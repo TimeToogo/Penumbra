@@ -58,6 +58,10 @@ class IdentityMap {
         $IdentityHash = $Identity->Hash();
         $this->Cache->Save($IdentityHash, $Entity);
     }
+
+    final public function Clear() {
+        $this->Cache->Clear();
+    }
 }
 
 ?>
