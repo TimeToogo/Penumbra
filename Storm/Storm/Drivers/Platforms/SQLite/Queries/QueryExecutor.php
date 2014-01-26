@@ -56,7 +56,7 @@ class QueryExecutor extends Queries\QueryExecutor {
             else {
                 $QueryBuilder->Append('NULL');
             }
-            $QueryBuilder->AppendIdentifier(' AS #', $Column->GetName());
+            $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetName()]);
         }
         $QueryBuilder->Append(')');
     }
