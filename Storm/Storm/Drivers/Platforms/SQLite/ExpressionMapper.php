@@ -45,31 +45,7 @@ final class ExpressionMapper extends E\ExpressionMapper {
                     $ValueExpression);
         }
     }
-    
-    public function MapBinaryOperationExpression(
-            CoreExpression $LeftOperandExpression, 
-            $BinaryOperator, 
-            CoreExpression $RightOperandExpression) {
-                
-        switch($BinaryOperator) {
-            case O\Binary::Concatenation:
-                return new E\FunctionCallExpression('CONCAT', Expression::ValueList([$LeftOperandExpression, $RightOperandExpression]));
-                
-            case O\Binary::Inequality:
-                return Expression::UnaryOperation(O\Unary::Not, 
-                        Expression::BinaryOperation(
-                                $LeftOperandExpression, 
-                                O\Binary::Equality, 
-                                $RightOperandExpression));
-            
-            default:
-                return new E\BinaryOperationExpression(
-                        $LeftOperandExpression, 
-                        $BinaryOperator, 
-                        $RightOperandExpression);
-        }
-    }
-    
+        
     public function MapUnaryOperationExpression($UnaryOperator, CoreExpression $OperandExpression) {
         switch ($UnaryOperator) {
             case O\Unary::Increment:

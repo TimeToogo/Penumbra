@@ -12,12 +12,13 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
     
     protected function BinaryOperators() {
         return [
+            Operators\Binary::Concatenation => '||',
             Operators\Binary::Addition => '+',
             Operators\Binary::BitwiseAnd => '&',
             Operators\Binary::BitwiseOr => '|',
             Operators\Binary::BitwiseXor => '^',
             Operators\Binary::Division => '/',
-            Operators\Binary::Equality => '<=>',
+            Operators\Binary::Equality => '==',
             Operators\Binary::GreaterThan => '>',
             Operators\Binary::GreaterThanOrEqualTo => '>=',
             Operators\Binary::In => 'IN',
