@@ -11,6 +11,11 @@ use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Drivers\Base\Relational\PrimaryKeys\ValueWithReturningDataKeyGenerator;
 
 class QueryExecutor extends Queries\QueryExecutor {
+    const SaveRowBatchSize = 2000;
+    
+    public function __construct() {
+        parent::__construct(self::SaveRowBatchSize);
+    }
     
     /*
      * TODO: Verify 'ON DUPLICATE KEY' safety with unique constraints in conjunction with a primary key

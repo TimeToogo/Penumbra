@@ -11,6 +11,11 @@ use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Drivers\Base\Relational\PrimaryKeys\ValueWithReturningDataKeyGenerator;
 
 class QueryExecutor extends Queries\QueryExecutor {
+    const SaveRowBatchSize = 100;
+    
+    public function __construct() {
+        parent::__construct(self::SaveRowBatchSize);
+    }
     
     protected function SaveQuery(QueryBuilder $QueryBuilder, Table $Table, array $Rows,
             ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
