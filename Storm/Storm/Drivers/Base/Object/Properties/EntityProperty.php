@@ -34,7 +34,7 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
         }
     }
     
-    protected function ReviveRevivalData(Object\Domain $Domain, $Entity, RevivalData $RevivalData) {
+    protected function ReviveRetvivalData(Object\Domain $Domain, $Entity, Object\RevivalData $RevivalData) {
         if ($this->ProxyGenerator !== null) {
             $LoadFunction = static function () use (&$RevivalData) {
                 return $RevivalData;

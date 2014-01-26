@@ -63,7 +63,7 @@ class Traversing extends Accessor {
         return $this->NestedAccessors;
     }
     
-    private function &GetTraversedValue($Entity) {
+    private function GetTraversedValue($Entity) {
         $Value = $Entity;
         foreach($this->TraversingAccessors as $TraversingAccessor) {
             $TraversingAccessor->SetEntityType(get_class($Value));
