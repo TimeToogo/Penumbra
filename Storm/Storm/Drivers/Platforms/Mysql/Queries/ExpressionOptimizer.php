@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Platforms\Mysql\Queries;
 
-use \Storm\Drivers\Base\Relational\Queries;
+use \Storm\Drivers\Platforms\Base\Queries;
 use \Storm\Drivers\Base\Relational\Expressions;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Core\Relational\Expressions\Expression as CoreExpression;

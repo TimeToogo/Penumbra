@@ -4,6 +4,12 @@ namespace Storm\Drivers\Base\Relational;
 
 use \Storm\Core;
 
+/**
+ * The platform contains all specific implementation related to
+ * the underlying database.
+ * 
+ * @author Elliot Levin <elliot@aanet.com.au>
+ */
 interface IPlatform {
     
     /**
@@ -18,6 +24,7 @@ interface IPlatform {
     
     /**
      * The connection should not be serialized.
+     * @return string[]
      */
     public function __sleep();
     

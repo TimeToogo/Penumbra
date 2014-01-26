@@ -4,44 +4,23 @@ namespace Storm\Drivers\Platforms\Mysql\Queries;
 
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Table;
-use \Storm\Drivers\Base\Relational\Queries;
+use \Storm\Drivers\Platforms\Base\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
-use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Relational\Requests;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Drivers\Base\Relational\PrimaryKeys\ValueWithReturningDataKeyGenerator;
 
 class QueryExecutor extends Queries\QueryExecutor {
     
-    protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys) {
-        $this->DeletePrimaryKeysQuery($Connection, $Table, $DiscardedPrimaryKeys)->Execute();
-    }
-
-    protected function DeleteWhereQuery(IConnection $Connection, Relational\Criterion $DiscardedRequest) {
-        $this->DeleteQuery($Connection, $DiscardedRequest)->Execute();
-    }
-
-    protected function ExecuteUpdate(IConnection $Connection, Relational\Procedure &$ProcedureToExecute) {
-        $this->UpdateQuery($Connection, $ProcedureToExecute)->Execute();
-    }
-    
-    protected function SaveRows(IConnection $Connection, Table $Table, array &$RowsToPersist,
-            ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
-        if($ValueWithReturningDataKeyGenerator !== null) {
-            throw new \Exception('Mysql does not support returning data');
-        }
-        $this->SaveQuery($Connection, $Table, $RowsToPersist)->Execute();
-    }
-    
     /*
      * TODO: Verify 'ON DUPLICATE KEY' safety with unique constraints in conjunction with a primary key
      * See temporary fix below
      */
-    protected function SaveQuery(IConnection $Connection, Table $Table, array $Rows) {
-        if(count($Rows) === 0)
-            return;
-        
-        $QueryBuilder = $Connection->QueryBuilder();
+    protected function SaveQuery(QueryBuilder $QueryBuilder, Table $Table, array $Rows,
+            ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
+        if($ValueWithReturningDataKeyGenerator !== null) {
+            throw new \Exception('Mysql does not support returning data');
+        }
         
         $Columns = $Table->GetColumns();
         $PrimaryKeyColumns = $Table->GetPrimaryKeyColumns();
@@ -71,8 +50,6 @@ class QueryExecutor extends Queries\QueryExecutor {
         }
         
         $this->AppendOnDuplicateKeyUpdate($QueryBuilder, $TableName, $Columns, $PrimaryKeyIdentifiers);
-        
-        return $QueryBuilder->Build();
     }
     
     private function AppendRow(QueryBuilder $QueryBuilder, array $Columns, Relational\Row $Row) {
@@ -158,9 +135,7 @@ class QueryExecutor extends Queries\QueryExecutor {
         $this->AppendCriterion($QueryBuilder, $Request->GetCriterion());
     }
     
-    protected function UpdateQuery(IConnection $Connection, Relational\Procedure $Procedure) {
-        $QueryBuilder = $Connection->QueryBuilder();
-        
+    protected function UpdateQuery(QueryBuilder $QueryBuilder, Relational\Procedure $Procedure) {        
         $TableNames = array_map(
                 function ($Table) { 
                     return $Table->GetName();
@@ -178,23 +153,15 @@ class QueryExecutor extends Queries\QueryExecutor {
             $QueryBuilder->AppendExpression($Expression);
         }
         $this->AppendCriterion($QueryBuilder, $Procedure->GetCriterion());
-        
-        return $QueryBuilder->Build();
     }
     
-    protected function DeleteQuery(IConnection $Connection, Relational\Criterion $Criterion) {
-        $QueryBuilder = $Connection->QueryBuilder();
-        
+    protected function DeleteQuery(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
         $QueryBuilder->AppendIdentifiers('DELETE # FROM # ', array_keys($Criterion->GetTables()), ',');
         
         $this->AppendCriterion($QueryBuilder, $Criterion);
-        
-        return $QueryBuilder->Build();
     }
     
-    protected function DeletePrimaryKeysQuery(IConnection $Connection, Table $Table, array $PrimaryKeys) {
-        $QueryBuilder = $Connection->QueryBuilder();
-        
+    protected function DeletePrimaryKeysQuery(QueryBuilder $QueryBuilder, Table $Table, array $PrimaryKeys) {
         $TableName = $Table->GetName();
         $QueryBuilder->AppendIdentifier('DELETE # FROM # WHERE ', [$TableName]);
         
@@ -222,9 +189,6 @@ class QueryExecutor extends Queries\QueryExecutor {
         }
         
         $QueryBuilder->Append(')');
-        
-        
-        return $QueryBuilder->Build();
     }
     
     private function AppendCriterion(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
