@@ -50,7 +50,7 @@ class IdentityMap {
     }
 
     final public function CacheEntities(array $Entities) {
-        array_walk($Entities, [$this, 'CacheEntity']);
+        array_map([$this, 'CacheEntity'], $Entities);
     }
 
     final public function CacheEntity($Entity, Object\Identity $Identity = null) {
