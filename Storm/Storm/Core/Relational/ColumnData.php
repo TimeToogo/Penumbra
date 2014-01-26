@@ -82,6 +82,10 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         $this->ColumnData[$ColumnIdentifier] = $Data;
     }
     
+    protected function RemoveColumn(IColumn $Column) {
+        unset($this->ColumnData[$Column->GetIdentifier()]);
+    }
+    
     final public function Hash() {
         asort($this->ColumnData);
         return md5(json_encode($this->ColumnData));
@@ -113,7 +117,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
 
     final public function offsetUnset($Column) {
-        unset($this->ColumnData[$Column->GetIdentifier()]);
+        $this->RemoveColumn($Column);
     }
     
     /**

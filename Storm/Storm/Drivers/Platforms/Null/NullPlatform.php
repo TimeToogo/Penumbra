@@ -5,6 +5,9 @@ namespace Storm\Drivers\Platforms\Null;
 use \Storm\Drivers\Base\Relational;
 
 final class NullPlatform implements Relational\IPlatform {
+    public function __sleep() {
+        
+    }
     
     public function Commit(array $TablesOrderedByPersistingDependency, array $TablesOrderedByDiscardingDependency, \Storm\Core\Relational\Transaction $Transaction) {
         
@@ -17,7 +20,11 @@ final class NullPlatform implements Relational\IPlatform {
     public function GetConnection() {
         
     }
-
+    
+    public function SetConnection(Relational\Queries\IConnection $Connection) {
+        
+    }
+    
     public function GetCriterionCompiler() {
         
     }

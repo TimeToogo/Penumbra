@@ -14,7 +14,7 @@ final class Bindings implements \ArrayAccess {
     }
 
     public function offsetSet($ParameterKey, $ParameterValue) {
-        $this->Bindings[$ParameterKey] = new Binding($ParameterValue);
+        $this->Bindings[$ParameterKey] = new Binding($ParameterValue, ParameterType::String);
     }
 
     public function offsetUnset($ParameterKey) {

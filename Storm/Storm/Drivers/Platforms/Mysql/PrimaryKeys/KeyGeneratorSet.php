@@ -5,6 +5,7 @@ namespace Storm\Drivers\Platforms\Mysql\PrimaryKeys;
 use \Storm\Drivers\Base\Relational\PrimaryKeys;
 
 class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
+    private $SequenceTable;
     
     public function SetSequenceTable(SequenceTable $SequenceTable) {
         $this->SequenceTable = $SequenceTable;
