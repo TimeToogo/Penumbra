@@ -23,8 +23,6 @@ class Posts extends Relational\Table {
     public $Content;
     public $CreatedDate;
     
-    public $PrimaryKey;
-    
     protected function CreateTableStructure(IColumnSet $Column) {
         $this->BlogId = $Column->IncrementInt32('BlogId');
         $this->Title = $Column->String('Title', 50, true);

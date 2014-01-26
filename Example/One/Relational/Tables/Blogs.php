@@ -26,8 +26,6 @@ class Blogs extends Relational\Table {
     public $Description;
     public $CreatedDate;
     
-    public $PrimaryKey;
-    
     protected function CreateTableStructure(IColumnSet $Column) {
         $this->Id = $Column->IncrementInt32('Id');
         $this->Name = $Column->String('Name', 50);
@@ -38,8 +36,7 @@ class Blogs extends Relational\Table {
     public $Posts;
 
     protected function CreateRelations(Database $Database) {
-        $PostTable = $Database->Posts;
-        $this->Posts = new Relations\ToManyRelation($PostTable->BlogForeignKey, $PostTable);
+        $this->Posts = new Relations\ToManyRelation($Database->Posts->BlogForeignKey);
     }
 
     protected function CreateRelationalStructure(Database $Database) {

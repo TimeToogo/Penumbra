@@ -23,7 +23,6 @@ final class PostRelationalMap extends Mapping\EntityRelationalMap {
         $Table = $Database->Posts;
         
         $this->Map($EntityMap->Title)->ToColumn($Table->Title);
-        $this->Map($EntityMap->Title)->ToColumn($Table->Title);
         $this->Map($EntityMap->Content)->ToColumn($Table->Content);
         $this->Map($EntityMap->CreatedDate)->ToColumn($Table->CreatedDate);
         

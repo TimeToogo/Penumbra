@@ -25,8 +25,6 @@ class Tags extends Relational\Table {
     public $Id;
     public $Name;
     
-    public $PrimaryKey;
-    
     protected function CreateTableStructure(IColumnSet $Column) {
         $this->Id = $Column->IncrementInt32('Id');
         $this->Name = $Column->String('Name', 50);
