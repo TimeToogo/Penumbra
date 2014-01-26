@@ -20,7 +20,7 @@ class AutoIncrementGenerator extends PrimaryKeys\PostInsertKeyGenerator {
         $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
         $IncrementColumn = reset($PrimaryKeyColumns);
         $FirstInsertId = $Connection->FetchValue('SELECT last_insert_rowid()');
-        $IncrementId = $FirstInsertId;
+        $IncrementId = (int)$FirstInsertId - (count($UnkeyedRows) - 1);
         foreach ($UnkeyedRows as $Row) {
             $IncrementColumn->Store($Row, $IncrementId);
             $IncrementId++;
