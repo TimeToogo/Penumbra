@@ -36,14 +36,14 @@ class QueryExecutor extends Queries\QueryExecutor {
         foreach($Rows as $Row) {
             if($First) $First = false;
             else
-                $QueryBuilder->Append(', ');
+                $QueryBuilder->Append(' UNION ALL ');
             
             $this->AppendRow($QueryBuilder, $Columns, $Row);
         }
     }
     
     private function AppendRow(QueryBuilder $QueryBuilder, array $Columns, Relational\Row $Row) {
-        $QueryBuilder->Append('(');
+        $QueryBuilder->Append('SELECT ');
         $First1 = true;
         foreach($Columns as $Column) {
             if($First1) $First1 = false;
@@ -56,6 +56,7 @@ class QueryExecutor extends Queries\QueryExecutor {
             else {
                 $QueryBuilder->Append('NULL');
             }
+            $QueryBuilder->AppendIdentifier(' AS #', $Column->GetName());
         }
         $QueryBuilder->Append(')');
     }
