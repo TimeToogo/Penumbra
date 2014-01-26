@@ -60,7 +60,6 @@ class QueryExecutor extends Queries\QueryExecutor {
                 $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetName()]);
             }
         }
-        $QueryBuilder->Append(')');
     }
           
     protected function SelectQuery(QueryBuilder $QueryBuilder, Relational\Request $Request) {
