@@ -13,6 +13,13 @@ use \Storm\Drivers\Fluent\Object\Closure;
  */
 class Storm {
     /**
+     * The entity repositories.
+     * 
+     * @var Repository[]
+     */
+    protected $Repositories;
+    
+    /**
      * The supplied DomainDatabaseMap.
      * 
      * @var DomainDatabaseMap
@@ -48,26 +55,80 @@ class Storm {
     }
     
     /**
-     * Builds a new repository instance for a type of entity.
+     * Get the repository instance for a type of entity.
      * 
      * @param string|object $EntityType The entity of which the repository represents
      * @return Repository
      */
-    public function GetRepository($EntityType, $AutoSave = false) {
+    public function GetRepository($EntityType) {
         if(is_object($EntityType)) {
             $EntityType = get_class($EntityType);
         }
         
-        return $this->ConstructRepository($EntityType, $AutoSave);
+        if(!isset($this->Repositories[$EntityType])) {
+            $this->Repositories[$EntityType] = $this->ConstructRepository($EntityType);
+        }
+        
+        return $this->Repositories[$EntityType];
     }
     
     /**
-     * Instantiates a new repository.
+     * Instantiates a new repository for the specified entity type.
      * 
+     * @param string $EntityType The entity of which the repository represents
      * @return Repository The instantiated repository
      */
-    protected function ConstructRepository($EntityType, $AutoSave = false) {
-        return new Repository($this->DomainDatabaseMap, $this->ClosureToASTConverter, $EntityType, $AutoSave);
+    protected function ConstructRepository($EntityType) {
+        return new Repository($this->DomainDatabaseMap, $this->ClosureToASTConverter, $EntityType);
+    }
+    
+    /**
+     * Saves all the changes from the repositories
+     * instantiated by this storm.
+     * 
+     * @return void
+     */
+    final public function SaveChanges() {
+        $PersistedQueues = array();
+        $ExecutionQueues = array();
+        $DiscardedQueues = array();
+        $DiscardedCriterionQueues = array();
+        
+        foreach($this->Repositories as $Repository) {
+            list($PersistedQueue,
+            $ExecutionQueue,
+            $DiscardedQueue,
+            $DiscardedCriterionQueue) = $Repository->GetChanges();
+            $PersistedQueues[] = $PersistedQueue;
+            $ExecutionQueues[] = $ExecutionQueue;
+            $DiscardedQueues[] = $DiscardedQueue;
+            $DiscardedCriterionQueues[] = $DiscardedCriterionQueue;
+            
+            $Repository->ClearChanges();
+        }
+        
+        $PersistedQueue = call_user_func_array('array_merge', $PersistedQueues);
+        $ExecutionQueue = call_user_func_array('array_merge', $ExecutionQueues);
+        $DiscardedQueue = call_user_func_array('array_merge', $DiscardedQueues);
+        $DiscardedCriterionQueue = call_user_func_array('array_merge', $DiscardedCriterionQueues);
+        
+        $this->DomainDatabaseMap->Commit(
+                $PersistedQueue, 
+                $ExecutionQueue, 
+                $DiscardedQueue, 
+                $DiscardedCriterionQueue);
+    }
+    
+    /**
+     * Clears all the changes from the repositories
+     * instantiated by this storm.
+     * 
+     * @return void
+     */
+    final public function ClearChanges() {
+        foreach($this->Repositories as $Repository) {
+            $Repository->ClearChanges();
+        }
     }
 }
 

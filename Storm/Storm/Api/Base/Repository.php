@@ -354,6 +354,28 @@ class Repository {
                 $this->DiscardedQueue, 
                 $this->DiscardedCriterionQueue);
         
+        $this->ClearChanges();
+    }
+    
+    /**
+     * Gets the pending changes.
+     * 
+     * @return array An array containing all the operations queues
+     */
+    final public function GetChanges() {
+        return [$this->PersistedQueue, 
+                $this->ExecutionQueue, 
+                $this->DiscardedQueue, 
+                $this->DiscardedCriterionQueue];
+    }
+    
+    /**
+     * Clears all the pending changes awaiting to be 
+     * commited to underlying DomainDatabaseMap.
+     * 
+     * @return void
+     */
+    final public function ClearChanges() {
         $this->PersistedQueue = array();
         $this->ExecutionQueue = array();
         $this->DiscardedQueue = array();
