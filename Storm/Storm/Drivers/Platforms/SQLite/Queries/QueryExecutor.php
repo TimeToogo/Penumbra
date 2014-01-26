@@ -23,18 +23,14 @@ class QueryExecutor extends Queries\QueryExecutor {
         $ColumnNames = array_keys($Columns);
         $PrimaryKeyColumnNames = array_keys($PrimaryKeyColumns);
         $TableName = $Table->GetName();
-        $Identifiers = array();
         
-        foreach($ColumnNames as $ColumnName) {
-            $Identifiers[] = [$TableName, $ColumnName];
-        }
         $PrimaryKeyIdentifiers = array();
         foreach($PrimaryKeyColumnNames as $ColumnName) {
             $PrimaryKeyIdentifiers[] = [$TableName, $ColumnName];
         }
         
         $QueryBuilder->AppendIdentifier('INSERT OR REPLACE INTO #', [$TableName]);
-        $QueryBuilder->AppendIdentifiers('(#)', $Identifiers, ',');
+        $QueryBuilder->AppendIdentifiers('(#)', $ColumnNames, ',');
         $QueryBuilder->Append(' VALUES ');
         $First = true;
         foreach($Rows as $Row) {
