@@ -15,8 +15,8 @@ abstract class Platform extends Relational\Platform {
             Relational\Queries\IExpressionCompiler $ExpressionCompiler, 
             Relational\Queries\ICriterionCompiler $CriterionCompiler, 
             Relational\Queries\IIdentifierEscaper $IdentifierEscaper,
-            Relational\Syncing\IDatabaseBuilder $DatabaseBuilder,
-            Relational\Syncing\IDatabaseModifier $DatabaseModifier,
+            Relational\Syncing\IDatabaseBuilder $DatabaseBuilder = null,
+            Relational\Syncing\IDatabaseModifier $DatabaseModifier = null,
             Relational\Queries\IQueryExecutor $QueryExecutor) {
         $this->DevelopmentMode = $DevelopmentMode;
         

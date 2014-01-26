@@ -7,17 +7,17 @@ use \Storm\Drivers\Base\Relational;
 use \Storm\Drivers\Platforms\Base;
 
 final class Platform extends Base\Platform {
-    public function __construct($DevelopmentMode) {
+    public function __construct() {
         parent::__construct(
-                $DevelopmentMode, 
+                false, 
                 new ExpressionMapper(new FunctionMapper(), new ObjectMapper()),
                 new Columns\ColumnSet(),
                 new PrimaryKeys\KeyGeneratorSet(),
                 new Queries\ExpressionCompiler(new Queries\ExpressionOptimizer()),
                 new Queries\CriterionCompiler(),
                 new Queries\IdentifierEscaper(),
-                new Syncing\DatabaseBuilder(), 
-                new Syncing\DatabaseModifier(), 
+                null, 
+                null, 
                 new Queries\QueryExecutor());
     }
     
