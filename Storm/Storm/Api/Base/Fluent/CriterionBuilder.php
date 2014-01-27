@@ -51,7 +51,7 @@ class CriterionBuilder {
      * Example predicate closure:
      * <code>
      *  function (Car $Car) use ($Name) {
-     *      return $Car->IsAvailable() && $Entity->GetName() === $Name;
+     *      return $Car->IsAvailable() && $Car->GetName() === $Name;
      *  }
      * </code>
      * 

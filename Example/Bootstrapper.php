@@ -8,7 +8,7 @@ date_default_timezone_set('Australia/Melbourne');
 
 ini_set('display_errors', 'On');
 error_reporting(-1);
-set_time_limit(10);
+set_time_limit(100);
 
 define('DIRECTORY_SEPERATOR', '/');
 define('BASE_PATH', str_replace('\\', DIRECTORY_SEPERATOR, __DIR__) . DIRECTORY_SEPERATOR);

@@ -20,10 +20,14 @@ class TagMap extends EntityMap {
     
     public $Id;
     public $Name;
+    public $Description;
+    public $Number;
     
     protected function CreateProperties(Domain $Domain) {
         $this->Id = new Properties\DataProperty(new Accessors\Field('Id'), true);
         $this->Name = new Properties\DataProperty(new Accessors\Field('Name'));
+        $this->Description = new Properties\DataProperty(new Accessors\Field('Description'));
+        $this->Number = new Properties\DataProperty(new Accessors\Field('Number'));
     }
 
 }

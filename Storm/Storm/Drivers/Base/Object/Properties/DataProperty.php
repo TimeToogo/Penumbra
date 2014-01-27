@@ -17,11 +17,11 @@ class DataProperty extends Property implements Object\IDataProperty {
     
     
     public function ReviveValue($PropertyValue, $Entity) {
-        $this->GetAccessor()->SetValue($Entity, $PropertyValue);
+        $this->Accessor->SetValue($Entity, $PropertyValue);
     }
     
     public function GetValue($Entity) {
-        return $this->GetAccessor()->GetValue($Entity);
+        return $this->Accessor->GetValue($Entity);
     }
 }
 

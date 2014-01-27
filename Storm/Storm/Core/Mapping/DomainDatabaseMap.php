@@ -13,7 +13,7 @@ use \Storm\Core\Containers\Map;
  * 
  * @internal Currently this has become a minor God-Object and should be broken up into more 
  * consice and well-defined classes. This could be a bit of a refactoring job. Currently
- * I have organized the groups of behavor into editor fold tags. These should be individual classes.
+ * I have organized the groups of behavor into editor fold tags. These should become individual classes.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */

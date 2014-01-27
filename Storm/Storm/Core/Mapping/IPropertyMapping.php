@@ -13,7 +13,7 @@ use \Storm\Core\Relational;
  */
 interface IPropertyMapping {
     const IPropertyMappingType = __CLASS__;
-    
+        
     /**
      * The mapped property.
      * 

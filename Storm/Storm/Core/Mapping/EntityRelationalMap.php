@@ -257,11 +257,16 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         return $this->CollectionPropertyToManyRelationMappings;
     }
     
+    private $ResultRow = null;
     /**
      * {@inheritDoc}
      */
     public function ResultRow($ColumnData = array()) {
-        return new Relational\ResultRow($this->MappedPersistColumns, $ColumnData);
+        if($this->ResultRow === null) {
+            $this->ResultRow = new Relational\ResultRow($this->MappedPersistColumns, $ColumnData);
+        }
+        
+        return $this->ResultRow->Another($ColumnData);
     }
 
     /**

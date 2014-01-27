@@ -8,24 +8,24 @@ use \Storm\Drivers\Base\Relational\Syncing\IDatabaseBuilder;
 use \Storm\Drivers\Base\Relational\Syncing\IDatabaseModifier;
 
 final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
-    private $IdentifiersAreCaseSenstive;
+    private $IdentifiersAreCaseSensitive;
     private $DropUnspecifiedTables;
     private $DropUnspecifiedColumns;
     
     public function __construct(
             IDatabaseBuilder $Builder, IDatabaseModifier $Modifier,
-            $IdentifiersAreCaseSenstive = true, 
+            $IdentifiersAreCaseSensitive = true, 
             $DropUnspecifiedTables = false, 
             $DropUnspecifiedColumns = false) {
         parent::__construct($Builder, $Modifier);
         
-        $this->IdentifiersAreCaseSenstive = $IdentifiersAreCaseSenstive;
+        $this->IdentifiersAreCaseSensitive = $IdentifiersAreCaseSensitive;
         $this->DropUnspecifiedTables = $DropUnspecifiedTables;
         $this->DropUnspecifiedColumns = $DropUnspecifiedColumns;
     }
     
-    final public function SetIdentifiersAreCaseSenstive($IdentifiersAreCaseSenstive) {
-        $this->IdentifiersAreCaseSenstive = $IdentifiersAreCaseSenstive;
+    final public function SetIdentifiersAreCaseSensitive($IdentifiersAreCaseSensitive) {
+        $this->IdentifiersAreCaseSensitive = $IdentifiersAreCaseSensitive;
     }
     
     protected function SyncDatabase(
@@ -38,7 +38,7 @@ final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
          $Tables = $Database->GetTables();
          $CurrentTables = $CurrentDatabase->GetTables();
          
-         if(!$this->IdentifiersAreCaseSenstive) {
+         if(!$this->IdentifiersAreCaseSensitive) {
              $Tables = array_change_key_case($Tables);
              $CurrentTables = array_change_key_case($CurrentTables);
          }

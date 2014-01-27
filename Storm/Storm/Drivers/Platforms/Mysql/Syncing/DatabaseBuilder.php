@@ -72,7 +72,7 @@ class DatabaseBuilder implements IDatabaseBuilder {
         }
         
         $Table = new Relational\Table(
-                $TableName, new Null\NullKeyGenerator(), 
+                $TableName, null, 
                 $Columns, $StructuralTraits, array());
         $LoadedTables[$TableName] = $Table;
         

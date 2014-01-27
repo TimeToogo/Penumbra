@@ -24,6 +24,8 @@ final class TagRelationalMap extends Mapping\EntityRelationalMap {
         
         $this->Map($EntityMap->Id)->ToColumn($Table->Id);
         $this->Map($EntityMap->Name)->ToColumn($Table->Name);
+        $this->Map($EntityMap->Description)->ToColumn($Table->Description);
+        $this->Map($EntityMap->Number)->ToColumn($Table->Number);
     }
 }
 

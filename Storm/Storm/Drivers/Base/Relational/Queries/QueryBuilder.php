@@ -202,6 +202,13 @@ class QueryBuilder {
         
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $this->ParameterPlaceholder);
     }
+    
+    final public function AppendSingleValue($Value, $ParameterType = null) {
+        $this->ParameterType($ParameterType, $Value);
+        $this->Bindings->Bind($Value, $ParameterType);
+        
+        $this->QueryString .= $this->ParameterPlaceholder;
+    }
 
 
     final public function AppendAll($QueryStringFormat, array $Values, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
@@ -209,13 +216,20 @@ class QueryBuilder {
             $this->Bindings->Bind($Value, $this->DefaultParameterType($Value));
         }
 
-
         $QueryPlaceholders = implode($Delimiter, array_fill(0, count($Values), $this->ParameterPlaceholder));
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $QueryPlaceholders);
     }
     
     final public function AppendColumnData(Relational\Columns\Column $Column, $Value) {     
-        $this->ExpressionCompiler->Append($this, $Column->GetDataType()->GetPersistExpression(Relational\Expressions\Expression::Constant($Value)));
+        $ValueExpression = Relational\Expressions\Expression::Constant($Value);
+        $PersistExpression = $Column->GetDataType()->GetPersistExpression($ValueExpression);
+        
+        if($ValueExpression === $PersistExpression) {
+            $this->AppendSingleValue($Value);
+        }
+        else {
+            $this->ExpressionCompiler->Append($this, $PersistExpression);
+        }
     }
     
     final public function AppendAllColumnData(\Storm\Core\Relational\ColumnData $Data, $Delimiter) {     
@@ -238,18 +252,20 @@ class QueryBuilder {
             $ParameterType = $this->DefaultParameterType($Value);
     }
 
-
+    private static $ParameterTypeMap = [
+        'string' => ParameterType::String,
+        'boolean' => ParameterType::Boolean,
+        'integer' => ParameterType::Integer,
+        'NULL' => ParameterType::Null,
+    ];
     final private function DefaultParameterType($Value) {
-        if (is_string($Value))
-            return ParameterType::String;
-        else if (is_bool($Value))
-            return ParameterType::Boolean;
-        else if (is_integer($Value))
-            return ParameterType::Integer;
-        else if ($Value === null)
-            return ParameterType::Null;
-        else
+        $Type = gettype($Value);
+        if(isset(self::$ParameterTypeMap[$Type])) {
+            return self::$ParameterTypeMap[$Type];
+        }
+        else {
             return ParameterType::Binary;
+        }
     }
     // </editor-fold>
     

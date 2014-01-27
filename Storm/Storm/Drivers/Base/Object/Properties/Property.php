@@ -8,7 +8,10 @@ use \Storm\Core\Object\EntityMap;
 
 abstract class Property implements IProperty {
     private $Identifier;
-    private $Accessor;
+    /**
+     * @var Accessors\Accessor 
+     */
+    protected $Accessor;
     private $EntityMap;
     
     public function __construct(Accessors\Accessor $Accessor) {

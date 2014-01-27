@@ -334,6 +334,7 @@ abstract class EntityMap implements \IteratorAggregate {
     /**
      * Applies the supplied property data to the supplied entity instance.
      * 
+     * @param Domain $Domain The object domain to revive in entity in.
      * @param object $Entity The entity to apply the property data
      * @param PropertyData $PropertyData The property data apply
      * @return void
@@ -363,7 +364,7 @@ abstract class EntityMap implements \IteratorAggregate {
         $Entities = array();
         foreach($RevivalDatas as $Key => $RevivalData) {
             $Entity = $this->ConstructEntity();
-            $this->LoadEntity($Domain, $RevivalData, $Entity);
+            $this->Apply($Domain, $Entity, $RevivalData);
             $Entities[$Key] = $Entity;
         }
         

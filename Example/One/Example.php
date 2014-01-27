@@ -11,7 +11,7 @@ use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
 class One implements \StormExamples\IStormExample {
-    const DevelopmentMode = 1;
+    const DevelopmentMode = 0;
     const UseCache = true;
     
     public static function GetPlatform() {
@@ -249,6 +249,8 @@ class One implements \StormExamples\IStormExample {
         for ($Count = 100; $Count > 0; $Count--) {
             $Tag = new Entities\Tag();
             $Tag->Name = $Names[rand(0, count($Names) - 1)];
+            $Tag->Description = 'This is a description - ' . $Count;
+            $Tag->Number = $Count * $Count;
             $Post->Tags[] = $Tag;
         }
     }

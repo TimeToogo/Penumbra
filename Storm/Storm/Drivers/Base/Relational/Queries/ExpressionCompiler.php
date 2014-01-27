@@ -69,7 +69,7 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
     }
 
     protected function AppendConstant(QueryBuilder $QueryBuilder, CoreE\ConstantExpression $Expression) {
-        $QueryBuilder->AppendValue('#', $Expression->GetValue());
+        $QueryBuilder->AppendSingleValue($Expression->GetValue());
     }
 
     protected function AppendBinaryOperation(QueryBuilder $QueryBuilder, E\BinaryOperationExpression $Expression) {

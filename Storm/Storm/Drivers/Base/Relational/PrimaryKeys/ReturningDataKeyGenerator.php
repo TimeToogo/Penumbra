@@ -6,9 +6,9 @@ use \Storm\Core\Relational\Expressions\Expression;
 use \Storm\Core\Relational\IColumn;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
-abstract class ValueWithReturningDataKeyGenerator implements IKeyGenerator {
+abstract class ReturningDataKeyGenerator implements IKeyGenerator {
     final public function GetKeyGeneratorMode() {
-        return KeyGeneratorMode::ValueWithReturningData;
+        return KeyGeneratorMode::ReturningData;
     }
     
     public abstract function AppendValueToQueryBuilder(QueryBuilder $QueryBuilder, IColumn $PrimaryKey);

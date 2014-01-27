@@ -11,7 +11,7 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     /**
      * @var EntityMap 
      */
-    private $EntityMap;
+    protected $EntityMap;
     
     /**
      * @var string 

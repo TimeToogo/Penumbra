@@ -19,7 +19,7 @@ class Table extends \Storm\Drivers\Base\Relational\Table {
     
     public function __construct(
             $Name,
-            IKeyGenerator $KeyGenerator,
+            IKeyGenerator $KeyGenerator = null,
             array $Columns, 
             array $StructuralTraits = array(), 
             array $RelationalTraits = array(), 

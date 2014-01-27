@@ -86,8 +86,8 @@ abstract class QueryExecutor implements IQueryExecutor {
                 
                 $KeyGenerator->FillPrimaryKeys($Connection, $UnkeyedRows);
             }
-            else if($KeyGeneratorMode === PrimaryKeys\KeyGeneratorMode::ValueWithReturningData) {
-                /* @var $KeyGenerator PrimaryKeys\ValueWithReturningDataKeyGenerator */
+            else if($KeyGeneratorMode === PrimaryKeys\KeyGeneratorMode::ReturningData) {
+                /* @var $KeyGenerator PrimaryKeys\ReturningDataKeyGenerator */
                 
                 $ValueWithReturningDataKeyGenerator = $KeyGenerator;
             }
@@ -104,7 +104,7 @@ abstract class QueryExecutor implements IQueryExecutor {
         }
     }
     protected abstract function SaveRows(IConnection $Connection, Table $Table, array &$RowsToPersist,
-            PrimaryKeys\ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null);
+            PrimaryKeys\ReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null);
     
     
     private function GroupByTableName(array $ObjectsWithTable) {

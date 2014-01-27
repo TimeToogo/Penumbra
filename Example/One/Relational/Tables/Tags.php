@@ -24,10 +24,14 @@ class Tags extends Relational\Table {
     
     public $Id;
     public $Name;
+    public $Description;
+    public $Number;
     
     protected function CreateTableStructure(IColumnSet $Column) {
         $this->Id = $Column->IncrementInt32('Id');
         $this->Name = $Column->String('Name', 50);
+        $this->Description = $Column->String('Description', 255);
+        $this->Number = $Column->Int32('Number');
     }
 
     protected function CreateRelationalStructure(Database $Database) {

@@ -8,7 +8,7 @@ use \Storm\Drivers\Platforms\Base\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Drivers\Base\Relational\Requests;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
-use \Storm\Drivers\Base\Relational\PrimaryKeys\ValueWithReturningDataKeyGenerator;
+use \Storm\Drivers\Base\Relational\PrimaryKeys\ReturningDataKeyGenerator;
 
 class QueryExecutor extends Queries\QueryExecutor {
     const SaveRowBatchSize = 100;
@@ -18,7 +18,7 @@ class QueryExecutor extends Queries\QueryExecutor {
     }
     
     protected function SaveQuery(QueryBuilder $QueryBuilder, Table $Table, array $Rows,
-            ValueWithReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
+            ReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
         if($ValueWithReturningDataKeyGenerator !== null) {
             throw new \Exception('SQLite does not support returning data');
         }
