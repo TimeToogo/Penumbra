@@ -20,7 +20,13 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     
     protected function __construct(array $Columns, array $ColumnData) {
         foreach ($Columns as $Column) {
-            $this->Columns[$Column->GetIdentifier()] = $Column;
+            $Identifier = $Column->GetIdentifier();
+            
+            $this->Columns[$Identifier] = $Column;
+            
+            if(!isset($ColumnData[$Identifier])) {
+                $ColumnData[$Identifier] = null;
+            }
         }
         $this->ColumnData = $ColumnData;
     }
@@ -40,14 +46,14 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
     
     /**
-     * Get another column data instance with new data
+     * Get another column data instance with new data.
      * 
      * @param array $ColumnData
      * @return ColumnData
      */
     final public function Another(array $ColumnData) {
         $ClonedColumnData = clone $this;
-        $ClonedColumnData->ColumnData = $ColumnData;
+        $ClonedColumnData->ColumnData = $ColumnData + array_fill_keys(array_keys($this->Columns), null);
         return $ClonedColumnData;
     }
     
@@ -83,7 +89,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
     
     protected function RemoveColumn(IColumn $Column) {
-        unset($this->ColumnData[$Column->GetIdentifier()]);
+        $this->ColumnData[$Column->GetIdentifier()] = null;
     }
     
     final public function Hash() {
@@ -101,15 +107,15 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
 
     final public function offsetExists($Column) {
-        return isset($this->ColumnData[$Column->GetIdentifier()]);
+        return isset($this->Columns[$Column->GetIdentifier()]);
     }
     
     final public function offsetGet($Column) {
-        $Null = null;
-        if(!$this->offsetExists($Column))
-            return $Null;
+        $Identifier = $Column->GetIdentifier();
+        if(!isset($this->ColumnData[$Identifier]))
+            return null;
         else
-            return $this->ColumnData[$Column->GetIdentifier()];
+            return $this->ColumnData[$Identifier];
     }
 
     final public function offsetSet($Column, $Data) {

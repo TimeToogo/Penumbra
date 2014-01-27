@@ -50,8 +50,9 @@ class Connection extends Queries\Connection {
     
     public function Escape($Value, $ParameterType) {
         //PDO puts quotes around integers
-        if($ParameterType == Queries\ParameterType::Integer)
+        if($ParameterType == Queries\ParameterType::Integer) {
             return (string)((int)$Value);
+        }
         
         $PDOParameterType = PDOParameterType::MapParameterType($ParameterType);
         return $this->PDO->quote($Value, $PDOParameterType);

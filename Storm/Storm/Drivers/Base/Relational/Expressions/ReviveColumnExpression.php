@@ -9,7 +9,9 @@ class ReviveColumnExpression extends ColumnExpression {
     private $ReviveExpression;
     public function __construct(Column $Column) {
         parent::__construct($Column);
-        $this->ReviveExpression = $Column->GetDataType()->GetReviveExpression(Expression::Column($Column));
+        $this->ReviveExpression = $Column instanceof Column ?
+                $Column->GetDataType()->GetReviveExpression(Expression::Column($Column)) : 
+                Expression::Column($Column);
     }
     
     /**

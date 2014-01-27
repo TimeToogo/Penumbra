@@ -8,6 +8,15 @@ use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Drivers\Base\Relational\PrimaryKeys;
 
 abstract class QueryExecutor implements IQueryExecutor {
+    /**
+     * @var Persister
+     */
+    private $Persister;
+    public function __construct(Persister $Persister) {
+        $this->Persister = $Persister;
+    }
+
+    
     
     final public function Select(IConnection $Connection, Relational\Request $Request) {
         $QueryBuilder = $Connection->QueryBuilder();
@@ -49,7 +58,7 @@ abstract class QueryExecutor implements IQueryExecutor {
                 if(isset($GroupedPersistedRows[$TableName])) {
                     $Transaction->TriggerPrePersistEvent($GroupedPersistedRows[$TableName]);
                     
-                    $this->PersistRows($Connection, $Transaction, $Table, $GroupedPersistedRows[$TableName]);
+                    $this->Persister->PersistRows($Connection, $Table, $GroupedPersistedRows[$TableName]);
                     
                     $Transaction->TriggerPostPersistEvent($GroupedPersistedRows[$TableName]);
                 }
@@ -65,47 +74,7 @@ abstract class QueryExecutor implements IQueryExecutor {
     protected abstract function DeleteWhereQuery(IConnection $Connection, Relational\Criterion $DiscardedCriteria);
     protected abstract function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys);
     protected abstract function ExecuteUpdate(IConnection $Connection, Relational\Procedure &$ProcedureToExecute);
-    
-    private function PersistRows(IConnection $Connection, Relational\Transaction $Transaction, 
-            Table $Table, array &$RowsToPersist) {
-        
-        $HasKeyGenerator = $Table->HasKeyGenerator();
-        $ValueWithReturningDataKeyGenerator = null;
-        if($HasKeyGenerator) {
-            $UnkeyedRows = array_filter($RowsToPersist, 
-                    function (Relational\Row $Row) { return !$Row->HasPrimaryKey(); });
-            
-            $KeyGenerator = $Table->GetKeyGenerator();
-            $KeyGeneratorMode = $KeyGenerator->GetKeyGeneratorMode();
-            
-            if(count($UnkeyedRows) === 0) {
-                $KeyGeneratorMode = null;
-            }
-            else if($KeyGeneratorMode === PrimaryKeys\KeyGeneratorMode::PreInsert) {
-                /* @var $KeyGenerator PrimaryKeys\PreInsertKeyGenerator */
-                
-                $KeyGenerator->FillPrimaryKeys($Connection, $UnkeyedRows);
-            }
-            else if($KeyGeneratorMode === PrimaryKeys\KeyGeneratorMode::ReturningData) {
-                /* @var $KeyGenerator PrimaryKeys\ReturningDataKeyGenerator */
-                
-                $ValueWithReturningDataKeyGenerator = $KeyGenerator;
-            }
-        }
-        
-        $this->SaveRows($Connection, $Table, $RowsToPersist, $ValueWithReturningDataKeyGenerator);
-        
-        if($HasKeyGenerator) {
-            if($KeyGeneratorMode === PrimaryKeys\KeyGeneratorMode::PostInsert) {
-                /* @var $KeyGenerator PrimaryKeys\PostInsertKeyGenerator */
-                
-                $KeyGenerator->FillPrimaryKeys($Connection, $UnkeyedRows);
-            }
-        }
-    }
-    protected abstract function SaveRows(IConnection $Connection, Table $Table, array &$RowsToPersist,
-            PrimaryKeys\ReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null);
-    
+       
     
     private function GroupByTableName(array $ObjectsWithTable) {
         $OrderedObjects = array();

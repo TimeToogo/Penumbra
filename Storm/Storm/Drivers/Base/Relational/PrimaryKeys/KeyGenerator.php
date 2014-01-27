@@ -5,10 +5,19 @@ namespace Storm\Drivers\Base\Relational\PrimaryKeys;
 use \Storm\Core\Relational;
 
 abstract class KeyGenerator implements IKeyGenerator {
+    /**
+     * @var Relational\Table 
+     */
     private $Table;
+    
+    /**
+     * @var Relational\IColumn[] 
+     */
     private $PrimaryKeyColumns;
     public function SetTable(Relational\Table $Table) {
-        $this->Table = $Table;
+        if($this->Table === $Table) {
+            return;
+        }
         $PrimaryKeyColumns = $Table->GetPrimaryKeyColumns();
         if(count($PrimaryKeyColumns) === 0) {
             throw new \Exception;//TODO:error message

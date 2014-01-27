@@ -11,58 +11,11 @@ use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Drivers\Base\Relational\PrimaryKeys\ReturningDataKeyGenerator;
 
 class QueryExecutor extends Queries\QueryExecutor {
-    const SaveRowBatchSize = 100;
     
     public function __construct() {
-        parent::__construct(self::SaveRowBatchSize);
+        parent::__construct(new Queries\BasicPersister());
     }
     
-    protected function SaveQuery(QueryBuilder $QueryBuilder, Table $Table, array $Rows,
-            ReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
-        if($ValueWithReturningDataKeyGenerator !== null) {
-            throw new \Exception('SQLite does not support returning data');
-        }
-        
-        $Columns = $Table->GetColumns();
-        $PrimaryKeyColumns = $Table->GetPrimaryKeyColumns();
-        $ColumnNames = array_keys($Columns);
-        $PrimaryKeyColumnNames = array_keys($PrimaryKeyColumns);
-        $TableName = $Table->GetName();
-        
-        $PrimaryKeyIdentifiers = array();
-        foreach($PrimaryKeyColumnNames as $ColumnName) {
-            $PrimaryKeyIdentifiers[] = [$TableName, $ColumnName];
-        }
-        
-        $QueryBuilder->AppendIdentifier('INSERT OR REPLACE INTO #', [$TableName]);
-        $QueryBuilder->AppendIdentifiers(' (#) ', $ColumnNames, ',');
-        $First = true;
-        foreach($Rows as $Row) {
-            if($First) $First = false;
-            else
-                $QueryBuilder->Append(' UNION ALL ');
-            
-            $this->AppendRow($QueryBuilder, $Columns, $Row);
-        }
-    }
-    
-    private function AppendRow(QueryBuilder $QueryBuilder, array $Columns, Relational\Row $Row) {
-        $QueryBuilder->Append('SELECT ');
-        $First1 = true;
-        foreach($Columns as $Column) {
-            if($First1) $First1 = false;
-            else
-                $QueryBuilder->Append(', ');
-
-            if(isset($Row[$Column])) {
-                $QueryBuilder->AppendColumnData($Column, $Row[$Column]);
-            }
-            else {
-                $QueryBuilder->Append('NULL');
-            }
-        }
-    }
-          
     protected function SelectQuery(QueryBuilder $QueryBuilder, Relational\Request $Request) {
         $QueryBuilder->Append('SELECT ');
         $First = true;

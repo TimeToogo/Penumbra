@@ -3,6 +3,7 @@
 namespace Storm\Drivers\Platforms\SQLite\PrimaryKeys;
 
 use \Storm\Drivers\Base\Relational\PrimaryKeys;
+use \Storm\Drivers\Platforms\Mysql\PrimaryKeys\IndividualAutoIncrementGenerator;
 
 class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
     
@@ -11,7 +12,7 @@ class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
     }
 
     public function Increment() {
-        return new AutoIncrementGenerator();
+        return new IndividualAutoIncrementGenerator();
     }
 
     public function Sequence($Name) {

@@ -114,7 +114,21 @@ class QueryBuilder {
                 });
     }
     
+    // <editor-fold defaultstate="collapsed" desc="Placeholders">
+    
+    final public function AppendParameterPlaceholder($QueryStringFormat, $ValuePlaceholder = self::DefaultPlaceholder) {
+        $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $this->ParameterPlaceholder);
+    }
+
+    final public function AppendParameterPlaceholders($QueryStringFormat, $Count, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
+        $Placeholders = implode($Delimiter, array_fill(0, $Count, $this->ParameterPlaceholder));
+        $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $Placeholders);
+    }
+
+    // </editor-fold>
+    
     // <editor-fold defaultstate="collapsed" desc="Identifier Appenders">
+    
     final public function AppendIdentifier($QueryStringFormat, array $IdentifierSegments, $ValuePlaceholder = self::DefaultPlaceholder) {
         $EscapedIdentifier = $this->IdentifierEscaper->Escape($IdentifierSegments);
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $EscapedIdentifier);
@@ -137,9 +151,11 @@ class QueryBuilder {
         $QueryIdentifiers = implode($Delimiter, $Identifiers);
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $QueryIdentifiers);
     }
+    
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Identifier Helpers">    
+    
     private function GetColumnIdentifier(Relational\Columns\Column $Column, $Alias = null) {
         $EscapedIdentifier = $this->IdentifierEscaper->Escape([$Column->GetTable()->GetName(), $Column->GetName()]);
         if($Alias !== null) {
@@ -157,9 +173,11 @@ class QueryBuilder {
         
         return $this->IdentifierEscaper->EscapeAll($Identifiers);
     }
+    
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Escaped Value Appenders">
+    
     final public function AppendEscaped($QueryStringFormat, $Value, $ParameterType = null, $ValuePlaceholder = self::DefaultPlaceholder) {
         $this->ParameterType($ParameterType, $Value);
         $EscapedValue = $this->Connection->Escape($Value, $ParameterType);
@@ -178,9 +196,11 @@ class QueryBuilder {
 
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, implode($Delimiter, $EscapedValues));
     }
+    
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Bound Value Appenders">
+    
     final public function AppendReference($QueryStringFormat, &$Value, $ParameterType = null, $ValuePlaceholder = self::DefaultPlaceholder) {
         $this->ParameterType($ParameterType, $Value);
         $PlaceholderCount = substr_count($QueryStringFormat, $ValuePlaceholder);
@@ -194,7 +214,6 @@ class QueryBuilder {
 
 
     final public function AppendValue($QueryStringFormat, $Value, $ParameterType = null, $ValuePlaceholder = self::DefaultPlaceholder) {
-        $this->ParameterType($ParameterType, $Value);
         $PlaceholderCount = substr_count($QueryStringFormat, $ValuePlaceholder);
         for($Count = 0; $Count < $PlaceholderCount; $Count++) {
             $this->Bindings->Bind($Value, $ParameterType);
@@ -204,16 +223,18 @@ class QueryBuilder {
     }
     
     final public function AppendSingleValue($Value, $ParameterType = null) {
-        $this->ParameterType($ParameterType, $Value);
         $this->Bindings->Bind($Value, $ParameterType);
         
         $this->QueryString .= $this->ParameterPlaceholder;
     }
 
 
-    final public function AppendAll($QueryStringFormat, array $Values, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
+    final public function AppendValues($QueryStringFormat, array $Values, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
+        $PlaceholderCount = substr_count($QueryStringFormat, $ValuePlaceholder);
         foreach ($Values as $Value) {
-            $this->Bindings->Bind($Value, $this->DefaultParameterType($Value));
+            for ($Count = 0; $Count < $PlaceholderCount; $Count++) {
+                $this->Bindings->Bind($Value);
+            }
         }
 
         $QueryPlaceholders = implode($Delimiter, array_fill(0, count($Values), $this->ParameterPlaceholder));
@@ -244,29 +265,6 @@ class QueryBuilder {
         }
     }
     
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Parameter Type Helpers">
-    final private function ParameterType(&$ParameterType, $Value) {
-        if ($ParameterType === null)
-            $ParameterType = $this->DefaultParameterType($Value);
-    }
-
-    private static $ParameterTypeMap = [
-        'string' => ParameterType::String,
-        'boolean' => ParameterType::Boolean,
-        'integer' => ParameterType::Integer,
-        'NULL' => ParameterType::Null,
-    ];
-    final private function DefaultParameterType($Value) {
-        $Type = gettype($Value);
-        if(isset(self::$ParameterTypeMap[$Type])) {
-            return self::$ParameterTypeMap[$Type];
-        }
-        else {
-            return ParameterType::Binary;
-        }
-    }
     // </editor-fold>
     
     final private function ReplacePlaceholder($QueryStringFormat, $Placeholder, $Value) {

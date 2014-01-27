@@ -16,7 +16,7 @@ class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
     }
 
     public function Increment() {
-        return new AutoIncrementGenerator();
+        return new MultiAutoIncrementGenerator();
     }
 
     public function Sequence($Name) {

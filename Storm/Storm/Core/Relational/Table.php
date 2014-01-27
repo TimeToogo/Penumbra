@@ -197,6 +197,8 @@ abstract class Table {
     }
     
     /**
+     * Gets the table columns, indexed by their respective column name.
+     * 
      * @return IColumn[]
      */
     final public function GetColumns() {
@@ -211,6 +213,9 @@ abstract class Table {
     }
     
     /**
+     * Gets the table columns which are primary keys, 
+     * indexed by their respective column name.
+     * 
      * @return IColumn[]
      */
     final public function GetPrimaryKeyColumns() {

@@ -1,12 +1,17 @@
 <?php
 
-namespace Storm\Drivers\Platforms\SQLite\PrimaryKeys;
+namespace Storm\Drivers\Platforms\Mysql\PrimaryKeys;
 
 use \Storm\Drivers\Base\Relational;
 use \Storm\Drivers\Base\Relational\PrimaryKeys;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 
-class AutoIncrementGenerator extends PrimaryKeys\PostInsertKeyGenerator {
+/**
+ * Note: this is only safe when on innodb when 'innodb_autoinc_lock_mode' is equal to 0 or 1
+ * as this ensures that when a multi row insert is done, the auto increments
+ * are guaranteed to be sequential.
+ */
+class MultiAutoIncrementGenerator extends PrimaryKeys\PostMultiInsertKeyGenerator {
     protected function OnSetPrimaryKeyColumns(array $PrimaryKeyColumns) {
         if(count($PrimaryKeyColumns) !== 1) {
             throw new \Exception('Only supports single auto increment column');
@@ -19,8 +24,9 @@ class AutoIncrementGenerator extends PrimaryKeys\PostInsertKeyGenerator {
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
         $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
         $IncrementColumn = reset($PrimaryKeyColumns);
-        $FirstInsertId = $Connection->FetchValue('SELECT last_insert_rowid()');
-        $IncrementId = (int)$FirstInsertId - (count($UnkeyedRows) - 1);
+        //Mysql will return the first auto increment from a multi insert
+        $FirstInsertId = (int)$Connection->GetLastInsertIncrement();
+        $IncrementId = $FirstInsertId;
         foreach ($UnkeyedRows as $Row) {
             $IncrementColumn->Store($Row, $IncrementId);
             $IncrementId++;

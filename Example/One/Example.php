@@ -11,7 +11,7 @@ use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
 class One implements \StormExamples\IStormExample {
-    const DevelopmentMode = 0;
+    const DevelopmentMode = 2;
     const UseCache = true;
     
     public static function GetPlatform() {

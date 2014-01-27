@@ -14,7 +14,7 @@ final class Bindings implements \ArrayAccess {
     }
 
     public function offsetSet($ParameterKey, $ParameterValue) {
-        $this->Bindings[$ParameterKey] = new Binding($ParameterValue, ParameterType::String);
+        $this->Bind($ParameterValue, null, $ParameterKey);
     }
 
     public function offsetUnset($ParameterKey) {
@@ -32,12 +32,36 @@ final class Bindings implements \ArrayAccess {
         return array_keys($this->Bindings);
     }
     
-    public function Bind(&$Value, $ParameterType, $ParameterKey = null) {
+    public function Bind(&$Value, $ParameterType = null, $ParameterKey = null) {
+        $this->DefaultParameterType($ParameterType, $Value);
         if($ParameterKey !== null) {
             $this->Bindings[$ParameterKey] = new Binding($Value, $ParameterType);
         }
         else { 
             $this->Bindings[] = new Binding($Value, $ParameterType);
+        }
+    }
+    
+    private function DefaultParameterType(&$ParameterType, $Value) {
+        if ($ParameterType === null) {
+            $ParameterType = $this->GetDefaultParameterType($Value);
+        }
+    }
+
+    private static $ParameterTypeMap = [
+        'string' => ParameterType::String,
+        'boolean' => ParameterType::Boolean,
+        'double' => ParameterType::Double,
+        'integer' => ParameterType::Integer,
+        'NULL' => ParameterType::Null,
+    ];
+    private function GetDefaultParameterType($Value) {
+        $Type = gettype($Value);
+        if(isset(self::$ParameterTypeMap[$Type])) {
+            return self::$ParameterTypeMap[$Type];
+        }
+        else {
+            return ParameterType::Binary;
         }
     }
 }

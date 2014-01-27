@@ -45,7 +45,7 @@ class Query implements Queries\IQuery {
     
     private function BindAll() {
         foreach($this->Bindings->Get() as $ParameterKey => $Binding) {
-            //Positional parameters are one based
+            //PDO positional parameters are one based
             if(is_int($ParameterKey)) {
                 $ParameterKey++;
             }

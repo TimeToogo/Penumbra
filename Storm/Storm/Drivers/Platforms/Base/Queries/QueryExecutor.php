@@ -12,11 +12,6 @@ use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Drivers\Base\Relational\PrimaryKeys\ReturningDataKeyGenerator;
 
 abstract class QueryExecutor extends Queries\QueryExecutor {
-    private $SaveRowBatchSize = null;
-    
-    public function __construct($SaveRowBatchSize = null) {
-        $this->SaveRowBatchSize = $SaveRowBatchSize;
-    }
     
     final protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys) {
         if(count($DiscardedPrimaryKeys) === 0) {
@@ -38,28 +33,6 @@ abstract class QueryExecutor extends Queries\QueryExecutor {
         $this->UpdateQuery($QueryBuilder, $ProcedureToExecute);
         $QueryBuilder->Build()->Execute();
     }
-    
-    final protected function SaveRows(IConnection $Connection, Table $Table, array &$RowsToPersist,
-            ReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null) {
-        if(count($RowsToPersist) === 0) {
-            return;
-        }
-        $SaveRowBatches = array();
-        if($this->SaveRowBatchSize === null) {
-            $SaveRowBatches[] = $RowsToPersist;
-        }
-        else {
-            $SaveRowBatches = array_chunk($RowsToPersist, $this->SaveRowBatchSize);
-        }
-        foreach($SaveRowBatches as $SaveRowBatch) {
-            $QueryBuilder = $Connection->QueryBuilder();
-            $this->SaveQuery($QueryBuilder, $Table, $SaveRowBatch, $ValueWithReturningDataKeyGenerator);
-            $QueryBuilder->Build()->Execute();
-        }
-    }
-    
-    protected abstract function SaveQuery(QueryBuilder $QueryBuilder, Table $Table, array $Rows,
-            ReturningDataKeyGenerator $ValueWithReturningDataKeyGenerator = null);
     
     protected abstract function UpdateQuery(QueryBuilder $QueryBuilder, Relational\Procedure $Procedure);
     

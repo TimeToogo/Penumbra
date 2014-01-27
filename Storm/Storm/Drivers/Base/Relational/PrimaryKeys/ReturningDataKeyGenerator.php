@@ -7,8 +7,8 @@ use \Storm\Core\Relational\IColumn;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
 abstract class ReturningDataKeyGenerator implements IKeyGenerator {
-    final public function GetKeyGeneratorMode() {
-        return KeyGeneratorMode::ReturningData;
+    final public function GetKeyGeneratorType() {
+        return KeyGeneratorType::ReturningData;
     }
     
     public abstract function AppendValueToQueryBuilder(QueryBuilder $QueryBuilder, IColumn $PrimaryKey);
