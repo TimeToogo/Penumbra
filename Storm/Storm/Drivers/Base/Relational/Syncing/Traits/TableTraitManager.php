@@ -7,17 +7,39 @@ use Storm\Drivers\Base\Relational\TableTrait;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
-abstract class TableTraitManager implements ITableTraitManager {
+abstract class TableTraitManager implements ITableTraitManager, \Serializable {
     private $AddFunctionManager;
     private $DropFunctionManager;
     private $DefinitionFunctionManager;
     public function __construct() {
+        $this->Load();
+    }
+    private function Load() {
         $this->AddFunctionManager = new TraitMethodManager();
         $this->DropFunctionManager = new TraitMethodManager();
         $this->DefinitionFunctionManager = new TraitMethodManager();
         $this->Initialize();
     }
     protected abstract function Initialize();
+    
+    public function serialize() {
+        $AddFunctionManager = $this->AddFunctionManager;
+        $DropFunctionManager = $this->DropFunctionManager;
+        $DefinitionFunctionManager = $this->DefinitionFunctionManager;
+        unset($this->AddFunctionManager, $this->DropFunctionManager, $this->DefinitionFunctionManager);
+        
+        $Serialized = serialize($this);
+        
+        $this->AddFunctionManager = $AddFunctionManager;
+        $this->DropFunctionManager = $DropFunctionManager;
+        $this->DefinitionFunctionManager = $DefinitionFunctionManager;     
+        
+        return $Serialized;
+    }
+    
+    public function unserialize($serialized) {
+        $this->Load();
+    }
     
     final protected function Register($TraitType, callable $DefinitionFunction, callable $AddFunction, callable $DropFunction) {
         $this->RegisterDefinition($TraitType, $DefinitionFunction);
@@ -53,6 +75,7 @@ abstract class TableTraitManager implements ITableTraitManager {
         $AppenderFunction = $this->DefinitionFunctionManager->GetRegisteredFunction($Trait);
         $AppenderFunction($QueryBuilder, $Table, $Trait);
     }
+    
 }
 
 ?>

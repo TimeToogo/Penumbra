@@ -21,9 +21,15 @@ class ColumnExpression extends Expression {
      */
     private $Column;
     
-    public function __construct(IColumn $Column) {        
+    /**
+     * @var string|null
+     */
+    private $Alias;
+    
+    public function __construct(IColumn $Column, $Alias = null) {        
         $this->Table = $Column->GetTable();
         $this->Column = $Column;
+        $this->Alias = $Alias;
     }
     
     /**
@@ -32,12 +38,19 @@ class ColumnExpression extends Expression {
     final public function GetTable() {
         return $this->Table;
     }
-        
+    
     /**
      * @return IColumn
      */
     final public function GetColumn() {
         return $this->Column;
+    }
+    
+    /**
+     * @return string|null
+     */
+    final public function GetAlias() {
+        return $this->Alias;
     }
 }
 

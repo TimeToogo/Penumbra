@@ -9,7 +9,7 @@ use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 abstract class CriterionCompiler extends Queries\CriterionCompiler {    
     protected function AppendPredicateExpressions(QueryBuilder $QueryBuilder, array $PredicateExpressions) {
         $QueryBuilder->Append('(');
-        foreach($QueryBuilder->Iterate($PredicateExpressions, ' AND ') as $PredicateExpression) {
+        foreach($QueryBuilder->Delimit($PredicateExpressions, ' AND ') as $PredicateExpression) {
             $QueryBuilder->AppendExpression($PredicateExpression);
         }
         $QueryBuilder->Append(')');
@@ -17,14 +17,14 @@ abstract class CriterionCompiler extends Queries\CriterionCompiler {
     
     protected function AppendGroupByExpressions(QueryBuilder $QueryBuilder, array $Expressions) {
         $QueryBuilder->Append(' GROUP BY ');
-        foreach($QueryBuilder->Iterate($Expressions, ', ') as $Expression) {            
+        foreach($QueryBuilder->Delimit($Expressions, ', ') as $Expression) {            
             $QueryBuilder->AppendExpression($Expression);
         }
     }
 
     protected function AppendOrderByExpressions(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap) {
         $QueryBuilder->Append(' ORDER BY ');
-        foreach($QueryBuilder->Iterate($ExpressionAscendingMap, ', ') as $Expression) {
+        foreach($QueryBuilder->Delimit($ExpressionAscendingMap, ', ') as $Expression) {
             $Ascending = $ExpressionAscendingMap[$Expression];
             $Direction = $Ascending ? 'ASC' : 'DESC';
             

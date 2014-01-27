@@ -34,6 +34,9 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
             case $Expression instanceof CoreE\ConstantExpression:
                 return $this->AppendConstant($QueryBuilder, $Expression);
                 
+            case $Expression instanceof E\IdentifierExpression:
+                return $this->AppendIdentifier($QueryBuilder, $Expression);
+                
             case $Expression instanceof E\SetExpression:
                 return $this->AppendSet($QueryBuilder, $Expression);
                 
@@ -65,11 +68,15 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
     }
     
     protected function AppendColumn(QueryBuilder $QueryBuilder, CoreE\ColumnExpression $Expression) {
-        $QueryBuilder->AppendColumn('#', $Expression->GetColumn());
+        $QueryBuilder->AppendColumn('#', $Expression->GetColumn(), $Expression->GetAlias());
     }
-
+    
     protected function AppendConstant(QueryBuilder $QueryBuilder, CoreE\ConstantExpression $Expression) {
         $QueryBuilder->AppendSingleValue($Expression->GetValue());
+    }
+    
+    protected function AppendIdentifier(QueryBuilder $QueryBuilder, E\IdentifierExpression $Expression) {
+        $QueryBuilder->AppendIdentifier('#', $Expression->GetIdentifierSegments());
     }
 
     protected function AppendBinaryOperation(QueryBuilder $QueryBuilder, E\BinaryOperationExpression $Expression) {

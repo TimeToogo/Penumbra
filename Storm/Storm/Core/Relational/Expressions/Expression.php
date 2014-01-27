@@ -17,8 +17,8 @@ abstract class Expression {
     /**
      * @return ColumnExpression
      */
-    public static function Column(Relational\IColumn $Column) {
-        return new ColumnExpression($Column);
+    public static function Column(Relational\IColumn $Column, $Alias = null) {
+        return new ColumnExpression($Column, $Alias);
     }
 
 

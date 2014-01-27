@@ -97,18 +97,15 @@ class QueryBuilder {
         $this->CriterionCompiler->AppendCriterion($this, $Criterion);
     }
     
-    final public function Iterate($Iteratable, $Delimiter) {
+    final public function Delimit($Iteratable, $Delimiter) {
         $Iterator = is_array($Iteratable) ? 
                 new \ArrayIterator($Iteratable) : new \IteratorIterator($Iteratable);
         $First = true;
         return new \CallbackFilterIterator($Iterator, 
                 function () use (&$First, &$Delimiter) {
-                    if($First) {
-                        $First = false;
-                    }
-                    else {
-                        $this->Append($Delimiter);
-                    }
+                    if($First) $First = false;
+                    else 
+                        $this->QueryString .= $Delimiter;
                     
                     return true;
                 });
@@ -179,7 +176,7 @@ class QueryBuilder {
     // <editor-fold defaultstate="collapsed" desc="Escaped Value Appenders">
     
     final public function AppendEscaped($QueryStringFormat, $Value, $ParameterType = null, $ValuePlaceholder = self::DefaultPlaceholder) {
-        $this->ParameterType($ParameterType, $Value);
+        $this->Bindings->DefaultParameterType($ParameterType, $Value);
         $EscapedValue = $this->Connection->Escape($Value, $ParameterType);
 
 
@@ -190,7 +187,9 @@ class QueryBuilder {
     final public function AppendAllEscaped($QueryStringFormat, array $Values, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
         $EscapedValues = array();
         foreach ($Values as $Value) {
-            $EscapedValues[] = $this->Connection->Escape($Value, $this->DefaultParameterType($Value));
+            $ParameterType = null;
+            $this->Bindings->DefaultParameterType($ParameterType, $Value);
+            $EscapedValues[] = $this->Connection->Escape($Value, $ParameterType);
         }
 
 

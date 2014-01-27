@@ -12,7 +12,7 @@ use \Storm\Drivers\Base\Relational\PrimaryKeys\ReturningDataKeyGenerator;
 
 class QueryExecutor extends Queries\QueryExecutor {
     public function __construct() {
-        parent::__construct(new Queries\BasicPersister());
+        parent::__construct(new Persister());
     }
     
     protected function SelectQuery(QueryBuilder $QueryBuilder, Relational\Request $Request) {
@@ -65,15 +65,15 @@ class QueryExecutor extends Queries\QueryExecutor {
         $PrimaryKeyNames = array_keys($PrimaryKeysColumns);
         $QueryBuilder->Append('(');
         
-        foreach($QueryBuilder->Iterate($PrimaryKeyNames, ', ') as $PrimaryKeyName) {
+        foreach($QueryBuilder->Delimit($PrimaryKeyNames, ', ') as $PrimaryKeyName) {
             $QueryBuilder->AppendIdentifier('#', [$TableName, $PrimaryKeyName]);
         }
         
         $QueryBuilder->Append(') IN (');
         
-        foreach($QueryBuilder->Iterate($PrimaryKeys, ',') as $PrimaryKey) {
+        foreach($QueryBuilder->Delimit($PrimaryKeys, ',') as $PrimaryKey) {
             $QueryBuilder->Append('(');
-            foreach($QueryBuilder->Iterate($PrimaryKeysColumns, ',') as $PrimaryKeysColumn) {
+            foreach($QueryBuilder->Delimit($PrimaryKeysColumns, ',') as $PrimaryKeysColumn) {
                 if(isset($PrimaryKey[$PrimaryKeysColumn])) {
                     $QueryBuilder->AppendColumnData($PrimaryKeysColumn, $PrimaryKey[$PrimaryKeysColumn]);
                 }

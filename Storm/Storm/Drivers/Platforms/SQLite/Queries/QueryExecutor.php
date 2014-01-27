@@ -71,7 +71,7 @@ class QueryExecutor extends Queries\QueryExecutor {
             $QueryBuilder->Append('IN (');
             $PrimaryKeysColumn = reset($PrimaryKeysColumns);
             
-            foreach($QueryBuilder->Iterate($PrimaryKeys, ',') as $PrimaryKey) {
+            foreach($QueryBuilder->Delimit($PrimaryKeys, ',') as $PrimaryKey) {
                 if(isset($PrimaryKey[$PrimaryKeysColumn])) {
                     $QueryBuilder->AppendColumnData($PrimaryKeysColumn, $PrimaryKey[$PrimaryKeysColumn]);
                 }
@@ -83,8 +83,8 @@ class QueryExecutor extends Queries\QueryExecutor {
         }
         else {
             $QueryBuilder->Append('WHERE 1=1 AND (');
-            foreach($QueryBuilder->Iterate($PrimaryKeys, ' OR ') as $PrimaryKey) {
-                foreach($QueryBuilder->Iterate($PrimaryKeysColumns, ' AND ') as $PrimaryKeysColumn) {
+            foreach($QueryBuilder->Delimit($PrimaryKeys, ' OR ') as $PrimaryKey) {
+                foreach($QueryBuilder->Delimit($PrimaryKeysColumns, ' AND ') as $PrimaryKeysColumn) {
                     if(isset($PrimaryKey[$PrimaryKeysColumn])) {
                         $QueryBuilder->AppendIdentifier('# = ', [$TableName, $PrimaryKeysColumn->GetName()]);
                         $QueryBuilder->AppendColumnData($PrimaryKeysColumn, $PrimaryKey[$PrimaryKeysColumn]);

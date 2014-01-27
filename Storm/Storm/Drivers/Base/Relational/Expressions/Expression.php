@@ -8,6 +8,13 @@ use \Storm\Drivers\Base\Relational\Columns\Column;
 abstract class Expression extends Expressions\Expression {
     
     /**
+     * @return IdentifierExpression
+     */
+    public static function Identifier(array $Segments) {
+        return new IdentifierExpression($Segments);
+    }
+    
+    /**
      * @return ReviveColumnExpression
      */
     public static function ReviveColumn(Column $Column) {

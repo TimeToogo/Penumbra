@@ -9,8 +9,6 @@ use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Drivers\Base\Relational\Requests;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
-use \Storm\Drivers\Base\Relational\PrimaryKeys\ReturningDataKeyGenerator;
-use \Storm\Drivers\Base\Relational\PrimaryKeys\PostIndividualInsertKeyGenerator;
 
 class Persister extends Queries\StandardPersister {
     public function __construct($BatchSize = 1000) {
@@ -32,6 +30,7 @@ class Persister extends Queries\StandardPersister {
         $ColumnNames = array_keys($Columns);
         $PrimaryKeyColumnNames = array_keys($PrimaryKeyColumns);
         $TableName = $Table->GetName();
+        $ValueTableName = $TableName . 'Values';
         
         $PrimaryKeyIdentifiers = array();
         foreach($PrimaryKeyColumnNames as $ColumnName) {
@@ -42,31 +41,38 @@ class Persister extends Queries\StandardPersister {
         $QueryBuilder->AppendIdentifiers('(#)', $ColumnNames, ',');
         
         $QueryBuilder->Append(' SELECT ');
-        foreach($QueryBuilder->Iterate($Columns, ', ') as $Column) {
-            $QueryBuilder->AppendExpression(Expression::PersistData(Expression::Column($Column)));
+        /*
+         * Apply all the persisting data transformation as a select rather than every
+         * the same on every row
+         */
+        foreach($QueryBuilder->Delimit($Columns, ', ') as $ColumnName => $Column) {
+            $QueryBuilder->AppendExpression(
+                    Expression::PersistData($Column, Expression::Identifier([$ValueTableName, $ColumnName])));
         }
         $QueryBuilder->Append(' FROM (');
         
-        $Identifiers = array_map(function($Column) { return $Column->GetIdentifier(); }, $Columns);
+        $Identifiers = array_combine($ColumnNames, 
+                array_map(function($Column) { return $Column->GetIdentifier(); }, $Columns));
         $ColumnDatas = array_map(function ($Row) { return $Row->GetColumnData(); }, $Rows);
         
         $First = true;
-        foreach($QueryBuilder->Iterate($ColumnDatas, ' UNION ALL SELECT ') as $ColumnData) {
+        $QueryBuilder->Append('SELECT ');
+        foreach($QueryBuilder->Delimit($ColumnDatas, ' UNION ALL SELECT ') as $ColumnData) {
             $FirstValue = true;
-            foreach($Identifiers as $Identifier) {
+            foreach($Identifiers as $ColumnName => $Identifier) {
                 if($FirstValue) $FirstValue = false;
                 else 
-                    $QueryBuilder->Append (',');
+                    $QueryBuilder->Append(',');
                 
                 $QueryBuilder->AppendSingleValue($ColumnData[$Identifier]);
                 
                 if($First) {
-                    $QueryBuilder->AppendIdentifier(' AS #', $ColumnNames);
+                    $QueryBuilder->AppendIdentifier(' AS #', [$ColumnName]);
                 }
             }
             $First = false;
         }
-        $QueryBuilder->Append(')');
+        $QueryBuilder->AppendIdentifier(') #', [$ValueTableName]);
         
         $this->AppendOnDuplicateKeyUpdate($QueryBuilder, $TableName, $Columns, $PrimaryKeyIdentifiers);
     }
@@ -74,17 +80,13 @@ class Persister extends Queries\StandardPersister {
     private function AppendOnDuplicateKeyUpdate(
             QueryBuilder $QueryBuilder, $TableName, 
             array $Columns, array $PrimaryKeyIdentifiers) {
-        $First = true;
+        
+        $QueryBuilder->Append(' ON DUPLICATE KEY UPDATE ');
+        
         $FirstPrimaryKey = true;
-        foreach($Columns as $Column) {
-            if($First) {
-                $QueryBuilder->Append(' ON DUPLICATE KEY UPDATE ');
-                $First = false;
-            }
-            else
-                $QueryBuilder->Append(', ');
+        foreach($QueryBuilder->Delimit($Columns, ',') as $ColumName => $Column) {
             
-            $Identifier = [$TableName, $Column->GetName()];
+            $ColumnIdentifier = [$TableName, $ColumName];
             if($FirstPrimaryKey && $Column->IsPrimaryKey()) {
                 /*
                  * Ugly fix/hack to prevent mysql from updating primary key when encountering
@@ -98,20 +100,19 @@ class Persister extends Queries\StandardPersister {
                  * issue as then it will fail with a duplicate primary key but could lead to some 
                  * wacky edge cases that I want no part in.
                  */
-                $QueryBuilder->AppendIdentifier('# = IF(', $Identifier);
-                foreach($QueryBuilder->Iterate($PrimaryKeyIdentifiers, ' AND ') as $PrimaryKeyIdentifier) {
-                    
+                $QueryBuilder->AppendIdentifier('# = IF(', $ColumnIdentifier);
+                foreach($QueryBuilder->Delimit($PrimaryKeyIdentifiers, ' AND ') as $PrimaryKeyIdentifier) {
                     $QueryBuilder->AppendIdentifier('# = VALUES(#)', $PrimaryKeyIdentifier);
                 }
                 $QueryBuilder->Append(',');
-                $QueryBuilder->AppendIdentifier('VALUES(#)', $Identifier);
+                $QueryBuilder->AppendIdentifier('VALUES(#)', $ColumnIdentifier);
                 $QueryBuilder->Append(',');
                 $QueryBuilder->Append('(SELECT 1 UNION ALL SELECT 1))');
                 
                 $FirstPrimaryKey = false;
             }
             else {
-                $QueryBuilder->AppendIdentifier('# = VALUES(#)', $Identifier);
+                $QueryBuilder->AppendIdentifier('# = VALUES(#)', $ColumnIdentifier);
             }
         }
     }

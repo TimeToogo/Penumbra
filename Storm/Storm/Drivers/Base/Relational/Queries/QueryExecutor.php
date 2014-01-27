@@ -15,8 +15,6 @@ abstract class QueryExecutor implements IQueryExecutor {
     public function __construct(Persister $Persister) {
         $this->Persister = $Persister;
     }
-
-    
     
     final public function Select(IConnection $Connection, Relational\Request $Request) {
         $QueryBuilder = $Connection->QueryBuilder();

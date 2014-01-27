@@ -42,7 +42,7 @@ final class Bindings implements \ArrayAccess {
         }
     }
     
-    private function DefaultParameterType(&$ParameterType, $Value) {
+    final public function DefaultParameterType(&$ParameterType, $Value) {
         if ($ParameterType === null) {
             $ParameterType = $this->GetDefaultParameterType($Value);
         }
