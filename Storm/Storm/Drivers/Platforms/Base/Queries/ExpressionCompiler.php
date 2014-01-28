@@ -78,7 +78,7 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
         $QueryBuilder->Append('CAST');
         $QueryBuilder->Append('(');
         $this->Append($QueryBuilder, $Expression->GetCastValueExpression());
-        $QueryBuilder->Append(' AS ' . $Expression->GetCastType());
+        $QueryBuilder->Append(' AS ' . $this->GetCastTypeString($Expression->GetCastType()));
         $QueryBuilder->Append(')');
     }
     

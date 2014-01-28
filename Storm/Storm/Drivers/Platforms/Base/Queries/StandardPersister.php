@@ -81,7 +81,7 @@ abstract class StandardPersister extends BasePersister {
         $Columns = $Table->GetColumns();
         $ColumnNames = array_keys($Columns);
         
-        $this->AppendPersistDataTransformationsSelect($QueryBuilder, $Rows, $DerivedTableName);
+        $this->AppendPersistDataTransformationsSelect($QueryBuilder, $Columns, $DerivedTableName);
         $QueryBuilder->Append(' FROM (');
         
         $Identifiers = array_combine($ColumnNames, 
@@ -105,6 +105,8 @@ abstract class StandardPersister extends BasePersister {
             }
             $First = false;
         }
+        
+        $QueryBuilder->AppendIdentifier(') #', [$DerivedTableName]);
     }
     
     protected function AppendPersistDataTransformationsSelect(

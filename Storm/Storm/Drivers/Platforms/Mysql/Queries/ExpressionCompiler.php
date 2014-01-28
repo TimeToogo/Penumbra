@@ -50,7 +50,8 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
     
     protected function CastTypes() {
        return [
-           
+            Operators\Cast::Integer => 'INTEGER',
+            Operators\Cast::String => 'CHAR',
         ]; 
     }
 }

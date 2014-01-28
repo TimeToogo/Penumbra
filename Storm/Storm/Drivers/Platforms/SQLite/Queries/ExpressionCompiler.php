@@ -18,7 +18,8 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
             Operators\Binary::BitwiseOr => '|',
             Operators\Binary::BitwiseXor => '^',
             Operators\Binary::Division => '/',
-            Operators\Binary::Equality => '==',
+            Operators\Binary::Equality => 'IS',
+            Operators\Binary::Inequality => 'IS NOT',
             Operators\Binary::GreaterThan => '>',
             Operators\Binary::GreaterThanOrEqualTo => '>=',
             Operators\Binary::In => 'IN',
@@ -62,6 +63,15 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
         $this->Append($QueryBuilder, $Expression->GetIfFalseExpression());
         $QueryBuilder->Append(' END ');
     }
+
+    protected function CastTypes() {
+       return [
+            Operators\Cast::Double => 'REAL',
+            Operators\Cast::Integer => 'INTEGER',
+            Operators\Cast::String => 'TEXT',
+        ]; 
+    }
+
 }
 
 ?>

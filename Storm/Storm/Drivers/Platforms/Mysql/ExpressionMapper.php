@@ -125,15 +125,9 @@ final class ExpressionMapper extends E\ExpressionMapper {
                         $CastValueExpression, 
                         O\Binary::Addition, 
                         '0.0D');
-                
-            case O\Cast::Integer:
-                return Expression::Cast('INTEGER', $CastValueExpression);
-            
-            case O\Cast::String:
-                return Expression::Cast('CHAR', $CastValueExpression);
-            
+             
             default:
-                throw new \Exception();
+                return Expression::Cast($CastType, $CastValueExpression);
         }
     }
     
