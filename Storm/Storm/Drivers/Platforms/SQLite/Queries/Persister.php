@@ -1,6 +1,6 @@
 <?php
 
-namespace Storm\Drivers\Platforms\Mysql\Queries;
+namespace Storm\Drivers\Platforms\SQLite\Queries;
 
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Table;
