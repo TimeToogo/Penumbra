@@ -40,7 +40,7 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
 
-    const Id = 30;
+    const Id = 155;
     
     const Persist = 0;
     const Retreive = 1;
@@ -174,6 +174,7 @@ class One implements \StormExamples\IStormExample {
         
         $Blog = $BlogRepository->LoadById($Id);
         $Blog->Posts[0]->Content .= 'foobar';
+        $Blog->Posts[1]->Content = 'BarBar--------------!';
         
         $BlogRepository->Persist($Blog);
         $BlogRepository->SaveChanges();
