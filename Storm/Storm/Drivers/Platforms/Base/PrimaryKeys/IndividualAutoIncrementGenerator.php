@@ -1,6 +1,6 @@
 <?php
 
-namespace Storm\Drivers\Platforms\Mysql\PrimaryKeys;
+namespace Storm\Drivers\Platforms\Base\PrimaryKeys;
 
 use \Storm\Core\Relational\Row;
 use \Storm\Drivers\Base\Relational;
