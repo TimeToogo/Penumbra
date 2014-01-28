@@ -8,40 +8,41 @@ use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
 abstract class ToOneRelationBase extends KeyedRelation implements Relational\IToOneRelation {
     
-    final public function MapParentToRelatedRow(array $ParentRows, array $RelatedRows) {
+    final public function MapParentKeysToRelatedRow(array $ParentRows, array $RelatedRows) {
         if(count($RelatedRows) > count($ParentRows)) {
             throw new \Exception;//TODO: error message
         }
-        
-        $Map = new Map();
-        if(count($ParentRows) === 1 && count($RelatedRows) === 1) {
-            $Map->Map(reset($ParentRows), reset($RelatedRows));
-        } 
-        else {
-            $ForeignKey = $this->GetForeignKey();
-            if($this->IsInversed()) {
-                $KeyedRelatedRows = $this->HashRowsByColumnValues($RelatedRows, $ForeignKey->GetParentColumns());
-                $ParentReferencedKeys = Relational\ResultRow::GetAllDataFromColumns($ParentRows, $ForeignKey->GetReferencedColumns());
-                foreach($ParentRows as $Key => $ParentRow) {
-                    $Hash = $ParentReferencedKeys[$Key]->HashData();
-                    if(isset($KeyedRelatedRows[$Hash])) {
-                        $Map->Map($ParentRow, $KeyedRelatedRows[$Hash]);
-                    }
-                }
-            }
-            else {
-                $KeyedRelatedRows = $this->HashRowsByColumnValues($RelatedRows, $ForeignKey->GetReferencedColumns());
-                $ParentReferencedKeys = Relational\ResultRow::GetAllDataFromColumns($ParentRows, $ForeignKey->GetParentColumns());
-                foreach($ParentRows as $ParentRow) {
-                    $Hash = $ParentReferencedKeys[$Key]->HashData();
-                    if(isset($KeyedRelatedRows[$Hash])) {
-                        $Map->Map($ParentRow, $KeyedRelatedRows[$Hash]);
-                    }
-                }
-            }
+        if(count($RelatedRows) === 0) {
+            return array();
         }
         
-        return $Map;
+        if(count($ParentRows) === 1) {
+            return [key($ParentRows) => reset($RelatedRows)];
+        } 
+        else {
+            $MappedRelatedRows = array();
+            $ForeignKey = $this->GetForeignKey();
+            
+            
+            if($this->IsInversed()) {
+                $ParentRowColumns = $ForeignKey->GetReferencedColumnIdentifiers();
+                $RelatedRowColumns = $ForeignKey->GetParentColumnIdentifiers();
+            }
+            else {
+                $ParentRowColumns = $ForeignKey->GetParentColumnIdentifiers();
+                $RelatedRowColumns = $ForeignKey->GetReferencedColumnIdentifiers();
+            }
+            
+            $HashedParentRowToKeyMap = $this->MakeHashedDataToKeyMap($ParentRows, $ParentRowColumns);
+            $KeyedRelatedRows = $this->IndexRowsByHashedColumnValues($RelatedRows, $RelatedRowColumns);
+            
+            foreach($HashedParentRowToKeyMap as $HashedData => $Key) {
+                $MappedRelatedRows[$Key] = isset($KeyedRelatedRows[$HashedData]) ? 
+                        $KeyedRelatedRows[$HashedData] : null;
+            }
+            return $MappedRelatedRows;
+        }
+        
     }
     
     final protected function MapKeyIntersection(Map $Map, array $KeyedParentRows, array $KeyedRelatedRows) {
@@ -51,12 +52,15 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
     }
     
     public function Persist(Relational\Transaction $Transaction, 
-            Relational\ResultRow $ParentData, Relational\RelationshipChange $RelationshipChange) {
+            array &$ParentData, Relational\RelationshipChange $RelationshipChange) {
+        
         if($RelationshipChange->HasPersistedRelationship()) {
             $PersistedRelationship = $RelationshipChange->GetPersistedRelationship();
+            
             if($PersistedRelationship->IsIdentifying()) {
-                $ParentRow = $ParentData->GetRow($this->GetParentTable());
-                $ChildRow = $PersistedRelationship->GetChildResultRow()->GetRow($this->GetTable());
+                $ParentRow =& $this->GetParentTable()->GetRowData($ParentData);
+                $ChildResultRow =& $PersistedRelationship->GetChildResultRow();
+                $ChildRow =& $this->GetTable()->GetRowData($ChildResultRow);
                 $this->PersistIdentifyingRelationship($Transaction, $ParentRow, $ChildRow);
             }
         }
@@ -64,27 +68,28 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
     
     final protected function PersistIdentifyingRelationship(
             Relational\Transaction $Transaction, 
-            Relational\Row $ParentRow, Relational\Row $ChildRow) {
-        
+            array &$ParentRow, array &$ChildResultRow) {
+        $ParentTable = $this->GetParentTable();
+        $RelatedTable = $this->GetTable();
         if($this->IsInversed()) {
-            if($ParentRow->HasPrimaryKey()) {
-                $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildRow);
+            if($ParentTable->HasPrimaryKeyData($ParentRow)) {
+                $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildResultRow);
             }
             else {
-                $Transaction->SubscribeToPrePersistEvent($ChildRow, 
-                        function (Relational\Row $ChildRow) use (&$ParentRow) {
-                            $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildRow);
+                $Transaction->SubscribeToPrePersistEvent($RelatedTable, 
+                        function () use (&$ParentRow, &$ChildResultRow) {
+                            $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildResultRow);
                         });
             }
         }
         else {
-            if($ParentRow->HasPrimaryKey()) {
-                $this->GetForeignKey()->MapParentToReferencedKey($ParentRow, $ChildRow);
+            if($ParentTable->HasPrimaryKeyData($ParentRow)) {
+                $this->GetForeignKey()->MapParentToReferencedKey($ParentRow, $ChildResultRow);
             }
             else {
-                $Transaction->SubscribeToPrePersistEvent($ChildRow, 
-                        function (Relational\Row $ChildRow) use (&$ParentRow) {
-                            $this->GetForeignKey()->MapParentToReferencedKey($ParentRow, $ChildRow);
+                $Transaction->SubscribeToPrePersistEvent($RelatedTable, 
+                        function () use (&$ParentRow, &$ChildResultRow) {
+                            $this->GetForeignKey()->MapParentToReferencedKey($ParentRow, $ChildResultRow);
                         });
             }
         }

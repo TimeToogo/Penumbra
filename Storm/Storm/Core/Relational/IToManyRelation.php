@@ -14,22 +14,22 @@ interface IToManyRelation extends IRelation {
     /**
      * Map the parent rows to their respective related rows
      * 
-     * @param ResultRow[] $ParentRows The parent rows
-     * @param ResultRow[] $RelatedRows The related rows
+     * @param array[] $ParentRows The parent rows
+     * @param array[] $RelatedRows The related rows
      * @return Map The map containing the parent rows mapped to an Array Object
      * containing their respective related rows
      */
-    public function MapParentToRelatedRows(array $ParentRows, array $RelatedRows);
+    public function MapParentKeysToRelatedRows(array $ParentRows, array $RelatedRows);
     
     /**
      * Sync the supplied relationship changes by persisting to/discarding from the transaction
      * 
      * @param Transaction $Transaction The transaction to persist to
-     * @param ResultRow $ParentData The parent result row
+     * @param array $ParentData The parent result row
      * @param RelationshipChange[] $RelationshipChanges The mapped relationship changes
      * @return void
      */
-    public function Persist(Transaction $Transaction, ResultRow $ParentData, array $RelationshipChanges);
+    public function Persist(Transaction $Transaction, array $ParentData, array $RelationshipChanges);
 }
 
 ?>

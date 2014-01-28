@@ -18,25 +18,24 @@ class ExtraLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRel
         
         parent::__construct($EntityProperty, $ToOneRelation);
     }
-
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ResultRowRevivalDataMap) {        
-        $Property = $this->GetProperty();
+    
+    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array &$RevivalDataArray) {
+        $PropertyIdentifier = $this->GetProperty()->GetIdentifier();
         $EntityType = $this->GetEntityType();
-        $ToOneRelation = $this->GetToOneRelation();
-        $Database = $DomainDatabaseMap->GetDatabase();
-        foreach($ResultRowRevivalDataMap as $ParentRow) {
-            $RevivalData = $ResultRowRevivalDataMap[$ParentRow];
-            $RelatedEntityDataLoader = function () use (&$DomainDatabaseMap, &$Database, &$ToOneRelation, $EntityType, $ParentRow) {
+        
+        foreach($ResultRowArray as $Key => &$RevivalData) {
+            
+            $RelatedEntityDataLoader = function () use (&$DomainDatabaseMap, $EntityType, $ParentRow) {
                 $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, [$ParentRow]);
                 $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($EntityType, $RelatedRows);
                 
                 return reset($RelatedRevivalData);
             };
             
-            $RevivalData[$Property] = $RelatedEntityDataLoader;
+            $RevivalData[$Key][$PropertyIdentifier] = $RelatedEntityDataLoader;
         }
+        
     }
-
 }
 
 ?>

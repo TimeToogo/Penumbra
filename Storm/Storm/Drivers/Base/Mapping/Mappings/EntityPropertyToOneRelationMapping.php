@@ -50,27 +50,7 @@ abstract class EntityPropertyToOneRelationMapping extends PropertyMapping implem
         $DomainDatabaseMap->MapEntityToRelationalRequest($this->EntityType, $RelatedRowRequest);
         return $DomainDatabaseMap->GetDatabase()->Load($RelatedRowRequest);
     }
-    
-    final protected function MapToParentRowRelatedRevivalDataMap(DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap, array $RelatedRows) {
-        $ParentRows = $ParentRowRevivalDataMap->GetInstances();
-        $ParentRelatedRowMap = $this->ToOneRelation->MapParentToRelatedRow($ParentRows, $RelatedRows);
         
-        $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $RelatedRows);
-        $RelatedRowRevivalDataMap = Map::From($RelatedRows, $RelatedRevivalData);
-
-        $ParentRowRelatedRevivalDataMap = new Map();
-        foreach($ParentRowRevivalDataMap as $ParentRow) {
-            $RelatedRow = $ParentRelatedRowMap[$ParentRow];
-            if($RelatedRow !== null) {
-                $RelatedRevivalData = $RelatedRowRevivalDataMap[$RelatedRow];
-
-                $ParentRowRelatedRevivalDataMap[$ParentRow] = $RelatedRevivalData;
-            }
-        }
-        
-        return $ParentRowRelatedRevivalDataMap;
-    }
-    
     public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, Relational\RelationshipChange $RelationshipChange) {
         if($RelationshipChange->HasDiscardedRelationship() || $RelationshipChange->HasPersistedRelationship()) {
             $this->ToOneRelation->Persist($Transaction, $ParentData, $RelationshipChange);

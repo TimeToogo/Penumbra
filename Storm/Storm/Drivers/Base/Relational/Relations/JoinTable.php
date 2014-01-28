@@ -123,17 +123,17 @@ abstract class JoinTable extends Base\Relational\Table {
     }
     
     /**
-     * @param Relational\ColumnData $PrimaryKey1
-     * @param Relational\ColumnData $PrimaryKey2
+     * @param array $PrimaryKey1Data
+     * @param array $PrimaryKey2Data
      * @return Relational\Row
      */
-    final public function JoinRow(Relational\ColumnData $PrimaryKey1, Relational\ColumnData $PrimaryKey2) {
-        $Row = $this->Row();
+    final public function JoinRow(array &$PrimaryKey1Data, array &$PrimaryKey2Data) {
+        $JoinRow = array();
         
-        $this->ForeignKey1->MapReferencedToParentKey($PrimaryKey1, $Row);
-        $this->ForeignKey2->MapReferencedToParentKey($PrimaryKey2, $Row);
+        $this->ForeignKey1->MapReferencedToParentKey($PrimaryKey1Data, $JoinRow);
+        $this->ForeignKey2->MapReferencedToParentKey($PrimaryKey2Data, $JoinRow);
         
-        return $Row;
+        return $JoinRow;
     }
 }
 

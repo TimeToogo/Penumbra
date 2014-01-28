@@ -26,7 +26,7 @@ abstract class Table {
     /**
      * @var string[]
      */
-    private $ColumnIdentifiers;
+    private $ColumnsByIdentifiers;
     
     /**
      * @var IColumn[]
@@ -36,7 +36,7 @@ abstract class Table {
     /**
      * @var string[]
      */
-    private $PrimaryKeyColumnIdentifiers;
+    private $PrimaryKeyColumnByIdentifiers;
     
     /**
      * @var IToOneRelation[]
@@ -69,9 +69,9 @@ abstract class Table {
         $Registrar = new Registrar(IColumn::IColumnType);
         $this->RegisterColumns($Registrar, $Database);
         $this->Columns = array();
-        $this->ColumnIdentifiers = array();
+        $this->ColumnsByIdentifiers = array();
         $this->PrimaryKeyColumns = array();
-        $this->PrimaryKeyColumnIdentifiers = array();
+        $this->PrimaryKeyColumnByIdentifiers = array();
         foreach($Registrar->GetRegistered() as $Column) {
             $this->AddColumn($Column);
         }
@@ -158,10 +158,10 @@ abstract class Table {
         $ColumnName = $Column->GetName();
         $ColumnIdentifier = $Column->GetIdentifier();
         $this->Columns[$ColumnName] = $Column;
-        $this->ColumnIdentifiers[$ColumnIdentifier] = $ColumnIdentifier;
+        $this->ColumnsByIdentifiers[$ColumnIdentifier] = $Column;
         if($Column->IsPrimaryKey()) {
             $this->PrimaryKeyColumns[$ColumnName] = $Column;
-            $this->PrimaryKeyColumnIdentifiers[$ColumnIdentifier] = $ColumnIdentifier;
+            $this->PrimaryKeyColumnByIdentifiers[$ColumnIdentifier] = $Column;
         }
      }
 
@@ -195,6 +195,13 @@ abstract class Table {
     final public function GetColumn($Name) {
         return $this->HasColumn($Name) ? $this->Columns[$Name] : null;
     }
+    /**
+     * @param string $Identifier The column identifier
+     * @return IColumn|null
+     */
+    final public function GetColumnByIdentifier($Identifier) {
+        return isset($this->ColumnsByIdentifiers[$Identifier]) ? $this->ColumnsByIdentifiers[$Identifier] : null;
+    }
     
     /**
      * Gets the table columns, indexed by their respective column name.
@@ -209,7 +216,7 @@ abstract class Table {
      * @return string[]
      */
     final public function GetColumnIdentifiers() {
-        return $this->ColumnIdentifiers;
+        return array_keys($this->ColumnsByIdentifiers);
     }
     
     /**
@@ -226,7 +233,7 @@ abstract class Table {
      * @return string[]
      */
     final public function GetPrimaryKeyColumnIdentifiers() {
-        return $this->PrimaryKeyColumnIdentifiers;
+        return array_keys($this->PrimaryKeyColumnByIdentifiers);
     }
     
     /**
@@ -301,6 +308,37 @@ abstract class Table {
             $this->Row = new Row($this);
         }
         return $this->Row->Another($Data);
+    }
+    
+    /**
+     * Get a row of this table
+     * 
+     * @param array $ColumnData The column data
+     * @return Row The row
+     */
+    final public function &GetRowData(array &$ColumnData){
+        return array_intersect_key($ColumnData, $this->ColumnsByIdentifiers);
+    }
+    
+    /**
+     * Get a row of this table
+     * 
+     * @param array $ColumnData The column data
+     * @return Row The row
+     */
+    final public function &GetPrimaryKeyData(array &$ColumnData){
+        return array_intersect_key($ColumnData, $this->PrimaryKeyColumns);
+    }
+    
+    /**
+     * Get a row of this table
+     * 
+     * @param array $ColumnData The column data
+     * @return Row The row
+     */
+    final public function HasPrimaryKeyData(array $ColumnData){
+        $PrimaryKeyData = $this->GetPrimaryKeyData($ColumnData);
+        return count(array_filter($PrimaryKeyData, 'is_null')) > 0;
     }
     
     private $PrimaryKey = null;

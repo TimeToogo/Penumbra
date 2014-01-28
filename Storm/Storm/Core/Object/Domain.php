@@ -72,10 +72,11 @@ abstract class Domain {
      * @return EntityMap The matching entity map
      * @throws \Storm\Core\Exceptions\UnmappedEntityException
      */
-    private function VerifyEntity($Entity) {
+    private function VerifyEntity($Entity, &$MatchedEntityType = null) {
         $EntityTypes = array_reverse(array_merge([get_class($Entity)], array_values(class_parents($Entity, false))));
         foreach($EntityTypes as $EntityType) {
             if(isset($this->EntityMaps[$EntityType])) {
+                $MatchedEntityType = $EntityType;
                 return $this->EntityMaps[$EntityType];
             }
         }           
@@ -137,10 +138,12 @@ abstract class Domain {
      * @return DiscardedRelationship The discarded relationship
      */
     final public function DiscardedRelationship($Entity, $RelatedEntity) {
-        $ParentIdentity = $this->VerifyEntity($Entity)->Identity($Entity);
-        $RelatedIdentity = $this->VerifyEntity($RelatedEntity)->Identity($RelatedEntity);
+        $EntityType = null;
+        $RelatedEntityType = null;
+        $ParentIdentity = $this->VerifyEntity($Entity, $EntityType)->Identity($Entity);
+        $RelatedIdentity = $this->VerifyEntity($RelatedEntity, $RelatedEntityType)->Identity($RelatedEntity);
         
-        return new DiscardedRelationship(false, $ParentIdentity, $RelatedIdentity);
+        return new DiscardedRelationship(false, $EntityType, $RelatedEntityType, $ParentIdentity, $RelatedIdentity);
     }
     
     /**
@@ -153,10 +156,12 @@ abstract class Domain {
      * @return DiscardedRelationship The discarded relationship
      */
     final public function DiscardedIdentifyingRelationship($ParentEntity, $ChildEntity, UnitOfWork $UnitOfWork) {
-        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
-        $ChildIdentity = $this->VerifyEntity($ChildEntity)->Discard($UnitOfWork, $ChildEntity)->GetIdentity();
+        $EntityType = null;
+        $RelatedEntityType = null;
+        $ParentIdentity = $this->VerifyEntity($ParentEntity, $EntityType)->Identity($ParentEntity);
+        $ChildIdentity = $this->VerifyEntity($ChildEntity, $RelatedEntityType)->Discard($UnitOfWork, $ChildEntity)->GetIdentity();
         
-        return new DiscardedRelationship(true, $ParentIdentity, $ChildIdentity);
+        return new DiscardedRelationship(true, $EntityType, $RelatedEntityType, $ParentIdentity, $ChildIdentity);
     }
     
     /**
@@ -167,10 +172,12 @@ abstract class Domain {
      * @return PersistedRelationship The persisted relationship
      */
     final public function PersistedRelationship($ParentEntity, $RelatedEntity) {
-        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
-        $RelatedIdentity = $this->VerifyEntity($RelatedEntity)->Identity($RelatedEntity);
+        $EntityType = null;
+        $RelatedEntityType = null;
+        $ParentIdentity = $this->VerifyEntity($ParentEntity, $EntityType)->Identity($ParentEntity);
+        $RelatedIdentity = $this->VerifyEntity($RelatedEntity, $RelatedEntityType)->Identity($RelatedEntity);
         
-        return new PersistedRelationship($ParentIdentity, $RelatedIdentity);
+        return new PersistedRelationship($EntityType, $RelatedEntityType, $ParentIdentity, $RelatedIdentity);
     }
     
     /**
@@ -183,10 +190,12 @@ abstract class Domain {
      * @return PersistedRelationship The persisted relationship
      */
     final public function PersistedIdentifyingRelationship($ParentEntity, $ChildEntity, UnitOfWork $UnitOfWork) {
-        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
-        $RelatedPersistenceData = $this->VerifyEntity($ChildEntity)->Persist($UnitOfWork, $ChildEntity);
+        $EntityType = null;
+        $RelatedEntityType = null;
+        $ParentIdentity = $this->VerifyEntity($ParentEntity, $EntityType)->Identity($ParentEntity);
+        $RelatedPersistenceData = $this->VerifyEntity($ChildEntity, $RelatedEntityType)->Persist($UnitOfWork, $ChildEntity);
         
-        return new PersistedRelationship($ParentIdentity, null, $RelatedPersistenceData);
+        return new PersistedRelationship($EntityType, $RelatedEntityType, $ParentIdentity, null, $RelatedPersistenceData);
     }
     
     /**
@@ -195,7 +204,7 @@ abstract class Domain {
      * 
      * @param UnitOfWork $UnitOfWork The unit of work to persist to
      * @param object $Entity The entity to persist
-     * @return PersistenceData The persistence data of the entity
+     * @return array The persistence data of the entity
      */
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
         return $this->VerifyEntity($Entity)->Persist($UnitOfWork, $Entity);
@@ -207,7 +216,7 @@ abstract class Domain {
      * 
      * @param UnitOfWork $UnitOfWork The unit of work to discard to
      * @param object $Entity The entity to discard
-     * @return DiscardenceData The discardence data of the entity
+     * @return array The discardence data of the entity
      */
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
         return $this->VerifyEntity($Entity)->Discard($UnitOfWork, $Entity);
@@ -217,7 +226,7 @@ abstract class Domain {
      * Revives an array of entities from the supplied array of revival data.
      * 
      * @param string $EntityType The type of entities to revive
-     * @param RevivalData[] $RevivalData The array of revival data
+     * @param array[] $RevivalData The array of revival data
      * @return object[] The revived entities
      */
     final public function ReviveEntities($EntityType, array $RevivalData) {
@@ -232,11 +241,11 @@ abstract class Domain {
     /**
      * Loads an entity instance with the supplied revival data.
      * 
-     * @param RevivalData $RevivalData The revival data to load the entity with
+     * @param array $RevivalData The revival data to load the entity with
      * @param object $Entity The entity to load
      * @return void
      */
-    final public function LoadEntity(RevivalData $RevivalData, $Entity) {
+    final public function LoadEntity(array $RevivalData, $Entity) {
         $EntityMap = $this->EntityMaps[$RevivalData->GetEntityType()];
         
         $EntityMap->LoadEntity($this, $RevivalData, $Entity);

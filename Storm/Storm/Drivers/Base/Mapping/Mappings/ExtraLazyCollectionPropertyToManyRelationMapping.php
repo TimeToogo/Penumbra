@@ -13,22 +13,22 @@ class ExtraLazyCollectionPropertyToManyRelationMapping extends CollectionPropert
             Relational\IToManyRelation $ToManyRelation) {
         parent::__construct($CollectionProperty, $ToManyRelation);
     }
-
-    public function Revive(Mapping\DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap) {
-        $Property = $this->GetProperty();
+    
+    public function Revive(Mapping\DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array &$RevivalDataArray) {
+        $PropertyIdentifier = $this->GetProperty()->GetIdentifier();
         $EntityType = $this->GetEntityType();
-        $ToManyRelation = $this->GetToManyRelation();
-        $Database = $DomainDatabaseMap->GetDatabase();
-        foreach($ParentRowRevivalDataMap as $ParentRow) {
-            $RevivalData = $ParentRowRevivalDataMap[$ParentRow];
-            $RelatedEntityRevivalDataLoader = function () use (&$DomainDatabaseMap, &$Database, &$ToManyRelation, $EntityType, $ParentRow) {
-                $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, [$ParentRow]);
-                $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($EntityType, $RelatedRows);
-                
-                return $RelatedRevivalDataArray;
-            };
+        
+        foreach($ResultRowArray as $Key => &$ParentRow) {
             
-            $RevivalData[$Property] = $RelatedEntityRevivalDataLoader;
+            $RelatedEntityRevivalDataLoader = 
+                    function () use (&$DomainDatabaseMap, $EntityType, $ParentRow) {
+                        $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, [$ParentRow]);
+                        $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($EntityType, $RelatedRows);
+
+                        return $RelatedRevivalDataArray;
+                    };
+            
+            $RevivalDataArray[$Key][$PropertyIdentifier] = $RelatedEntityRevivalDataLoader;
         }
     }
 }

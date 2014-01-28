@@ -11,6 +11,8 @@ class DataPropertyColumnMapping extends PropertyMapping implements IDataProperty
     private $IsIdentityPrimaryKeyMapping = false;
     private $DataProperty;
     private $Column;
+    private $PropetyIdentifier;
+    private $ColumnIdentifier;
     
     public function __construct(
             Object\IDataProperty $DataProperty, 
@@ -28,6 +30,8 @@ class DataPropertyColumnMapping extends PropertyMapping implements IDataProperty
         
         $this->DataProperty = $DataProperty;
         $this->Column = $Column;
+        $this->PropetyIdentifier = $DataProperty->GetIdentifier();
+        $this->Column = $Column->GetIdentifier();
     }
     
     public function IsIdentityPrimaryKeyMapping() {
@@ -48,17 +52,17 @@ class DataPropertyColumnMapping extends PropertyMapping implements IDataProperty
     public function GetDataProperty() {
         return $this->DataProperty;
     }
-
-    public function Revive(Map $ColumnDataPropertyDataMap) {
-        $Property = $this->GetProperty();
-        foreach($ColumnDataPropertyDataMap as $ColumnData) {
-            $PropertyData = $ColumnDataPropertyDataMap[$ColumnData];
-            $PropertyData[$Property] = $this->Column->Retrieve($ColumnData);
+    
+    public function Revive(array $ColumnDataArray, array $PropertyDataArray) {
+        foreach($ColumnDataArray as $Key => $ColumnData) {
+            $PropertyDataArray[$Key][$this->PropetyIdentifier] = $this->Column->ToPropertyValue($ColumnData[$this->ColumnIdentifier]);
         }
     }
-
-    public function Persist($DataPropertyValue, Relational\ColumnData $ColumnData) {
-        $this->Column->Store($ColumnData, $DataPropertyValue);
+    
+    public function Persist(array $PropertyDataArray, array $ColumnDataArray) {
+        foreach($PropertyDataArray as $Key => $PropertyData) {
+            $ColumnDataArray[$Key][$this->ColumnIdentifier] = $this->Column->ToPersistenceValue($PropertyData[$this->PropetyIdentifier]);
+        }
     }
 }
 

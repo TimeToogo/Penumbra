@@ -14,28 +14,40 @@ final class PersistedRelationship {
     private $IsIdentifying;
     
     /**
-     * @var Identity
+     * @var string
+     */
+    private $ParentEntityType;
+    
+    /**
+     * @var string
+     */
+    private $RelatedEntityType;
+    
+    /**
+     * @var array
      */
     private $ParentIdentity;
     
     /**
-     * @var Identity|null
+     * @var array|null
      */
     private $RelatedIdentity;
     
     /**
-     * @var PersistenceData|null
+     * @var array|null
      */
     private $ChildPersistenceData;
     
-    public function __construct(Identity $ParentIdentity, 
-            Identity $RelatedIdentity = null, PersistenceData $ChildPersistenceData = null) {
+    public function __construct($ParentEntityType, $RelatedEntityType, 
+            array $ParentIdentity, array $RelatedIdentity = null, array $ChildPersistenceData = null) {
         if($RelatedIdentity === null && $ChildPersistenceData === null) {
             throw new \InvalidArgumentException('Related identity and persistence data cannot both be null');
         }
         if($RelatedIdentity !== null && $ChildPersistenceData !== null) {
             throw new \InvalidArgumentException('Related identity and persistence data cannot both be not null');
         }
+        $this->ParentEntityType = $ParentEntityType;
+        $this->RelatedEntityType = $RelatedEntityType;
         $this->IsIdentifying = $RelatedIdentity === null;
         $this->ParentIdentity = $ParentIdentity;
         $this->RelatedIdentity = $RelatedIdentity;
@@ -48,16 +60,24 @@ final class PersistedRelationship {
     public function IsIdentifying() {
         return $this->IsIdentifying;
     }
-       
-    /**
-     * @return Identity
+    
+    public function GetParentEntityType() {
+        return $this->ParentEntityType;
+    }
+
+    public function GetRelatedEntityType() {
+        return $this->RelatedEntityType;
+    }
+
+        /**
+     * @return array
      */
     public function GetParentIdentity() {
         return $this->ParentIdentity;
     }
     
     /**
-     * @return Identity
+     * @return array
      * @throws \BadMethodCallException
      */
     public function GetRelatedIdentity() {
@@ -68,7 +88,7 @@ final class PersistedRelationship {
     }
     
     /**
-     * @return Identity
+     * @return array
      * @throws \BadMethodCallException
      */
     public function GetChildPersistenceData() {

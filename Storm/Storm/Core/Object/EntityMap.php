@@ -252,35 +252,17 @@ abstract class EntityMap implements \IteratorAggregate {
      * of the supplied entity.
      * 
      * @param object|null $Entity
-     * @return Identity The entity's identity
+     * @return array The entity's identity
      */
-    final public function Identity($Entity = null) {
-        if($Entity === null) {
-            return new Identity($this);
-        }
-        
+    final public function Identity($Entity = null) {        
         $this->VerifyEntity($Entity);
         
-        $Identity = new Identity($this);
-        foreach($this->IdentityProperties as $IdentityProperty) {
-            $Identity[$IdentityProperty] = $IdentityProperty->GetValue($Entity);
+        $Identity = array();
+        foreach($this->IdentityProperties as $Identifier => $IdentityProperty) {
+            $Identity[$Identifier] = $IdentityProperty->GetValue($Entity);
         }
         
         return $Identity;
-    }
-    
-    /**
-     * @return RevivalData
-     */
-    final public function RevivalData() {
-        return new RevivalData($this);
-    }
-    
-    /**
-     * @return PersistenceData
-     */
-    final public function PersistanceData() {
-        return new PersistenceData($this);
     }
     
     /**
@@ -293,15 +275,15 @@ abstract class EntityMap implements \IteratorAggregate {
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
         
-        $PersistenceData = new PersistenceData($this);
-        foreach($this->DataProperties as $DataProperty) {
-            $PersistenceData[$DataProperty] = $DataProperty->GetValue($Entity);
+        $PersistenceData = array();
+        foreach($this->DataProperties as $Identifier => $DataProperty) {
+            $PersistenceData[$Identifier] = $DataProperty->GetValue($Entity);
         }
-        foreach($this->EntityProperties as $EntityProperty) {
-            $PersistenceData[$EntityProperty] = $EntityProperty->Persist($UnitOfWork, $Entity);
+        foreach($this->EntityProperties as $Identifier => $EntityProperty) {
+            $PersistenceData[$Identifier] = $EntityProperty->Persist($UnitOfWork, $Entity);
         }
-        foreach($this->CollectionProperties as $CollectionProperty) {
-            $PersistenceData[$CollectionProperty] = $CollectionProperty->Persist($UnitOfWork, $Entity);
+        foreach($this->CollectionProperties as $Identifier => $CollectionProperty) {
+            $PersistenceData[$Identifier] = $CollectionProperty->Persist($UnitOfWork, $Entity);
         }
         
         return $PersistenceData;
@@ -312,20 +294,20 @@ abstract class EntityMap implements \IteratorAggregate {
      * 
      * @param UnitOfWork $UnitOfWork The unit of work to discard from
      * @param object $Entity The entity to discard
-     * @return DiscardenceData The discardence data of the entity
+     * @return array The discardence data of the entity
      */
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
         
-        $DiscardingData = new DiscardenceData($this);
-        foreach($this->IdentityProperties as $IdentityProperty) {
-            $DiscardingData[$IdentityProperty] = $IdentityProperty->GetValue($Entity);
+        $DiscardingData = array();
+        foreach($this->IdentityProperties as $Identifier => $IdentityProperty) {
+            $DiscardingData[$Identifier] = $IdentityProperty->GetValue($Entity);
         }
-        foreach($this->EntityProperties as $EntityProperty) {
-            $DiscardingData[$EntityProperty] = $EntityProperty->Discard($UnitOfWork, $Entity);
+        foreach($this->EntityProperties as $Identifier => $EntityProperty) {
+            $DiscardingData[$Identifier] = $EntityProperty->Discard($UnitOfWork, $Entity);
         }
-        foreach($this->CollectionProperties as $CollectionProperty) {
-            $DiscardingData[$CollectionProperty] = $CollectionProperty->Discard($UnitOfWork, $Entity);
+        foreach($this->CollectionProperties as $Identifier => $CollectionProperty) {
+            $DiscardingData[$Identifier] = $CollectionProperty->Discard($UnitOfWork, $Entity);
         }
         
         return $DiscardingData;
@@ -336,10 +318,10 @@ abstract class EntityMap implements \IteratorAggregate {
      * 
      * @param Domain $Domain The object domain to revive in entity in.
      * @param object $Entity The entity to apply the property data
-     * @param PropertyData $PropertyData The property data apply
+     * @param array $PropertyData The property data apply
      * @return void
      */
-    final public function Apply(Domain $Domain, $Entity, PropertyData $PropertyData) {
+    final public function Apply(Domain $Domain, $Entity, array $PropertyData) {
         foreach($PropertyData as $PropertyIdentifier => $Value) {
             if(isset($this->DataProperties[$PropertyIdentifier])) {
                 $this->DataProperties[$PropertyIdentifier]->ReviveValue($Value, $Entity);
@@ -357,7 +339,7 @@ abstract class EntityMap implements \IteratorAggregate {
      * Revives an array of entities from the supplied array of revival data.
      * 
      * @param string $EntityType The type of entities to revive
-     * @param RevivalData[] $RevivalData The array of revival data
+     * @param array[] $RevivalDatas The array of revival data
      * @return object[] The revived entities
      */
     final public function ReviveEntities(Domain $Domain, array $RevivalDatas) {
@@ -374,11 +356,11 @@ abstract class EntityMap implements \IteratorAggregate {
     /**
      * Loads an entity instance with the supplied revival data.
      * 
-     * @param RevivalData $RevivalData The revival data to load the entity with
+     * @param array $RevivalData The revival data to load the entity with
      * @param object $Entity The entity to load
      * @return void
      */
-    final public function LoadEntity(Domain $Domain, RevivalData $RevivalData, $Entity) {
+    final public function LoadEntity(Domain $Domain, array $RevivalData, $Entity) {
         $this->Apply($Domain, $Entity, $RevivalData);
     }
 }

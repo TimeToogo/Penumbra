@@ -125,34 +125,34 @@ interface IEntityRelationalMap {
     /**
      * Maps an identity to the equivalent primary key.
      * 
-     * @param Object\Identity $Identity The identity to map
-     * @return Relational\PrimaryKey The mapped primary key
+     * @param array $Identity The identity to map
+     * @return array The mapped primary key
      */
-    public function MapIdentityToPrimaryKey(Object\Identity $Identity);
+    public function MapIdentityToPrimaryKey(array $Identity);
     
     /**
      * Maps an array of identities to the equivalent primary keys.
      * NOTE: Keys are preserved
      * 
-     * @param Object\Identity[] $Identity The identities to map
-     * @return Relational\PrimaryKey[] The mapped primary keys
+     * @param array[] $Identity The identities to map
+     * @return array] The mapped primary keys
      */
     public function MapIdentitiesToPrimaryKeys(array $Identities);
     
     /**
      * Map a primary key to the equivalent identity.
      * 
-     * @param Relational\PrimaryKey The map primary key to map
-     * @return Object\Identity $Identity The mapped identity
+     * @param array The map primary key to map
+     * @return array $Identity The mapped identity
      */
-    public function MapPrimaryKeyToIdentity(Relational\PrimaryKey $PrimaryKey);
+    public function MapPrimaryKeyToIdentity(array $PrimaryKey);
     
     /**
      * Maps an array of primary keysto the equivalent identities.
      * NOTE: Keys are preserved
      * 
-     * @param Relational\PrimaryKey[] The primary keys to map
-     * @return Object\Identity[] $Identity The mapped identities
+     * @param array[] The primary keys to map
+     * @return array[] $Identity The mapped identities
      */
     public function MapPrimaryKeysToIdentities(array $PrimaryKeys);
 }

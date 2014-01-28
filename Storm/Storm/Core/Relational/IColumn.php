@@ -57,22 +57,8 @@ interface IColumn {
      */
     public function SetName($Name);
     
-    /**
-     * Gets the column value from the supplied column data
-     * 
-     * @param ColumnData $Data The column data to retreive from
-     * @return mixed
-     */
-    public function Retrieve(ColumnData $Data);
-    
-    /**
-     * Set the column value of the supplied column data with the supplied value
-     * 
-     * @param ColumnData $Data The column data to retreive from
-     * @param mixed $Value The value to set
-     * @return void
-     */
-    public function Store(ColumnData $Data, $Value);
+    public function ToPersistenceValue($Value);
+    public function ToPropertyValue($Value);
 }
 
 ?>

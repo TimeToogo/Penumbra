@@ -19,28 +19,31 @@ class EagerEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelatio
         }
     }
     
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ResultRowRevivalDataMap) {
+    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array &$RevivalDataArray) {
+        $PropertyIdentifier = $this->GetProperty()->GetIdentifier();
+        
         if(!$this->GetEntityProperty()->IsOptional()) {
-            $JoinedRows = $ResultRowRevivalDataMap->GetInstances();
-            $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $JoinedRows);
-            $Property = $this->GetProperty();
-            foreach($JoinedRows as $Key => $JoinedRow) {
-                $ParentRevivalData = $ResultRowRevivalDataMap[$JoinedRow];
-                $ParentRevivalData[$Property] = $RelatedRevivalData[$Key];
+            $JoinedRows = $ResultRowArray;
+            $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $JoinedRows);
+            
+            foreach($RevivalDataArray as $Key => $RevivalData) {
+                $RevivalData[$PropertyIdentifier] = $RelatedRevivalDataArray[$Key];
             }
         }
         else {
-            $ParentRows = $ResultRowRevivalDataMap->GetInstances();            
-            $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ParentRows);
+            $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ResultRowArray);
             
-            $ParentRowRelatedRevivalDataMap = $this->MapToParentRowRelatedRevivalDataMap($DomainDatabaseMap, $ResultRowRevivalDataMap, $RelatedRows);
+            $ParentKeyRelatedRowMap = $this->ToOneRelation->MapParentKeysToRelatedRow($ResultRowArray, $RelatedRows);
             
-            $Property = $this->GetProperty();
-            foreach($ParentRowRelatedRevivalDataMap as $ParentRow) {
-                $RelatedRevivalData = $ParentRowRelatedRevivalDataMap[$ParentRow];
-                $ParentRevivalData = $ResultRowRevivalDataMap[$ParentRow];
-                
-                $ParentRevivalData[$Property] = $RelatedRevivalData;
+            $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $ParentKeyRelatedRowMap);
+
+            foreach($RevivalDataArray as $Key => &$RevivalData) {
+                if(isset($RelatedRevivalDataArray[$Key])) {
+                    $RevivalData[$PropertyIdentifier] = $RelatedRevivalDataArray[$Key];
+                }
+                else {
+                    $RevivalData[$PropertyIdentifier] = null;
+                }
             }
         }
     }

@@ -101,7 +101,7 @@ trait EntityProxyFunctionality {
         $this->__IsLoaded = true;
     }
     
-    private function __Revive(RevivalData $RevivalData) {
+    private function __Revive(array $RevivalData) {
         $this->__Domain->LoadEntity($RevivalData, $this);
     }
     

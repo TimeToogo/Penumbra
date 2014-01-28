@@ -113,7 +113,7 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
     // <editor-fold defaultstate="collapsed" desc="Foreign Key">
     public function ForeignKey(
             QueryBuilder $QueryBuilder, Table $Table, Traits\ForeignKey $Trait) {
-        $ColumnNameMap = $Trait->GetReferencedColumnNameMap();
+        $ColumnNameMap = $Trait->GetParentReferencedColumnNameMap();
         $PrimaryColumns = array_keys($ColumnNameMap);
         $ForeignColumns = array_values($ColumnNameMap);
         

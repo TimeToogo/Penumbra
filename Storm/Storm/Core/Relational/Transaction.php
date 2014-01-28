@@ -56,14 +56,14 @@ final class Transaction {
     }
     
     /**
-     * @return Row[]
+     * @return array[]
      */
     public function GetPersistedRows() {
         return $this->PersistedRows;
     }
     
     /**
-     * @return Row[][]
+     * @return array[][]
      */
     public function GetPersistedRowGroups() {
         return $this->PersistedRowGroups;
@@ -77,14 +77,14 @@ final class Transaction {
     }
     
     /**
-     * @return PrimaryKey[]
+     * @return array[]
      */
     public function GetDiscardedPrimaryKeys() {
         return $this->DiscardedPrimaryKeys;
     }
     
     /**
-     * @return PrimaryKey[][]
+     * @return array[][]
      */
     public function GetDiscardedPrimaryKeyGroups() {
         return $this->DiscardedPrimaryKeyGroups;
@@ -103,18 +103,14 @@ final class Transaction {
      * @param Row $Row The row to persist
      * @return void
      */
-    public function Persist(Row $Row) {
-        $Hash = spl_object_hash($Row);
-        if(isset($this->PersistedRows[$Hash])) {
-            return;
-        }
-        $this->PersistedRows[$Hash] = $Row;
+    public function Persist(Table $Table, array &$Row) {
+        $this->PersistedRows[] =& $Row;
         
-        $TableName = $Row->GetTable()->GetName();
+        $TableName = $Table->GetName();
         if(!isset($this->PersistedRowGroups[$TableName])) {
             $this->PersistedRowGroups[$TableName] = array();
         }
-        $this->PersistedRowGroups[$TableName][] = $Row;
+        $this->PersistedRowGroups[$TableName][] =& $Row;
     }
     
     /**
@@ -123,8 +119,10 @@ final class Transaction {
      * @param Row[] $Rows The rows to persist
      * @return void
      */
-    public function PersistAll(array $Rows) {
-        array_walk($Rows, [$this, 'Persist']);
+    public function PersistAll(Table $Table, array &$Rows) {
+        foreach($Rows as &$Row) {
+            $this->Persist($Table, $Row);
+        }
     }
     
     /**
@@ -164,13 +162,11 @@ final class Transaction {
     /**
      * Trigger the pre persist callbacks for the supplied rows
      * 
-     * @param Row[] $Rows The rows to trigger
+     * @param Table $Table The rows to trigger
      * @return void
      */
-    public function TriggerPrePersistEvent(array $Rows) {
-        foreach($Rows as $Row) {
-            $this->TriggerEvents($this->PrePersistRowEventMap, $Row);
-        }
+    public function TriggerPrePersistEvent(Table $Table) {
+        $this->TriggerEvents($this->PrePersistRowEventMap, $Table);
     }
     
     /**
@@ -179,8 +175,8 @@ final class Transaction {
      * @param Row $Row
      * @param callable $Event
      */
-    public function SubscribeToPrePersistEvent(Row $Row, callable $Event) {
-        $this->AddEvent($this->PrePersistRowEventMap, $Row, $Event);
+    public function SubscribeToPrePersistEvent(Table $Table, callable $Event) {
+        $this->AddEvent($this->PrePersistRowEventMap, $Table, $Event);
     }
     
     /**
@@ -189,10 +185,8 @@ final class Transaction {
      * @param Row[] $Rows The rows to trigger
      * @return void
      */
-    public function TriggerPostPersistEvent(array $Rows) {
-        foreach($Rows as $Row) {
-            $this->TriggerEvents($this->PostPersistRowEventMap, $Row);
-        }
+    public function TriggerPostPersistEvent(Table $Table) {
+        $this->TriggerEvents($this->PostPersistRowEventMap, $Table);
     }
     
     /**
@@ -202,8 +196,8 @@ final class Transaction {
      * @param callable $Event
      * @return void
      */
-    public function SubscribeToPostPersistEvent(Row $Row, callable $Event) {
-        $this->AddEvent($this->PostPersistRowEventMap, $Row, $Event);
+    public function SubscribeToPostPersistEvent(Table $Table, callable $Event) {
+        $this->AddEvent($this->PostPersistRowEventMap, $Table, $Event);
     }
     
     /**
@@ -222,14 +216,14 @@ final class Transaction {
      * @param PrimaryKey $PrimaryKey The primary key to discard
      * @return void
      */
-    public function Discard(PrimaryKey $PrimaryKey) {
-        $this->DiscardedPrimaryKeys[] = $PrimaryKey;
+    public function Discard(Table $Table, array &$PrimaryKey) {
+        $this->DiscardedPrimaryKeys[] =& $PrimaryKey;
         
-        $TableName = $PrimaryKey->GetTable()->GetName();
+        $TableName = $Table->GetName();
         if(!isset($this->DiscardedPrimaryKeyGroups[$TableName])) {
             $this->DiscardedPrimaryKeyGroups[$TableName] = array();
         }
-        $this->DiscardedPrimaryKeyGroups[$TableName][] = $PrimaryKey;
+        $this->DiscardedPrimaryKeyGroups[$TableName][] =& $PrimaryKey;
     }
     
     /**
@@ -238,8 +232,10 @@ final class Transaction {
      * @param PrimaryKey[] $PrimaryKeys The primary keys to discard
      * @return void
      */
-    public function DiscardAll(array $PrimaryKeys) {
-        array_walk($PrimaryKeys, [$this, 'Discard']);
+    public function DiscardAll(Table $Table, array &$PrimaryKeys) {
+        foreach($PrimaryKeys as &$PrimaryKey) {
+            $this->Discard($Table, $PrimaryKey);
+        }
     }
     
     /**

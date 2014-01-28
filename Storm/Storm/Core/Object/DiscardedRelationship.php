@@ -14,16 +14,29 @@ final class DiscardedRelationship {
     private $IsIdentifying;
     
     /**
-     * @return Identity
+     * @return string
+     */
+    private $ParentEntityType;
+    
+    /**
+     * @return string
+     */
+    private $RelatedEntityType;
+    
+    
+    /**
+     * @return array
      */
     private $ParentIdentity;
     
     /**
-     * @return Identity
+     * @return array
      */
     private $ChildIdentity;
     
-    public function __construct($IsIdentifying, Identity $ParentIdentity, Identity $ChildIdentity) {
+    public function __construct($IsIdentifying, $ParentEntityType, $RelatedEntityType, array $ParentIdentity, array $ChildIdentity) {
+        $this->ParentEntityType = $ParentEntityType;
+        $this->RelatedEntityType = $RelatedEntityType;
         $this->IsIdentifying = $IsIdentifying;
         $this->ParentIdentity = $ParentIdentity;
         $this->ChildIdentity = $ChildIdentity;
@@ -35,16 +48,24 @@ final class DiscardedRelationship {
     public function IsIdentifying() {
         return $this->IsIdentifying;
     }
+    
+    public function GetParentEntityType() {
+        return $this->ParentEntityType;
+    }
+
+    public function GetRelatedEntityType() {
+        return $this->RelatedEntityType;
+    }
 
     /**
-     * @return Identity
+     * @return array
      */
     public function GetParentIdentity() {
         return $this->ParentIdentity;
     }
 
     /**
-     * @return Identity
+     * @return array
      */
     public function GetRelatedIdentity() {
         return $this->ChildIdentity;

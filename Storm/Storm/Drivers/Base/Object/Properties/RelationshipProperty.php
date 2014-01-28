@@ -54,7 +54,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         if($PropertyRevivalValue === null) {
             return $this->ReviveNull($Domain, $Entity);
         }
-        if($PropertyRevivalValue instanceof Object\RevivalData) {
+        if(is_array($PropertyRevivalValue) && !is_array(reset($PropertyRevivalValue))) {
             if($this->BackReferenceProperty !== null) {
                 $PropertyRevivalValue[$this->BackReferenceProperty] = $Entity;
             }
@@ -64,7 +64,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
             return $this->ReviveCallable($Domain, $Entity, $PropertyRevivalValue, $this->BackReferenceProperty);
         }
         else if(is_array($PropertyRevivalValue)) {
-            if(count(array_filter($PropertyRevivalValue, function ($Value) { return $Value instanceof Object\RevivalData; })) === count($PropertyRevivalValue)) {
+            if(count(array_filter($PropertyRevivalValue, function ($Value) { return is_array($Value); })) === count($PropertyRevivalValue)) {
                 if($this->BackReferenceProperty !== null) {
                     foreach($PropertyRevivalValue as $RevivalData) {
                         $RevivalData[$this->BackReferenceProperty] = $Entity;
@@ -84,7 +84,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         throw new \Exception;//TODO:error message
     }
     
-    protected function ReviveRevivalData(Domain $Domain, $Entity, Object\RevivalData $RevivalData) {
+    protected function ReviveRevivalData(Domain $Domain, $Entity, array $RevivalData) {
         throw new \Exception;//TODO:error message
     }
     

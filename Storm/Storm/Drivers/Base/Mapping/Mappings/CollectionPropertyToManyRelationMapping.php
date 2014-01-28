@@ -51,31 +51,17 @@ abstract class CollectionPropertyToManyRelationMapping extends PropertyMapping i
         return $DomainDatabaseMap->GetDatabase()->Load($RelatedRowRequest);
     }
     
-    final protected function MapToParentRowRelatedRevivalDataArrayMap(DomainDatabaseMap $DomainDatabaseMap, 
-            Map $ParentRowRevivalDataMap, array $RelatedRows) {
-        $ParentRows = $ParentRowRevivalDataMap->GetInstances();
-        $ParentRelatedRowsMap = $this->ToManyRelation->MapParentToRelatedRows($ParentRows, $RelatedRows);
-        
-        $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $RelatedRows);
-        $RelatedRowRevivalDataMap = Map::From($RelatedRows, $RelatedRevivalData);
+    final protected function MapParentRowKeysToRelatedRows(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows, array $RelatedRows) {
+        $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->EntityType, $RelatedRows);
 
-        $ParentRowRelatedRevivalDataArrayMap = new Map();
-        foreach($ParentRowRevivalDataMap as $ParentRow) {
-            $RelatedRows = $ParentRelatedRowsMap[$ParentRow];
-            
-            $RelatedRevivalDataArray = new \ArrayObject();
-            foreach($RelatedRows as $RelatedRow) {
-                $RelatedRevivalDataArray[] = $RelatedRowRevivalDataMap[$RelatedRow];
-            }
-            
-            $ParentRowRelatedRevivalDataArrayMap[$ParentRow] = $RelatedRevivalDataArray;
+        $PropertyIdentifier = $this->GetProperty()->GetIdentifier();
+        $MappedRelatedRows = array();
+        foreach($ParentRows as $Key => $ParentRow) {            
+            $MappedRelatedRows[$Key] = array_intersect_key($RelatedRevivalData, $RelatedRows);
         }
-        
-        return $ParentRowRelatedRevivalDataArrayMap;
     }
 
-    
-    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, array $RelationshipChanges) {
+    public function Persist(Relational\Transaction $Transaction, array $ParentData, array $RelationshipChanges) {
         if(count($RelationshipChanges) > 0) {
             $this->ToManyRelation->Persist($Transaction, $ParentData, $RelationshipChanges);
         }

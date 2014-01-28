@@ -19,12 +19,12 @@ final class UnitOfWork {
     private $PersistenceDataEntityMap;
     
     /**
-     * @var PersistenceData[] 
+     * @var array[] 
      */
     private $PersistenceData = array();
     
     /**
-     * @var PersistenceData[][]
+     * @var array[][]
      */
     private $PersistenceDataGroups = array();
     
@@ -34,12 +34,12 @@ final class UnitOfWork {
     private $ProcedureToExecute = array();
     
     /**
-     * @var DiscardenceData[] 
+     * @var array[] 
      */
     private $DiscardenceData = array();
     
     /**
-     * @var Identity[][] 
+     * @var array[][] 
      */
     private $DiscardedIdentityGroups = array();
     
@@ -63,7 +63,7 @@ final class UnitOfWork {
     /**
      * Persist an entity to the unit of work.
      * 
-     * @param type $Entity The entity to persist
+     * @param object $Entity The entity to persist
      * @return void 
      */
     public function Persist($Entity) {
@@ -87,9 +87,9 @@ final class UnitOfWork {
      * Sets a generated identity to to the entity mapped with the supplied persistence data.
      * 
      * @param PersistenceData $PersistenceData The persistence data of the entity
-     * @param Identity $Identity The identity to supply the entity
+     * @param array $Identity The identity to supply the entity
      */
-    public function SupplyIdentity(PersistenceData $PersistenceData, Identity $Identity) {
+    public function SupplyIdentity(\ArrayObject $PersistenceData, array $Identity) {
         if(isset($this->PersistenceDataEntityMap[$PersistenceData])) {
             $Entity = $this->PersistenceDataEntityMap[$PersistenceData];
             $this->Domain->Apply($Entity, $Identity);
@@ -148,14 +148,14 @@ final class UnitOfWork {
     }
     
     /**
-     * @return PersistenceData[]
+     * @return array[]
      */
     public function GetPersistenceData() {
         return $this->PersistenceData;
     }
     
     /**
-     * @return PersistenceData[][]
+     * @return array[][]
      */
     public function GetPersistenceDataGroups() {
         return $this->PersistenceDataGroups;
@@ -169,14 +169,14 @@ final class UnitOfWork {
     }
     
     /**
-     * @return PersistenceData[]
+     * @return array[]
      */
     public function GetDiscardenceData() {
         return $this->DiscardenceData;
     }
     
     /**
-     * @return PersistenceData[][]
+     * @return array[][]
      */
     public function GetDiscardenceDataGroups() {
         return $this->DiscardedIdentityGroups;

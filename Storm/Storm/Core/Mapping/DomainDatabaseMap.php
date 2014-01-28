@@ -441,7 +441,7 @@ abstract class DomainDatabaseMap {
         $RevivalDataArray = array();
         $EntityMap = $EntityRelationalMap->GetEntityMap();
         foreach ($ResultRows as $Key => $ResultRow) {
-            $RevivalData = $EntityMap->RevivalData();
+            $RevivalData = array();
             $ResultRowRevivalDataMap[$ResultRow] = $RevivalData;
             $RevivalDataArray[$Key] = $RevivalData;
         }
@@ -488,19 +488,26 @@ abstract class DomainDatabaseMap {
     private function MapUnitOfWorkToTransaction(
             Object\UnitOfWork $UnitOfWork, 
             Relational\Transaction $Transaction) {
+        
         foreach($UnitOfWork->GetPersistenceDataGroups() as $EntityType => $PersistenceDataGroup) {
-            $this->MapPersistenceDataToTransaction($UnitOfWork, $Transaction, $PersistenceDataGroup);
+            $this->MapPersistenceDataToTransaction($UnitOfWork, $Transaction, $EntityType, $PersistenceDataGroup);
         }
+        
         foreach($UnitOfWork->GetExecutedProcedures() as $Procedure) {
             $Transaction->Execute($this->MapProcedure($Procedure));
         }
+        
         foreach($UnitOfWork->GetDiscardenceDataGroups() as $EntityType => $DiscardedIdentityGroup) {
             $EntityRelationalMap = $this->EntityRelationMaps[$EntityType];
+            $MappedPersistTables = $EntityRelationalMap->GetMappedPersistTables();
             $ResultRows = $this->MapEntityDataToTransaction($UnitOfWork, $Transaction, $EntityRelationalMap, $DiscardedIdentityGroup);
             foreach($ResultRows as $ResultRow) {
-                $Transaction->DiscardAll($ResultRow->GetPrimaryKeys());
+                foreach($MappedPersistTables as $MappedPersistTable) {
+                    $Transaction->DiscardAll($MappedPersistTable, $MappedPersistTable->GetPrimaryKeyData($ResultRow));
+                }
             }            
         }
+        
         foreach($UnitOfWork->GetDiscardedCriteria() as $DiscardedCriterion) {
             $Transaction->DiscardWhere($this->MapObjectCriterion($DiscardedCriterion));
         }
@@ -514,36 +521,41 @@ abstract class DomainDatabaseMap {
      * 
      * @param Object\UnitOfWork $UnitOfWork 
      * @param Relational\Transaction $Transaction
-     * @param Object\PersistenceData[] $PersistenceDataArray
+     * @param array[] $PersistenceDataArray
      * @return Relational\ResultRows[]
      */
     private function MapPersistenceDataToTransaction(
             Object\UnitOfWork $UnitOfWork, 
             Relational\Transaction $Transaction,
+            $EntityType,
             array $PersistenceDataArray) {
         if(count($PersistenceDataArray) === 0) {
             return;
         }
         
-        $EntityRelationalMap = $this->EntityRelationMaps[reset($PersistenceDataArray)->GetEntityType()];
+        $EntityRelationalMap = $this->EntityRelationMaps[$EntityType];
         $PrimaryKeyTable = $EntityRelationalMap->GetPrimaryKeyTable();
-        $ResultRows = $this->MapEntityDataToTransaction($UnitOfWork, $Transaction, $EntityRelationalMap, $PersistenceDataArray);
+        $MappedPersistTables = $EntityRelationalMap->GetMappedPersistTables();
+        $ResultRows =& $this->MapEntityDataToTransaction($UnitOfWork, $Transaction, $EntityRelationalMap, $PersistenceDataArray);
         
-        foreach($ResultRows as $Key => $ResultRow) {
-            $PersistenceData = $PersistenceDataArray[$Key];
-            $Transaction->PersistAll($ResultRow->GetRows());
-            
-            $PrimaryKeyRow = $ResultRow->GetRow($PrimaryKeyTable);
-            
-            if(!$PrimaryKeyRow->HasPrimaryKey()) {
-                //Adds a callback to supply the unit of work the generated identity after persistence.
-                $Transaction->SubscribeToPostPersistEvent(
-                        $PrimaryKeyRow, 
-                        function ($PersistedRow) use (&$UnitOfWork, &$EntityRelationalMap, $PersistenceData) {
-                            $Identity = $EntityRelationalMap->MapPrimaryKeyToIdentity($PersistedRow->GetPrimaryKey());
-                            $UnitOfWork->SupplyIdentity($PersistenceData, $Identity);
-                        });
+        $RowsWithoutPrimaryKeys = array();
+        $PersistenceDataKeys = array();
+        foreach($ResultRows as $Key => &$ResultRow) {
+            foreach($MappedPersistTables as $MappedPersistTable) {
+                $Transaction->Persist($MappedPersistTable, $MappedPersistTable->GetRowData($ResultRow));
             }
+            
+            $RowsWithoutPrimaryKeys[] =& $PrimaryKeyTable->GetRowData($ResultRow);
+        }
+        if(count($RowsWithoutPrimaryKeys) > 0) {
+            //Adds a callback to supply the unit of work the generated identity after persistence.
+            $Transaction->SubscribeToPostPersistEvent(
+                    $PrimaryKeyTable, 
+                    function () use (&$UnitOfWork, &$EntityRelationalMap, &$RowsWithoutPrimaryKeys) {
+                        $Identities = $EntityRelationalMap->MapPrimaryKeysToIdentities($RowsWithoutPrimaryKeys);
+                        trigger_error('TODO: Supply identity');
+                        $UnitOfWork->SupplyIdentity($PersistenceData, $Identity);
+                    });
         }
         
         return $ResultRows;
@@ -557,7 +569,7 @@ abstract class DomainDatabaseMap {
      * @param Object\UnitOfWork $UnitOfWork
      * @param Relational\Transaction $Transaction
      * @param IEntityRelationalMap $EntityRelationalMap
-     * @param Object\EntityData $EntityDataArray
+     * @param array[] $EntityDataArray
      * @return Relational\ResultRows[]
      */
     private function MapEntityDataToTransaction(
@@ -570,33 +582,33 @@ abstract class DomainDatabaseMap {
         
         $ResultRowArray = array();
         foreach($EntityDataArray as $Key => $EntityData) {
-            $ResultRowData = $EntityRelationalMap->ResultRow();
+            $ResultRowData = array();
             
             foreach($DataPropertyColumnMappings as $DataPropertyColumnMapping) {
-                $Property = $DataPropertyColumnMapping->GetProperty();
-                if(isset($EntityData[$Property])) {
-                    $DataPropertyValue = $EntityData[$Property];
+                $PropertyIdentifier = $DataPropertyColumnMapping->GetProperty()->GetIdentifier();
+                if(isset($EntityData[$PropertyIdentifier])) {
+                    $DataPropertyValue = $EntityData[$PropertyIdentifier];
                     $DataPropertyColumnMapping->Persist($DataPropertyValue, $ResultRowData);
                 }
             }
             
             foreach($EntityPropertyToOneRelationMappings as $EntityPropertyToOneRelationMapping) {
-                $RelationshipChange = $EntityData[$EntityPropertyToOneRelationMapping->GetProperty()];
+                $RelationshipChange = $EntityData[$EntityPropertyToOneRelationMapping->GetProperty()->GetIdentifier()];
                 $MappedRelationshipChange = 
-                        $this->MapRelationshipChanges($UnitOfWork, $Transaction, 
+                        $this->MapRelationshipChanges($UnitOfWork, $Transaction, $EntityRelationalMap,
                         [$RelationshipChange])[0];
                 $EntityPropertyToOneRelationMapping->Persist($Transaction, $ResultRowData, $MappedRelationshipChange);
             }
             
             foreach($CollectionPropertyToManyRelationMappings as $CollectionPropertyToManyRelationMapping) {
-                $RelationshipChanges = $EntityData[$CollectionPropertyToManyRelationMapping->GetProperty()];
+                $RelationshipChanges = $EntityData[$CollectionPropertyToManyRelationMapping->GetProperty()->GetIdentifier()];
                 $MappedRelationshipChanges = 
-                        $this->MapRelationshipChanges($UnitOfWork, $Transaction, $RelationshipChanges);
+                        $this->MapRelationshipChanges($UnitOfWork, $Transaction, $EntityRelationalMap, $RelationshipChanges);
                 
                 $CollectionPropertyToManyRelationMapping->Persist($Transaction, $ResultRowData, $MappedRelationshipChanges);
             }
             
-            $ResultRowArray[$Key] = $ResultRowData;
+            $ResultRowArray[$Key] =& $ResultRowData;
         }
         
         return $ResultRowArray;
@@ -605,29 +617,21 @@ abstract class DomainDatabaseMap {
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Relationship mappers">
-    
-    private function MapIdentityToPrimaryKey(Object\Identity $Identity) {
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($Identity->GetEntityType());
-        return $EntityRelationalMap->MapIdentityToPrimaryKey($Identity);
-    }
-    
-    private function MapPrimaryKeyToIdentity(Relational\PrimaryKey $PrimaryKey) {
-        $EntityRelationalMap = $this->GetEntityRelationalMapByPrimaryKeyTable($PrimaryKey->GetTable()->GetName());
-        return $EntityRelationalMap->MapPrimaryKeyToIdentity($PrimaryKey);
-    }
-    
+        
     /**
      * @return Relational\DiscardedRelationship[]
      */
-    final public function MapDiscardedRelationships(array $ObjectDiscardedRelationships) {
+    final public function MapDiscardedRelationships(
+            IEntityRelationalMap $EntityRelationalMap,
+            array $ObjectDiscardedRelationships) {
         $RelationalDiscardedRelationships = array();
         foreach($ObjectDiscardedRelationships as $Key => $DiscardedRelationship) {
             if($DiscardedRelationship === null) {
                 $RelationalDiscardedRelationships[$Key] = null;
                 continue;
             }
-            $ParentPrimaryKey = $this->MapIdentityToPrimaryKey($DiscardedRelationship->GetParentIdentity());
-            $ChildPrimaryKey = $this->MapIdentityToPrimaryKey($DiscardedRelationship->GetRelatedIdentity());
+            $ParentPrimaryKey = $EntityRelationalMap->MapIdentityToPrimaryKey($DiscardedRelationship->GetParentIdentity());
+            $ChildPrimaryKey = $EntityRelationalMap->MapIdentityToPrimaryKey($DiscardedRelationship->GetRelatedIdentity());
             
             $RelationalDiscardedRelationships[$Key] = new Relational\DiscardedRelationship(
                     $DiscardedRelationship->IsIdentifying(),
@@ -643,7 +647,9 @@ abstract class DomainDatabaseMap {
      * @return Relational\PersistedRelationship[]
      */
     final public function MapPersistedRelationships(
-            Object\UnitOfWork $UnitOfWork, Relational\Transaction $Transaction,             
+            Object\UnitOfWork $UnitOfWork,
+            Relational\Transaction $Transaction,    
+            IEntityRelationalMap $EntityRelationalMap,
             array $ObjectPersistedRelationships) {
         
         $ParentPrimaryKey = null;
@@ -653,15 +659,17 @@ abstract class DomainDatabaseMap {
                 continue;
             }
             if($ParentPrimaryKey === null) {
-                $ParentPrimaryKey = $this->MapIdentityToPrimaryKey(
+                $ParentPrimaryKey = $EntityRelationalMap->MapIdentityToPrimaryKey(
                         $ObjectPersistedRelationship->GetParentIdentity());
             }            
             if ($ObjectPersistedRelationship->IsIdentifying()) {
                 $ChildPersistenceData[$Key] = $ObjectPersistedRelationship->GetChildPersistenceData();
             }
         }
-        $ChildResultRows = $this->MapPersistenceDataToTransaction($UnitOfWork, $Transaction, $ChildPersistenceData);
-        
+        if(count($ChildPersistenceData) > 0) {
+            $ChildEntityType = reset($ObjectPersistedRelationships)->GetRelatedEntityType();
+            $ChildResultRows =& $this->MapPersistenceDataToTransaction($UnitOfWork, $Transaction, $ChildEntityType, $ChildPersistenceData);
+        }        
 
         $RelationalPersistedRelationships = array();
         foreach($ObjectPersistedRelationships as $Key => $ObjectPersistedRelationship) {
@@ -669,14 +677,15 @@ abstract class DomainDatabaseMap {
                 $RelationalPersistedRelationships[$Key] = null;
                 continue;
             }
+            $Null = null;
             if ($ObjectPersistedRelationship->IsIdentifying()) {
                 $RelationalPersistedRelationships[$Key] = 
-                        new Relational\PersistedRelationship($ParentPrimaryKey, null, $ChildResultRows[$Key]);
+                        new Relational\PersistedRelationship($ParentPrimaryKey, $Null, $ChildResultRows[$Key]);
             }
             else {
-                $RelatedPrimaryKey = $this->MapIdentityToPrimaryKey($ObjectPersistedRelationship->GetRelatedIdentity());
+                $RelatedPrimaryKey = $EntityRelationalMap->MapIdentityToPrimaryKey($ObjectPersistedRelationship->GetRelatedIdentity());
                 $RelationalPersistedRelationships[$Key] = 
-                        new Relational\PersistedRelationship($ParentPrimaryKey, $RelatedPrimaryKey, null);
+                        new Relational\PersistedRelationship($ParentPrimaryKey, $RelatedPrimaryKey, $Null);
             }
         }
         
@@ -689,7 +698,9 @@ abstract class DomainDatabaseMap {
      * @return Relational\RelationshipChange
      */
     final public function MapRelationshipChanges(
-            Object\UnitOfWork $UnitOfWork, Relational\Transaction $Transaction,
+            Object\UnitOfWork $UnitOfWork, 
+            Relational\Transaction $Transaction,
+            IEntityRelationalMap $EntityRelationalMap,
             array $ObjectRelationshipChanges) {
         
         $ObjectPersistedRelationships = array();
@@ -700,9 +711,10 @@ abstract class DomainDatabaseMap {
             $ObjectDiscardedRelationships[$Key] = $ObjectRelationshipChange->GetDiscardedRelationship();
         }
         
-        $RelationalPersistedRelationships = $this->MapPersistedRelationships($UnitOfWork, $Transaction, 
-                $ObjectPersistedRelationships);
-        $RelationalDiscardedRelationships = $this->MapDiscardedRelationships($ObjectDiscardedRelationships);
+        $RelationalPersistedRelationships = $this->MapPersistedRelationships(
+                $UnitOfWork, $Transaction, $EntityRelationalMap, $ObjectPersistedRelationships);
+        
+        $RelationalDiscardedRelationships = $this->MapDiscardedRelationships($EntityRelationalMap, $ObjectDiscardedRelationships);
         
         $RelationalRelationshipChanges = array();
         foreach($ObjectRelationshipChanges as $Key => $ObjectRelationshipChange) {

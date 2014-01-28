@@ -14,22 +14,22 @@ final class PersistedRelationship {
     private $IsIdentifying;
     
     /**
-     * @var PrimaryKey 
+     * @var array 
      */
     private $ParentPrimaryKey;
     
     /**
-     * @var PrimaryKey|null
+     * @var array|null
      */
     private $RelatedPrimaryKey;
     
     /**
-     * @var ResultRow|null 
+     * @var array|null 
      */
     private $ChildResultRow;
     
-    public function __construct(PrimaryKey $ParentPrimaryKey, 
-            PrimaryKey $RelatedPrimaryKey = null, ResultRow $ChildResultRow = null) {
+    public function __construct(array &$ParentPrimaryKey, 
+            array &$RelatedPrimaryKey = null, array &$ChildResultRow = null) {
         if($RelatedPrimaryKey === null && $ChildResultRow === null) {
             throw new \InvalidArgumentException('Related primary key and result row cannot both be null');
         }
@@ -37,9 +37,9 @@ final class PersistedRelationship {
             throw new \InvalidArgumentException('Related primary key and result row cannot both be not null');
         }
         $this->IsIdentifying = $RelatedPrimaryKey === null;
-        $this->ParentPrimaryKey = $ParentPrimaryKey;
-        $this->RelatedPrimaryKey = $RelatedPrimaryKey;
-        $this->ChildResultRow = $ChildResultRow;
+        $this->ParentPrimaryKey =& $ParentPrimaryKey;
+        $this->RelatedPrimaryKey =& $RelatedPrimaryKey;
+        $this->ChildResultRow =& $ChildResultRow;
     }
     
     /**
@@ -50,17 +50,17 @@ final class PersistedRelationship {
     }
     
     /**
-     * @return PrimaryKey
+     * @return array
      */
-    public function GetParentPrimaryKey() {
+    public function &GetParentPrimaryKey() {
         return $this->ParentPrimaryKey;
     }
 
     /**
-     * @return PrimaryKey
+     * @return array
      * @throws \BadMethodCallException If relationship is identifying
      */
-    public function GetRelatedPrimaryKey() {
+    public function &GetRelatedPrimaryKey() {
         if($this->IsIdentifying) {
             throw new \BadMethodCallException('Relationship is identifying');
         }
@@ -68,14 +68,14 @@ final class PersistedRelationship {
     }
 
     /**
-     * @return ResultRow
+     * @return array
      * @throws \BadMethodCallException If relationship is not identifying
      */
-    public function GetChildResultRow() {
+    public function &GetChildResultRow() {
         if(!$this->IsIdentifying) {
             throw new \BadMethodCallException('Relationship is not identifying');
         }
-        return $this->ChildResultRow ;
+        return $this->ChildResultRow;
     }
 }
 

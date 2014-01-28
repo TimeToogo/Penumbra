@@ -103,7 +103,7 @@ class CollectionProperty extends MultipleEntityProperty {
     private function IndexEntitiesByIdentity(Object\Domain $Domain, array &$Entities) {
         $IndexedEntities = array();
         foreach($Entities as $Key => $Entity) {
-            $IndexedEntities[$Domain->Identity($Entity)->Hash()] = $Entity;
+            $IndexedEntities[md5(json_encode($Domain->Identity($Entity)))] = $Entity;
         }
         
         $Entities = $IndexedEntities;

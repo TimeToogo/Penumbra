@@ -5,6 +5,7 @@ namespace Storm\Drivers\Base\Object\Properties;
 use \Storm\Core\Object;
 
 class ArrayProperty extends MultipleEntityProperty {
+    
     protected function ReviveProxies(Object\Domain $Domain, $Entity, array $Proxies) {
         return $Proxies;
     }

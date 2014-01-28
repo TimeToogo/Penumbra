@@ -147,7 +147,7 @@ abstract class Database {
      * Load the rows specified by the request.
      * 
      * @param Request $Request The request to load
-     * @return ResultRow[] The loaded result rows
+     * @return array[] The loaded result rows
      */
     final public function Load(Request $Request) {
         foreach($Request->GetTables() as $Table) {
@@ -160,7 +160,7 @@ abstract class Database {
      * by the request from the underlying database.
      * 
      * @param Request $Request The request to load
-     * @return ResultRow[] The loaded result rows
+     * @return array[] The loaded result rows
      */
     protected abstract function LoadRows(Request $Request);
     

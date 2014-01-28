@@ -54,11 +54,11 @@ abstract class QueryExecutor implements IQueryExecutor {
             foreach($TablesOrderedByPersistingDependency as $Table) {
                 $TableName = $Table->GetName();
                 if(isset($GroupedPersistedRows[$TableName])) {
-                    $Transaction->TriggerPrePersistEvent($GroupedPersistedRows[$TableName]);
+                    $Transaction->TriggerPrePersistEvent($Table);
                     
                     $this->Persister->PersistRows($Connection, $Table, $GroupedPersistedRows[$TableName]);
                     
-                    $Transaction->TriggerPostPersistEvent($GroupedPersistedRows[$TableName]);
+                    $Transaction->TriggerPostPersistEvent($Table);
                 }
             }
             

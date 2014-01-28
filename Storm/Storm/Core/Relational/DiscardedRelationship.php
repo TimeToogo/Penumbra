@@ -14,19 +14,19 @@ final class DiscardedRelationship {
     private $IsIdentifying;
     
     /**
-     * @var PrimaryKey 
+     * @var array 
      */
     private $ParentPrimaryKey;
     
     /**
-     * @var PrimaryKey 
+     * @var array 
      */
     private $ChildPrimaryKey;
     
-    public function __construct($IsIdentifying, PrimaryKey $ParentPrimaryKey, PrimaryKey $ChildPrimaryKey) {
+    public function __construct($IsIdentifying, array &$ParentPrimaryKey, array &$ChildPrimaryKey) {
         $this->IsIdentifying = $IsIdentifying;
-        $this->ParentPrimaryKey = $ParentPrimaryKey;
-        $this->ChildPrimaryKey = $ChildPrimaryKey;
+        $this->ParentPrimaryKey =& $ParentPrimaryKey;
+        $this->ChildPrimaryKey =& $ChildPrimaryKey;
     }
     
     /**
@@ -37,16 +37,16 @@ final class DiscardedRelationship {
     }
 
     /**
-     * @return PrimaryKey
+     * @return array
      */
-    public function GetParentPrimaryKey() {
+    public function &GetParentPrimaryKey() {
         return $this->ParentPrimaryKey;
     }
 
     /**
-     * @return PrimaryKey
+     * @return array
      */
-    public function GetRelatedPrimaryKey() {
+    public function &GetRelatedPrimaryKey() {
         return $this->ChildPrimaryKey;
     }
 }

@@ -14,25 +14,32 @@ class ToManyRelation extends ToManyRelationBase {
                 Relational\DependencyOrder::Before);
     }
     
-    protected function FillParentToRelatedRowsMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
-        $ReferencedColumns = $ForeignKey->GetReferencedColumns();
-        $ParentColumns = $ForeignKey->GetParentColumns();
+    protected function GroupRelatedRowsByParentKeys(array &$MappedRelatedRows, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
         
-        $GroupedRelatedRows = $this->GroupRowsByColumns($RelatedRows, $ParentColumns);
-        $this->MapParentRowsToGroupedRelatedRows($Map, $ParentRows, $ReferencedColumns, $GroupedRelatedRows);
+        $GroupedRelatedRows = $this->GroupRowsByColumnValues($RelatedRows, $ForeignKey->GetParentColumnIdentifiers());
+        $KeyedParentRows = $this->MakeHashedDataToKeyMap($ParentRows, $ForeignKey->GetReferencedColumnIdentifiers());
+        
+        foreach($KeyedParentRows as $HashData => $ParentRowKey) {
+            $MappedRelatedRows[$ParentRowKey] = isset($GroupedRelatedRows[$HashData]) ?
+                    $GroupedRelatedRows[$HashData] : array();
+        }
+        
     }
     
-    protected function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
-            Relational\Row $ParentRow, array $ChildRows) {
+    protected function PersistIdentifyingRelationship(
+            Relational\Transaction $Transaction, 
+            array $ParentRow, array &$ChildRows) {
         $ForeignKey = $this->GetForeignKey();
-        if($ParentRow->HasPrimaryKey()) {
+        $ParentTable = $this->GetParentTable();
+        
+        if($ParentTable->HasPrimaryKeyData($ParentRow)) {
             foreach($ChildRows as $ChildRow) {
                 $ForeignKey->MapReferencedToParentKey($ParentRow, $ChildRow);
             }
         }
         else {
-            $Transaction->SubscribeToPostPersistEvent($ParentRow, 
-                    function (Relational\Row $ParentRow) use (&$ForeignKey, &$ChildRows) {
+            $Transaction->SubscribeToPrePersistEvent($this->GetTable(), 
+                    function () use (&$ForeignKey, &$ParentRow, &$ChildRows) {
                         foreach($ChildRows as $ChildRow) {
                             $ForeignKey->MapReferencedToParentKey($ParentRow, $ChildRow);
                         }

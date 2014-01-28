@@ -48,7 +48,7 @@ interface IDataPropertyColumnMapping extends IPropertyMapping {
      * @param Map $ColumnDataPropertyDataMap The map containing the column data and property data
      * @return void
      */
-    public function Revive(Map $ColumnDataPropertyDataMap);
+    public function Revive(array $ColumnDataArray, array &$PropertyDataArray);
     
     /**
      * Maps the property value to the supplied column data.
@@ -57,7 +57,7 @@ interface IDataPropertyColumnMapping extends IPropertyMapping {
      * @param Relational\ColumnData $ColumnData The column data to map to
      * @return void
      */
-    public function Persist($DataPropertyValue, Relational\ColumnData $ColumnData);
+    public function Persist(array $PropertyDataArray, array &$ColumnDataArray);
 }
 
 ?>

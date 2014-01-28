@@ -50,12 +50,13 @@ abstract class KeyedRelation extends Relation {
         foreach($ParentRows as $ParentRow) {
             $ReferencedKey = $this->MapParentRowToRelatedKey($this->ForeignKey, $ParentRow);
             
-            $MatchExpressions[] = new Expressions\MatchesColumnDataExpression($ReferencedKey);
+            $MatchExpressions[] = new Expressions\MatchesColumnDataExpression($this->GetTable(), $ReferencedKey);
         }
         
         $Request->GetCriterion()->AddPredicateExpression(
                 new Expressions\PredicateExpression($MatchExpressions, Expressions\Operators\Binary::LogicalOr));
     }
+    
     /**
      * @return Relational\Table
      */
@@ -63,6 +64,7 @@ abstract class KeyedRelation extends Relation {
         return $this->IsInversed ? 
                 $this->ForeignKey->GetReferencedTable() : $this->ForeignKey->GetParentTable();
     }
+    
     /**
      * @return Relational\IColumn[]
      */
@@ -71,37 +73,52 @@ abstract class KeyedRelation extends Relation {
                 $this->ForeignKey->GetParentColumns() : $this->ForeignKey->GetReferencedColumns();
     }
     
+    final protected function MakeHashedDataToKeyMap(array $ResultRows, array $ColumnIdentifiers) {
+        return array_combine(
+                $this->IndexRowsByHashedColumnValues($ResultRows, $ColumnIdentifiers), 
+                array_keys($ResultRows));
+    }
+    
+    final protected function IndexRowsByHashedColumnValues(array $ResultRows, array $ColumnIdentifiers) {
+        $KeyedResultRows = array();
+        if(count($ColumnIdentifiers) === 1) {
+            $ColumnIdentifier = reset($ColumnIdentifiers);
+            foreach($ResultRows as $Key => &$ResultRow) {
+                $Hash = md5(json_encode($ResultRow[$ColumnIdentifier]));
+                $KeyedResultRows[$Hash] =& $ResultRow;
+            }
+        }
+        else {
+            $ColumnIdentifiers = array_flip(array_values($ColumnIdentifiers));
+            foreach($ResultRows as $Key => &$ResultRow) {
+                $HashValues = array_intersect_key($ResultRow, $ColumnIdentifiers);
+                ksort($HashValues);
+                $Hash = md5(json_encode(array_values($HashValues)));
+                $KeyedResultRows[$Hash] =& $ResultRow;
+            }
+        }
+        
+        return $KeyedResultRows;
+    }
+    
     /**
      * @return Relational\ResultRow
      */
-    protected function MapParentRowToRelatedKey(
-            ForeignKey $ForeignKey, 
-            Relational\ResultRow $ParentRow) {
+    protected function MapParentRowToRelatedKey(ForeignKey $ForeignKey, array $ParentRow) {
         if($this->IsInversed) {
-            $ReferencedKey = $ParentRow->GetDataFromColumns($ForeignKey->GetReferencedColumns());
-            $ParentKey = new Relational\ResultRow($ForeignKey->GetParentColumns());
+            $ReferencedKey = $ParentRow;
+            $ParentKey = array();
             $ForeignKey->MapReferencedToParentKey($ReferencedKey, $ParentKey);
 
             return $ParentKey;
         }
         else {
-            $ParentKey = $ParentRow->GetDataFromColumns($ForeignKey->GetParentColumns());
-            $ReferencedKey = new Relational\ResultRow($ForeignKey->GetReferencedColumns());
+            $ParentKey = $ParentRow;
+            $ReferencedKey = array();
             $ForeignKey->MapParentToReferencedKey($ParentKey, $ReferencedKey);
             
             return $ReferencedKey;
         }
-    }
-    
-    final protected function HashRowsByColumnValues(array $ResultRows, array $Columns) {
-        $KeyedRows = array();
-        $ColumnDataArray = Relational\ResultRow::GetAllDataFromColumns($ResultRows, $Columns);
-        foreach($ResultRows as $Key => $Row) {
-            $Hash = $ColumnDataArray[$Key]->HashData();
-            $KeyedRows[$Hash] = $Row;
-        }
-        
-        return $KeyedRows;
     }
 }
 
