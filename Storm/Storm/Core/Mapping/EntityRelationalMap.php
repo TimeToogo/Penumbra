@@ -335,7 +335,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         $Columns = call_user_func_array('array_merge', $ColumnGroups);
         return $Columns;
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -343,10 +343,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         $PrimaryKey = $this->PrimaryKeyTable->PrimaryKey();
         foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
             $Property = $Mapping->GetProperty();
-            $PropertyValue = $Identity[$Property];
-            if(isset($Identity[$Property])) {
-                $Mapping->Persist($PropertyValue, $PrimaryKey);
-            }
+            $Mapping->Persist($Identity[$Property], $PrimaryKey);
         }
         
         return $PrimaryKey;
@@ -376,7 +373,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         foreach($PrimaryKeys as $Key => $PrimaryKey) {
             $Identities[$Key] = $this->EntityMap->Identity();
         }
-        $Map = Map::From([$PrimaryKeys], [$Identities]);
+        $Map = Map::From($PrimaryKeys, $Identities);
         $this->RevivePrimaryKeyIdentityMap($Map);
         
         return $Identities;

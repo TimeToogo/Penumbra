@@ -62,6 +62,26 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
         }
     }
     
+    protected $CastTypes;
+    protected abstract function CastTypes();
+    
+    protected function GetCastTypeString($Operator) {
+        if (isset($this->CastTypes[$Operator])) {
+            return $this->CastTypes[$Operator];
+        } 
+        else {
+            throw new \Exception();
+        }
+    }
+    
+    protected function AppendCast(QueryBuilder $QueryBuilder, E\CastExpression $Expression) {
+        $QueryBuilder->Append('CAST');
+        $QueryBuilder->Append('(');
+        $this->Append($QueryBuilder, $Expression->GetCastValueExpression());
+        $QueryBuilder->Append(' AS ' . $Expression->GetCastType());
+        $QueryBuilder->Append(')');
+    }
+    
     protected function AppendFunctionCall(QueryBuilder $QueryBuilder, E\FunctionCallExpression $Expression) {
         $QueryBuilder->Append($Expression->GetName());
         
@@ -87,14 +107,6 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
             
             $this->Append($QueryBuilder, $ValueExpression);
         }
-        $QueryBuilder->Append(')');
-    }
-    
-    protected function AppendCast(QueryBuilder $QueryBuilder, E\CastExpression $Expression) {
-        $QueryBuilder->Append('CAST');
-        $QueryBuilder->Append('(');
-        $this->Append($QueryBuilder, $Expression->GetCastValueExpression());
-        $QueryBuilder->Append(' AS ' . $Expression->GetCastType());
         $QueryBuilder->Append(')');
     }
 

@@ -9,6 +9,7 @@ final class Binary {
     const Multiplication = 2;
     const Division = 3;
     const Modulus = 4;
+    const Power = 5;
     
     //Bitwise
     const BitwiseAnd = 100;

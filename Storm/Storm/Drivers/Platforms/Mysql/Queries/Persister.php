@@ -30,7 +30,7 @@ class Persister extends Queries\StandardPersister {
         $ColumnNames = array_keys($Columns);
         $PrimaryKeyColumnNames = array_keys($PrimaryKeyColumns);
         $TableName = $Table->GetName();
-        $ValueTableName = $TableName . 'Values';
+        $DerivedTableName = $TableName . 'Values';
         
         $PrimaryKeyIdentifiers = array();
         foreach($PrimaryKeyColumnNames as $ColumnName) {
@@ -40,39 +40,7 @@ class Persister extends Queries\StandardPersister {
         $QueryBuilder->AppendIdentifier('INSERT INTO #', [$TableName]);
         $QueryBuilder->AppendIdentifiers('(#)', $ColumnNames, ',');
         
-        $QueryBuilder->Append(' SELECT ');
-        /*
-         * Apply all the persisting data transformation as a select rather than every
-         * the same on every row
-         */
-        foreach($QueryBuilder->Delimit($Columns, ', ') as $ColumnName => $Column) {
-            $QueryBuilder->AppendExpression(
-                    Expression::PersistData($Column, Expression::Identifier([$ValueTableName, $ColumnName])));
-        }
-        $QueryBuilder->Append(' FROM (');
-        
-        $Identifiers = array_combine($ColumnNames, 
-                array_map(function($Column) { return $Column->GetIdentifier(); }, $Columns));
-        $ColumnDatas = array_map(function ($Row) { return $Row->GetColumnData(); }, $Rows);
-        
-        $First = true;
-        $QueryBuilder->Append('SELECT ');
-        foreach($QueryBuilder->Delimit($ColumnDatas, ' UNION ALL SELECT ') as $ColumnData) {
-            $FirstValue = true;
-            foreach($Identifiers as $ColumnName => $Identifier) {
-                if($FirstValue) $FirstValue = false;
-                else 
-                    $QueryBuilder->Append(',');
-                
-                $QueryBuilder->AppendSingleValue($ColumnData[$Identifier]);
-                
-                if($First) {
-                    $QueryBuilder->AppendIdentifier(' AS #', [$ColumnName]);
-                }
-            }
-            $First = false;
-        }
-        $QueryBuilder->AppendIdentifier(') #', [$ValueTableName]);
+        $this->AppendRowsAsDerivedTable($QueryBuilder, $Table, $DerivedTableName, $Rows);
         
         $this->AppendOnDuplicateKeyUpdate($QueryBuilder, $TableName, $Columns, $PrimaryKeyIdentifiers);
     }

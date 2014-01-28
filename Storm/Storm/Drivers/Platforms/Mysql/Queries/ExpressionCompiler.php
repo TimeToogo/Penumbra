@@ -47,6 +47,12 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
             Operators\Unary::Not => '!',
         ];
     }
+    
+    protected function CastTypes() {
+       return [
+           
+        ]; 
+    }
 }
 
 ?>

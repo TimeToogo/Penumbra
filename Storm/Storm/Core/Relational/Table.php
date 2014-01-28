@@ -289,6 +289,7 @@ abstract class Table {
         }
     }
     
+    private $Row = null;
     /**
      * Get a row of this table
      * 
@@ -296,17 +297,24 @@ abstract class Table {
      * @return Row The row
      */
     final public function Row(array $Data = array()){
-        return new Row($this, $Data);
+        if($this->Row === null) {
+            $this->Row = new Row($this);
+        }
+        return $this->Row->Another($Data);
     }
     
+    private $PrimaryKey = null;
     /**
      * Get a primary key of this table
      * 
      * @param array $Data The column data
      * @return PrimaryKey The row
      */
-    final public function PrimaryKey(array $Data = array()){
-        return new PrimaryKey($this, $Data);
+    final public function PrimaryKey(array $Data = array()) {
+        if($this->PrimaryKey === null) {
+            $this->PrimaryKey = new PrimaryKey($this);
+        }
+        return $this->PrimaryKey->Another($Data);
     }
    
     

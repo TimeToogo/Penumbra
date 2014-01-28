@@ -72,6 +72,56 @@ abstract class StandardPersister extends BasePersister {
             Table $Table, 
             array $Rows, 
             $ShouldReturnKeyData);
+    
+    protected final function AppendRowsAsDerivedTable(
+            QueryBuilder $QueryBuilder, 
+            Table $Table,
+            $DerivedTableName,
+            array $Rows) {
+        $Columns = $Table->GetColumns();
+        $ColumnNames = array_keys($Columns);
+        
+        $this->AppendPersistDataTransformationsSelect($QueryBuilder, $Rows, $DerivedTableName);
+        $QueryBuilder->Append(' FROM (');
+        
+        $Identifiers = array_combine($ColumnNames, 
+                array_map(function($Column) { return $Column->GetIdentifier(); }, $Columns));
+        $ColumnDatas = array_map(function ($Row) { return $Row->GetColumnData(); }, $Rows);
+        
+        $First = true;
+        $QueryBuilder->Append('SELECT ');
+        foreach($QueryBuilder->Delimit($ColumnDatas, ' UNION ALL SELECT ') as $ColumnData) {
+            $FirstValue = true;
+            foreach($Identifiers as $ColumnName => $Identifier) {
+                if($FirstValue) $FirstValue = false;
+                else 
+                    $QueryBuilder->Append(',');
+                
+                $QueryBuilder->AppendSingleValue($ColumnData[$Identifier]);
+                
+                if($First) {
+                    $QueryBuilder->AppendIdentifier(' AS #', [$ColumnName]);
+                }
+            }
+            $First = false;
+        }
+    }
+    
+    protected function AppendPersistDataTransformationsSelect(
+            QueryBuilder $QueryBuilder,
+            array $Columns,
+            $DerivedTableName) {
+        
+        $QueryBuilder->Append(' SELECT ');
+        /*
+         * Apply all the persisting data transformation as a select on the data
+         * rather than on every row
+         */
+        foreach($QueryBuilder->Delimit($Columns, ', ') as $ColumnName => $Column) {
+            $QueryBuilder->AppendExpression(
+                    Expression::PersistData($Column, Expression::Identifier([$DerivedTableName, $ColumnName])));
+        }
+    }
 }
 
 ?>

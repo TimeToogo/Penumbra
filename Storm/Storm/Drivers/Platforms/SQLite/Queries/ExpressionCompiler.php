@@ -48,6 +48,20 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
             Operators\Unary::Not => '!',
         ];
     }
+    
+    protected function AppendCast(QueryBuilder $QueryBuilder, E\CastExpression $Expression) {
+        parent::AppendCast($QueryBuilder, $Expression);
+    }
+    
+    protected function AppendIf(QueryBuilder $QueryBuilder, E\IfExpression $Expression) {
+        $QueryBuilder->Append('CASE WHEN ');
+        $this->Append($QueryBuilder, $Expression->GetConditionExpression());
+        $QueryBuilder->Append(' THEN ');
+        $this->Append($QueryBuilder, $Expression->GetIfTrueExpression());
+        $QueryBuilder->Append(' ELSE ');
+        $this->Append($QueryBuilder, $Expression->GetIfFalseExpression());
+        $QueryBuilder->Append(' END ');
+    }
 }
 
 ?>
