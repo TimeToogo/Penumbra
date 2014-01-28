@@ -19,30 +19,8 @@ final class FunctionMapper extends E\FunctionMapper {
             'bin2hex' => 'HEX',
             'soundex' => 'SOUNDEX',
             
-            'trim' => 'trim',
-            
             'str_replace' => 'REPLACE',
-            'pow' => 'POW',
-            'ceil' => 'CEIL',
-            'floor' => 'FLOOR',
-            'sqrt' => 'SQRT',
-            'base_convert' => 'CONV',
-            'deg2rad' => 'RADIANS',
-            'rad2deg' => 'DEGREES',
-            'rad2deg' => 'DEGREES',
-            'acos' => 'ACOS',
-            'asin' => 'ASIN',
-            'atan' => 'ATAN',
-            'atan2' => 'ATAN2',
-            'cos' => 'COS',
-            'log' => 'LOG',
-            'log10' => 'LOG10',
-            'fmod' => 'MOD',
-            'sin' => 'SIN',
-            'tan' => 'TAN',
-            
-            'crc32' => 'CRC32',
-            'crypt' => 'ENCRYPT',
+            'substr' => 'SUBSTR',
         ];
     }
     
