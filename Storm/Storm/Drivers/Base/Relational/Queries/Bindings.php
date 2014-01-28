@@ -32,7 +32,7 @@ final class Bindings implements \ArrayAccess {
         return array_keys($this->Bindings);
     }
     
-    public function Bind(&$Value, $ParameterType = null, $ParameterKey = null) {
+    public function Bind($Value, $ParameterType = null, $ParameterKey = null) {
         $this->DefaultParameterType($ParameterType, $Value);
         if($ParameterKey !== null) {
             $this->Bindings[$ParameterKey] = new Binding($Value, $ParameterType);
@@ -69,12 +69,12 @@ final class Binding {
     private $Value;
     private $ParameterType;
     
-    public function __construct(&$Value, $ParameterType) {
-        $this->Value =& $Value;
+    public function __construct($Value, $ParameterType) {
+        $this->Value = $Value;
         $this->ParameterType = $ParameterType;
     }
     
-    public function &GetValue() {
+    public function GetValue() {
         return $this->Value;
     }
 

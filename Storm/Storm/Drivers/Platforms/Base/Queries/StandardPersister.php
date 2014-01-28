@@ -4,6 +4,7 @@ namespace Storm\Drivers\Platforms\Base\Queries;
 
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Table;
+use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 use \Storm\Drivers\Platforms\Base\Queries;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
@@ -27,24 +28,20 @@ abstract class StandardPersister extends BasePersister {
         $QueryBuilder = $Connection->QueryBuilder();
         $this->AppendInsert($QueryBuilder, $TableName, $ColumnNames);
         
+        $QueryBuilder->Append('(');
         $QueryBuilder->AppendAllColumnData(reset($Rows), ',');
+        $QueryBuilder->Append(')');
         
         $PreparedInsert = $QueryBuilder->Build();
         $Bindings = $PreparedInsert->GetBindings();
         
         $ColumnValues = array_values($Columns);
-        $ParameterTypes = array_map(function($Column) {
-            $Column->GetDataType()->GetParameterType();
-        });
+        $ParameterTypes = $this->GetParamterTypes($ColumnValues);
         
         foreach($Rows as $Row) {
             foreach($ColumnValues as $Count => $Column) {
-                if(isset($Row[$Column])) {
-                    $Bindings->Bind($Row[$Column], $ParameterTypes[$Count], $Count);
-                }
-                else {
-                    $Bindings->Bind(null, \Storm\Drivers\Base\Relational\Queries\ParameterType::Null, $Count);
-                }
+                $Value = $Row[$Column];
+                $Bindings->Bind($Value, $Value === null ? ParameterType::Null : $ParameterTypes[$Count], $Count);
             }
             $PreparedInsert->Execute();
             $PostIndividualInsertCallback($Row);
@@ -86,7 +83,10 @@ abstract class StandardPersister extends BasePersister {
         
         $Identifiers = array_combine($ColumnNames, 
                 array_map(function($Column) { return $Column->GetIdentifier(); }, $Columns));
+        $ParameterTypes = $this->GetParamterTypes($Columns);
+        
         $ColumnDatas = array_map(function ($Row) { return $Row->GetColumnData(); }, $Rows);
+        
         
         $First = true;
         $QueryBuilder->Append('SELECT ');
@@ -97,7 +97,8 @@ abstract class StandardPersister extends BasePersister {
                 else 
                     $QueryBuilder->Append(',');
                 
-                $QueryBuilder->AppendSingleValue($ColumnData[$Identifier]);
+                $Value = $ColumnData[$Identifier];
+                $QueryBuilder->AppendSingleValue($Value, $Value === null ? ParameterType::Null : $ParameterTypes[$ColumnName]);
                 
                 if($First) {
                     $QueryBuilder->AppendIdentifier(' AS #', [$ColumnName]);
@@ -107,6 +108,14 @@ abstract class StandardPersister extends BasePersister {
         }
         
         $QueryBuilder->AppendIdentifier(') #', [$DerivedTableName]);
+    }
+    
+    private function GetParamterTypes(array $Columns) {
+        return array_combine(array_keys($Columns), array_map(
+                function($Column) {
+                    return $Column->GetDataType()->GetParameterType();
+                },
+                $Columns));
     }
     
     protected function AppendPersistDataTransformationsSelect(

@@ -54,9 +54,9 @@ class Query implements Queries\IQuery {
         $this->HasBound = true;
     }
     
-    private function Bind($To, &$Value, $ParameterType) {
+    private function Bind($To, $Value, $ParameterType) {
         $PDOParameterType = PDOParameterType::MapParameterType($ParameterType);
-        return $this->Statement->bindParam($To, $Value, $PDOParameterType);
+        return $this->Statement->bindValue($To, $Value, $PDOParameterType);
     }
 }
 
