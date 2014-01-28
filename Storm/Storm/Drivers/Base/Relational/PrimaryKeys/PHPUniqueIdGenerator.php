@@ -13,12 +13,12 @@ class PHPUniqueIdGenerator extends PreInsertKeyGenerator {
         $this->MoreEntropy = $MoreEntropy;
     }
     
-    public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
+    public function FillPrimaryKeys(IConnection $Connection, array &$UnkeyedRows) {
         $Columns = $this->GetPrimaryKeyColumns();
         
-        foreach($UnkeyedRows as $UnkeyedRow) {
+        foreach($UnkeyedRows as &$UnkeyedRow) {
             foreach($Columns as $Column) {
-                $UnkeyedRow[$Column] = uniqid($this->Prefix, $this->MoreEntropy);
+                $UnkeyedRow[$Column->GetIdentifier()] = uniqid($this->Prefix, $this->MoreEntropy);
             }
         }
     }

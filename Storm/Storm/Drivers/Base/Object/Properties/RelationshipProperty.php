@@ -56,7 +56,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         }
         if(is_array($PropertyRevivalValue) && !is_array(reset($PropertyRevivalValue))) {
             if($this->BackReferenceProperty !== null) {
-                $PropertyRevivalValue[$this->BackReferenceProperty] = $Entity;
+                $PropertyRevivalValue[$this->BackReferenceProperty->GetIdentifier()] = $Entity;
             }
             return $this->ReviveRevivalData($Domain, $Entity, $PropertyRevivalValue);
         }
@@ -67,7 +67,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
             if(count(array_filter($PropertyRevivalValue, function ($Value) { return is_array($Value); })) === count($PropertyRevivalValue)) {
                 if($this->BackReferenceProperty !== null) {
                     foreach($PropertyRevivalValue as $RevivalData) {
-                        $RevivalData[$this->BackReferenceProperty] = $Entity;
+                        $RevivalData[$this->BackReferenceProperty->GetIdentifier()] = $Entity;
                     }
                 }
                 return $this->ReviveArrayOfRevivalData($Domain, $Entity, $PropertyRevivalValue);

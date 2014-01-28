@@ -36,9 +36,10 @@ class LazyCollection extends Collection {
         $Loader = $this->ArrayLoaderFunction;
         $RevivalData = $Loader();
         $Entities = $this->LoadEntities($RevivalData);
-        $this->exchangeArray($this->LoadEntities($RevivalData));
+        $this->exchangeArray($Entities);
         $this->SetIsAltered(false);
-        $this->OriginalEntities = $Entities;
+        $this->OriginalEntities = 
+                array_map(function ($Entity) { return clone $Entity; }, $Entities);
     }
     private function LoadEntities(array $RevivalData) {
         if($this->ProxyGenerator !== null) {

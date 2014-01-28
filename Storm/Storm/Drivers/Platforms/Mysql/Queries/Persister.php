@@ -18,7 +18,7 @@ class Persister extends Queries\StandardPersister {
     protected function UpsertRowsQuery(
             QueryBuilder $QueryBuilder, 
             Table $Table, 
-            array $Rows, 
+            array &$Rows, 
             $ShouldReturnKeyData) {
         
         if($ShouldReturnKeyData) {
@@ -30,7 +30,7 @@ class Persister extends Queries\StandardPersister {
         $ColumnNames = array_keys($Columns);
         $PrimaryKeyColumnNames = array_keys($PrimaryKeyColumns);
         $TableName = $Table->GetName();
-        $DerivedTableName = $TableName . 'Values';
+        $DerivedTableName = $TableName . '__Values';
         
         $PrimaryKeyIdentifiers = array();
         foreach($PrimaryKeyColumnNames as $ColumnName) {
@@ -40,7 +40,7 @@ class Persister extends Queries\StandardPersister {
         $QueryBuilder->AppendIdentifier('INSERT INTO #', [$TableName]);
         $QueryBuilder->AppendIdentifiers('(#)', $ColumnNames, ',');
         
-        $this->AppendRowsAsDerivedTable($QueryBuilder, $Table, $DerivedTableName, $Rows);
+        $this->AppendDataAsDerivedTable($QueryBuilder, $Table->GetColumns(), $DerivedTableName, $Rows);
         
         $this->AppendOnDuplicateKeyUpdate($QueryBuilder, $TableName, $Columns, $PrimaryKeyIdentifiers);
     }

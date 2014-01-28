@@ -317,7 +317,8 @@ abstract class Table {
      * @return Row The row
      */
     final public function &GetRowData(array &$ColumnData){
-        return array_intersect_key($ColumnData, $this->ColumnsByIdentifiers);
+        $RowData = array_intersect_key($ColumnData, $this->ColumnsByIdentifiers);
+        return $RowData;
     }
     
     /**
@@ -327,7 +328,8 @@ abstract class Table {
      * @return Row The row
      */
     final public function &GetPrimaryKeyData(array &$ColumnData){
-        return array_intersect_key($ColumnData, $this->PrimaryKeyColumns);
+        $PrimaryKeyData = array_intersect_key($ColumnData, $this->PrimaryKeyColumnByIdentifiers);
+        return $PrimaryKeyData;
     }
     
     /**
@@ -338,7 +340,8 @@ abstract class Table {
      */
     final public function HasPrimaryKeyData(array $ColumnData){
         $PrimaryKeyData = $this->GetPrimaryKeyData($ColumnData);
-        return count(array_filter($PrimaryKeyData, 'is_null')) > 0;
+        return count(array_filter($PrimaryKeyData, 
+                function ($Value) { return $Value !== null; })) === count($this->PrimaryKeyColumns);
     }
     
     private $PrimaryKey = null;

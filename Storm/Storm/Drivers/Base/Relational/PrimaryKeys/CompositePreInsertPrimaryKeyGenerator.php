@@ -26,7 +26,7 @@ class CompositePreInsertPrimaryKeyGenerator extends PreInsertKeyGenerator {
         }
     }
     
-    public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
+    public function FillPrimaryKeys(IConnection $Connection, array &$UnkeyedRows) {
         $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
         foreach($PrimaryKeyColumns as $PrimaryKeyColumn) {
             $KeyGenerator = $this->ColumnGeneratorMap[$PrimaryKeyColumn];

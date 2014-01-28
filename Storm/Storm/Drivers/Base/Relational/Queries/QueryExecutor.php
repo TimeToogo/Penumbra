@@ -20,7 +20,7 @@ abstract class QueryExecutor implements IQueryExecutor {
         $QueryBuilder = $Connection->QueryBuilder();
         $this->SelectQuery($QueryBuilder, $Request);
         
-        return $Connection->LoadResultRows($Request->GetColumns(), $QueryBuilder->Build());
+        return $QueryBuilder->Build()->Execute()->FetchAll();
     }
     protected abstract function SelectQuery(QueryBuilder $QueryBuilder, Relational\Request $Request);
     
@@ -32,7 +32,7 @@ abstract class QueryExecutor implements IQueryExecutor {
         try {
             $Connection->BeginTransaction();
             
-            $GroupedDiscardedPrimaryKeys = $this->GroupByTableName($Transaction->GetDiscardedPrimaryKeys());
+            $GroupedDiscardedPrimaryKeys =& $Transaction->GetDiscardedPrimaryKeyGroups();
             
             foreach($TablesOrderedByDiscardingDependency as $Table) {
                 $TableName = $Table->GetName();
@@ -50,7 +50,7 @@ abstract class QueryExecutor implements IQueryExecutor {
                 $this->ExecuteUpdate($Connection, $Procedure);
             }
             
-            $GroupedPersistedRows = $this->GroupByTableName($Transaction->GetPersistedRows(), $TablesOrderedByPersistingDependency);
+            $GroupedPersistedRows =& $Transaction->GetPersistedRowGroups();
             foreach($TablesOrderedByPersistingDependency as $Table) {
                 $TableName = $Table->GetName();
                 if(isset($GroupedPersistedRows[$TableName])) {
@@ -72,20 +72,7 @@ abstract class QueryExecutor implements IQueryExecutor {
     protected abstract function DeleteWhereQuery(IConnection $Connection, Relational\Criterion $DiscardedCriteria);
     protected abstract function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys);
     protected abstract function ExecuteUpdate(IConnection $Connection, Relational\Procedure &$ProcedureToExecute);
-       
     
-    private function GroupByTableName(array $ObjectsWithTable) {
-        $OrderedObjects = array();
-        foreach($ObjectsWithTable as $ObjectWithTable) {
-            $TableName = $ObjectWithTable->GetTable()->GetName();
-            if(!isset($OrderedObjects[$TableName])) {
-                $OrderedObjects[$TableName] = array();
-            }
-            $OrderedObjects[$TableName][] = $ObjectWithTable;
-        }
-        
-        return $OrderedObjects;
-    }
 }
 
 ?>

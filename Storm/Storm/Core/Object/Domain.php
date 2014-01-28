@@ -54,7 +54,7 @@ abstract class Domain {
      * @return bool
      */
     final public function HasEntityMap($EntityType) {
-        return isset($this->EntityMaps[$EntityType]);
+        return $this->GetMatchingEntityType($EntityType) !== null;
     }
     
     /**
@@ -62,7 +62,8 @@ abstract class Domain {
      * @return EntityMap|null The entity map or null if it is not registered
      */
     final public function GetEntityMap($EntityType) {
-        return $this->HasEntityMap($EntityType) ? $this->EntityMaps[$EntityType] : null;
+        return $this->HasEntityMap($EntityType) ?
+                $this->EntityMaps[$this->GetMatchingEntityType($EntityType)] : null;
     }
     
     /**
@@ -73,14 +74,30 @@ abstract class Domain {
      * @throws \Storm\Core\Exceptions\UnmappedEntityException
      */
     private function VerifyEntity($Entity, &$MatchedEntityType = null) {
-        $EntityTypes = array_reverse(array_merge([get_class($Entity)], array_values(class_parents($Entity, false))));
+        $MatchedEntityType = $this->GetMatchingEntityType($Entity);
+        if($MatchedEntityType !== null) {
+            return $this->EntityMaps[$MatchedEntityType];
+        }
+        else {
+            throw new \Storm\Core\Exceptions\UnmappedEntityException(get_class($Entity));
+        }
+    }
+    /**
+     * @param object|string $EntityOrEntityType The entity to check or entity type
+     * @return string|null The matching entity type
+     */
+    final public function GetMatchingEntityType($EntityOrEntityType) {
+        $EntityType = is_object($EntityOrEntityType) ? get_class($EntityOrEntityType) : $EntityOrEntityType;
+        if(isset($this->EntityMaps[$EntityType])) {
+            return $EntityType;
+        }
+        $EntityTypes = array_reverse(array_merge([$EntityType], array_values(class_parents($EntityOrEntityType, false))));
         foreach($EntityTypes as $EntityType) {
             if(isset($this->EntityMaps[$EntityType])) {
-                $MatchedEntityType = $EntityType;
-                return $this->EntityMaps[$EntityType];
+                return $EntityType;
             }
         }           
-        throw new \Storm\Core\Exceptions\UnmappedEntityException($EntityType);
+        return null;
     }
     
     /**
@@ -123,10 +140,10 @@ abstract class Domain {
      * Applies the supplied property data to the supplied entity instance.
      * 
      * @param object $Entity The entity to apply the property data
-     * @param PropertyData $PropertyData The property data apply
+     * @param array $PropertyData The property data apply
      * @return void
      */
-    final public function Apply($Entity, PropertyData $PropertyData) {
+    final public function Apply($Entity, array $PropertyData) {
         return $this->VerifyEntity($Entity)->Apply($this, $Entity, $PropertyData);
     }
     
@@ -191,9 +208,10 @@ abstract class Domain {
      */
     final public function PersistedIdentifyingRelationship($ParentEntity, $ChildEntity, UnitOfWork $UnitOfWork) {
         $EntityType = null;
-        $RelatedEntityType = null;
+        $RelatedEntityType = $this->GetMatchingEntityType($ChildEntity);
         $ParentIdentity = $this->VerifyEntity($ParentEntity, $EntityType)->Identity($ParentEntity);
         $RelatedPersistenceData = $this->VerifyEntity($ChildEntity, $RelatedEntityType)->Persist($UnitOfWork, $ChildEntity);
+        $UnitOfWork->RequestIdentity($RelatedPersistenceData, $ChildEntity);
         
         return new PersistedRelationship($EntityType, $RelatedEntityType, $ParentIdentity, null, $RelatedPersistenceData);
     }

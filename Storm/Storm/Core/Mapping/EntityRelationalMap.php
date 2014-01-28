@@ -263,10 +263,14 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      */
     public function ResultRow($ColumnData = array()) {
         if($this->ResultRow === null) {
-            $this->ResultRow = new Relational\ResultRow($this->MappedPersistColumns, $ColumnData);
+            $AllPersistColumns = call_user_func_array('array_merge', 
+                    array_map(function($Table) { return $Table->GetColumns(); }, $this->PersistTables));
+            $this->ResultRow = array_fill_keys(
+                    array_map(function($Column) { return $Column->GetIdentifier(); }, $AllPersistColumns),
+                    null);
         }
         
-        return $this->ResultRow->Another($ColumnData);
+        return $ColumnData + $this->ResultRow;
     }
 
     /**
@@ -340,12 +344,13 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * {@inheritDoc}
      */
     final public function MapIdentityToPrimaryKey(array $Identity) {
-        $PrimaryKey = array();
+        $Identity = [$Identity];
+        $PrimaryKey = [array()];
         foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
-            $Mapping->Persist([$Identity], [$PrimaryKey]);
+            $Mapping->Persist($Identity, $PrimaryKey);
         }
         
-        return $PrimaryKey;
+        return $PrimaryKey[0];
     }
     /**
      * {@inheritDoc}
@@ -363,12 +368,13 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * {@inheritDoc}
      */
     final public function MapPrimaryKeyToIdentity(array $PrimaryKey) {
-        $Identity = array();
+        $PrimaryKey = [$PrimaryKey];
+        $Identity = [array()];
         foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
-            $Mapping->Revive([$PrimaryKey], [$Identity]);
+            $Mapping->Revive($PrimaryKey, $Identity);
         }
         
-        return $Identity;
+        return $Identity[0];
     }
     /**
      * {@inheritDoc}

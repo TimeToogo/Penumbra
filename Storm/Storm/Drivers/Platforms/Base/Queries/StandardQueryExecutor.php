@@ -11,7 +11,15 @@ use \Storm\Drivers\Base\Relational\Requests;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
 abstract class StandardQueryExecutor extends QueryExecutor {
+    private $StandardPersister;
+    
+    public function __construct(StandardPersister $Persister) {
+        parent::__construct($Persister);
         
+        $this->StandardPersister = $Persister;
+    }
+    
+    
     protected function SelectQuery(QueryBuilder $QueryBuilder, Relational\Request $Request) {
         $QueryBuilder->Append('SELECT ');
         foreach($QueryBuilder->Delimit($Request->GetColumns(), ',') as $Column) {
@@ -32,12 +40,7 @@ abstract class StandardQueryExecutor extends QueryExecutor {
         
         $QueryBuilder->AppendIdentifiers('UPDATE # SET ', $TableNames, ',');
         
-        $First = true;
-        foreach($Procedure->GetExpressions() as $Expression) {
-            if($First) $First = false;
-            else
-                $QueryBuilder->Append(', ');
-            
+        foreach($QueryBuilder->Delimit($Procedure->GetExpressions(), ',') as $Expression) {
             $QueryBuilder->AppendExpression($Expression);
         }
         $this->AppendCriterion($QueryBuilder, $Procedure->GetCriterion());
@@ -51,31 +54,23 @@ abstract class StandardQueryExecutor extends QueryExecutor {
     
     protected function DeletePrimaryKeysQuery(QueryBuilder $QueryBuilder, Table $Table, array $PrimaryKeys) {
         $TableName = $Table->GetName();
-        $QueryBuilder->AppendIdentifier('DELETE # FROM # WHERE ', [$TableName]);
+        $DerivedTableName = $TableName . '__PrimaryKeys';
         
         $PrimaryKeysColumns = $Table->GetPrimaryKeyColumns();
         $PrimaryKeyNames = array_keys($PrimaryKeysColumns);
         
-        if(count($PrimaryKeysColumns) === 1) {
-            $QueryBuilder->AppendIdentifier('#', [$TableName, reset($PrimaryKeyNames)]);
-            
-            $QueryBuilder->Append('IN (');
-            $PrimaryKeysColumn = reset($PrimaryKeysColumns);
-            
-            foreach($QueryBuilder->Delimit($PrimaryKeys, ',') as $PrimaryKey) {
-                $QueryBuilder->AppendColumnData($PrimaryKeysColumn, $PrimaryKey[$PrimaryKeysColumn]);
-            }
-            $QueryBuilder->Append(')');
-        }
-        else {
-            $QueryBuilder->Append('(');
-            foreach($QueryBuilder->Delimit($PrimaryKeys, ') OR (') as $PrimaryKey) {
-                foreach($QueryBuilder->Delimit($PrimaryKeysColumns, ' AND ') as $ColumnName => $PrimaryKeysColumn) {
-                    $QueryBuilder->AppendIdentifier('# = ', [$TableName, $ColumnName]);
-                    $QueryBuilder->AppendColumnData($PrimaryKeysColumn, $PrimaryKey[$PrimaryKeysColumn]);
-                }
-            }
-            $QueryBuilder->Append(')');
+        $QueryBuilder->AppendIdentifier('DELETE # FROM # INNER JOIN ', [$TableName]);        
+        $this->StandardPersister->AppendDataAsDerivedTable(
+                $QueryBuilder,
+                $PrimaryKeysColumns, 
+                $DerivedTableName, 
+                $PrimaryKeys);
+        
+        $QueryBuilder->Append(' ON ');
+        
+        foreach($QueryBuilder->Delimit($PrimaryKeyNames, ' AND ') as $PrimaryKeyName) {
+            $QueryBuilder->AppendIdentifier('# = ', [$TableName, $PrimaryKeyName]);
+            $QueryBuilder->AppendIdentifier('#', [$DerivedTableName, $PrimaryKeyName]);
         }
     }
     

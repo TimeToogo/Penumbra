@@ -206,10 +206,10 @@ class Repository {
             throw new \Exception();
         }
         
-        $Identity = $this->EntityMap->Identity();
+        $Identity = array();
         $Count = 0;
-        foreach($this->IdentityProperties as $IdentityProperty) {
-            $Identity[$IdentityProperty] = $IdentityValues[$Count];
+        foreach($this->IdentityProperties as $Identifier => $IdentityProperty) {
+            $Identity[$Identifier] = $IdentityValues[$Count];
             $Count++;
         }
         
@@ -219,10 +219,10 @@ class Repository {
     /**
      * Loads an entity from an identity instance.
      * 
-     * @param Object\Identity $Identity The identity of the entity
+     * @param array $Identity The identity of the entity
      * @return object|null
      */
-    protected function LoadByIdentity(Object\Identity $Identity) {
+    protected function LoadByIdentity(array $Identity) {
         $CachedEntity = $this->IdentityMap->GetFromCache($Identity);
         if($CachedEntity instanceof $this->EntityType) {
             return $CachedEntity;
@@ -233,7 +233,7 @@ class Repository {
                         $this->EntityType, 
                         $this->EntityMap->GetProperties(), 
                         true, 
-                        new Base\Object\Criteria\MatchesCriterion($Identity)));
+                        new Base\Object\Criteria\MatchesCriterion($this->EntityMap, $Identity)));
         
         if($Entity instanceof $this->EntityType) {
             $this->IdentityMap->CacheEntity($Entity, $Identity);

@@ -31,7 +31,7 @@ class DataPropertyColumnMapping extends PropertyMapping implements IDataProperty
         $this->DataProperty = $DataProperty;
         $this->Column = $Column;
         $this->PropetyIdentifier = $DataProperty->GetIdentifier();
-        $this->Column = $Column->GetIdentifier();
+        $this->ColumnIdentifier = $Column->GetIdentifier();
     }
     
     public function IsIdentityPrimaryKeyMapping() {
@@ -53,15 +53,25 @@ class DataPropertyColumnMapping extends PropertyMapping implements IDataProperty
         return $this->DataProperty;
     }
     
-    public function Revive(array $ColumnDataArray, array $PropertyDataArray) {
+    public function Revive(array $ColumnDataArray, array &$PropertyDataArray) {
         foreach($ColumnDataArray as $Key => $ColumnData) {
-            $PropertyDataArray[$Key][$this->PropetyIdentifier] = $this->Column->ToPropertyValue($ColumnData[$this->ColumnIdentifier]);
+            if(isset($ColumnData[$this->ColumnIdentifier])) {
+                $PropertyDataArray[$Key][$this->PropetyIdentifier] = $this->Column->ToPropertyValue($ColumnData[$this->ColumnIdentifier]);
+            }
+            else {
+                $PropertyDataArray[$Key][$this->PropetyIdentifier] = null;
+            }
         }
     }
     
-    public function Persist(array $PropertyDataArray, array $ColumnDataArray) {
+    public function Persist(array $PropertyDataArray, array &$ColumnDataArray) {
         foreach($PropertyDataArray as $Key => $PropertyData) {
-            $ColumnDataArray[$Key][$this->ColumnIdentifier] = $this->Column->ToPersistenceValue($PropertyData[$this->PropetyIdentifier]);
+            if(isset($PropertyData[$this->PropetyIdentifier])) {
+                $ColumnDataArray[$Key][$this->ColumnIdentifier] = $this->Column->ToPersistenceValue($PropertyData[$this->PropetyIdentifier]);
+            }
+            else {
+                $ColumnDataArray[$Key][$this->ColumnIdentifier] = null;
+            }
         }
     }
 }

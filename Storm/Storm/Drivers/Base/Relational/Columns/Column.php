@@ -118,12 +118,12 @@ class Column implements IColumn {
             
     }
 
-    public function Retrieve(ColumnData $Data) {
-        return $this->DataType->ToPropertyValue($Data[$this]);
+    public function ToPropertyValue($Value) {
+        return $this->DataType->ToPropertyValue($Value);
     }
     
-    public function Store(ColumnData $Data, $Value) {
-        $Data->SetColumn($this, $this->DataType->ToPersistedValue($Value));
+    public function ToPersistenceValue($Value) {
+        return $this->DataType->ToPersistedValue($Value);
     }
 }
 ?>

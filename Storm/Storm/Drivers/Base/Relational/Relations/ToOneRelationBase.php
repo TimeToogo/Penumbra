@@ -45,12 +45,6 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
         
     }
     
-    final protected function MapKeyIntersection(Map $Map, array $KeyedParentRows, array $KeyedRelatedRows) {
-        foreach(array_intersect_key($KeyedParentRows, $KeyedRelatedRows) as $Key => $ParentRow) {
-            $Map->Map($ParentRow, $KeyedRelatedRows[$Key]);
-        }
-    }
-    
     public function Persist(Relational\Transaction $Transaction, 
             array &$ParentData, Relational\RelationshipChange $RelationshipChange) {
         
@@ -58,10 +52,9 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
             $PersistedRelationship = $RelationshipChange->GetPersistedRelationship();
             
             if($PersistedRelationship->IsIdentifying()) {
-                $ParentRow =& $this->GetParentTable()->GetRowData($ParentData);
                 $ChildResultRow =& $PersistedRelationship->GetChildResultRow();
                 $ChildRow =& $this->GetTable()->GetRowData($ChildResultRow);
-                $this->PersistIdentifyingRelationship($Transaction, $ParentRow, $ChildRow);
+                $this->PersistIdentifyingRelationship($Transaction, $ParentData, $ChildRow);
             }
         }
     }

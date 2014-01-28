@@ -28,19 +28,19 @@ class ToManyRelation extends ToManyRelationBase {
     
     protected function PersistIdentifyingRelationship(
             Relational\Transaction $Transaction, 
-            array $ParentRow, array &$ChildRows) {
+            array &$ParentRow, array &$ChildRows) {
         $ForeignKey = $this->GetForeignKey();
         $ParentTable = $this->GetParentTable();
-        
+         
         if($ParentTable->HasPrimaryKeyData($ParentRow)) {
-            foreach($ChildRows as $ChildRow) {
+            foreach($ChildRows as &$ChildRow) {
                 $ForeignKey->MapReferencedToParentKey($ParentRow, $ChildRow);
             }
-        }
+        } 
         else {
             $Transaction->SubscribeToPrePersistEvent($this->GetTable(), 
-                    function () use (&$ForeignKey, &$ParentRow, &$ChildRows) {
-                        foreach($ChildRows as $ChildRow) {
+                    function ($Transaction) use (&$ForeignKey, &$ParentRow, &$ChildRows) {
+                        foreach($ChildRows as &$ChildRow) {
                             $ForeignKey->MapReferencedToParentKey($ParentRow, $ChildRow);
                         }
                     });

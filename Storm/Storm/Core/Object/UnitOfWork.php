@@ -19,12 +19,12 @@ final class UnitOfWork {
     private $PersistenceDataEntityMap;
     
     /**
-     * @var array[] 
+     * @var \ArrayObject[] 
      */
     private $PersistenceData = array();
     
     /**
-     * @var array[][]
+     * @var \ArrayObject[][]
      */
     private $PersistenceDataGroups = array();
     
@@ -64,7 +64,7 @@ final class UnitOfWork {
      * Persist an entity to the unit of work.
      * 
      * @param object $Entity The entity to persist
-     * @return void 
+     * @return \ArrayObject 
      */
     public function Persist($Entity) {
         $Hash = spl_object_hash($Entity);
@@ -72,27 +72,38 @@ final class UnitOfWork {
             return $this->PersistenceData[$Hash];
         }
         
-        $PersistenceData = $this->Domain->Persist($this, $Entity);
+        $PersistenceData = new \ArrayObject($this->Domain->Persist($this, $Entity));
         $this->PersistenceData[$Hash] = $PersistenceData;
         $this->PersistenceDataEntityMap[$PersistenceData] = $Entity;
         
-        $EntityType = $PersistenceData->GetEntityType();
+        $EntityType = $this->Domain->GetMatchingEntityType($Entity);
         if(!isset($this->PersistenceDataGroups[$EntityType])) {
             $this->PersistenceDataGroups[$EntityType] = array();
         }
         $this->PersistenceDataGroups[$EntityType][] = $PersistenceData;
+        
+        return $PersistenceData;
+    }
+    
+    
+    /**
+     * 
+     * @param \ArrayObject $PersistenceData The persistence data of the entity
+     * @param object $Identity The identity to supply the entity
+     */
+    public function RequestIdentity(\ArrayObject $PersistenceData, $Entity) {
+        $this->PersistenceDataEntityMap[$PersistenceData] = $Entity;
     }
     
     /**
      * Sets a generated identity to to the entity mapped with the supplied persistence data.
      * 
-     * @param PersistenceData $PersistenceData The persistence data of the entity
+     * @param \ArrayObject $PersistenceData The persistence data of the entity
      * @param array $Identity The identity to supply the entity
      */
     public function SupplyIdentity(\ArrayObject $PersistenceData, array $Identity) {
         if(isset($this->PersistenceDataEntityMap[$PersistenceData])) {
-            $Entity = $this->PersistenceDataEntityMap[$PersistenceData];
-            $this->Domain->Apply($Entity, $Identity);
+            $this->Domain->Apply($this->PersistenceDataEntityMap[$PersistenceData], $Identity);
         }
     }
     
@@ -131,7 +142,7 @@ final class UnitOfWork {
         $DiscardenceData = $this->Domain->Discard($this, $Entity);
         $this->DiscardenceData[$Hash] = $DiscardenceData;
         
-        $EntityType = $DiscardenceData->GetEntityType();
+        $EntityType = $this->Domain->GetMatchingEntityType($Entity);
         if(!isset($this->DiscardedIdentityGroups[$EntityType])) {
             $this->DiscardedIdentityGroups[$EntityType] = array();
         }

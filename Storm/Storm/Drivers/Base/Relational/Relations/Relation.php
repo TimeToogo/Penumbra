@@ -1,4 +1,4 @@
-$this->ForeignKey<?php
+<?php
 
 namespace Storm\Drivers\Base\Relational\Relations;
 

@@ -10,7 +10,7 @@ abstract class PostIndividualInsertKeyGenerator extends KeyGenerator {
         return KeyGeneratorType::PostIndividualInsert;
     }
     
-    public abstract function FillPrimaryKey(IConnection $Connection, Row $UnkeyedRow);
+    public abstract function FillPrimaryKey(IConnection $Connection, array &$UnkeyedRow);
 }
 
 ?>

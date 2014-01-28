@@ -32,8 +32,8 @@ class IdentityMap {
         $this->Cache = $Cache;
     }
         
-    final public function GetFromCache(Object\Identity $Identity) {
-        $IdentityHash = $Identity->Hash();
+    final public function GetFromCache(array $Identity) {
+        $IdentityHash = md5(json_encode($Identity));
 
         return $this->Cache->Contains($IdentityHash) ?
                 $this->Cache->Retrieve($IdentityHash) : null;
@@ -53,9 +53,12 @@ class IdentityMap {
         array_map([$this, 'CacheEntity'], $Entities);
     }
 
-    final public function CacheEntity($Entity, Object\Identity $Identity = null) {
+    final public function CacheEntity($Entity, array $Identity = null) {
+        if($Identity === null && !$this->EntityMap->HasIdentity($Entity)) {
+            return;
+        }
         $Identity = $Identity ?: $this->EntityMap->Identity($Entity);
-        $IdentityHash = $Identity->Hash();
+        $IdentityHash = md5(json_encode($Identity));
         $this->Cache->Save($IdentityHash, $Entity);
     }
 

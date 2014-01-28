@@ -51,7 +51,7 @@ abstract class EntityPropertyToOneRelationMapping extends PropertyMapping implem
         return $DomainDatabaseMap->GetDatabase()->Load($RelatedRowRequest);
     }
         
-    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, Relational\RelationshipChange $RelationshipChange) {
+    public function Persist(Relational\Transaction $Transaction, array $ParentData, Relational\RelationshipChange $RelationshipChange) {
         if($RelationshipChange->HasDiscardedRelationship() || $RelationshipChange->HasPersistedRelationship()) {
             $this->ToOneRelation->Persist($Transaction, $ParentData, $RelationshipChange);
         }

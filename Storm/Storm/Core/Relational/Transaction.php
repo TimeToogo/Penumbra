@@ -11,12 +11,12 @@ use Storm\Core\Containers\Map;
  */
 final class Transaction {
     /**
-     * @var Row[] 
+     * @var array[] 
      */
     private $PersistedRows = array();
     
     /**
-     * @var Row[] []
+     * @var array[] []
      */
     private $PersistedRowGroups = array();
     
@@ -36,12 +36,12 @@ final class Transaction {
     private $Procedures = array();
     
     /**
-     * @var PrimaryKey[]
+     * @var array[]
      */
     private $DiscardedPrimaryKeys = array();
     
     /**
-     * @var PrimaryKey[][]
+     * @var array[][]
      */
     private $DiscardedPrimaryKeyGroups = array();
     
@@ -51,21 +51,21 @@ final class Transaction {
     private $DiscardedCriteria = array();
     
     public function __construct() {
-        $this->PrePersistRowEventMap = new Map;
-        $this->PostPersistRowEventMap = new Map;
+        $this->PrePersistRowEventMap = new Map();
+        $this->PostPersistRowEventMap = new Map();
     }
     
     /**
      * @return array[]
      */
-    public function GetPersistedRows() {
+    public function &GetPersistedRows() {
         return $this->PersistedRows;
     }
     
     /**
      * @return array[][]
      */
-    public function GetPersistedRowGroups() {
+    public function &GetPersistedRowGroups() {
         return $this->PersistedRowGroups;
     }
     
@@ -79,14 +79,14 @@ final class Transaction {
     /**
      * @return array[]
      */
-    public function GetDiscardedPrimaryKeys() {
+    public function &GetDiscardedPrimaryKeys() {
         return $this->DiscardedPrimaryKeys;
     }
     
     /**
      * @return array[][]
      */
-    public function GetDiscardedPrimaryKeyGroups() {
+    public function &GetDiscardedPrimaryKeyGroups() {
         return $this->DiscardedPrimaryKeyGroups;
     }
     
@@ -100,7 +100,7 @@ final class Transaction {
     /**
      * Persist a row within the transaction.
      * 
-     * @param Row $Row The row to persist
+     * @param array $Row The row to persist
      * @return void
      */
     public function Persist(Table $Table, array &$Row) {
@@ -116,7 +116,7 @@ final class Transaction {
     /**
      * Persist an array of rows within the transaction.
      * 
-     * @param Row[] $Rows The rows to persist
+     * @param array[] $Rows The rows to persist
      * @return void
      */
     public function PersistAll(Table $Table, array &$Rows) {
@@ -132,11 +132,12 @@ final class Transaction {
      * @param object $Key The key
      * @return void
      */
-    private function TriggerEvents(Map $EventMap, $Key) {
+    private function TriggerEvents(Map $EventMap, $Key, array $CustomArguments = array()) {
+        array_unshift($CustomArguments, $this);
         if(isset($EventMap[$Key])) {
             $Events = $EventMap[$Key];
             foreach($Events as $Event) {
-                $Event($Key);
+                call_user_func_array($Event, $CustomArguments);
             }
         }
     }
@@ -162,7 +163,7 @@ final class Transaction {
     /**
      * Trigger the pre persist callbacks for the supplied rows
      * 
-     * @param Table $Table The rows to trigger
+     * @param Table $Table The table to trigger
      * @return void
      */
     public function TriggerPrePersistEvent(Table $Table) {
@@ -172,7 +173,7 @@ final class Transaction {
     /**
      * Subscribe a callback to when the supplied row will be persisted.
      * 
-     * @param Row $Row
+     * @param Table $Table
      * @param callable $Event
      */
     public function SubscribeToPrePersistEvent(Table $Table, callable $Event) {
@@ -182,7 +183,7 @@ final class Transaction {
     /**
      * Trigger the post persist callbacks for the supplied rows
      * 
-     * @param Row[] $Rows The rows to trigger
+     * @param Table $Table The table to trigger
      * @return void
      */
     public function TriggerPostPersistEvent(Table $Table) {
@@ -192,7 +193,7 @@ final class Transaction {
     /**
      * Subscribe a callback to after the supplied row was persisted.
      * 
-     * @param Row $Row
+     * @param Table $Table
      * @param callable $Event
      * @return void
      */
@@ -213,7 +214,7 @@ final class Transaction {
     /**
      * Discard a row from its primary key within the transaction.
      * 
-     * @param PrimaryKey $PrimaryKey The primary key to discard
+     * @param array $PrimaryKey The primary key to discard
      * @return void
      */
     public function Discard(Table $Table, array &$PrimaryKey) {
@@ -229,7 +230,7 @@ final class Transaction {
     /**
      * Discard an array of rows from their primary keys within the transaction.
      * 
-     * @param PrimaryKey[] $PrimaryKeys The primary keys to discard
+     * @param array[] $PrimaryKeys The primary keys to discard
      * @return void
      */
     public function DiscardAll(Table $Table, array &$PrimaryKeys) {

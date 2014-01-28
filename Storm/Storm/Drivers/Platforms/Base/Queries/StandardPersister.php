@@ -18,7 +18,7 @@ abstract class StandardPersister extends BasePersister {
     protected function InsertRowsIndividually(
             IConnection $Connection, 
             Table $Table, 
-            array $Rows, 
+            array &$Rows, 
             callable $PostIndividualInsertCallback) {
         
         $TableName = $Table->GetName();
@@ -29,7 +29,9 @@ abstract class StandardPersister extends BasePersister {
         $this->AppendInsert($QueryBuilder, $TableName, $ColumnNames);
         
         $QueryBuilder->Append('(');
-        $QueryBuilder->AppendAllColumnData(reset($Rows), ',');
+        foreach ($QueryBuilder->Delimit($Columns, ',') as $Column) {
+            $QueryBuilder->AppendExpression(Expression::PersistData($Column, Expression::Constant(null)));
+        }
         $QueryBuilder->Append(')');
         
         $PreparedInsert = $QueryBuilder->Build();
@@ -38,7 +40,7 @@ abstract class StandardPersister extends BasePersister {
         $ColumnValues = array_values($Columns);
         $ParameterTypes = $this->GetParamterTypes($ColumnValues);
         
-        foreach($Rows as $Row) {
+        foreach($Rows as &$Row) {
             foreach($ColumnValues as $Count => $Column) {
                 $Value = $Row[$Column];
                 $Bindings->Bind($Value, $Value === null ? ParameterType::Null : $ParameterTypes[$Count], $Count);
@@ -54,7 +56,7 @@ abstract class StandardPersister extends BasePersister {
         $QueryBuilder->AppendIdentifiers('(#) VALUES ', $ColumnNames, ',');
     }
     
-    final protected function UpsertRows(IConnection $Connection, Table $Table, array $Rows, $ShouldReturnKeyData) {
+    final protected function UpsertRows(IConnection $Connection, Table $Table, array &$Rows, $ShouldReturnKeyData) {
         $QueryBuilder = $Connection->QueryBuilder();
         
         $this->UpsertRowsQuery($QueryBuilder, $Table, $Rows, $ShouldReturnKeyData);
@@ -67,37 +69,42 @@ abstract class StandardPersister extends BasePersister {
     protected abstract function UpsertRowsQuery(
             QueryBuilder $QueryBuilder, 
             Table $Table, 
-            array $Rows, 
+            array &$Rows, 
             $ShouldReturnKeyData);
     
-    protected final function AppendRowsAsDerivedTable(
+    final public function AppendDataAsDerivedTable(
             QueryBuilder $QueryBuilder, 
-            Table $Table,
+            array $Columns,
             $DerivedTableName,
-            array $Rows) {
-        $Columns = $Table->GetColumns();
-        $ColumnNames = array_keys($Columns);
+            array &$ColumnDataArray) {
         
-        $this->AppendPersistDataTransformationsSelect($QueryBuilder, $Columns, $DerivedTableName);
+        $QueryBuilder->Append(' SELECT ');
+        /*
+         * Apply all the persisting data expressions as a select on the derived table
+         * rather than on every row
+         */
+        foreach($QueryBuilder->Delimit($Columns, ', ') as $ColumnName => $Column) {
+            $QueryBuilder->AppendExpression(
+                    Expression::PersistData($Column, Expression::Identifier([$DerivedTableName, $ColumnName])));
+        }
+        
         $QueryBuilder->Append(' FROM (');
         
+        $ColumnNames = array_map(function($Column) { return $Column->GetName(); }, $Columns);
         $Identifiers = array_combine($ColumnNames, 
                 array_map(function($Column) { return $Column->GetIdentifier(); }, $Columns));
         $ParameterTypes = $this->GetParamterTypes($Columns);
-        
-        $ColumnDatas = array_map(function ($Row) { return $Row->GetColumnData(); }, $Rows);
-        
-        
+                
         $First = true;
         $QueryBuilder->Append('SELECT ');
-        foreach($QueryBuilder->Delimit($ColumnDatas, ' UNION ALL SELECT ') as $ColumnData) {
+        foreach($QueryBuilder->Delimit($ColumnDataArray, ' UNION ALL SELECT ') as $ColumnData) {
             $FirstValue = true;
             foreach($Identifiers as $ColumnName => $Identifier) {
                 if($FirstValue) $FirstValue = false;
                 else 
                     $QueryBuilder->Append(',');
                 
-                $Value = $ColumnData[$Identifier];
+                $Value = isset($ColumnData[$Identifier]) ? $ColumnData[$Identifier] : null;
                 $QueryBuilder->AppendSingleValue($Value, $Value === null ? ParameterType::Null : $ParameterTypes[$ColumnName]);
                 
                 if($First) {
@@ -116,22 +123,6 @@ abstract class StandardPersister extends BasePersister {
                     return $Column->GetDataType()->GetParameterType();
                 },
                 $Columns));
-    }
-    
-    protected function AppendPersistDataTransformationsSelect(
-            QueryBuilder $QueryBuilder,
-            array $Columns,
-            $DerivedTableName) {
-        
-        $QueryBuilder->Append(' SELECT ');
-        /*
-         * Apply all the persisting data transformation as a select on the data
-         * rather than on every row
-         */
-        foreach($QueryBuilder->Delimit($Columns, ', ') as $ColumnName => $Column) {
-            $QueryBuilder->AppendExpression(
-                    Expression::PersistData($Column, Expression::Identifier([$DerivedTableName, $ColumnName])));
-        }
     }
 }
 

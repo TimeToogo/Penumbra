@@ -21,16 +21,18 @@ abstract class Persister {
     final public function PersistRows(
             IConnection $Connection, 
             Table $Table, 
-            array $RowsToPersist) {
+            array &$RowsToPersist) {
         
         $KeyedRows = array();
-        $UnkeyedRows = array_filter($RowsToPersist, 
-                function (Relational\Row $Row) use (&$KeyedRows) { 
-                    $HasPrimaryKey = $Row->HasPrimaryKey();
-                    if($HasPrimaryKey) {
-                        $KeyedRows[] = $Row;
+        $UnkeyedRows = array();
+        array_walk($RowsToPersist, 
+                function (array &$Row) use (&$Table, &$KeyedRows, &$UnkeyedRows) {
+                    if($Table->HasPrimaryKeyData($Row)) {
+                        $KeyedRows[] =& $Row;
                     }
-                    return !$HasPrimaryKey;
+                    else {
+                        $UnkeyedRows[] =& $Row;
+                    }
                 });
         
         $HasKeyGenerator = $Table->HasKeyGenerator();
@@ -78,12 +80,14 @@ abstract class Persister {
             }
         }
         else {
-            foreach(array_chunk($RowsToPersist, $this->BatchSize) as $RowBatch) {
+            foreach(array_chunk($RowsToPersist, $this->BatchSize) as &$RowBatch) {
+                $UnkeyedRowsInBatch = array_uintersect($RowBatch, $UnkeyedRows, [$this, 'Identical']);
+                $KeyedRowsInBatch = array_uintersect($RowBatch, $UnkeyedRows, [$this, 'Identical']);
                 $this->SaveRows(
                         $Connection, 
                         $Table, 
-                        array_uintersect($RowBatch, $UnkeyedRows, [$this, 'Identical']), 
-                        array_uintersect($RowBatch, $KeyedRows, [$this, 'Identical']), 
+                        $UnkeyedRowsInBatch, 
+                        $KeyedRowsInBatch, 
                         $ReturningDataKeyGenerator,
                         $PostIndividualInsertKeyGenerator);
                 
@@ -94,14 +98,14 @@ abstract class Persister {
                 }
             }
         }
-        
     }
+    
     public function Identical($One, $Two) {
         return $One === $Two;
     }
     
     protected abstract function SaveRows(IConnection $Connection, Table $Table, 
-            array $RowsWithoutPrimaryKey, array $RowsWithPrimaryKeys,
+            array &$RowsWithoutPrimaryKey, array &$RowsWithPrimaryKeys,
             PrimaryKeys\ReturningDataKeyGenerator $ReturningDataKeyGenerator = null,
             PrimaryKeys\PostIndividualInsertKeyGenerator $PostIndividualInsertKeyGenerator = null);
 }

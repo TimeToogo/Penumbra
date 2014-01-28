@@ -27,7 +27,7 @@ class SequenceGenerator extends PrimaryKeys\PreInsertKeyGenerator {
             throw new \Exception('Only supports single column');
         }
     }
-    public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
+    public function FillPrimaryKeys(IConnection $Connection, array &$UnkeyedRows) {
         $PriamryKeyColumns = $this->GetPrimaryKeyColumns();
         $PrimaryKeyColumn = reset($PriamryKeyColumns);
         
@@ -42,11 +42,11 @@ class SequenceGenerator extends PrimaryKeys\PreInsertKeyGenerator {
         $QueryBuilder->Build()->Execute();
         
         //Mysql will return the first inserted id
-        $IncrementValue = $Connection->FetchValue('SELECT LAST_INSERT_ID()');
-        
-        foreach($UnkeyedRows as $UnkeyedRow) {
-            $PrimaryKeyColumn->Store($UnkeyedRow, $IncrementValue);
-            $IncrementValue++;
+        $IncrementId = (int)$Connection->GetLastInsertIncrement();
+        $Identifier = $PrimaryKeyColumn->GetIdentifier();
+        foreach($UnkeyedRows as &$UnkeyedRow) {
+            $UnkeyedRow[$Identifier] = $PrimaryKeyColumn->ToPersistenceValue($IncrementId);
+            $IncrementId++;
         }
     }
 }

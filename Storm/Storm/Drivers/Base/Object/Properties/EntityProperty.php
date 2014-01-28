@@ -34,7 +34,7 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
         }
     }
     
-    protected function ReviveRetvivalData(Object\Domain $Domain, $Entity, array $RevivalData) {
+    protected function ReviveRevivalData(Object\Domain $Domain, $Entity, array $RevivalData) {
         if ($this->ProxyGenerator !== null) {
             $LoadFunction = static function () use (&$RevivalData) {
                 return $RevivalData;
@@ -53,7 +53,7 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
             if($BackReferenceProperty !== null) {
                 $Callback = function () use ($Callback, &$BackReferenceProperty, &$Entity) {
                     $RevivalData = call_user_func_array($Callback, func_get_args());
-                    $RevivalData[$BackReferenceProperty] = $Entity;
+                    $RevivalData[$BackReferenceProperty->GetIdentifier()] = $Entity;
                 };
             }
             return $this->ProxyGenerator->GenerateProxy($Domain, $this->GetEntityType(), $Callback);

@@ -17,14 +17,15 @@ class LazyCollectionPropertyToManyRelationMapping extends CollectionPropertyToMa
     public function Revive(Mapping\DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array &$RevivalDataArray) {
         
         $RelatedEntityRevivalDataArrayLoader = function ($ParentRowKey) use (&$DomainDatabaseMap, &$ResultRowArray) {
-            static $ParentRowKeyRevivalDataArraysMap = array();
+            static $ParentRowKeyRevivalDataArraysMap = null;
             
             if($ParentRowKeyRevivalDataArraysMap === null) {
                 
                 $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ResultRowArray);
-                $ParentKeyRelatedRowsMap = $this->ToManyRelation->MapParentKeysToRelatedRows($ResultRowArray, $RelatedRows);
+                
+                $ParentKeyRelatedRowsMap = $this->GetToManyRelation()->MapParentKeysToRelatedRows($ResultRowArray, $RelatedRows);
         
-                $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->EntityType, $RelatedRows);
+                $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $RelatedRows);
                 
                 $ParentRowKeyRevivalDataArraysMap = array();
                 foreach($ResultRowArray as $Key => $ResultRowArray) {

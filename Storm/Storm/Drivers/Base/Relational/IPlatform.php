@@ -71,7 +71,7 @@ interface IPlatform {
     public function Sync(Database $Database);
     
     /**
-     * @return ResultRow[]
+     * @return array[]
      */
     public function Select(Core\Relational\Request $Request);
     

@@ -12,6 +12,9 @@ use \Storm\Drivers\Base\Relational\Queries\IConnection;
  * are guaranteed to be sequential.
  */
 class MultiAutoIncrementGenerator extends PrimaryKeys\PostMultiInsertKeyGenerator {
+    private $Column;
+    private $ColumnIdentifier;
+    
     protected function OnSetPrimaryKeyColumns(array $PrimaryKeyColumns) {
         if(count($PrimaryKeyColumns) !== 1) {
             throw new \Exception('Only supports single auto increment column');
@@ -19,16 +22,16 @@ class MultiAutoIncrementGenerator extends PrimaryKeys\PostMultiInsertKeyGenerato
         else if(!reset($PrimaryKeyColumns)->HasTrait(Relational\Columns\Traits\Increment::GetType())) {
             throw new \Exception('Column must be an AUTO_INCREMENT column');
         }
+        $this->Column = reset($PrimaryKeyColumns);
+        $this->ColumnIdentifier = $this->Column->GetIdentifier();
     }
     
-    public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
-        $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
-        $IncrementColumn = reset($PrimaryKeyColumns);
+    public function FillPrimaryKeys(IConnection $Connection, array &$UnkeyedRows) {
         //Mysql will return the first auto increment from a multi insert
         $FirstInsertId = (int)$Connection->GetLastInsertIncrement();
         $IncrementId = $FirstInsertId;
-        foreach ($UnkeyedRows as $Row) {
-            $IncrementColumn->Store($Row, $IncrementId);
+        foreach ($UnkeyedRows as &$Row) {
+            $Row[$this->ColumnIdentifier] = $this->Column->ToPersistenceValue($IncrementId);
             $IncrementId++;
         }
     }

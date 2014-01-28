@@ -10,7 +10,7 @@ abstract class PreInsertKeyGenerator extends KeyGenerator {
         return KeyGeneratorType::PreInsert;
     }
     
-    public abstract function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows);
+    public abstract function FillPrimaryKeys(IConnection $Connection, array &$UnkeyedRows);
 }
 
 ?>

@@ -52,11 +52,11 @@ interface ICollectionPropertyToManyRelationMapping extends IPropertyMapping {
      * the parent data and related data in the supplied transaction.
      * 
      * @param Relational\Transaction $Transaction The transaction context
-     * @param Relational\ColumnData $ParentData The column data of the parent
+     * @param array $ParentData The column data of the parent
      * @param Relational\RelationshipChange[] $RelationshipChanges The change in the relationship state
      * @return void
      */
-    public function Persist(Relational\Transaction $Transaction, array $ParentData, array $RelationshipChanges);
+    public function Persist(Relational\Transaction $Transaction, array &$ParentData, array $RelationshipChanges);
 }
 
 ?>

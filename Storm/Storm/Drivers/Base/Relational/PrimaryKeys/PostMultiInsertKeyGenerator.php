@@ -9,7 +9,7 @@ abstract class PostMultiInsertKeyGenerator extends KeyGenerator {
         return KeyGeneratorType::PostMultiInsert;
     }
     
-    public abstract function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows);
+    public abstract function FillPrimaryKeys(IConnection $Connection, array &$UnkeyedRows);
 }
 
 ?>

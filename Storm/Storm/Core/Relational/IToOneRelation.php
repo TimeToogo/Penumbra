@@ -24,11 +24,11 @@ interface IToOneRelation extends IRelation {
      * Sync the supplied relationship change by persisting to/discarding from the transaction
      * 
      * @param Transaction $Transaction The transaction to persist to
-     * @param ResultRow $ParentData The parent result row
+     * @param array $ParentData The parent result row
      * @param RelationshipChange $RelationshipChanges The mapped relationship change
      * @return void
      */
-    public function Persist(Transaction $Transaction, ResultRow $ParentData, RelationshipChange $RelationshipChange);
+    public function Persist(Transaction $Transaction, array &$ParentData, RelationshipChange $RelationshipChange);
 }
 
 ?>

@@ -32,7 +32,7 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
                 foreach($Callbacks as $Key => $Callback) {
                     $Callbacks[$Key] = function() use($Callback, &$BackReferenceProperty, $Entity) {
                         $RevivalData = call_user_func_array($Callback, func_get_args());
-                        $RevivalData[$BackReferenceProperty] = $Entity;
+                        $RevivalData[$BackReferenceProperty->GetIdentifier()] = $Entity;
                         
                         return $RevivalData;
                     };
@@ -55,7 +55,7 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
             $Callback = function () use ($Callback, &$BackReferenceProperty, &$Entity) {
                 $RevivalDataArray = call_user_func_array($Callback, func_get_args());
                 foreach($RevivalDataArray as $RevivalData) {
-                    $RevivalData[$BackReferenceProperty] = $Entity;
+                    $RevivalData[$BackReferenceProperty->GetIdentifier()] = $Entity;
                 }
                 
                 return $RevivalDataArray;

@@ -15,8 +15,8 @@ abstract class BasePersister extends Queries\Persister {
     final protected function SaveRows(
             IConnection $Connection, 
             Table $Table, 
-            array $RowsWithoutPrimaryKey, 
-            array $RowsWithPrimaryKeys, 
+            array &$RowsWithoutPrimaryKey, 
+            array &$RowsWithPrimaryKeys, 
             ReturningDataKeyGenerator $ReturningDataKeyGenerator = null,
             PostIndividualInsertKeyGenerator $PostIndividualInsertKeyGenerator = null) {
         
@@ -30,7 +30,7 @@ abstract class BasePersister extends Queries\Persister {
                     $Connection, 
                     $Table, 
                     $RowsWithoutPrimaryKey, 
-                    function (Relational\Row $Row) use (&$Connection, &$PostIndividualInsertKeyGenerator) {
+                    function (array &$Row) use (&$Connection, &$PostIndividualInsertKeyGenerator) {
                         $PostIndividualInsertKeyGenerator->FillPrimaryKey($Connection, $Row);
                     });
             
@@ -57,7 +57,7 @@ abstract class BasePersister extends Queries\Persister {
     protected abstract function InsertRowsIndividually(
             IConnection $Connection, 
             Table $Table, 
-            array $Rows,
+            array &$Rows,
             callable $PostIndividualInsertCallback);
     
     /**
@@ -66,7 +66,7 @@ abstract class BasePersister extends Queries\Persister {
     protected abstract function UpsertRows(
             IConnection $Connection, 
             Table $Table, 
-            array $Rows,
+            array &$Rows,
             $ShouldReturnKeyData);
 }
 

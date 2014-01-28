@@ -29,7 +29,7 @@ interface IToManyRelation extends IRelation {
      * @param RelationshipChange[] $RelationshipChanges The mapped relationship changes
      * @return void
      */
-    public function Persist(Transaction $Transaction, array $ParentData, array $RelationshipChanges);
+    public function Persist(Transaction $Transaction, array &$ParentData, array $RelationshipChanges);
 }
 
 ?>

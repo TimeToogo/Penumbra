@@ -55,7 +55,7 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
     }
     
     public function Persist(Relational\Transaction $Transaction, 
-            array $ParentData, array $RelationshipChanges) {
+            array &$ParentData, array $RelationshipChanges) {
         $IdentifyingChildRows = array();
         $ParentTable = $this->GetParentTable();
         $RelatedTable = $this->GetTable();
@@ -65,7 +65,7 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
             if($RelationshipChange->HasPersistedRelationship()) {
                 $PersistedRelationship = $RelationshipChange->GetPersistedRelationship();
                 if($PersistedRelationship->IsIdentifying()) {
-                    $IdentifyingChildRows[] =& $RelatedTable->GetRowData($PersistedRelationship->GetChildResultRow());
+                    $IdentifyingChildRows[] =& $PersistedRelationship->GetChildResultRow();
                 }
             }
             
@@ -85,7 +85,7 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
         }
     }
     protected abstract function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
-            array $ParentRow, array &$ChildRows);
+            array &$ParentRow, array &$ChildRows);
     
 }
 

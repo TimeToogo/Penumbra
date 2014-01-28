@@ -19,9 +19,10 @@ class IndividualAutoIncrementGenerator extends PrimaryKeys\PostIndividualInsertK
         }
         $this->IncrementColumn = reset($PrimaryKeyColumns);
     }
-    public function FillPrimaryKey(IConnection $Connection, Row $UnkeyedRow) {
+    public function FillPrimaryKey(IConnection $Connection, array &$UnkeyedRow) {
         $InsertId = (int)$Connection->GetLastInsertIncrement();
-        $this->IncrementColumn->Store($UnkeyedRow, $InsertId);
+        $UnkeyedRow[$this->IncrementColumn->GetIdentifier()] = 
+                $this->IncrementColumn->ToPersistenceValue($InsertId);
     }
 }
 

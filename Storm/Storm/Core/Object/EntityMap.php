@@ -251,10 +251,10 @@ abstract class EntityMap implements \IteratorAggregate {
      * If the entity is null returns a new blank identity otherwise returns the identity
      * of the supplied entity.
      * 
-     * @param object|null $Entity
+     * @param object $Entity
      * @return array The entity's identity
      */
-    final public function Identity($Entity = null) {        
+    final public function Identity($Entity) {        
         $this->VerifyEntity($Entity);
         
         $Identity = array();
@@ -275,7 +275,7 @@ abstract class EntityMap implements \IteratorAggregate {
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
         
-        $PersistenceData = array();
+        $PersistenceData = new \ArrayObject();
         foreach($this->DataProperties as $Identifier => $DataProperty) {
             $PersistenceData[$Identifier] = $DataProperty->GetValue($Entity);
         }

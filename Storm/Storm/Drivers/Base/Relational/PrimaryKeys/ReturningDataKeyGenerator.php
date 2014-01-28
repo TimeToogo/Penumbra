@@ -13,7 +13,7 @@ abstract class ReturningDataKeyGenerator implements IKeyGenerator {
     
     public abstract function AppendValueToQueryBuilder(QueryBuilder $QueryBuilder, IColumn $PrimaryKey);
     
-    public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows, array $ReturnedKeyData) {
+    public function FillPrimaryKeys(IConnection $Connection, array &$UnkeyedRows, array $ReturnedKeyData) {
         if(count($UnkeyedRows) !== count($ReturnedKeyData)) {
             throw new \Exception;//TODO:error message
         }
@@ -21,7 +21,7 @@ abstract class ReturningDataKeyGenerator implements IKeyGenerator {
             $this->FillPrimaryKeyValues($Connection, array_values($UnkeyedRows), array_values($ReturnedKeyData));
         }
     }
-    protected abstract function FillPrimaryKeyValues(IConnection $Connection, array $UnkeyedRowsValues, array $ReturnedKeyDataValues);
+    protected abstract function FillPrimaryKeyValues(IConnection $Connection, array &$UnkeyedRowsValues, array $ReturnedKeyDataValues);
 }
 
 ?>

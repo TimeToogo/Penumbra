@@ -56,7 +56,7 @@ interface IEntityPropertyToOneRelationMapping extends IPropertyMapping {
      * @param Relational\RelationshipChange $RelationshipChange The change in the relationship state
      * @return void
      */
-    public function Persist(Relational\Transaction $Transaction, array $ParentData, Relational\RelationshipChange $RelationshipChange);
+    public function Persist(Relational\Transaction $Transaction, array &$ParentData, Relational\RelationshipChange $RelationshipChange);
 }
 
 ?>

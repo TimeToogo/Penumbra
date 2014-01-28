@@ -39,7 +39,7 @@ final class PersistedRelationship {
     private $ChildPersistenceData;
     
     public function __construct($ParentEntityType, $RelatedEntityType, 
-            array $ParentIdentity, array $RelatedIdentity = null, array $ChildPersistenceData = null) {
+            array $ParentIdentity, array $RelatedIdentity = null, \ArrayObject $ChildPersistenceData = null) {
         if($RelatedIdentity === null && $ChildPersistenceData === null) {
             throw new \InvalidArgumentException('Related identity and persistence data cannot both be null');
         }

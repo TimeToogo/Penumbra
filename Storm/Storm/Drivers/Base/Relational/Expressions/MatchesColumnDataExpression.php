@@ -11,10 +11,11 @@ class MatchesColumnDataExpression extends PredicateExpression {
         
         $ConstraintExpressions = array();
         
-        foreach($ColumnData as $ColumnIdentifier => $Value) {            
+        foreach($ColumnData as $ColumnIdentifier => $Value) {
+            $Column = $Table->GetColumnByIdentifier($ColumnIdentifier);
             $ConstraintExpressions[] =
                     Expression::BinaryOperation(
-                            Expression::Column($Table->GetColumnByIdentifier($ColumnIdentifier)), 
+                            Expression::Column($Column), 
                             Binary::Equality,
                             Expression::PersistData($Column, Expression::Constant($Value)));
         }

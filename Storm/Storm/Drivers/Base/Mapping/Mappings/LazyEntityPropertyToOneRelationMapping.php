@@ -21,11 +21,12 @@ class LazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelation
     public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array &$RevivalDataArray) {
         
         $RelatedEntityRevivalDataLoader = function ($ParentRowKey) use (&$DomainDatabaseMap, &$ResultRowArray) {
-            static $ParentRowKeyRelatedRevivalDataMap = array();
+            static $ParentRowKeyRelatedRevivalDataMap = null;
+            
             if($ParentRowKeyRelatedRevivalDataMap === null) {
                 $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ResultRowArray);
                  
-                $ParentKeyRelatedRowMap = $this->ToOneRelation->MapParentKeysToRelatedRow($ResultRowArray, $RelatedRows);
+                $ParentKeyRelatedRowMap = $this->GetToOneRelation()->MapParentKeysToRelatedRow($ResultRowArray, $RelatedRows);
 
                 $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $ParentKeyRelatedRowMap);
 

@@ -61,7 +61,7 @@ abstract class CollectionPropertyToManyRelationMapping extends PropertyMapping i
         }
     }
 
-    public function Persist(Relational\Transaction $Transaction, array $ParentData, array $RelationshipChanges) {
+    public function Persist(Relational\Transaction $Transaction, array &$ParentData, array $RelationshipChanges) {
         if(count($RelationshipChanges) > 0) {
             $this->ToManyRelation->Persist($Transaction, $ParentData, $RelationshipChanges);
         }
