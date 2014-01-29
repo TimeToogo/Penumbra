@@ -51,10 +51,23 @@ abstract class CollectionPropertyToManyRelationMapping extends PropertyMapping i
         return $DomainDatabaseMap->GetDatabase()->Load($RelatedRowRequest);
     }
     
+    final protected function MapParentRowKeysToRelatedRevivalDataArray(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows, array $RelatedRows) {
+        $ParentKeyRelatedRowsMap = $this->ToManyRelation->MapParentKeysToRelatedRows($ParentRows, $RelatedRows);
+        
+        $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->EntityType, $RelatedRows);
+        
+        $MappedRelatedRevivalData = array();
+        foreach($ParentRows as $Key => $ParentRow) {            
+            $MappedRelatedRevivalData[$Key] = array_intersect_key($RelatedRevivalData, $ParentKeyRelatedRowsMap[$Key]);
+        }
+        
+        return $MappedRelatedRevivalData;
+    }
+    
     final protected function MapToParentRowRelatedRevivalDataArrayMap(DomainDatabaseMap $DomainDatabaseMap, 
             Map $ParentRowRevivalDataMap, array $RelatedRows) {
         $ParentRows = $ParentRowRevivalDataMap->GetInstances();
-        $ParentRelatedRowsMap = $this->ToManyRelation->MapParentToRelatedRows($ParentRows, $RelatedRows);
+        $ParentRelatedRowsMap = $this->ToManyRelation->MapParentKeysToRelatedRows($ParentRows, $RelatedRows);
         
         $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $RelatedRows);
         $RelatedRowRevivalDataMap = Map::From($RelatedRows, $RelatedRevivalData);
@@ -75,7 +88,7 @@ abstract class CollectionPropertyToManyRelationMapping extends PropertyMapping i
     }
 
     
-    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, array $RelationshipChanges) {
+    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges) {
         if(count($RelationshipChanges) > 0) {
             $this->ToManyRelation->Persist($Transaction, $ParentData, $RelationshipChanges);
         }

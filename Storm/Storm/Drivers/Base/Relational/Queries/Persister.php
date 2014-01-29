@@ -24,13 +24,15 @@ abstract class Persister {
             array $RowsToPersist) {
         
         $KeyedRows = array();
-        $UnkeyedRows = array_filter($RowsToPersist, 
-                function (Relational\Row $Row) use (&$KeyedRows) { 
-                    $HasPrimaryKey = $Row->HasPrimaryKey();
-                    if($HasPrimaryKey) {
-                        $KeyedRows[] = $Row;
+        $UnkeyedRows = array();
+        array_walk($RowsToPersist, 
+                function (Relational\Row $Row) use (&$KeyedRows, &$UnkeyedRows) {
+                    if($Row->HasPrimaryKey()) {
+                        $KeyedRows[] =& $Row;
                     }
-                    return !$HasPrimaryKey;
+                    else {
+                        $UnkeyedRows[] =& $Row;
+                    }
                 });
         
         $HasKeyGenerator = $Table->HasKeyGenerator();

@@ -14,18 +14,13 @@ final class EagerCollectionPropertyToManyRelationMapping extends CollectionPrope
         parent::__construct($CollectionProperty, $ToManyRelation);
     }
     
-    public function Revive(Mapping\DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap) {
-        $ParentRows = $ParentRowRevivalDataMap->GetInstances();
-        $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ParentRows);
-        $ParentRowRelatedRevivalDataArrayMap = 
-                $this->MapToParentRowRelatedRevivalDataArrayMap($DomainDatabaseMap, $ParentRowRevivalDataMap, $RelatedRows);
+    public function Revive(Mapping\DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
+        $RelatedRowArray = $this->LoadRelatedRows($DomainDatabaseMap, $ResultRowArray);
         
-        $Property = $this->GetProperty();
-        foreach($ParentRowRelatedRevivalDataArrayMap as $ParentRow) {
-            $RelatedRevivalDataArray = $ParentRowRelatedRevivalDataArrayMap[$ParentRow];
-            $ParentRevivalData = $ParentRowRevivalDataMap[$ParentRow];
-
-            $ParentRevivalData[$Property] = $RelatedRevivalDataArray->getArrayCopy();
+        $ParentKeyRelatedRevivalDataArrayMap = $this->MapParentRowKeysToRelatedRevivalDataArray($DomainDatabaseMap, $ResultRowArray, $RelatedRowArray);
+        
+        foreach($RevivalDataArray as $Key => $RevivalData) {            
+            $RevivalData[$this->Property] = $ParentKeyRelatedRevivalDataArrayMap[$Key];
         }
     }
 }

@@ -12,6 +12,7 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
         $this->BinaryOperators = $this->BinaryOperators();
         $this->SetOperators = $this->SetOperators();
         $this->UnaryOperators = $this->UnaryOperators();
+        $this->CastTypes = $this->CastTypes();
     }
     
     protected function AppendBinaryOperation(QueryBuilder $QueryBuilder, E\BinaryOperationExpression $Expression) {

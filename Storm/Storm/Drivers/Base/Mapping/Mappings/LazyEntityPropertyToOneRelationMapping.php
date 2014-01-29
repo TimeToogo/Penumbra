@@ -17,29 +17,25 @@ class LazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelation
         
         parent::__construct($EntityProperty, $ToOneRelation);
     }
-
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap) {
-        $ToOneRelation = $this->GetToOneRelation();
-        $RelatedEntityRevivalDataLoader = function ($ParentRow) use (&$DomainDatabaseMap, &$ToOneRelation, &$ParentRowRevivalDataMap) {
-            static $ParentRowRelatedRevivalDataMap;
-            if($ParentRowRelatedRevivalDataMap === null) {
-                $ParentRows = $ParentRowRevivalDataMap->GetInstances();
-                $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ParentRows);
-                
-                $ParentRowRelatedRevivalDataMap = $this->MapToParentRowRelatedRevivalDataMap($DomainDatabaseMap, $ParentRowRevivalDataMap, $RelatedRows);
+    
+    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
+        $RelatedRevivalDataLoader = function ($ParentRowKey) use (&$DomainDatabaseMap, &$ResultRowArray) {
+            static $ParentKeyRelatedRevivalDataMap = null;
+            
+            if($ParentKeyRelatedRevivalDataMap === null) {
+                $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ResultRowArray);
+                $ParentKeyRelatedRevivalDataMap = $this->MapParentRowKeysToRelatedRevivalData($DomainDatabaseMap, $ResultRowArray, $RelatedRows);
             }
             
-            return $ParentRowRelatedRevivalDataMap[$ParentRow];
+            return $ParentKeyRelatedRevivalDataMap[$ParentRowKey];
         };
         
-        $Property = $this->GetProperty();
-        foreach($ParentRowRevivalDataMap as $ParentRow) {
-            $RevivalData = $ParentRowRevivalDataMap[$ParentRow];
-            $RelatedEntityDataLoader = function () use (&$RelatedEntityRevivalDataLoader, $ParentRow) {
-                return $RelatedEntityRevivalDataLoader($ParentRow);
+        foreach($RevivalDataArray as $Key => &$RevivalData) {
+            $Loader = function () use (&$RelatedRevivalDataLoader, $Key) {
+                return $RelatedRevivalDataLoader($Key);
             };
             
-            $RevivalData[$Property] = $RelatedEntityDataLoader;
+            $RevivalData[$this->Property] = $Loader;
         }
     }
 }

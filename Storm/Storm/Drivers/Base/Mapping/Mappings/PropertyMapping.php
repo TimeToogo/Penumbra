@@ -6,7 +6,10 @@ use \Storm\Core\Mapping;
 use \Storm\Core\Object;
 
 abstract class PropertyMapping implements Mapping\IPropertyMapping {
-    private $Property;
+    /**
+     * @var Object\IProperty
+     */
+    protected $Property;
     
     public function __construct(Object\IProperty $Property) {
         $this->Property = $Property;

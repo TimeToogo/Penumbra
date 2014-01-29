@@ -8,7 +8,7 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 class SemiLazyCollectionPropertyToManyRelationMapping extends CollectionPropertyToManyRelationMapping {
-    private $ParentRowRevivalDataMaps = array();
+    private $ParentRowArrays = array();
     private $RelatedRows = array();
     
     public function __construct(
@@ -17,44 +17,47 @@ class SemiLazyCollectionPropertyToManyRelationMapping extends CollectionProperty
         parent::__construct($CollectionProperty, $ToManyRelation);
     }
     
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap) {
-        $this->ParentRowRevivalDataMaps[] = $ParentRowRevivalDataMap;
+    public function __sleep() {
+        return array();
+    }
+    
+    public function __wakeup() {
+        $this->ParentRowArrays = array();
+        $this->RelatedRows = array();
+    }
+    
+    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
+        $this->ParentRowArrays[] = $ResultRowArray;
         
-        $RelatedEntityRevivalDataArrayLoader = function ($ParentRow) use (&$DomainDatabaseMap, &$ParentRowRevivalDataMap) {
-            static $ParentRelatedRevivalDataArraysMap;
+        $RelatedRevivalDataArrayLoader = function ($ParentRowKey) use (&$DomainDatabaseMap, &$ResultRowArray) {
+            static $ParentKeyRelatedRevivalDataArraysMap = null;
             
-            if($ParentRelatedRevivalDataArraysMap === null) {
-                $ParentRelatedRevivalDataArraysMap = $this->LoadAllRelatedRows($DomainDatabaseMap, $ParentRowRevivalDataMap);
+            if($ParentKeyRelatedRevivalDataArraysMap === null) {
+                $ParentKeyRelatedRevivalDataArraysMap = $this->LoadAllRelatedRows($DomainDatabaseMap, $ResultRowArray);
             }
             
-            return $ParentRelatedRevivalDataArraysMap[$ParentRow]->getArrayCopy();
+            return $ParentKeyRelatedRevivalDataArraysMap[$ParentRowKey];
         };
         
-        $Property = $this->GetProperty();
-        foreach($ParentRowRevivalDataMap as $ParentRow) {            
-            $RevivalData = $ParentRowRevivalDataMap[$ParentRow];            
-            $RelatedEntityRevivalDataLoader = function () use (&$RelatedEntityRevivalDataArrayLoader, $ParentRow) {
-                return $RelatedEntityRevivalDataArrayLoader($ParentRow);
+        foreach($RevivalDataArray as $Key => $RevivalData) {
+            $Loader = function () use (&$RelatedRevivalDataArrayLoader, $Key) {
+                return $RelatedRevivalDataArrayLoader($Key);
             };
             
-            $RevivalData[$Property] = $RelatedEntityRevivalDataLoader;
+            $RevivalData[$this->Property] = $Loader;
         }
     }
     
-    private function LoadAllRelatedRows(DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap) {
-        if(count($this->ParentRowRevivalDataMaps) > 0) {
-            $ParentRows = call_user_func_array('array_merge', 
-                    array_map(function (Map $Map) { return $Map->GetInstances(); }, 
-                            $this->ParentRowRevivalDataMaps));
-
-            $this->RelatedRows = array_merge(
-                    $this->LoadRelatedRows($DomainDatabaseMap, $ParentRows), 
-                    $this->RelatedRows);
+    private function LoadAllRelatedRows(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows) {
+        if(count($this->ParentRowArrays) > 0) {
+            $AllParentRows = call_user_func_array('array_merge', $this->ParentRowArrays);
             
-            $this->ParentRowRevivalDataMaps = array();
+            $this->RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $AllParentRows);
+            
+            $this->ParentRowArrays = array();
         }
         
-        return $this->MapToParentRowRelatedRevivalDataArrayMap($DomainDatabaseMap, $ParentRowRevivalDataMap, $this->RelatedRows);
+        return $this->MapParentRowKeysToRelatedRevivalDataArray($DomainDatabaseMap, $ParentRows, $this->RelatedRows);
     }
 }
 

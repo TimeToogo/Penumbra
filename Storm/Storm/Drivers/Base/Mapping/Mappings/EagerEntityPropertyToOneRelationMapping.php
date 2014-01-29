@@ -8,9 +8,17 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 class EagerEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelationMapping {
+    private $WillJoinRows;
+    
+    public function __construct(Object\IEntityProperty $EntityProperty, Relational\IToOneRelation $ToOneRelation) {
+        parent::__construct($EntityProperty, $ToOneRelation);
+        
+        $this->WillJoinRows = !$this->GetEntityProperty()->IsOptional();
+    }
+    
     
     public function AddToRelationalRequest(DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest) {
-        if(!$this->GetEntityProperty()->IsOptional()) {
+        if($this->WillJoinRows) {
             $DomainDatabaseMap->MapEntityToRelationalRequest(
                     $this->GetEntityType(),
                     $RelationalRequest);
@@ -19,29 +27,20 @@ class EagerEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelatio
         }
     }
     
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ResultRowRevivalDataMap) {
-        if(!$this->GetEntityProperty()->IsOptional()) {
-            $JoinedRows = $ResultRowRevivalDataMap->GetInstances();
-            $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $JoinedRows);
-            $Property = $this->GetProperty();
-            foreach($JoinedRows as $Key => $JoinedRow) {
-                $ParentRevivalData = $ResultRowRevivalDataMap[$JoinedRow];
-                $ParentRevivalData[$Property] = $RelatedRevivalData[$Key];
-            }
+    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
+        $ParentKeyRelatedRevivalDataMap = null;
+        
+        if(!$this->WillJoinRows) {
+            $ParentKeyRelatedRevivalDataMap = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $ResultRowArray);
         }
         else {
-            $ParentRows = $ResultRowRevivalDataMap->GetInstances();            
-            $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ParentRows);
+            $RelatedRowArray = $this->LoadRelatedRows($DomainDatabaseMap, $ResultRowArray);
             
-            $ParentRowRelatedRevivalDataMap = $this->MapToParentRowRelatedRevivalDataMap($DomainDatabaseMap, $ResultRowRevivalDataMap, $RelatedRows);
-            
-            $Property = $this->GetProperty();
-            foreach($ParentRowRelatedRevivalDataMap as $ParentRow) {
-                $RelatedRevivalData = $ParentRowRelatedRevivalDataMap[$ParentRow];
-                $ParentRevivalData = $ResultRowRevivalDataMap[$ParentRow];
-                
-                $ParentRevivalData[$Property] = $RelatedRevivalData;
-            }
+            $ParentKeyRelatedRevivalDataMap = $this->MapParentRowKeysToRelatedRevivalData($DomainDatabaseMap, $ResultRowArray, $RelatedRowArray);
+        }
+        
+        foreach($RevivalDataArray as $Key => $RevivalData) {            
+            $RevivalData[$this->Property] = $ParentKeyRelatedRevivalDataMap[$Key];
         }
     }
 }

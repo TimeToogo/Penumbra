@@ -17,19 +17,6 @@ abstract class EntityMap extends \Storm\Core\Object\EntityMap {
     }
     
     /**
-     * @return Requests\EntityRequest
-     */
-    final public function Request($IsSingleEntity = false) {
-        return new Requests\EntityRequest($this, $IsSingleEntity);
-    }
-    
-    /**
-     * @return Requests\IdentityRequest
-     */
-    final public function RequestId(Identity $Identity) {
-        return new Requests\IdentityRequest($Identity);
-    }
-    /**
      * @return Construction\IEntityConstructor
      */
     protected abstract function EntityConstructor();

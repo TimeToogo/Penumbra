@@ -11,8 +11,8 @@ use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
 class One implements \StormExamples\IStormExample {
-    const DevelopmentMode = 0;
-    const UseCache = true;
+    const DevelopmentMode = 1;
+    const UseCache = false;
     
     public static function GetPlatform() {
         return new Platforms\Mysql\Platform(self::DevelopmentMode > 1);
@@ -40,7 +40,7 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
 
-    const Id = 155;
+    const Id = 157;
     
     const Persist = 0;
     const Retreive = 1;
@@ -53,7 +53,7 @@ class One implements \StormExamples\IStormExample {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
-        $Action = self::Persist;
+        $Action = self::Discard;
         $Amount = 1;
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
@@ -127,7 +127,7 @@ class One implements \StormExamples\IStormExample {
         }
         $RevivedBlog->Posts[0]->Tags->ToArray();
         $RevivedBlog->Posts[1]->Tags->ToArray();
-
+        $BlogRepository->GetIdentityMap()->Clear();
         return null;
     }
     

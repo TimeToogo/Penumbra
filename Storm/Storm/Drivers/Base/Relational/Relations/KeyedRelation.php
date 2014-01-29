@@ -78,22 +78,26 @@ abstract class KeyedRelation extends Relation {
             ForeignKey $ForeignKey, 
             Relational\ResultRow $ParentRow) {
         if($this->IsInversed) {
-            $ReferencedKey = $ParentRow->GetDataFromColumns($ForeignKey->GetReferencedColumns());
-            $ParentKey = new Relational\ResultRow($ForeignKey->GetParentColumns());
-            $ForeignKey->MapReferencedToParentKey($ReferencedKey, $ParentKey);
+            $ParentKey = $ForeignKey->ParentKey();
+            $ForeignKey->MapReferencedToParentKey($ParentRow, $ParentKey);
 
             return $ParentKey;
         }
         else {
-            $ParentKey = $ParentRow->GetDataFromColumns($ForeignKey->GetParentColumns());
-            $ReferencedKey = new Relational\ResultRow($ForeignKey->GetReferencedColumns());
-            $ForeignKey->MapParentToReferencedKey($ParentKey, $ReferencedKey);
+            $ReferencedKey = $ForeignKey->ReferencedKey();
+            $ForeignKey->MapParentToReferencedKey($ParentRow, $ReferencedKey);
             
             return $ReferencedKey;
         }
     }
     
-    final protected function HashRowsByColumnValues(array $ResultRows, array $Columns) {
+    final protected function MakeHashedDataToKeyMap(array $ResultRows, array $Columns) {
+        return array_combine(
+                array_keys($this->IndexRowsByHashedColumnValues($ResultRows, $Columns)), 
+                array_keys($ResultRows));
+    }
+
+    final protected function IndexRowsByHashedColumnValues(array $ResultRows, array $Columns) {
         $KeyedRows = array();
         $ColumnDataArray = Relational\ResultRow::GetAllDataFromColumns($ResultRows, $Columns);
         foreach($ResultRows as $Key => $Row) {

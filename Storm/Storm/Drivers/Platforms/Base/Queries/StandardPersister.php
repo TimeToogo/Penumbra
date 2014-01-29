@@ -70,34 +70,45 @@ abstract class StandardPersister extends BasePersister {
             array $Rows, 
             $ShouldReturnKeyData);
     
-    protected final function AppendRowsAsDerivedTable(
+    final public function AppendDataAsDerivedTable(
             QueryBuilder $QueryBuilder, 
-            Table $Table,
+            array $Columns,
             $DerivedTableName,
-            array $Rows) {
-        $Columns = $Table->GetColumns();
-        $ColumnNames = array_keys($Columns);
+            array $ColumnDataArray) {
         
-        $this->AppendPersistDataTransformationsSelect($QueryBuilder, $Columns, $DerivedTableName);
+        $QueryBuilder->Append(' SELECT ');
+        /*
+         * Apply all the persisting data expressions as a select on the derived table
+         * rather than on every row
+         */
+        foreach($QueryBuilder->Delimit($Columns, ', ') as $ColumnName => $Column) {
+            $QueryBuilder->AppendExpression(
+                    Expression::PersistData($Column, Expression::Identifier([$DerivedTableName, $ColumnName])));
+        }
+        
         $QueryBuilder->Append(' FROM (');
         
+        $ColumnDataArray = array_map(
+                function(Relational\ColumnData $ColumnData) { 
+                    return $ColumnData->GetColumnData();
+                }, 
+                $ColumnDataArray);
+        
+        $ColumnNames = array_map(function($Column) { return $Column->GetName(); }, $Columns);
         $Identifiers = array_combine($ColumnNames, 
                 array_map(function($Column) { return $Column->GetIdentifier(); }, $Columns));
         $ParameterTypes = $this->GetParamterTypes($Columns);
-        
-        $ColumnDatas = array_map(function ($Row) { return $Row->GetColumnData(); }, $Rows);
-        
-        
+                
         $First = true;
         $QueryBuilder->Append('SELECT ');
-        foreach($QueryBuilder->Delimit($ColumnDatas, ' UNION ALL SELECT ') as $ColumnData) {
+        foreach($QueryBuilder->Delimit($ColumnDataArray, ' UNION ALL SELECT ') as $ColumnData) {
             $FirstValue = true;
             foreach($Identifiers as $ColumnName => $Identifier) {
                 if($FirstValue) $FirstValue = false;
                 else 
                     $QueryBuilder->Append(',');
                 
-                $Value = $ColumnData[$Identifier];
+                $Value = isset($ColumnData[$Identifier]) ? $ColumnData[$Identifier] : null;
                 $QueryBuilder->AppendSingleValue($Value, $Value === null ? ParameterType::Null : $ParameterTypes[$ColumnName]);
                 
                 if($First) {
@@ -116,22 +127,6 @@ abstract class StandardPersister extends BasePersister {
                     return $Column->GetDataType()->GetParameterType();
                 },
                 $Columns));
-    }
-    
-    protected function AppendPersistDataTransformationsSelect(
-            QueryBuilder $QueryBuilder,
-            array $Columns,
-            $DerivedTableName) {
-        
-        $QueryBuilder->Append(' SELECT ');
-        /*
-         * Apply all the persisting data transformation as a select on the data
-         * rather than on every row
-         */
-        foreach($QueryBuilder->Delimit($Columns, ', ') as $ColumnName => $Column) {
-            $QueryBuilder->AppendExpression(
-                    Expression::PersistData($Column, Expression::Identifier([$DerivedTableName, $ColumnName])));
-        }
     }
 }
 

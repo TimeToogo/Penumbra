@@ -19,16 +19,13 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     private $ColumnData;
     
     protected function __construct(array $Columns, array $ColumnData) {
+        $IndexedColumns = array();
         foreach ($Columns as $Column) {
-            $Identifier = $Column->GetIdentifier();
-            
-            $this->Columns[$Identifier] = $Column;
-            
-            if(!isset($ColumnData[$Identifier])) {
-                $ColumnData[$Identifier] = null;
-            }
+            $IndexedColumns[$Column->GetIdentifier()] = $Column;
         }
-        $this->ColumnData = $ColumnData;
+        $this->Columns =& $IndexedColumns;
+        
+        $this->ColumnData = array_intersect_key($ColumnData, $this->Columns) + array_fill_keys(array_keys($this->Columns), null);
     }
     
     /**
@@ -53,7 +50,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
      */
     final public function Another(array $ColumnData) {
         $ClonedColumnData = clone $this;
-        $ClonedColumnData->ColumnData = $ColumnData + array_fill_keys(array_keys($this->Columns), null);
+        $ClonedColumnData->ColumnData = array_intersect_key($ColumnData, $this->Columns) + array_fill_keys(array_keys($this->Columns), null);
         return $ClonedColumnData;
     }
     

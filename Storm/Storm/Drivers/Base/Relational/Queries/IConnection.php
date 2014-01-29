@@ -32,12 +32,7 @@ interface IConnection {
      */
     public function Execute($QueryString, Bindings $Bindings = null);
     public function FetchValue($QueryString, Bindings $Bindings = null);
-    
-    /**
-     * @return Relational\ResultRow[]
-     */
-    public function LoadResultRows(array $Columns, IQuery $Query);
-    
+        
     public function Disconnect();
 }
 

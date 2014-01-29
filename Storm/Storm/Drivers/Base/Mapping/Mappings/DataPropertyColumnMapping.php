@@ -48,17 +48,27 @@ class DataPropertyColumnMapping extends PropertyMapping implements IDataProperty
     public function GetDataProperty() {
         return $this->DataProperty;
     }
-
-    public function Revive(Map $ColumnDataPropertyDataMap) {
-        $Property = $this->GetProperty();
-        foreach($ColumnDataPropertyDataMap as $ColumnData) {
-            $PropertyData = $ColumnDataPropertyDataMap[$ColumnData];
-            $PropertyData[$Property] = $this->Column->Retrieve($ColumnData);
+    
+    public function Revive(array $ColumnDataArray, array $PropertyDataArray) {
+        foreach($ColumnDataArray as $Key => $ColumnData) {
+            if(isset($ColumnData[$this->Column])) {
+                $PropertyDataArray[$Key][$this->DataProperty] = $this->Column->ToPropertyValue($ColumnData[$this->Column]);
+            }
+            else {
+                $PropertyDataArray[$Key][$this->DataProperty] = null;
+            }
         }
     }
-
-    public function Persist($DataPropertyValue, Relational\ColumnData $ColumnData) {
-        $this->Column->Store($ColumnData, $DataPropertyValue);
+    
+    public function Persist(array $PropertyDataArray, array $ColumnDataArray) {
+        foreach($PropertyDataArray as $Key => $PropertyData) {
+            if(isset($PropertyData[$this->DataProperty])) {
+                $ColumnDataArray[$Key][$this->Column] = $this->Column->ToPersistenceValue($PropertyData[$this->DataProperty]);
+            }
+            else {
+                $ColumnDataArray[$Key][$this->Column] = null;
+            }
+        }
     }
 }
 

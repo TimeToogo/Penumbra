@@ -42,11 +42,11 @@ class SequenceGenerator extends PrimaryKeys\PreInsertKeyGenerator {
         $QueryBuilder->Build()->Execute();
         
         //Mysql will return the first inserted id
-        $IncrementValue = $Connection->FetchValue('SELECT LAST_INSERT_ID()');
+        $IncrementId = (int)$Connection->GetLastInsertIncrement();
         
         foreach($UnkeyedRows as $UnkeyedRow) {
-            $PrimaryKeyColumn->Store($UnkeyedRow, $IncrementValue);
-            $IncrementValue++;
+            $UnkeyedRow[$PrimaryKeyColumn] = $PrimaryKeyColumn->ToPersistenceValue($IncrementId);
+            $IncrementId++;
         }
     }
 }

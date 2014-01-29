@@ -9,7 +9,7 @@ use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 class ToOneRelation extends ToOneRelationBase {
     public function __construct(ForeignKey $ForeignKey) {
          parent::__construct(
-                 $ForeignKey, 
+                $ForeignKey, 
                 $ForeignKey->GetReferencedTable(), 
                 Relational\DependencyOrder::After, 
                 Relational\DependencyOrder::Before);

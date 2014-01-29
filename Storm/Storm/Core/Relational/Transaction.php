@@ -134,11 +134,12 @@ final class Transaction {
      * @param object $Key The key
      * @return void
      */
-    private function TriggerEvents(Map $EventMap, $Key) {
+    private function TriggerEvents(Map $EventMap, $Key, array $CustomArguments = array()) {
+        array_unshift($CustomArguments, $this);
         if(isset($EventMap[$Key])) {
             $Events = $EventMap[$Key];
             foreach($Events as $Event) {
-                $Event($Key);
+                call_user_func_array($Event, $CustomArguments);
             }
         }
     }
@@ -164,46 +165,42 @@ final class Transaction {
     /**
      * Trigger the pre persist callbacks for the supplied rows
      * 
-     * @param Row[] $Rows The rows to trigger
+     * @param Table $Table The table to trigger
      * @return void
      */
-    public function TriggerPrePersistEvent(array $Rows) {
-        foreach($Rows as $Row) {
-            $this->TriggerEvents($this->PrePersistRowEventMap, $Row);
-        }
+    public function TriggerPrePersistEvent(Table $Table) {
+        $this->TriggerEvents($this->PrePersistRowEventMap, $Table);
     }
     
     /**
      * Subscribe a callback to when the supplied row will be persisted.
      * 
-     * @param Row $Row
+     * @param Table $Table
      * @param callable $Event
      */
-    public function SubscribeToPrePersistEvent(Row $Row, callable $Event) {
-        $this->AddEvent($this->PrePersistRowEventMap, $Row, $Event);
+    public function SubscribeToPrePersistEvent(Table $Table, callable $Event) {
+        $this->AddEvent($this->PrePersistRowEventMap, $Table, $Event);
     }
     
     /**
      * Trigger the post persist callbacks for the supplied rows
      * 
-     * @param Row[] $Rows The rows to trigger
+     * @param Table $Table The table to trigger
      * @return void
      */
-    public function TriggerPostPersistEvent(array $Rows) {
-        foreach($Rows as $Row) {
-            $this->TriggerEvents($this->PostPersistRowEventMap, $Row);
-        }
+    public function TriggerPostPersistEvent(Table $Table) {
+        $this->TriggerEvents($this->PostPersistRowEventMap, $Table);
     }
     
     /**
      * Subscribe a callback to after the supplied row was persisted.
      * 
-     * @param Row $Row
+     * @param Table $Table
      * @param callable $Event
      * @return void
      */
-    public function SubscribeToPostPersistEvent(Row $Row, callable $Event) {
-        $this->AddEvent($this->PostPersistRowEventMap, $Row, $Event);
+    public function SubscribeToPostPersistEvent(Table $Table, callable $Event) {
+        $this->AddEvent($this->PostPersistRowEventMap, $Table, $Event);
     }
     
     /**

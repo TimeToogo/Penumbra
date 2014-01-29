@@ -22,15 +22,15 @@ class ResultRow extends ColumnData {
      * @var PrimaryKey[] 
      */
     private $PrimaryKeys = array();
-    public function __construct(array $Columns, array $ColumnData = array()) {
+    
+    public function __construct(array &$Columns, array $ColumnData = array()) {
         foreach($Columns as $Column) {
             $Table = $Column->GetTable();
             $TableName = $Table->GetName();
             
             $this->Tables[$TableName] = $Table;
             if(!isset($this->Rows[$TableName])) {
-                $this->Rows[$TableName] = new Row($Table, 
-                        array_intersect_key($ColumnData, $Table->GetColumnIdentifiers()));
+                $this->Rows[$TableName] = $Table->Row(array_intersect_key($ColumnData, $Table->GetColumnIdentifiers()));
                 $this->PrimaryKeys[$TableName] = $this->Rows[$TableName]->GetPrimaryKey();
             }
         }
@@ -137,12 +137,12 @@ class ResultRow extends ColumnData {
      */
     final public static function GetAllDataFromColumns(array $ResultRows, array $Columns) {
         $NewResultRow = new ResultRow($Columns);
-        $ColumnIdentifiers = array_flip(array_keys($NewResultRow->GetColumns()));
+        $ColumnIdentifiersAsKeys = array_flip(array_keys($NewResultRow->GetColumns()));
         
         $NewResultRows = array();
         foreach($ResultRows as $Key => $ResultRow) {
             $NewResultRows[$Key] = $NewResultRow->Another(
-                    array_intersect_key($ResultRow->GetColumnData(), $ColumnIdentifiers));
+                    array_intersect_key($ResultRow->GetColumnData(), $ColumnIdentifiersAsKeys));
         }
         
         return $NewResultRows;

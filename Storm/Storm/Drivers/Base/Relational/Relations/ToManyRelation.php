@@ -14,25 +14,27 @@ class ToManyRelation extends ToManyRelationBase {
                 Relational\DependencyOrder::Before);
     }
     
-    protected function FillParentToRelatedRowsMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
+    protected function GroupRelatedRowsByParentKeys(array &$MappedRelatedRows, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
         $ReferencedColumns = $ForeignKey->GetReferencedColumns();
         $ParentColumns = $ForeignKey->GetParentColumns();
         
-        $GroupedRelatedRows = $this->GroupRowsByColumns($RelatedRows, $ParentColumns);
-        $this->MapParentRowsToGroupedRelatedRows($Map, $ParentRows, $ReferencedColumns, $GroupedRelatedRows);
+        $GroupedRelatedRows = $this->GroupRowsByColumnValues($RelatedRows, $ParentColumns);
+        $this->MapParentRowKeysToGroupedRelatedRows($MappedRelatedRows, $ParentRows, $ReferencedColumns, $GroupedRelatedRows);
     }
     
     protected function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
             Relational\Row $ParentRow, array $ChildRows) {
         $ForeignKey = $this->GetForeignKey();
+        
         if($ParentRow->HasPrimaryKey()) {
             foreach($ChildRows as $ChildRow) {
                 $ForeignKey->MapReferencedToParentKey($ParentRow, $ChildRow);
             }
         }
         else {
-            $Transaction->SubscribeToPostPersistEvent($ParentRow, 
-                    function (Relational\Row $ParentRow) use (&$ForeignKey, &$ChildRows) {
+            $Transaction->SubscribeToPrePersistEvent(
+                    $this->GetTable(), 
+                    function () use (&$ForeignKey, &$ParentRow, &$ChildRows) {
                         foreach($ChildRows as $ChildRow) {
                             $ForeignKey->MapReferencedToParentKey($ParentRow, $ChildRow);
                         }

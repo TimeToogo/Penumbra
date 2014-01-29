@@ -14,7 +14,7 @@ final class PrimaryKey extends TableColumnData {
     
     protected function AddColumn(IColumn $Column, $Data) {
         if(!$this->GetTable()->HasPrimaryKey($Column->GetName())) {
-            throw new \InvalidArgumentException('$ColumnName must be a primary key column of ' . $this->GetTable()->GetName());
+             throw new \InvalidArgumentException('$ColumnName must be a primary key column of ' . $this->GetTable()->GetName());
         }
         
         parent::AddColumn($Column, $Data);
