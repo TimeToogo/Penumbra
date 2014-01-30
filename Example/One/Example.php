@@ -53,7 +53,7 @@ class One implements \StormExamples\IStormExample {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
-        $Action = self::Discard;
+        $Action = self::Persist;
         $Amount = 1;
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
