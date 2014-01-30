@@ -80,26 +80,24 @@ abstract class Persister {
             }
         }
         else {
-            foreach(array_chunk($RowsToPersist, $this->BatchSize) as $RowBatch) {
+            foreach(array_chunk($RowsToPersist, $this->BatchSize, true) as $RowBatch) {
+                $BatchedKeyedRows = array_intersect_key($RowBatch, $UnkeyedRows);
                 $this->SaveRows(
                         $Connection, 
                         $Table, 
-                        array_uintersect($RowBatch, $UnkeyedRows, [$this, 'Identical']), 
-                        array_uintersect($RowBatch, $KeyedRows, [$this, 'Identical']), 
+                        $BatchedKeyedRows, 
+                        array_intersect_key($RowBatch, $KeyedRows), 
                         $ReturningDataKeyGenerator,
                         $PostIndividualInsertKeyGenerator);
                 
                 if($KeyGeneratorType === PrimaryKeys\KeyGeneratorType::PostMultiInsert) {
                     /* @var $KeyGenerator PrimaryKeys\PostMultiInsertKeyGenerator */
 
-                    $KeyGenerator->FillPrimaryKeys($Connection, $UnkeyedRows);
+                    $KeyGenerator->FillPrimaryKeys($Connection, $BatchedKeyedRows);
                 }
             }
         }
         
-    }
-    public function Identical($One, $Two) {
-        return $One === $Two;
     }
     
     protected abstract function SaveRows(IConnection $Connection, Table $Table, 
