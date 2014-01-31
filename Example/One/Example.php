@@ -40,7 +40,7 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
 
-    const Id = 157;
+    const Id = 489;
     
     const Persist = 0;
     const Retreive = 1;
@@ -54,7 +54,7 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         
         $Action = self::Retreive;
-        $Amount = 10;
+        $Amount = 1;
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
             $Last = $this->Act($Action, $BloggingStorm, $BlogRepository, $TagRepository);
@@ -161,7 +161,7 @@ class One implements \StormExamples\IStormExample {
                 ->GroupBy(function ($Blog) { return $Blog->Id; })
                 ->First());
 
-        //$RevivedBlog = $BlogRepository->LoadById($Id);
+        
         if(extension_loaded('xdebug')) {
             var_dump($RevivedBlog);
         }
@@ -248,7 +248,7 @@ class One implements \StormExamples\IStormExample {
     public function AddTags(Entities\Post $Post) {
         $Names = ['Tagged', 'Tummy', 'Tailgater', 'Food Fight', 'Andy'];
         
-        for ($Count = 100; $Count > 0; $Count--) {
+        for ($Count = 2500; $Count > 0; $Count--) {
             $Tag = new Entities\Tag();
             $Tag->Name = $Names[rand(0, count($Names) - 1)];
             $Tag->Description = 'This is a description - ' . $Count;
