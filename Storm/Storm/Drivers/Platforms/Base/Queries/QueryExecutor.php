@@ -13,7 +13,7 @@ use \Storm\Drivers\Base\Relational\PrimaryKeys\ReturningDataKeyGenerator;
 
 abstract class QueryExecutor extends Queries\QueryExecutor {
     
-    final protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array &$DiscardedPrimaryKeys) {
+    final protected function DeleteRowsByPrimaryKeysQuery(IConnection $Connection, Table $Table, array $DiscardedPrimaryKeys) {
         if(count($DiscardedPrimaryKeys) === 0) {
             return;
         }
@@ -28,7 +28,7 @@ abstract class QueryExecutor extends Queries\QueryExecutor {
         $QueryBuilder->Build()->Execute();
     }
 
-    final protected function ExecuteUpdate(IConnection $Connection, Relational\Procedure &$ProcedureToExecute) {
+    final protected function ExecuteUpdate(IConnection $Connection, Relational\Procedure $ProcedureToExecute) {
         $QueryBuilder = $Connection->QueryBuilder();
         $this->UpdateQuery($QueryBuilder, $ProcedureToExecute);
         $QueryBuilder->Build()->Execute();
