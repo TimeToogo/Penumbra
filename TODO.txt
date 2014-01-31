@@ -19,7 +19,7 @@ The future:
 
 The far future:
  - Introduce migrations and advanced database syncing
- - Extend fluent request functionality via relationship properties (with subqueries and joins)
+ - Extend fluent request functionality via relationship properties (maps to subqueries and joins)
  - Begin a peformance lockdown, make sure Storm is peformant as possible. (milliseconds matter)
  - Begin to investigate possible edge cases and tie up any loose ends
  - Extend the test suite to cover >80% of code
