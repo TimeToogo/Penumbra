@@ -8,7 +8,7 @@ The near future:
 
 The future:
  - Extend fluent request functionality (multiple types of joins, maybe the having clause + others)
- - Implement CodeFirst and DatabaseFirst drivers
+ - Implement CodeFirst driver
  - Finalize the API
  - Begin writing a test suite for the major parts of the application
  - Implement an active record flavour of Storm (This could be quite sexy coupled with fluent requests)
