@@ -29,5 +29,5 @@ The very far future:
  - Build a wiki with the complete API and many tutorials.
  - Build a website for the community
  - Cli? Gui?
- - Rewrite the fluent request API back-end with specialized parser (remove dependency of Nikic's PHPParser)
+ - Rewrite the Closure AST parsing with specialized parser (remove dependency of Nikic's PHPParser)
  - 
