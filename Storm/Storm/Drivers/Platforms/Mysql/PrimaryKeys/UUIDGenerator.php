@@ -15,16 +15,17 @@ class UUIDGenerator extends PrimaryKeys\PreInsertKeyGenerator {
         $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
         $QueryBuilder = $Connection->QueryBuilder();
         
-        $UUIDStatment = 'SELECT UUID() AS `UUID`';
-        $UUIDStatments = array_fill(0, count($UnkeyedRows) * count($PrimaryKeyColumns), $UUIDStatment);
-        $QueryBuilder->Append(implode(' UNION ', $UUIDStatments));
+        $UUIDStatment = 'SELECT UUID()';
+        $UUIDStatments = array_fill(0, count($UnkeyedRows) * count($PrimaryKeyColumns) - 1, $UUIDStatment);
+        array_unshift($UUIDStatments, $UUIDStatment . ' AS `UUID`');
+        $QueryBuilder->Append(implode(' UNION ALL ', $UUIDStatments));
         
         $UUIDRows = $QueryBuilder->Build()->Execute()->FetchAll();
         $Count = 0;
         foreach($UnkeyedRows as $UnkeyedRow) {
             foreach($PrimaryKeyColumns as $PrimaryKeyColumn) {
                 $UUID = $UUIDRows[$Count]['UUID'];
-                $PrimaryKeyColumn->Store($UnkeyedRow, $UUID);
+                $UnkeyedRow[$PrimaryKeyColumn] = $PrimaryKeyColumn->ToPersistenceValue($UUID);
                 $Count++;
             }
         }

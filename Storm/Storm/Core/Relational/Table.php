@@ -26,7 +26,7 @@ abstract class Table {
     /**
      * @var string[]
      */
-    private $ColumnIdentifiers;
+    private $ColumnsByIdentifiers;
     
     /**
      * @var IColumn[]
@@ -36,7 +36,7 @@ abstract class Table {
     /**
      * @var string[]
      */
-    private $PrimaryKeyColumnIdentifiers;
+    private $PrimaryKeyColumnByIdentifiers;
     
     /**
      * @var IToOneRelation[]
@@ -69,9 +69,9 @@ abstract class Table {
         $Registrar = new Registrar(IColumn::IColumnType);
         $this->RegisterColumns($Registrar, $Database);
         $this->Columns = array();
-        $this->ColumnIdentifiers = array();
+        $this->ColumnsByIdentifiers = array();
         $this->PrimaryKeyColumns = array();
-        $this->PrimaryKeyColumnIdentifiers = array();
+        $this->PrimaryKeyColumnByIdentifiers = array();
         foreach($Registrar->GetRegistered() as $Column) {
             $this->AddColumn($Column);
         }
@@ -158,10 +158,10 @@ abstract class Table {
         $ColumnName = $Column->GetName();
         $ColumnIdentifier = $Column->GetIdentifier();
         $this->Columns[$ColumnName] = $Column;
-        $this->ColumnIdentifiers[$ColumnIdentifier] = $ColumnIdentifier;
+        $this->ColumnsByIdentifiers[$ColumnIdentifier] = $Column;
         if($Column->IsPrimaryKey()) {
             $this->PrimaryKeyColumns[$ColumnName] = $Column;
-            $this->PrimaryKeyColumnIdentifiers[$ColumnIdentifier] = $ColumnIdentifier;
+            $this->PrimaryKeyColumnByIdentifiers[$ColumnIdentifier] = $Column;
         }
      }
 
@@ -197,6 +197,14 @@ abstract class Table {
     }
     
     /**
+     * @param string $Identifier The column identifier
+     * @return IColumn|null
+     */
+    final public function GetColumnByIdentifier($Identifier) {
+        return isset($this->ColumnsByIdentifiers[$Identifier]) ? $this->ColumnsByIdentifiers[$Identifier] : null;
+    }
+    
+    /**
      * Gets the table columns, indexed by their respective column name.
      * 
      * @return IColumn[]
@@ -206,10 +214,17 @@ abstract class Table {
     }
     
     /**
+     * @return IColumn[]
+     */
+    final public function GetColumnsByIdentifier() {
+        return $this->ColumnsByIdentifiers;
+    }
+    
+    /**
      * @return string[]
      */
     final public function GetColumnIdentifiers() {
-        return $this->ColumnIdentifiers;
+        return array_keys($this->ColumnsByIdentifiers);
     }
     
     /**
@@ -223,10 +238,17 @@ abstract class Table {
     }
     
     /**
+     * @return IColumn[]
+     */
+    final public function GetPrimaryKeyColumnsByIdentifier() {
+        return $this->PrimaryKeyColumnByIdentifiers;
+    }
+    
+    /**
      * @return string[]
      */
     final public function GetPrimaryKeyColumnIdentifiers() {
-        return $this->PrimaryKeyColumnIdentifiers;
+        return array_keys($this->PrimaryKeyColumnByIdentifiers);
     }
     
     /**

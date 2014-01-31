@@ -8,7 +8,7 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelationMapping {
-    private $ParentRowRevivalDataMaps = array();
+    private $ParentRowArrays = array();
     private $RelatedRows = array();
     
     public function __construct(
@@ -21,45 +21,52 @@ class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRela
         parent::__construct($EntityProperty, $ToOneRelation);
     }
     
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap) {
-        $this->ParentRowRevivalDataMaps[] = $ParentRowRevivalDataMap;
+    public function __sleep() {
+        return array();
+    }
+    
+    public function __wakeup() {
+        $this->ParentRowArrays = array();
+        $this->RelatedRows = array();
+    }
+    
+    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
+        $this->ParentRowArrays[] = $ResultRowArray;
         
-        $RelatedEntityRevivalDataLoader = function ($ParentRow) use (&$DomainDatabaseMap, &$ParentRowRevivalDataMap) {  
+        $RelatedRevivalDataLoader = function ($ParentRow) use (&$DomainDatabaseMap, &$ResultRowArray) {  
             static $ParentRowRelatedRevivalDataMap = null;
             
             if($ParentRowRelatedRevivalDataMap === null) {
-                $ParentRowRelatedRevivalDataMap = $this->LoadAllRelatedRows($DomainDatabaseMap, $ParentRowRevivalDataMap);
+                $ParentRowRelatedRevivalDataMap = $this->LoadAllRelatedRows($DomainDatabaseMap, $ResultRowArray);
             }
             
             return $ParentRowRelatedRevivalDataMap[$ParentRow];
         };
         
-        $Property = $this->GetProperty();
-        foreach($ParentRowRevivalDataMap as $ParentRow) {
-            $RevivalData = $ParentRowRevivalDataMap[$ParentRow];
-            
-            $RelatedEntityDataLoader = function () use (&$RelatedEntityRevivalDataLoader, $ParentRow) {
-                return $RelatedEntityRevivalDataLoader($ParentRow);
+        foreach($RevivalDataArray as $Key => $RevivalData) {
+            $Loader = function () use (&$RelatedRevivalDataLoader, $Key) {
+                return $RelatedRevivalDataLoader($Key);
             };
             
-            $RevivalData[$Property] = $RelatedEntityDataLoader;
+            $RevivalData[$this->Property] = $Loader;
         }
     }
     
-    private function LoadAllRelatedRows(DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap) {
-        if(count($this->ParentRowRevivalDataMaps) > 0) {
-            $ParentRows = call_user_func_array('array_merge', 
-                    array_map(function (Map $Map) { return $Map->GetInstances(); }, 
-                            $this->ParentRowRevivalDataMaps));
-
-            $this->RelatedRows = array_merge(
-                    $this->LoadRelatedRows($DomainDatabaseMap, $ParentRows), 
-                    $this->RelatedRows);
+    /**
+     * TODO: bugfix for loading mapping related rows as it will throw an exception when
+     * attempts to map the parent rows to the related rows in the reletion due to there
+     * being more related rows than parent rows
+     */
+    private function LoadAllRelatedRows(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows) {
+        if(count($this->ParentRowArrays) > 0) {
+            $AllParentRows = call_user_func_array('array_merge', $this->ParentRowArrays);
             
-            $this->ParentRowRevivalDataMaps = array();
+            $this->RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $AllParentRows);
+            
+            $this->ParentRowArrays = array();
         }
         
-        return $this->MapToParentRowRelatedRevivalDataMap($DomainDatabaseMap, $ParentRowRevivalDataMap, $this->RelatedRows);
+        return $this->MapParentRowKeysToRelatedRevivalData($DomainDatabaseMap, $ParentRows, $this->RelatedRows);
     }
 }
 

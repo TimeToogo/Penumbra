@@ -40,7 +40,7 @@ class Persister extends Queries\StandardPersister {
         $QueryBuilder->AppendIdentifier('INSERT INTO #', [$TableName]);
         $QueryBuilder->AppendIdentifiers('(#)', $ColumnNames, ',');
         
-        $this->AppendRowsAsDerivedTable($QueryBuilder, $Table, $DerivedTableName, $Rows);
+        $this->AppendDataAsDerivedTable($QueryBuilder, $Table->GetColumns(), $DerivedTableName, $Rows);
         
         $this->AppendOnDuplicateKeyUpdate($QueryBuilder, $TableName, $Columns, $PrimaryKeyIdentifiers);
     }

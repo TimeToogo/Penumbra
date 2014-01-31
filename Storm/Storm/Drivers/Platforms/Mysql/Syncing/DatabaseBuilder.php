@@ -201,8 +201,6 @@ class DatabaseBuilder implements IDatabaseBuilder {
                 return Traits\ForeignKeyMode::SetNull;
             case 'CASCADE':
                 return Traits\ForeignKeyMode::Cascade;
-            case 'RESTRICT':
-                return Traits\ForeignKeyMode::Restrict;
             default:
                 throw new \InvalidArgumentException('Unknown ForeignKeyMode');
         }

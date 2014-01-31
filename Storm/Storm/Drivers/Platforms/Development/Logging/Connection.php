@@ -81,11 +81,6 @@ class Connection implements Queries\IConnection {
     public function SetExpressionCompiler(Queries\IExpressionCompiler $ExpressionCompiler) {
         return $this->Connection->SetExpressionCompiler($ExpressionCompiler);
     }
-
-    public function LoadResultRows(array $Columns, Queries\IQuery $Query) {
-        return $this->Connection->LoadResultRows($Columns, $Query);
-    }
-
 }
 
 ?>

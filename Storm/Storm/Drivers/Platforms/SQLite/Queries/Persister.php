@@ -41,7 +41,7 @@ class Persister extends Queries\StandardPersister {
         $QueryBuilder->AppendIdentifiers('(#)', $ColumnNames, ',');
         
         //TODO: Fix unique constraint conflicts
-        $this->AppendRowsAsDerivedTable($QueryBuilder, $Table, $DerivedTableName, $Rows);
+        $this->AppendDataAsDerivedTable($QueryBuilder, $Table->GetColumns(), $DerivedTableName, $Rows);
     }
 }
 

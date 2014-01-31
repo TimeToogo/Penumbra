@@ -28,7 +28,7 @@ class MultiAutoIncrementGenerator extends PrimaryKeys\PostMultiInsertKeyGenerato
         $FirstInsertId = (int)$Connection->GetLastInsertIncrement();
         $IncrementId = $FirstInsertId;
         foreach ($UnkeyedRows as $Row) {
-            $IncrementColumn->Store($Row, $IncrementId);
+            $Row[$IncrementColumn] = $IncrementColumn->ToPersistenceValue($IncrementId);
             $IncrementId++;
         }
     }

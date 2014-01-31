@@ -11,6 +11,7 @@ final class PDOParameterType {
         ParameterType::String => \PDO::PARAM_STR,
         ParameterType::Integer => \PDO::PARAM_INT,
         ParameterType::Double => \PDO::PARAM_STR,
+        ParameterType::Boolean => \PDO::PARAM_BOOL,
         ParameterType::Null => \PDO::PARAM_NULL,
         ParameterType::Binary => \PDO::PARAM_LOB,
     ];

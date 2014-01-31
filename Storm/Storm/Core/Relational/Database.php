@@ -150,19 +150,25 @@ abstract class Database {
      * @return ResultRow[] The loaded result rows
      */
     final public function Load(Request $Request) {
+        $Columns = array();
         foreach($Request->GetTables() as $Table) {
             $this->VerifyTable($Table);
+            $Columns += $Table->GetColumnsByIdentifier();
         }
-        return $this->LoadRows($Request);
+        $ResultRowData = $this->LoadResultRowData($Request);
+        
+        $ResultRow = new ResultRow($Columns, array());
+        
+        return array_map([$ResultRow, 'Another'], $ResultRowData);
     }
     /**
      * This method should be implemented such that is returns the rows specified
      * by the request from the underlying database.
      * 
      * @param Request $Request The request to load
-     * @return ResultRow[] The loaded result rows
+     * @return array[] The loaded result rows data as an associative array indexed by column identifiers
      */
-    protected abstract function LoadRows(Request $Request);
+    protected abstract function LoadResultRowData(Request $Request);
     
     /**
      * Commits the supplied transaction.

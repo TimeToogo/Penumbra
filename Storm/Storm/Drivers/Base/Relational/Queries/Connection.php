@@ -29,17 +29,6 @@ abstract class Connection implements IConnection {
     final public function SetCriterionCompiler(ICriterionCompiler $CriterionCompiler) {
         $this->CriterionCompiler = $CriterionCompiler;
     }
-    
-    final public function LoadResultRows(array $Columns, IQuery $Query) {
-        $Query->Execute();
-        $Row = new Relational\ResultRow($Columns, array());
-        $Rows = array();
-        while($RowData = $Query->FetchRow()) {
-            $Rows[] = $Row->Another($RowData);
-        }
-        
-        return $Rows;
-    }
 }
 
 ?>

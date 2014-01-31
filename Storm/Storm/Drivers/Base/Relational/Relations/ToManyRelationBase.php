@@ -8,42 +8,41 @@ use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
 abstract class ToManyRelationBase extends KeyedRelation implements Relational\IToManyRelation {
     
-    final public function MapParentToRelatedRows(array $ParentRows, array $RelatedRows) {
-        $Map = new Map();
+    final public function MapParentKeysToRelatedRows(array $ParentRows, array $RelatedRows) {
+        $MappedRelatedRows = array();
         if(count($ParentRows) === 1) {
-            $Map->Map(reset($ParentRows), new \ArrayObject($RelatedRows));
+            $MappedRelatedRows[key($ParentRows)] = $RelatedRows;
         } 
         else {
-            $this->FillParentToRelatedRowsMap($Map, $this->GetForeignKey(), $ParentRows, $RelatedRows);
+            $this->GroupRelatedRowsByParentKeys($MappedRelatedRows, $this->GetForeignKey(), $ParentRows, $RelatedRows);
         }
         
-        return $Map;
+        return $MappedRelatedRows;
     }
-    protected abstract function FillParentToRelatedRowsMap(Map $Map, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows);
-    
-    final protected function GroupRowsByColumns(array $RelatedRows, array $GroupByColumns) {
+    protected abstract function GroupRelatedRowsByParentKeys(array &$MappedRelatedRows, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows);
+        
+    final protected function GroupRowsByColumnValues(array $ResultRows, array $Columns) {
         $GroupedRelatedRows = array();
-        $GroupByKeys = Relational\ResultRow::GetAllDataFromColumns($RelatedRows, $GroupByColumns);
-        foreach($RelatedRows as $Key => $RelatedRow) {
+        $GroupByKeys = Relational\ResultRow::GetAllDataFromColumns($ResultRows, $Columns);
+        foreach($ResultRows as $Key => $ResultRow) {
             $Hash = $GroupByKeys[$Key]->HashData();
             if(!isset($GroupedRelatedRows[$Hash])) {
                 $GroupedRelatedRows[$Hash] = array();
             }
-            $GroupedRelatedRows[$Hash][] = $RelatedRow;
+            $GroupedRelatedRows[$Hash][] = $ResultRow;
         }
         
         return $GroupedRelatedRows;
     }
     
-    final protected function MapParentRowsToGroupedRelatedRows(Map $Map, array $ParentRows, array $MapByColumns, array $GroupedRelatedRows) {
-        $MapByKeys = Relational\ResultRow::GetAllDataFromColumns($ParentRows, $MapByColumns);
-        foreach($ParentRows as $Key => $ParentRow) {
-            $Hash = $MapByKeys[$Key]->HashData();
-            if(isset($GroupedRelatedRows[$Hash])) {
-                $Map->Map($ParentRow, new \ArrayObject($GroupedRelatedRows[$Hash]));
+    final protected function MapParentRowKeysToGroupedRelatedRows(array &$MappedRelatedRows, array $ParentRows, array $MapByColumns, array $GroupedRelatedRows) {
+        $ParentDataHashKeyMap = $this->MakeHashedDataToKeyMap($ParentRows, $MapByColumns);
+        foreach($ParentDataHashKeyMap as $HashedData => $ParentKey) {
+            if(isset($GroupedRelatedRows[$HashedData])) {
+                $MappedRelatedRows[$ParentKey] = $GroupedRelatedRows[$HashedData];
             }
             else {
-                $Map->Map($ParentRow, new \ArrayObject(array()));
+                $MappedRelatedRows[$ParentKey] = array();
             }
         }
     }
@@ -52,24 +51,36 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
             Relational\ResultRow $ParentData, array $RelationshipChanges) {
         $IdentifyingChildRows = array();
         $Table = $this->GetTable();
+        $ForeignKey = $this->GetForeignKey();
         foreach($RelationshipChanges as $RelationshipChange) {
+            
             if($RelationshipChange->HasPersistedRelationship()) {
                 $PersistedRelationship = $RelationshipChange->GetPersistedRelationship();
+                
                 if($PersistedRelationship->IsIdentifying()) {
                     $IdentifyingChildRows[] = $PersistedRelationship->GetChildResultRow()->GetRow($Table);
                 }
             }
+            
             if($RelationshipChange->HasDiscardedRelationship()) {
                 $DiscardedRelationship = $RelationshipChange->GetDiscardedRelationship();
+                
                 if($DiscardedRelationship->IsIdentifying()) {
                     $PrimaryKeyToDiscard = $DiscardedRelationship->GetRelatedPrimaryKey();
-                    $this->GetForeignKey()->MapReferencedToParentKey($ParentData, $PrimaryKeyToDiscard);
+                    if($this->IsInversed()) {
+                        $ForeignKey->MapReferencedToParentKey($ParentData, $PrimaryKeyToDiscard);
+                    }
+                    else {
+                        $ForeignKey->MapReferencedToParentKey($ParentData, $PrimaryKeyToDiscard);
+                    }
                     $Transaction->Discard($PrimaryKeyToDiscard);
                 }
             }
         }
         $ParentRow = $ParentData->GetRow($this->GetParentTable());
-        $this->PersistIdentifyingRelationship($Transaction, $ParentRow, $IdentifyingChildRows);
+        if(count($IdentifyingChildRows) > 0) {
+            $this->PersistIdentifyingRelationship($Transaction, $ParentRow, $IdentifyingChildRows);
+        }
     }
     protected abstract function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
             Relational\Row $ParentRow, array $ChildRows);

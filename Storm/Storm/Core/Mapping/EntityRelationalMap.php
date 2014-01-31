@@ -335,56 +335,53 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         $Columns = call_user_func_array('array_merge', $ColumnGroups);
         return $Columns;
     }
-    
+        
     /**
      * {@inheritDoc}
      */
     final public function MapIdentityToPrimaryKey(Object\Identity $Identity) {
-        $PrimaryKey = $this->PrimaryKeyTable->PrimaryKey();
+        $Identity = [$Identity];
+        $PrimaryKey = [$this->PrimaryKeyTable->PrimaryKey()];
         foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
-            $Property = $Mapping->GetProperty();
-            $Mapping->Persist($Identity[$Property], $PrimaryKey);
+            $Mapping->Persist($Identity, $PrimaryKey);
         }
         
-        return $PrimaryKey;
+        return $PrimaryKey[0];
     }
     /**
      * {@inheritDoc}
      */
     final public function MapIdentitiesToPrimaryKeys(array $Identities) {
-        return array_map([$this, 'MapIdentityToPrimaryKey'], $Identities);
+        $PrimaryKeys = array_map(function () { return $this->PrimaryKeyTable->PrimaryKey(); }, $Identities);
+        foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
+            $Mapping->Persist($Identities, $PrimaryKeys);
+        }
+        
+        return $PrimaryKeys;
     }
     
     /**
      * {@inheritDoc}
      */
     final public function MapPrimaryKeyToIdentity(Relational\PrimaryKey $PrimaryKey) {
-        $Identity = $this->EntityMap->Identity();
-        $Map = Map::From([$PrimaryKey], [$Identity]);
-        $this->RevivePrimaryKeyIdentityMap($Map);
+        $PrimaryKey = [$PrimaryKey];
+        $Identity = [$this->EntityMap->Identity()];
+        foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
+            $Mapping->Revive($PrimaryKey, $Identity);
+        }
         
-        return $Identity;
+        return $Identity[0];
     }
     /**
      * {@inheritDoc}
      */
     final public function MapPrimaryKeysToIdentities(array $PrimaryKeys) {
-        $Identities = array();
-        foreach($PrimaryKeys as $Key => $PrimaryKey) {
-            $Identities[$Key] = $this->EntityMap->Identity();
+        $Identities = array_map(function () { return $this->EntityMap->Identity(); }, $PrimaryKeys);
+        foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
+            $Mapping->Revive($PrimaryKeys, $Identities);
         }
-        $Map = Map::From($PrimaryKeys, $Identities);
-        $this->RevivePrimaryKeyIdentityMap($Map);
         
         return $Identities;
-    }
-    /**
-     * {@inheritDoc}
-     */
-    private function RevivePrimaryKeyIdentityMap(Map $Map) {
-        foreach($this->IdentityPropertyPrimaryKeyMappings as $Mapping) {
-            $Mapping->Revive($Map);
-        }
     }
 }
 

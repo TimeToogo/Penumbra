@@ -16,10 +16,9 @@ interface IToManyRelation extends IRelation {
      * 
      * @param ResultRow[] $ParentRows The parent rows
      * @param ResultRow[] $RelatedRows The related rows
-     * @return Map The map containing the parent rows mapped to an Array Object
-     * containing their respective related rows
+     * @return ResultRow[] The array containing the parent rows indexed by their parents key
      */
-    public function MapParentToRelatedRows(array $ParentRows, array $RelatedRows);
+    public function MapParentKeysToRelatedRows(array $ParentRows, array $RelatedRows);
     
     /**
      * Sync the supplied relationship changes by persisting to/discarding from the transaction

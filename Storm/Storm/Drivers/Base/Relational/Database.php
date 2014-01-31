@@ -40,7 +40,7 @@ abstract class Database extends Relational\Database {
         $this->Platform->Sync($this);
     }
     
-    final protected function LoadRows(Relational\Request $Request) {
+    final protected function LoadResultRowData(Relational\Request $Request) {
         $this->VerifyPlatform();
         return $this->Platform->Select($Request);
     }

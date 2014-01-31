@@ -20,8 +20,7 @@ final class Row extends TableColumnData {
     
     public function __construct(Table $Table, array $RowData = array()) {
         parent::__construct($Table, $RowData);
-        $this->PrimaryKey = new PrimaryKey($Table, 
-                array_intersect_key($RowData,  $Table->GetPrimaryKeyColumnIdentifiers()));
+        $this->PrimaryKey = $Table->PrimaryKey($RowData);
         $this->PrimaryKeyColumnsAmount = count($Table->GetPrimaryKeyColumns());
     }
     

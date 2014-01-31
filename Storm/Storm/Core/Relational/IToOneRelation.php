@@ -15,10 +15,9 @@ interface IToOneRelation extends IRelation {
      * 
      * @param ResultRow[] $ParentRows The parent rows
      * @param ResultRow[] $RelatedRows The related rows
-     * @return Map The map containing the parent rows mapped to their respective related row
-     * If there is no related row, the parent will not be mapped.
+     * @return ResultRow[] The map containing the parent rows indexed with their parents key
      */
-    public function MapParentToRelatedRow(array $ParentRows, array $RelatedRows);
+    public function MapParentKeysToRelatedRow(array $ParentRows, array $RelatedRows);
     
     /**
      * Sync the supplied relationship change by persisting to/discarding from the transaction

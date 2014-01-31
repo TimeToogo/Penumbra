@@ -51,9 +51,23 @@ abstract class EntityPropertyToOneRelationMapping extends PropertyMapping implem
         return $DomainDatabaseMap->GetDatabase()->Load($RelatedRowRequest);
     }
     
+    final protected function MapParentRowKeysToRelatedRevivalData(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows, array $RelatedRows) {
+        $ParentKeyRelatedRowMap = $this->ToOneRelation->MapParentKeysToRelatedRow($ParentRows, $RelatedRows);
+        
+        $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($this->EntityType, $ParentKeyRelatedRowMap);
+        
+        $MappedRelatedRevivalData = array();
+        foreach($ParentRows as $Key => $ParentRow) {            
+            $MappedRelatedRevivalData[$Key] = isset($RelatedRevivalDataArray[$Key]) ?
+                    $RelatedRevivalDataArray[$Key] : null;
+        }
+        
+        return $MappedRelatedRevivalData;
+    }
+    
     final protected function MapToParentRowRelatedRevivalDataMap(DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap, array $RelatedRows) {
         $ParentRows = $ParentRowRevivalDataMap->GetInstances();
-        $ParentRelatedRowMap = $this->ToOneRelation->MapParentToRelatedRow($ParentRows, $RelatedRows);
+        $ParentRelatedRowMap = $this->ToOneRelation->MapParentKeysToRelatedRow($ParentRows, $RelatedRows);
         
         $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $RelatedRows);
         $RelatedRowRevivalDataMap = Map::From($RelatedRows, $RelatedRevivalData);
@@ -71,7 +85,7 @@ abstract class EntityPropertyToOneRelationMapping extends PropertyMapping implem
         return $ParentRowRelatedRevivalDataMap;
     }
     
-    public function Persist(Relational\Transaction $Transaction, Relational\ColumnData $ParentData, Relational\RelationshipChange $RelationshipChange) {
+    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, Relational\RelationshipChange $RelationshipChange) {
         if($RelationshipChange->HasDiscardedRelationship() || $RelationshipChange->HasPersistedRelationship()) {
             $this->ToOneRelation->Persist($Transaction, $ParentData, $RelationshipChange);
         }
