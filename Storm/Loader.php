@@ -1,8 +1,20 @@
 <?php
 
+namespace Storm;
+
+$RequiredDependencies = [
+    'PHPParser_Parser' => 'nikic/PHPParser'
+];
+
+foreach ($RequiredDependencies as $RequiredClass => $DependencyName) {
+    if(!class_exists($RequiredClass)) {
+        throw new \Exception('Unloaded storm dependency: ' . $DependencyName);
+    }
+}
+
 define('STORM_ROOT_PATH', __DIR__ . DIRECTORY_SEPARATOR);
 function StormAutoLoader($ClassName) {
-    if(strpos($ClassName, 'Storm') !== 0) {
+    if(strpos($ClassName, __NAMESPACE__) !== 0) {
         return;
     }
     
@@ -11,6 +23,6 @@ function StormAutoLoader($ClassName) {
         require_once $FilePath;
     }
 }
-spl_autoload_register('StormAutoLoader');
+spl_autoload_register(__NAMESPACE__ . '\\StormAutoLoader');
 
 ?>
