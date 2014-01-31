@@ -7,16 +7,9 @@ namespace Storm\Core\Object;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-final class Identity extends PropertyData {
+final class Identity extends EntityData {
     public function __construct(EntityMap $EntityMap, array $IdentityData = array()) {
-        parent::__construct($EntityMap, $IdentityData);
-    }
-    protected function AddProperty(IProperty $Property, $Data) {
-        if(!$this->EntityMap->HasIdentityProperty($Property->GetIdentifier())) {
-            throw new \InvalidArgumentException('$PropertyName must be a valid Identity property of ' . get_class($this->GetEntityMap()));
-        }
-        
-        parent::AddProperty($Property, $Data);
+        parent::__construct($EntityMap, $EntityMap->GetIdentityProperties(), $IdentityData);
     }
     
     /**

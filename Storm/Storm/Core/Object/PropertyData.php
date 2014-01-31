@@ -9,9 +9,9 @@ namespace Storm\Core\Object;
  */
 abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     /**
-     * @var EntityMap 
+     * @var IProperty[] 
      */
-    protected $EntityMap;
+    private $Properties;
     
     /**
      * @var string 
@@ -23,32 +23,35 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
      */
     private $PropertyData;
     
-    public function __construct(EntityMap $EntityMap, array $PropertyData = array()) {
-        $this->EntityMap = $EntityMap;
-        $this->EntityType = $EntityMap->GetEntityType();
+    public function __construct(array $Properties, array $PropertyData = array()) {
+        $IndexedProperties = array();
+        foreach ($Properties as $Property) {
+            $IndexedProperties[$Property->GetIdentifier()] = $Property;
+        }
+        $this->Properties =& $IndexedProperties;
         $this->PropertyData = $PropertyData;
-    }
-    
-    /**
-     * @return EntityMap
-     */
-    final public function GetEntityMap() {
-        return $this->EntityMap;
-    }
-    
-    /**
-     * @return string
-     */
-    final public function GetEntityType() {
-        return $this->EntityType;
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     final protected function GetPropertyData() {
         return $this->PropertyData;
     }
+    
+    /**
+     * Get another property data instance with new data.
+     * 
+     * @param array $PropertyData
+     * @return PropertyData
+     */
+    final public function Another(array $PropertyData = array()) {
+        $ClonedPropertyData = clone $this;
+        $ClonedPropertyData->Properties =& $this->Properties;
+        $ClonedPropertyData->PropertyData = array_intersect_key($PropertyData, $this->Properties);
+        return $ClonedPropertyData;
+    }
+    
     
     /**
      * Sets a value for the supplied property
@@ -58,17 +61,17 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
      * @throws \InvalidArgumentException
      */
     final public function SetProperty(IProperty $Property, $Data) {
-        $this->AddProperty($Property, $Data);
-    }
-    
-    protected function AddProperty(IProperty $Property, $Data) {
         $Identifier = $Property->GetIdentifier();
-        if(!$this->EntityMap->HasProperty($Identifier)) {
-            throw new \InvalidArgumentException('$PropertyOrPropertyName must be a valid property of EntityMap ' . get_class($this->EntityMap));
+        
+        if(!isset($this->Properties[$Identifier])) {
+            throw new \InvalidArgumentException('$PropertyOrPropertyName must be a property of this property data ');
         }
         
+        $this->VerifyProperty($Property, $Identifier);
         $this->PropertyData[$Identifier] = $Data;
     }
+    
+    protected function VerifyProperty(IProperty $Property, $Identifier) {}
 
     final public function getIterator() {
         return new \ArrayIterator($this->PropertyData);
@@ -83,13 +86,14 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     }
 
     final public function offsetSet($Property, $Data) {
-        $this->AddProperty($Property, $Data);
+        $this->SetProperty($Property, $Data);
     }
 
     final public function offsetUnset($Property) {
         unset($this->PropertyData[$Property->GetIdentifier()]);
     }
-    public function GetProperty($Identifier) {
+    
+    final public function GetProperty($Identifier) {
         return $this->EntityMap->GetProperty($Identifier);
     }
     
@@ -100,11 +104,10 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
      * @return boolean
      */
     final public function Matches(PropertyData $Data) {
-        if($this->EntityType !== $Data->EntityType) {
-            return false;
-        }
+        ksort($this->PropertyData);
+        ksort($Data->PropertyData);
         
-        return ksort($this->PropertyData) === ksort($Data->PropertyData);
+        return $this->PropertyData === $Data->PropertyData;
     }
 }
 

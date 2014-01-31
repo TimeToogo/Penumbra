@@ -8,20 +8,20 @@ namespace Storm\Core\Object;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-final class DiscardenceData extends EntityData {
+final class DiscardenceData extends EntityPropertyData {
     public function __construct(EntityMap $EntityMap, array $EntityData = array()) {
-        parent::__construct($EntityMap, $EntityData);
+        parent::__construct(
+                $EntityMap, 
+                $EntityMap->GetIdentityProperties() + $EntityMap->GetRelationshipProperties(), 
+                $EntityData);
     }
     
-    protected function AddProperty(IProperty $Property, $Data) {
+    protected function VerifyProperty(IProperty $Property, $Identifier) {
         $EntityMap = $this->GetEntityMap();
-        $Identifier = $Property->GetIdentifier();
         if(!$EntityMap->HasIdentityProperty($Identifier) &&
                 !$EntityMap->HasRelationshipProperty($Identifier)) {
             throw new \InvalidArgumentException('$PropertyName must be a valid Identity or Relationship property of ' . get_class($this->GetEntityMap()));
         }
-        
-        parent::AddProperty($Property, $Data);
     }
 }
 

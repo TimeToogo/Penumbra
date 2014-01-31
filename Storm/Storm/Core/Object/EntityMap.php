@@ -34,7 +34,14 @@ abstract class EntityMap implements \IteratorAggregate {
     private $DataProperties = array();
     
     /**
-     * The properties containing the related entities.
+     * The properties representing related entities.
+     * 
+     * @var IRelationshipProperty[] 
+     */
+    private $RelationshipProperties = array();
+    
+    /**
+     * The properties containing a related entity.
      * 
      * @var IEntityProperty[] 
      */
@@ -118,6 +125,9 @@ abstract class EntityMap implements \IteratorAggregate {
         }
         else {
             throw new \Exception;//TODO:error message
+        }
+        if($Property instanceof IRelationshipProperty) {
+            $this->RelationshipProperties[$Identifier] = $Property;
         }
         
         $this->Properties[$Identifier] = $Property;
@@ -210,6 +220,14 @@ abstract class EntityMap implements \IteratorAggregate {
         return $this->Properties;
     }
     
+    
+    /**
+     * @return IRelationshipProperty[]
+     */
+    final public function GetRelationshipProperties() {
+        return $this->RelationshipProperties;
+    }
+    
     /**
      * @return IEntityProperty[]
      */
@@ -270,17 +288,45 @@ abstract class EntityMap implements \IteratorAggregate {
     }
     
     /**
+     * @var RevivalData
+     */
+    private $RevialData = null;
+    /**
      * @return RevivalData
      */
-    final public function RevivalData() {
-        return new RevivalData($this);
+    final public function RevivalData(array $RevivalData = array()) {
+        if($this->RevialData === null) {
+            $this->RevialData = new RevivalData($this);
+        }
+        return $this->RevialData->Another($RevivalData);
     }
     
     /**
+     * @var PersistenceData
+     */
+    private $PersistenceData = null;
+    /**
      * @return PersistenceData
      */
-    final public function PersistanceData() {
-        return new PersistenceData($this);
+    final public function PersistanceData(array $PersistanceData = array()) {
+        if($this->PersistenceData === null) {
+            $this->PersistenceData = new PersistenceData($this);
+        }
+        return $this->PersistenceData->Another($PersistanceData);
+    }
+    
+    /**
+     * @var DiscardenceData
+     */
+    private $DiscardenceData = null;
+    /**
+     * @return DiscardenceData
+     */
+    final public function DiscardenceData(array $DiscardenceData = array()) {
+        if($this->DiscardenceData === null) {
+            $this->DiscardenceData = new DiscardenceData($this);
+        }
+        return $this->DiscardenceData->Another($DiscardenceData);
     }
     
     /**
@@ -293,18 +339,18 @@ abstract class EntityMap implements \IteratorAggregate {
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
         
-        $PersistenceData = new PersistenceData($this);
-        foreach($this->DataProperties as $DataProperty) {
-            $PersistenceData[$DataProperty] = $DataProperty->GetValue($Entity);
+        $PersistenceData = array();
+        foreach($this->DataProperties as $Identifier => $DataProperty) {
+            $PersistenceData[$Identifier] = $DataProperty->GetValue($Entity);
         }
-        foreach($this->EntityProperties as $EntityProperty) {
-            $PersistenceData[$EntityProperty] = $EntityProperty->Persist($UnitOfWork, $Entity);
+        foreach($this->EntityProperties as $Identifier => $EntityProperty) {
+            $PersistenceData[$Identifier] = $EntityProperty->Persist($UnitOfWork, $Entity);
         }
-        foreach($this->CollectionProperties as $CollectionProperty) {
-            $PersistenceData[$CollectionProperty] = $CollectionProperty->Persist($UnitOfWork, $Entity);
+        foreach($this->CollectionProperties as $Identifier => $CollectionProperty) {
+            $PersistenceData[$Identifier] = $CollectionProperty->Persist($UnitOfWork, $Entity);
         }
         
-        return $PersistenceData;
+        return $this->PersistanceData($PersistenceData);
     }
     
     /**
@@ -317,18 +363,18 @@ abstract class EntityMap implements \IteratorAggregate {
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
         
-        $DiscardingData = new DiscardenceData($this);
-        foreach($this->IdentityProperties as $IdentityProperty) {
-            $DiscardingData[$IdentityProperty] = $IdentityProperty->GetValue($Entity);
+        $DiscardingData = array();
+        foreach($this->IdentityProperties as $Identifier => $IdentityProperty) {
+            $DiscardingData[$Identifier] = $IdentityProperty->GetValue($Entity);
         }
-        foreach($this->EntityProperties as $EntityProperty) {
-            $DiscardingData[$EntityProperty] = $EntityProperty->Discard($UnitOfWork, $Entity);
+        foreach($this->EntityProperties as $Identifier => $EntityProperty) {
+            $DiscardingData[$Identifier] = $EntityProperty->Discard($UnitOfWork, $Entity);
         }
-        foreach($this->CollectionProperties as $CollectionProperty) {
-            $DiscardingData[$CollectionProperty] = $CollectionProperty->Discard($UnitOfWork, $Entity);
+        foreach($this->CollectionProperties as $Identifier => $CollectionProperty) {
+            $DiscardingData[$Identifier] = $CollectionProperty->Discard($UnitOfWork, $Entity);
         }
         
-        return $DiscardingData;
+        return $this->DiscardenceData($DiscardingData);
     }
     
     /**

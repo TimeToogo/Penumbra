@@ -6,23 +6,34 @@ namespace Storm\Core\Object;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 abstract class EntityData extends PropertyData {
-    public function __construct(EntityMap $EntityMap, array $EntityData = array()) {
-        parent::__construct($EntityMap, $EntityData);
+    /**
+     * @var EntityMap
+     */
+    protected $EntityMap;
+    /**
+     * @var string
+     */
+    protected $EntityType;
+    
+    public function __construct(EntityMap $EntityMap, array $EntityProperties, array $EntityData = array()) {
+        parent::__construct($EntityProperties, $EntityData);
+        
+        $this->EntityMap = $EntityMap;
+        $this->EntityType = $this->EntityMap->GetEntityType();
     }
     
     /**
-     * @return Identity
+     * @return EntityMap
      */
-    final public function GetIdentity() {
-        $EntityMap = $this->GetEntityMap();
-        $Identity = $EntityMap->Identity();
-        foreach($EntityMap->GetIdentityProperties() as $Property) {
-            if(isset($this[$Property])) {
-                $Identity[$Property] = $this[$Property];
-            }
-        }
-        
-        return $Identity;
+    final public function GetEntityMap() {
+        return $this->EntityMap;
+    }
+    
+    /**
+     * @return string
+     */
+    final public function GetEntityType() {
+        return $this->EntityType;
     }
 }
 
