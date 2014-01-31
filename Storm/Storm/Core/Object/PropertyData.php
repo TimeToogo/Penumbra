@@ -14,11 +14,6 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     private $Properties;
     
     /**
-     * @var string 
-     */
-    private $EntityType;
-    
-    /**
      * @var array 
      */
     private $PropertyData;
@@ -28,8 +23,8 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
         foreach ($Properties as $Property) {
             $IndexedProperties[$Property->GetIdentifier()] = $Property;
         }
-        $this->Properties =& $IndexedProperties;
-        $this->PropertyData = $PropertyData;
+        $this->Properties = $IndexedProperties;
+        $this->PropertyData = array_intersect_key($PropertyData, $this->Properties);
     }
 
     /**
