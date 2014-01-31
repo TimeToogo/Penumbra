@@ -11,7 +11,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     /**
      * @var IColumn[] 
      */
-    private $Columns = array();
+    private $Columns;
     
     /**
      * @var array
@@ -23,7 +23,8 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         foreach ($Columns as $Column) {
             $IndexedColumns[$Column->GetIdentifier()] = $Column;
         }
-        $this->Columns =& $IndexedColumns;
+        
+        $this->Columns = $IndexedColumns;
         
         $this->ColumnData = array_intersect_key($ColumnData, $this->Columns) + array_fill_keys(array_keys($this->Columns), null);
     }
@@ -50,6 +51,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
      */
     final public function Another(array $ColumnData) {
         $ClonedColumnData = clone $this;
+        $ClonedColumnData->Columns =& $this->Columns;
         $ClonedColumnData->ColumnData = array_intersect_key($ColumnData, $this->Columns) + array_fill_keys(array_keys($this->Columns), null);
         return $ClonedColumnData;
     }
