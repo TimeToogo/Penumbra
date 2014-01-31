@@ -119,11 +119,7 @@ class ResultRow extends ColumnData {
      * @return ResultRow The data of the supplied columns
      */
     final public function GetDataFromColumns(array $Columns) {
-        $ColumnData = $this->GetColumnData();
-        $ColumnIdentifiers = 
-                array_flip(array_map(function ($Column) { return $Column->GetIdentifier(); }, $Columns));
-        
-        return new ResultRow($Columns, array_intersect_key($ColumnData, $ColumnIdentifiers));
+        return new ResultRow($Columns, $this->GetColumnData());
     }
     
     
@@ -137,12 +133,10 @@ class ResultRow extends ColumnData {
      */
     final public static function GetAllDataFromColumns(array $ResultRows, array $Columns) {
         $NewResultRow = new ResultRow($Columns);
-        $ColumnIdentifiersAsKeys = array_flip(array_keys($NewResultRow->GetColumns()));
         
         $NewResultRows = array();
         foreach($ResultRows as $Key => $ResultRow) {
-            $NewResultRows[$Key] = $NewResultRow->Another(
-                    array_intersect_key($ResultRow->GetColumnData(), $ColumnIdentifiersAsKeys));
+            $NewResultRows[$Key] = $NewResultRow->Another($ResultRow->GetColumnData());
         }
         
         return $NewResultRows;
