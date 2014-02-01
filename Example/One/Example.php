@@ -249,7 +249,7 @@ class One implements \StormExamples\IStormExample {
     public function AddTags(Entities\Post $Post) {
         $Names = ['Tagged', 'Tummy', 'Tailgater', 'Food Fight', 'Andy'];
         
-        for ($Count = 2500; $Count > 0; $Count--) {
+        for ($Count = 1000; $Count > 0; $Count--) {
             $Tag = new Entities\Tag();
             $Tag->Name = $Names[rand(0, count($Names) - 1)];
             $Tag->Description = 'This is a description - ' . $Count;
