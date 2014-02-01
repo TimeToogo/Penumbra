@@ -69,7 +69,7 @@ final class UnitOfWork {
     public function Persist($Entity) {
         $Hash = spl_object_hash($Entity);
         if(isset($this->PersistenceData[$Hash])) {
-            return $this->PersistenceData[$Hash];
+             return;
         }
         
         $PersistenceData = $this->Domain->Persist($this, $Entity);
@@ -97,19 +97,15 @@ final class UnitOfWork {
     }
     
     /**
-     * @return object[]
-     */
-    public function GetEntities() {
-        return $this->PersistenceDataEntityMap->GetToInstances();
-    }
-    
-    /**
      * Add a procedure to be executed.
      * 
      * @param IProcedure $Procedure The procedure to execute
      * @return void
      */
     public function Execute(IProcedure $Procedure) {
+        if(!$this->Domain->HasEntityMap($Procedure->GetEntityType())) {
+            throw new \InvalidArgumentException();
+        }
         $this->ProcedureToExecute[] = $Procedure;
     }
     
@@ -144,6 +140,9 @@ final class UnitOfWork {
      * @param ICriterion $Criterion The criterion to discard by
      */
     public function DiscardWhere(ICriterion $Criterion) {
+        if(!$this->Domain->HasEntityMap($Criterion->GetEntityType())) {
+            throw new \InvalidArgumentException();
+        }
         $this->DiscardedCriteria[spl_object_hash($Criterion)] = $Criterion;
     }
     
