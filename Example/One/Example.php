@@ -185,7 +185,8 @@ class One implements \StormExamples\IStormExample {
     }
     
     private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $Procedure = $BlogRepository->Procedure(function (Entities\Blog $Blog) {
+        $Procedure = $BlogRepository->Procedure(
+                function (Entities\Blog $Blog) {
                     $Blog->Description = md5(new \DateTime());
 
                     $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?

@@ -70,7 +70,7 @@ abstract class ASTBase implements IAST {
         $this->ResolveVariables($VariableValueMap);
     }
     protected abstract function ResolveVariables(array $VariableValueMap);
-    
+        
     final public function ParseNodes(array $Nodes = null) {
         if($Nodes === null) {
             $Nodes = $this->Nodes;

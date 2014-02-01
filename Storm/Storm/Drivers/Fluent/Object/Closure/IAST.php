@@ -20,12 +20,7 @@ interface IAST {
     public function GetEntityVariableName();
     public function GetPropertyMode();
     public function SetPropertyMode($PropertyMode);
-    
-    /**
-     * @return INode[]
-     */
-    public function GetNodes();
-    
+        
     /**
      * Removes variables from the AST by expanding the node into their original expresions
      * Example:
@@ -35,6 +30,15 @@ interface IAST {
      * $Foo += (2 + 5) - 3;
      */
     public function ExpandVariables();
+    
+    /**
+     * Simplifies the expression tree where possible
+     * Example:
+     * 2 + 5;
+     * -- Becomes --
+     * 7;
+     */
+    public function Simplify();
     
     public function IsResolved();
     /**

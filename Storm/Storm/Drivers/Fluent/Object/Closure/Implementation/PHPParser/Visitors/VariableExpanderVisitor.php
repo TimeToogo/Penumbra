@@ -58,7 +58,6 @@ class VariableExpanderVisitor extends \PHPParser_NodeVisitorAbstract {
         }
         else {
             return $this->Traverser->traverse([$Node])[0];
-            
         }
     }
     

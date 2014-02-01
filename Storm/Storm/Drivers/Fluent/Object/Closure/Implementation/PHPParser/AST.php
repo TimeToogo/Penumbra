@@ -11,12 +11,19 @@ use \Storm\Core\Object\Expressions\Operators;
 use \Storm\Drivers\Base\Object\Properties\Property;
 use \Storm\Drivers\Base\Object\Properties\Accessors\Accessor;
 
+$NodeSimplifiers = require_once 'NodeSimplifiers.php';
+
 class AST extends ASTBase {
     private $OriginalNodes = array();
     private $HasReturnNode;
     private $ReturnNodes = array();
     
     private $VariableExpander;
+    
+    /**
+     * @var NodeSimplifier[] 
+     */
+    private $NodeSimplifiers = array();
     
     private $UnresolvedVariables = array();
     private $VariableResolverVisiter;
@@ -36,6 +43,12 @@ class AST extends ASTBase {
         
         $this->VariableExpander = new \PHPParser_NodeTraverser();
         $this->VariableExpander->addVisitor(new Visitors\VariableExpanderVisitor($this->VariableExpander));
+        
+        $NodeSimplifiers = $_GLOBALS['NodeSimplifiers'];
+        foreach($NodeSimplifiers as $NodeSimplifier) {
+            $this->NodeSimplifiers[$NodeSimplifier->GetNodeType()] = $NodeSimplifier;
+        }
+        
         
         $this->VariableResolver = new \PHPParser_NodeTraverser();
         $this->VariableResolverVisiter = new Visitors\VariableResolverVisitor();
@@ -83,6 +96,36 @@ class AST extends ASTBase {
     
     public function ExpandVariables() {
         $this->Traverse($this->VariableExpander);
+    }
+    
+    public function Simplify() {
+        $this->OriginalNodes = $this->SimplifyNodes($this->OriginalNodes);
+        $this->LoadNodes();
+    }
+    
+    public function SimplifyNodes(array $Nodes) {
+        $SimplifiedNodes = array();
+        foreach($Nodes as $Key => $Node) {
+            $SubNodes = iterator_to_array($Nodes);
+            $SimplifiedSubNodes = $this->SimplifyNodes($SubNodes);
+            foreach ($SimplifiedSubNodes as $Key => $SimplifiedSubNode) {
+                $Node[$Key] = $SimplifiedSubNode;
+            }
+            
+            $SimplifiedNodes[$Key] = $this->SimplifyNode($Node);
+        }
+        
+        return $SimplifiedNodes;
+    }
+    
+    private function SimplifyNode(\PHPParser_NodeAbstract $Node) {
+        foreach($this->NodeSimplifiers as $NodeType => $NodeSimplifier) {
+            if($Node instanceof $NodeType) {
+                return $NodeSimplifier->SimplifyNode($Node);
+            }
+        }
+        
+        return $Node;
     }
     
     public function GetUnresolvedVariables() {

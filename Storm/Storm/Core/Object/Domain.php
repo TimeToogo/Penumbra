@@ -58,6 +58,13 @@ abstract class Domain {
     }
     
     /**
+     * @return EntityMap[] The registered entity maps
+     */
+    final public function GetEntityMaps() {
+        return $this->EntityMaps;
+    }
+    
+    /**
      * @param string $EntityType The type of entity that the entity map represents
      * @return EntityMap|null The entity map or null if it is not registered
      */
