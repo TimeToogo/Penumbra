@@ -11,7 +11,7 @@ use \Storm\Core\Mapping\DomainDatabaseMap;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-abstract class EntityMap implements \IteratorAggregate {
+abstract class EntityMap {
     use \Storm\Core\Helpers\Type;   
     
     /**
@@ -197,10 +197,6 @@ abstract class EntityMap implements \IteratorAggregate {
      */
     final public function GetEntityType() {
         return $this->EntityType;
-    }
-    
-    final public function getIterator() {
-        return new \ArrayIterator($this->Properties);
     }
     
     /**
