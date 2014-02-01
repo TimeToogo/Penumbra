@@ -7,7 +7,7 @@ namespace Storm\Core\Object;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-final class DiscardedRelationship {
+class DiscardedRelationship {
     /**
      * @var boolean 
      */

@@ -89,7 +89,7 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     }
     
     final public function GetProperty($Identifier) {
-        return $this->EntityMap->GetProperty($Identifier);
+        return isset($this->Properties[$Identifier]) ? $this->Properties[$Identifier] : null;
     }
     
     /**

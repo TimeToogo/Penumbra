@@ -7,7 +7,7 @@ namespace Storm\Core\Object;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-final class PersistedRelationship {
+class PersistedRelationship {
     /**
      * @var boolean
      */
