@@ -15,7 +15,8 @@ final class DependencyMode {
 /**
  * This interface represents a relation between two tables.
  * NOTE: The parent cardinality does not matter as retreiving related rows
- * is always does in the context of many parent rows.
+ * is always does in the context of many parent rows while persisting relating
+ * rows is always done in the context of one parent row.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
