@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phpunit 
+    bootstrap="TestBootstrapper.php"
+    colors="false"
+    stopOnFailure="true">
+    
+    <testsuites>
+      <testsuite name="Storm - Entirety">
+        <directory>../</directory>
+      </testsuite>
+      <testsuite name="Storm - Unit">
+        <directory>Unit</directory>
+      </testsuite>
+      <testsuite name="Storm - Integration">
+        <directory>Integration</directory>
+      </testsuite>
+      <testsuite name="Storm - Functional">
+        <directory>Functional</directory>
+      </testsuite>
+      <testsuite name="Storm - Unit - Core">
+        <directory>Unit/Core</directory>
+      </testsuite>
+      <testsuite name="Storm - Unit - API">
+        <directory>Unit/API</directory>
+      </testsuite>
+      <testsuite name="Storm - Unit - Drivers">
+        <directory>Unit/Drivers</directory>
+        <exclude>Unit/Drivers/Platforms</exclude>
+      </testsuite>
+      <testsuite name="Storm - Unit - Drivers - Platforms">
+        <directory>Unit/Drivers/Platforms</directory>
+      </testsuite>
+    </testsuites>
+</phpunit>
