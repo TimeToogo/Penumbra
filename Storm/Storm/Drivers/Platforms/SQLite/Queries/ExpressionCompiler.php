@@ -73,7 +73,10 @@ final class ExpressionCompiler extends Queries\ExpressionCompiler {
             Operators\Cast::String => 'TEXT',
         ]; 
     }
-
+    
+    protected function GetCastAsKeyword() {
+        return 'TO';
+    }
 }
 
 ?>
