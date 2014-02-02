@@ -5,7 +5,7 @@ namespace Storm\Drivers\Base\Relational\Expressions;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 use \Storm\Drivers\Base\Relational\Expressions\Operators\Binary;
 
-class ForeignKeyPredicateExpression extends PredicateExpression {
+class ForeignKeyPredicateExpression extends CompoundBooleanExpression {
     
     public function __construct(ForeignKey $ForeignKey) {
         $ReferencedColumnMap = $ForeignKey->GetReferencedColumnMap();
@@ -22,7 +22,7 @@ class ForeignKeyPredicateExpression extends PredicateExpression {
             
         }
         
-        parent::__construct($ConstraintExpressions);
+        parent::__construct($ConstraintExpressions, Binary::LogicalAnd);
     }
 }
 

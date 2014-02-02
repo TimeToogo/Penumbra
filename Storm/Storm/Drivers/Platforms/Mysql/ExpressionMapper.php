@@ -66,11 +66,11 @@ final class ExpressionMapper extends E\ExpressionMapper {
             case O\Binary::Concatenation:
                 return new E\FunctionCallExpression('CONCAT', Expression::ValueList([$LeftOperandExpression, $RightOperandExpression]));
                 
-            case O\Binary::Inequality:
+            case O\Binary::NullSafeInequality:
                 return Expression::UnaryOperation(O\Unary::Not, 
                         Expression::BinaryOperation(
                                 $LeftOperandExpression, 
-                                O\Binary::Equality, 
+                                O\Binary::NullSafeEquality, 
                                 $RightOperandExpression));
             
             default:

@@ -46,6 +46,9 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
             case $Expression instanceof E\UnaryOperationExpression:
                 return $this->AppendUnaryOperation($QueryBuilder, $Expression);
                 
+            case $Expression instanceof E\CompoundBooleanExpression:
+                return $this->AppendCompoundBoolean($QueryBuilder, $Expression);
+                
             case $Expression instanceof E\CastExpression:
                 return $this->AppendCast($QueryBuilder, $Expression);
                 
@@ -85,6 +88,14 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
         $this->Append($QueryBuilder, $Expression->GetRightOperandExpression());
     }
     protected abstract function GetBinaryOperatorString($Operator);
+
+    protected function AppendCompoundBoolean(QueryBuilder $QueryBuilder, E\CompoundBooleanExpression $Expression) {
+        $LogicalOperatorString = $this->GetBinaryOperatorString($Expression->GetLogicalOperator());
+        $BooleanExpressions = $Expression->GetBooleanExpressions();
+        foreach ($QueryBuilder->Delimit($BooleanExpressions, $LogicalOperatorString) as $BooleanExpression) {
+            $this->Append($QueryBuilder, $BooleanExpression);
+        }
+    }
 
     protected function AppendUnaryOperation(QueryBuilder $QueryBuilder, E\UnaryOperationExpression $Expression) {
         $QueryBuilder->Append($this->GetUnaryOperatorString($Expression->GetOperator()));

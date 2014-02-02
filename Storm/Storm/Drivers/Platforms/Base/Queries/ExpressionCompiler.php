@@ -98,6 +98,12 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
         $QueryBuilder->Append(')');
     }
 
+    protected function AppendCompoundBoolean(QueryBuilder $QueryBuilder, E\CompoundBooleanExpression $Expression) {
+        $QueryBuilder->Append('(');
+        parent::AppendCompoundBoolean($QueryBuilder, $Expression);
+        $QueryBuilder->Append(')');
+    }
+    
     protected function AppendList(QueryBuilder $QueryBuilder, E\ValueListExpression $Expression) {
         $QueryBuilder->Append('(');
         $First = true;

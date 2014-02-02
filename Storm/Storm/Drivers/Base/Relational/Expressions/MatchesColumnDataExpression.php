@@ -5,7 +5,7 @@ namespace Storm\Drivers\Base\Relational\Expressions;
 use \Storm\Core\Relational\ColumnData;
 use \Storm\Drivers\Base\Relational\Expressions\Operators\Binary;
 
-class MatchesColumnDataExpression extends PredicateExpression {
+class MatchesColumnDataExpression extends CompoundBooleanExpression {
     
     public function __construct(ColumnData $ColumnData) {
         
@@ -21,7 +21,7 @@ class MatchesColumnDataExpression extends PredicateExpression {
                             Expression::PersistData($Column, Expression::Constant($Value)));
         }
         
-        parent::__construct($ConstraintExpressions);
+        parent::__construct($ConstraintExpressions, Binary::LogicalAnd);
     }
 }
 

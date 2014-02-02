@@ -54,7 +54,7 @@ abstract class KeyedRelation extends Relation {
         }
         
         $Request->GetCriterion()->AddPredicateExpression(
-                new Expressions\PredicateExpression($MatchExpressions, Expressions\Operators\Binary::LogicalOr));
+                Expressions\Expression::CompoundBoolean($MatchExpressions, Expressions\Operators\Binary::LogicalOr));
     }
     /**
      * @return Relational\Table

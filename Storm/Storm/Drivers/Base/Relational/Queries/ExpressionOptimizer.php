@@ -13,6 +13,7 @@ use \Storm\Drivers\Base\Relational\Expressions\ValueListExpression;
 use \Storm\Drivers\Base\Relational\Expressions\FunctionCallExpression;
 use \Storm\Drivers\Base\Relational\Expressions\ReviveColumnExpression;
 use \Storm\Drivers\Base\Relational\Expressions\PersistDataExpression;
+use \Storm\Drivers\Base\Relational\Expressions\CompoundBooleanExpression;
  
 abstract class ExpressionOptimizer implements IExpressionOptimizer {
     
@@ -61,6 +62,15 @@ abstract class ExpressionOptimizer implements IExpressionOptimizer {
         $ConstantExpression = Expression::PersistData($Column, $ConstantExpression);
     }
     
+    final protected function AreExpressionsConstant(array $Expressions) {
+        foreach($Expressions as $Expression) {
+            if(!$this->IsExpressionConstant($Expression)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     final protected function IsExpressionConstant(CoreExpression $Expression) {
         switch (true) {
             case $Expression instanceof ConstantExpression:
@@ -76,13 +86,11 @@ abstract class ExpressionOptimizer implements IExpressionOptimizer {
                 return $this->IsExpressionConstant($Expression->GetLeftOperandExpression())
                         && $this->IsExpressionConstant($Expression->GetRightOperandExpression());
             
+            case $Expression instanceof CompoundBooleanExpression:
+                return $this->AreExpressionsConstant($Expression->GetBooleanExpressions());
+            
             case $Expression instanceof FunctionCallExpression:
-                foreach($Expression->GetArgumentValueListExpression()->GetValueExpressions() as $ArgumentExpression) {
-                    if(!$this->IsExpressionConstant($ArgumentExpression)) {
-                        return false;
-                    }
-                }
-                return true;
+                return $this->AreExpressionsConstant($Expression->GetArgumentValueListExpression()->GetValueExpressions());
             
             default:
                 return false;

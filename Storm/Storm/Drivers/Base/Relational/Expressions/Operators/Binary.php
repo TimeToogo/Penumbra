@@ -22,11 +22,13 @@ final class Binary {
     const LogicalAnd = 200;
     const LogicalOr = 201;
     const Equality = 202;
-    const Inequality = 203;
-    const LessThan = 204;
-    const LessThanOrEqualTo = 205;
-    const GreaterThan = 206;
-    const GreaterThanOrEqualTo = 207;
+    const NullSafeEquality = 203;
+    const Inequality = 204;
+    const NullSafeInequality = 205;
+    const LessThan = 206;
+    const LessThanOrEqualTo = 207;
+    const GreaterThan = 208;
+    const GreaterThanOrEqualTo = 209;
     
     //String
     const Concatenation = 208;

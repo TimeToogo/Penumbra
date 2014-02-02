@@ -57,6 +57,13 @@ abstract class Expression extends Expressions\Expression {
     }
     
     /**
+     * @return CompoundBooleanExpression
+     */
+    public static function CompoundBoolean(array $BooleanExpressions, $LogicalOperator = Binary::LogicalAnd) {
+        return new CompoundBooleanExpression($BooleanExpressions, $LogicalOperator);
+    }
+    
+    /**
      * @return FunctionCallExpression
      */
     public static function FunctionCall($Name, ValueListExpression $ArgumentValueListExpression = null) {
