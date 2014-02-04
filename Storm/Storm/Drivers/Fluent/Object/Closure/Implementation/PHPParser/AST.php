@@ -31,7 +31,7 @@ class AST extends ASTBase {
     
     public function __construct(
             array $Nodes, 
-            Object\EntityMap $EntityMap,
+            Object\IEntityMap $EntityMap,
             $EntityVariableName) {
         
         parent::__construct(array(), $EntityMap, $EntityVariableName);

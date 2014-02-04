@@ -17,7 +17,7 @@ final class PostRelationalMap extends Mapping\EntityRelationalMap {
         return $Database->GetTable('Posts');
     }
     
-    protected function InitializeMappings(Object\EntityMap $EntityMap, Relational\Database $Database) {
+    protected function InitializeMappings(Object\IEntityMap $EntityMap, Relational\Database $Database) {
         /* @var $EntityMap \StormExamples\One\Domain\Maps\PostMap */
         /* @var $Table \StormExamples\One\Relational\Tables\Posts */
         $Table = $Database->Posts;

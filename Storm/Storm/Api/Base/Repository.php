@@ -37,7 +37,7 @@ class Repository {
     /**
      * The EntityMap for this repository.
      * 
-     * @var Object\EntityMap
+     * @var Object\IEntityMap
      */
     protected $EntityMap;
     

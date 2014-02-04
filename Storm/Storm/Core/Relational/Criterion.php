@@ -9,7 +9,7 @@ namespace Storm\Core\Relational;
  */
 final class Criterion {
     /**
-     * @var Table[] 
+     * @var ITable[] 
      */
     private $Tables = array();
     
@@ -48,7 +48,7 @@ final class Criterion {
     }
     
     /**
-     * @return Table[]
+     * @return ITable[]
      */
     final public function GetTables() {
         return $this->Tables;
@@ -57,17 +57,17 @@ final class Criterion {
     /**
      * Add a table to the criterion.
      * 
-     * @param Table $Table The table to add
+     * @param ITable $Table The table to add
      * @return void
      */
-    final public function AddTable(Table $Table) {
+    final public function AddTable(ITable $Table) {
         $this->Tables[$Table->GetName()] = $Table;
     }
     
     /**
      * Add an array of tables to the criterion
      * 
-     * @param Table[] $Tables The tables to add
+     * @param ITable[] $Tables The tables to add
      * @return void
      */
     final public function AddTables(array $Tables) {

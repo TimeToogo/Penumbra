@@ -20,7 +20,7 @@ class Parser implements IParser {
     
     public function Parse(
             $ClosureBodySource,
-            Object\EntityMap $EntityMap,
+            Object\IEntityMap $EntityMap,
             $EntityVariableName) {
         $Nodes = self::$PHPParser->parse('<?php ' . $ClosureBodySource . ' ?>');
         $Nodes = $this->ConstantValueNodeReplacer->traverse($Nodes);

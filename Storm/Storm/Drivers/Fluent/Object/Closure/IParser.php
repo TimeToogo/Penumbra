@@ -12,7 +12,7 @@ interface IParser {
      */
     public function Parse(
             $ClosureBodySource,
-            Object\EntityMap $EntityMap,
+            Object\IEntityMap $EntityMap,
             $EntityVariableName);
 }
 

@@ -20,7 +20,7 @@ interface IProperty {
     /**
      * The parent entity map.
      * 
-     * @return EntityMap|null
+     * @return IEntityMap|null
      */
     public function GetEntityMap();
     
@@ -32,10 +32,10 @@ interface IProperty {
     /**
      * Sets the parent entity map.
      * 
-     * @param EntityMap|null $EntityMap
+     * @param IEntityMap|null $EntityMap
      * @return void
      */
-    public function SetEntityMap(EntityMap $EntityMap = null);
+    public function SetEntityMap(IEntityMap $EntityMap = null);
 }
 
 ?>

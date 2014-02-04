@@ -24,7 +24,7 @@ class ClosureToASTConverter extends Base\ClosureToASTConverter {
         $this->Cache = $Cache;
     }
 
-    public function ClosureToAST(Object\EntityMap $EntityMap, \Closure $Closure, $ResolveVariables = true) {
+    public function ClosureToAST(Object\IEntityMap $EntityMap, \Closure $Closure, $ResolveVariables = true) {
         $Reflection = new \ReflectionFunction($Closure);
         $ClosureHash = $this->ClosureHash($Reflection);
         

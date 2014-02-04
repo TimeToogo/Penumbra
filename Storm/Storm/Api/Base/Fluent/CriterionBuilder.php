@@ -19,7 +19,7 @@ class CriterionBuilder {
     private $Criterion;
     
     public function __construct(
-            Object\EntityMap $EntityMap,
+            Object\IEntityMap $EntityMap,
             ClosureToASTConverter $ClosureToASTConverter) {
         $this->EntityMap = $EntityMap;
         $this->EntityType = $EntityMap->GetEntityType();

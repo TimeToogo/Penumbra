@@ -6,7 +6,7 @@ use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational\Database;
 use \Storm\Drivers\Base\Relational\Columns\IColumnSet;
 use \Storm\Drivers\Base\Relational\PrimaryKeys\IKeyGeneratorSet;
-use \Storm\Core\Relational\Table;
+use \Storm\Core\Relational\ITable;
 use \Storm\Drivers\Constant\Relational;
 use \Storm\Drivers\Platforms\Mysql;
 use \Storm\Drivers\Base\Relational\Columns\Column;
@@ -31,7 +31,7 @@ class PostTags extends Relational\Relations\JoinTable {
     protected function Table1(Database $Database) {
         return $Database->Posts;
     }
-    protected function MapForeignKey1(Map $Map, Table $Posts) {
+    protected function MapForeignKey1(Map $Map, ITable $Posts) {
         $Map->Map($this->PostBlogId, $Posts->BlogId);
         $Map->Map($this->PostTitle, $Posts->Title);
     }
@@ -39,7 +39,7 @@ class PostTags extends Relational\Relations\JoinTable {
     protected function Table2(Database $Database) {
         return $Database->Tags;
     }
-    protected function MapForeignKey2(Map $Map, Table $Tags) {
+    protected function MapForeignKey2(Map $Map, ITable $Tags) {
         $Map->Map($this->TagId, $Tags->Id);
     }
 }

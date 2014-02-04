@@ -2,7 +2,7 @@
 
 namespace Storm\Core\Relational\Expressions;
 
-use \Storm\Core\Relational\Table;
+use \Storm\Core\Relational\ITable;
 use Storm\Core\Relational\IColumn;
 
 /**
@@ -12,7 +12,7 @@ use Storm\Core\Relational\IColumn;
  */
 class ColumnExpression extends Expression {
     /**
-     * @var Table 
+     * @var ITable 
      */
     private $Table;
     
@@ -33,7 +33,7 @@ class ColumnExpression extends Expression {
     }
     
     /**
-     * @return Table
+     * @return ITable
      */
     final public function GetTable() {
         return $this->Table;

@@ -16,7 +16,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     use \Storm\Core\Helpers\Type;    
     
     /**
-     * @var Object\EntityMap
+     * @var Object\IEntityMap
      */
     private $EntityMap;
     
@@ -26,17 +26,17 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     private $EntityType;
     
     /**
-     * @var Relational\Table
+     * @var Relational\ITable
      */
     private $PrimaryKeyTable;
     
     /**
-     * @var Relational\Table[]
+     * @var Relational\ITable[]
      */
     private $PersistTables;
     
     /**
-     * @var Relational\Table[]
+     * @var Relational\ITable[]
      */
     private $ReviveTables;
     
@@ -88,13 +88,13 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         
         $this->EntityMap = $this->EntityMap($DomainDatabaseMap->GetDomain());
         $this->EntityType = $this->EntityMap->GetEntityType();
-        if(!($this->EntityMap instanceof Object\EntityMap))
+        if(!($this->EntityMap instanceof Object\IEntityMap))
             throw new \UnexpectedValueException
-                    ('Return value from ' . get_class($this) . '->EntityMap() must be a valid EntityMap');
+                    ('Return value from ' . get_class($this) . '->EntityMap() must be a valid IEntityMap');
         
         $Database = $DomainDatabaseMap->GetDatabase();
         $this->PrimaryKeyTable = $this->PrimaryKeyTable($Database);
-        if(!($this->PrimaryKeyTable instanceof Relational\Table))
+        if(!($this->PrimaryKeyTable instanceof Relational\ITable))
             throw new \UnexpectedValueException
                     ('Return value from ' . get_class($this) . '->PrimaryKeyTable() must be a valid Table');
         
@@ -135,7 +135,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * relational map.
      * 
      * @param Object\Domain The current domain
-     * @return Object\EntityMap
+     * @return Object\IEntityMap
      */
     protected abstract function EntityMap(Object\Domain $Domain);
     
@@ -143,8 +143,8 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * The method to specify the table containing the primary key/identity for this
      * entity.
      * 
-     * @param Object\Domain The current domain
-     * @return Object\EntityMap
+     * @param Relational\Database The current database
+     * @return Relational\ITable
      */
     protected abstract function PrimaryKeyTable(Relational\Database $Database);
     
@@ -152,11 +152,11 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * The method to register all the property mappings for this entity relational map.
      * 
      * @param Registrar $Registrar The registrar to register the property mappings
-     * @param Object\EntityMap $EntityMap The entity map representing the entity properties
+     * @param Object\IEntityMap $EntityMap The entity map representing the entity properties
      * @param Relational\Database $Database The current database instance
      * @return void
      */
-    protected abstract function RegisterPropertyMappings(Registrar $Registrar, Object\EntityMap $EntityMap, Relational\Database $Database);
+    protected abstract function RegisterPropertyMappings(Registrar $Registrar, Object\IEntityMap $EntityMap, Relational\Database $Database);
     
     /**
      * Adds a property mapping to the entity relation map.

@@ -34,31 +34,31 @@ abstract class JoinTable extends Base\Relational\Table {
     }
     
     /**
-     * @return Relational\Table
+     * @return Relational\ITable
      */
     protected abstract function Table1(Relational\Database $Database);
     
-    private function GetForeignKeyMap1(Relational\Table $Table1) {
+    private function GetForeignKeyMap1(Relational\ITable $Table1) {
         $Map = new Map();
         $this->MapForeignKey1($Map, $Table1);
         return $Map;
     }
-    protected abstract function MapForeignKey1(Map $Map, Relational\Table $Table1);
+    protected abstract function MapForeignKey1(Map $Map, Relational\ITable $Table1);
     
     /**
-     * @return Relational\Table
+     * @return Relational\ITable
      */
     protected abstract function Table2(Relational\Database $Database);
     
-    private function GetForeignKeyMap2(Relational\Table $Table2) {
+    private function GetForeignKeyMap2(Relational\ITable $Table2) {
         $Map = new Map();
         $this->MapForeignKey2($Map, $Table2);
         return $Map;
     }
-    protected abstract function MapForeignKey2(Map $Map, Relational\Table $Table2);
+    protected abstract function MapForeignKey2(Map $Map, Relational\ITable $Table2);
     
     /**
-     * @return Relational\Table
+     * @return Relational\ITable
      */
     final public function GetTable1() {
         return $this->Table1;
@@ -71,7 +71,7 @@ abstract class JoinTable extends Base\Relational\Table {
     }
     
     /**
-     * @return Relational\Table
+     * @return Relational\ITable
      */
     final public function GetTable2() {
         return $this->Table2;
@@ -83,7 +83,7 @@ abstract class JoinTable extends Base\Relational\Table {
         return $this->ForeignKey2;
     }
     
-    private function MakeForeignKey(Relational\Table $Table, Map $ReferencedColumnMap) {
+    private function MakeForeignKey(Relational\ITable $Table, Map $ReferencedColumnMap) {
         return new ForeignKey($this->GetName() . '_' . $Table->GetName(), $ReferencedColumnMap,
                 ForeignKeyMode::Cascade, ForeignKeyMode::Cascade);
     }
@@ -92,7 +92,7 @@ abstract class JoinTable extends Base\Relational\Table {
      * @return ForeignKey
      * @throws Exception
      */
-    final public function GetForeignKey(Relational\Table $Table) {
+    final public function GetForeignKey(Relational\ITable $Table) {
         if($this->GetTable1()->Is($Table)) {
             return $this->GetForeignKey1();
         }

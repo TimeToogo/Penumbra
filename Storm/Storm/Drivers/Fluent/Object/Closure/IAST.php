@@ -10,13 +10,13 @@ interface IAST {
     const PropertiesAreSetters = 2;
     
     /**
-     * @return Object\EntityMap
+     * @return Object\IEntityMap
      */
     public function GetEntityMap();
     /**
-     * @return Object\EntityMap
+     * @return Object\IEntityMap
      */
-    public function SetEntityMap(Object\EntityMap $EntityMap);
+    public function SetEntityMap(Object\IEntityMap $EntityMap);
     public function GetEntityVariableName();
     public function GetPropertyMode();
     public function SetPropertyMode($PropertyMode);

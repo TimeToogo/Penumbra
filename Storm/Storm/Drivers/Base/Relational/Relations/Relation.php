@@ -11,14 +11,14 @@ abstract class Relation implements Relational\IRelation {
     private $PersistingOrder;
     private $DiscardingOrder;
     
-    public function __construct(Relational\Table $RelatedTable, $PersistingOrder, $DiscardingOrder) {
+    public function __construct(Relational\ITable $RelatedTable, $PersistingOrder, $DiscardingOrder) {
         $this->Table = $RelatedTable;
         $this->PersistingOrder = $PersistingOrder;
         $this->DiscardingOrder = $DiscardingOrder;
     }
     
     /**
-     * @return Relational\Table
+     * @return Relational\ITable
      */
     final public function GetTable() {
         return $this->Table;

@@ -5,12 +5,9 @@ namespace Storm\Core\Relational;
 use \Storm\Core\Containers\Registrar;
 
 /**
- * The table represents the structure and relations of a table in the
- * underlying database.
- * 
- * @author Elliot Levin <elliot@aanet.com.au>
+ *{@inheritDoc}
  */
-abstract class Table {
+abstract class Table implements ITable {
     use \Storm\Core\Helpers\Type;
     
     /**
@@ -58,10 +55,7 @@ abstract class Table {
     }
     
     /**
-     * Initializes the columns of the table.
-     * 
-     * @param Database $Database The parent database
-     * @return void
+     *{@inheritDoc}
      */
     final public function InitializeStructure(Database $Database) {
         $this->OnInitializeStructure($Database);
@@ -82,18 +76,12 @@ abstract class Table {
     protected function OnStructureInitialized(Database $Database) { }
     
     /**
-     * Initializes the related structure of the table.
-     * 
-     * @param Database $Database The parent database
-     * @return void
+     *{@inheritDoc}
      */
     public abstract function InitializeRelatedStructure(Database $Database);
     
     /**
-     * Initializes the relations of the table.
-     * 
-     * @param Database $Database The parent database
-     * @return void
+     *{@inheritDoc}
      */
     final public function InitializeRelations(Database $Database) {
         $this->OnInitializeRelations($Database);
@@ -166,130 +154,118 @@ abstract class Table {
      }
 
     /**
-     * @return string
+     *{@inheritDoc}
      */
     final public function GetName() {
         return $this->Name;
     }
     
     /**
-     * @param string $Name The column name
-     * @return boolean
+     *{@inheritDoc}
      */
     final public function HasColumn($Name) {
         return isset($this->Columns[$Name]);
     }
     
     /**
-     * @param string $Name The column name
-     * @return boolean
+     *{@inheritDoc}
      */
     final public function HasPrimaryKey($Name) {
         return isset($this->PrimaryKeyColumns[$Name]);
     }
     
     /**
-     * @param string $Name The column name
-     * @return IColumn|null
+     *{@inheritDoc}
      */
     final public function GetColumn($Name) {
         return $this->HasColumn($Name) ? $this->Columns[$Name] : null;
     }
     
     /**
-     * @param string $Identifier The column identifier
-     * @return IColumn|null
+     *{@inheritDoc}
      */
     final public function GetColumnByIdentifier($Identifier) {
         return isset($this->ColumnsByIdentifiers[$Identifier]) ? $this->ColumnsByIdentifiers[$Identifier] : null;
     }
     
     /**
-     * Gets the table columns, indexed by their respective column name.
-     * 
-     * @return IColumn[]
+     *{@inheritDoc}
      */
     final public function GetColumns() {
         return $this->Columns;
     }
     
     /**
-     * @return IColumn[]
+     *{@inheritDoc}
      */
     final public function GetColumnsByIdentifier() {
         return $this->ColumnsByIdentifiers;
     }
     
     /**
-     * @return string[]
+     *{@inheritDoc}
      */
     final public function GetColumnIdentifiers() {
         return array_keys($this->ColumnsByIdentifiers);
     }
     
     /**
-     * Gets the table columns which are primary keys, 
-     * indexed by their respective column name.
-     * 
-     * @return IColumn[]
+     *{@inheritDoc}
      */
     final public function GetPrimaryKeyColumns() {
         return $this->PrimaryKeyColumns;
     }
     
     /**
-     * @return IColumn[]
+     *{@inheritDoc}
      */
     final public function GetPrimaryKeyColumnsByIdentifier() {
         return $this->PrimaryKeyColumnByIdentifiers;
     }
     
     /**
-     * @return string[]
+     *{@inheritDoc}
      */
     final public function GetPrimaryKeyColumnIdentifiers() {
         return array_keys($this->PrimaryKeyColumnByIdentifiers);
     }
     
     /**
-     * @return IToOneRelation[]
+     *{@inheritDoc}
      */
     final public function GetToOneRelations() {
         return $this->ToOneRelations;
     }
     
     /**
-     * @return IToManyRelation[]
+     *{@inheritDoc}
      */
     final public function GetToManyRelations() {
         return $this->ToManyRelations;
     }    
     
     /**
-     * @param Table $OtherTable The other table
-     * @return int The dependency order
+     *{@inheritDoc}
      */
-    final public function GetPersistingOrderBetween(Table $OtherTable) {
+    final public function GetPersistingOrderBetween(ITable $OtherTable) {
         return $this->GetDepedencyOrderBetweenInternal(true, $OtherTable);
     }
     
     /**
-     * @param Table $OtherTable The other table
-     * @return int The dependency order
+     *{@inheritDoc}
      */
-    final public function GetDiscardingOrderBetween(Table $OtherTable) {
+    final public function GetDiscardingOrderBetween(ITable $OtherTable) {
         return $this->GetDepedencyOrderBetweenInternal(false, $OtherTable);
     }
     
     /**
-     * @param Table $OtherTable The other table
-     * @return int The dependency order
+     *{@inheritDoc}
      */
-    final public function GetDepedencyOrderBetween($DependencyMode, Table $OtherTable) {
+    final public function GetDepedencyOrderBetween($DependencyMode, ITable $OtherTable) {
         return $this->GetDepedencyOrderBetweenInternal($DependencyMode === DependencyMode::Persisting, $OtherTable);
     }
     
-    private function GetDepedencyOrderBetweenInternal($ForPersising, Table $OtherTable, $Reversed = false) {
+    private function GetDepedencyOrderBetweenInternal($ForPersising, ITable $OtherTable, $Reversed = false) {
         foreach($this->AllRelations as $Relation) {
             if($Relation->GetTable()->Is($OtherTable)) {
                 if($ForPersising)
@@ -313,10 +289,7 @@ abstract class Table {
     
     private $Row = null;
     /**
-     * Get a row of this table
-     * 
-     * @param array $Data The column data
-     * @return Row The row
+     *{@inheritDoc}
      */
     final public function Row(array $Data = array()){
         if($this->Row === null) {
@@ -327,10 +300,7 @@ abstract class Table {
     
     private $PrimaryKey = null;
     /**
-     * Get a primary key of this table
-     * 
-     * @param array $Data The column data
-     * @return PrimaryKey The row
+     *{@inheritDoc}
      */
     final public function PrimaryKey(array $Data = array()) {
         if($this->PrimaryKey === null) {
@@ -339,8 +309,10 @@ abstract class Table {
         return $this->PrimaryKey->Another($Data);
     }
    
-    
-    final public function Is(Table $Table) {
+    /**
+     *{@inheritDoc}
+     */
+    final public function Is(ITable $Table) {
         return $this->Name === $Table->Name;
     }
 }

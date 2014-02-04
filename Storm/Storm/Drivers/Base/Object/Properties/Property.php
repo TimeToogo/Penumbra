@@ -4,7 +4,7 @@ namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
 use \Storm\Core\Object\IProperty;
-use \Storm\Core\Object\EntityMap;
+use \Storm\Core\Object\IEntityMap;
 
 abstract class Property implements IProperty {
     private $Identifier;
@@ -38,7 +38,7 @@ abstract class Property implements IProperty {
         return $this->EntityMap !== null;
     }
     
-    final public function SetEntityMap(EntityMap $EntityMap = null) {
+    final public function SetEntityMap(IEntityMap $EntityMap = null) {
         $this->EntityMap = $EntityMap;
         if($EntityMap !== null) {
             $this->Accessor->SetEntityType($EntityMap->GetEntityType());

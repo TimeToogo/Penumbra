@@ -9,17 +9,17 @@ namespace Storm\Core\Relational;
  */
 abstract class TableColumnData extends ColumnData {
     /**
-     * @var Table
+     * @var ITable
      */
     private $Table;
     
-    protected function __construct(Table $Table, array $ColumnData = array()) {
+    protected function __construct(ITable $Table, array $ColumnData = array()) {
         $this->Table = $Table;
         parent::__construct($Table->GetColumns(), $ColumnData);
     }
     
     /**
-     * @return Table
+     * @return ITable
      */
     final public function GetTable() {
         return $this->Table;

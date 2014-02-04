@@ -24,7 +24,7 @@ interface IRelation {
     /**
      * Gets the related table.
      * 
-     * @return Table
+     * @return ITable
      */
     public function GetTable();
     

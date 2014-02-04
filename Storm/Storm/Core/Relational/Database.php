@@ -14,22 +14,22 @@ abstract class Database {
     use \Storm\Core\Helpers\Type;
         
     /**
-     * @var Table[] 
+     * @var ITable[] 
      */
     private $Tables = array();
     
     /**
-     * @var Table[] 
+     * @var ITable[] 
      */
     private $TablesOrderedByPersistingDependency = array();
     
     /**
-     * @var Table[] 
+     * @var ITable[] 
      */
     private $TablesOrderedByDiscardingDependency = array();
     
     public function __construct() {
-        $Registrar = new Registrar(Table::GetType());
+        $Registrar = new Registrar(ITable::ITableType);
         $this->RegisterTables($Registrar);
         $this->AddTables($Registrar->GetRegistered());
     }
@@ -45,7 +45,7 @@ abstract class Database {
     /**
      * Adds an array of tables.
      * 
-     * @param Table[] $Tables The tables to add
+     * @param ITable[] $Tables The tables to add
      */
     private function AddTables(array $Tables) {
         foreach($Tables as $Key => $Table) {
@@ -73,12 +73,12 @@ abstract class Database {
     /**
      * Adds a table to an array in a specified dependency order.
      * 
-     * @param Table $Table The table to add
-     * @param Tables[] $OrderedTables The array to add to
+     * @param ITable $Table The table to add
+     * @param ITable[] $OrderedTables The array to add to
      * @param int $DependencyMode The dependency mode to sort by
      * @return void
      */
-    private function AddTableToOrderedTables(Table $Table, array &$OrderedTables, $DependencyMode) {
+    private function AddTableToOrderedTables(ITable $Table, array &$OrderedTables, $DependencyMode) {
         $Count = 0;
         foreach($OrderedTables as $OtherTable) {
             if($Table->GetDepedencyOrderBetween($DependencyMode, $OtherTable) === DependencyOrder::Before) {
@@ -104,7 +104,7 @@ abstract class Database {
      * Gets a table by name.
      * 
      * @param string $Name The name of the table
-     * @return Table|null The matching table or null if it has not been registered
+     * @return ITable|null The matching table or null if it has not been registered
      */
     final public function GetTable($Name) {
         return $this->HasTable($Name) ? $this->Tables[$Name] : null;
@@ -113,31 +113,31 @@ abstract class Database {
     /**
      * Verifies a table is registered in this database.
      * 
-     * @param Table $Table The table to verify
+     * @param ITable $Table The table to verify
      * @throws \InvalidArgumentException If the table is not registered
      */
-    private function VerifyTable(Table $Table) {
+    private function VerifyTable(ITable $Table) {
         if(!$this->HasTable($Table->GetName())) {
             throw new \InvalidArgumentException('$Table must be of this database');
         }
     }
     
     /**
-     * @return Table[]
+     * @return ITable[]
      */
     final public function GetTables() {
         return $this->Tables;
     }
     
     /**
-     * @return Table[]
+     * @return ITable[]
      */
     public function GetTablesOrderedByPersistingDependency() {
         return $this->TablesOrderedByPersistingDependency;
     }
 
     /**
-     * @return Table[]
+     * @return ITable[]
      */
     public function GetTablesOrderedByDiscardingDependency() {
         return $this->TablesOrderedByDiscardingDependency;

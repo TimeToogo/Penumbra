@@ -9,7 +9,7 @@ namespace Storm\Core\Relational;
  */
 class ResultRow extends ColumnData {
     /**
-     * @var Table[] 
+     * @var ITable[] 
      */
     private $Tables = array();
     
@@ -82,13 +82,13 @@ class ResultRow extends ColumnData {
     }
     
     /**
-     * @return Table[]
+     * @return ITable[]
      */
     final public function GetTables() {
         return $this->Tables;
     }
     
-    final public function IsOf(Table $Table) {
+    final public function IsOf(ITable $Table) {
         return isset($this->Tables[$Table->GetName()]);
     }
     
@@ -109,11 +109,11 @@ class ResultRow extends ColumnData {
     /**
      * Get a the row of the supplied table
      * 
-     * @param Table $Table The table of the row to retreive
+     * @param ITable $Table The table of the row to retreive
      * @return Row The matching row
      * @throws \InvalidArgumentException If the table is not part of this result row
      */
-    final public function GetRow(Table $Table) {
+    final public function GetRow(ITable $Table) {
         if(!$this->IsOf($Table)) {
             throw new \InvalidArgumentException('$Table must be a part of this row');
         }
@@ -124,11 +124,11 @@ class ResultRow extends ColumnData {
     /**
      * Get a the primary key of the supplied table
      * 
-     * @param Table $Table The table of the primary key to retreive
+     * @param ITable $Table The table of the primary key to retreive
      * @return PrimaryKey The matching primary key
      * @throws \InvalidArgumentException If the table is not part of this result row
      */
-    final public function GetPrimaryKey(Table $Table) {
+    final public function GetPrimaryKey(ITable $Table) {
         if(!$this->IsOf($Table)) {
             throw new \InvalidArgumentException('$Table must be a part of this row');
         }

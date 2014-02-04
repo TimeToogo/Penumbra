@@ -165,41 +165,41 @@ final class Transaction {
     /**
      * Trigger the pre persist callbacks for the supplied rows
      * 
-     * @param Table $Table The table to trigger
+     * @param ITable $Table The table to trigger
      * @return void
      */
-    public function TriggerPrePersistEvent(Table $Table) {
+    public function TriggerPrePersistEvent(ITable $Table) {
         $this->TriggerEvents($this->PrePersistRowEventMap, $Table);
     }
     
     /**
      * Subscribe a callback to when the supplied row will be persisted.
      * 
-     * @param Table $Table
+     * @param ITable $Table
      * @param callable $Event
      */
-    public function SubscribeToPrePersistEvent(Table $Table, callable $Event) {
+    public function SubscribeToPrePersistEvent(ITable $Table, callable $Event) {
         $this->AddEvent($this->PrePersistRowEventMap, $Table, $Event);
     }
     
     /**
      * Trigger the post persist callbacks for the supplied rows
      * 
-     * @param Table $Table The table to trigger
+     * @param ITable $Table The table to trigger
      * @return void
      */
-    public function TriggerPostPersistEvent(Table $Table) {
+    public function TriggerPostPersistEvent(ITable $Table) {
         $this->TriggerEvents($this->PostPersistRowEventMap, $Table);
     }
     
     /**
      * Subscribe a callback to after the supplied row was persisted.
      * 
-     * @param Table $Table
+     * @param ITable $Table
      * @param callable $Event
      * @return void
      */
-    public function SubscribeToPostPersistEvent(Table $Table, callable $Event) {
+    public function SubscribeToPostPersistEvent(ITable $Table, callable $Event) {
         $this->AddEvent($this->PostPersistRowEventMap, $Table, $Event);
     }
     

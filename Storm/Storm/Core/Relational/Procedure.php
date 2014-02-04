@@ -15,7 +15,7 @@ class Procedure {
     /**
      * The tables to update.
      * 
-     * @var Table[]
+     * @var ITable[]
      */
     private $Tables;
     

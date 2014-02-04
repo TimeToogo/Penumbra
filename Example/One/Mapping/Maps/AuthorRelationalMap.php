@@ -17,7 +17,7 @@ final class AuthorRelationalMap extends Mapping\EntityRelationalMap {
         return $Database->GetTable('Authors');
     }
     
-    protected function InitializeMappings(Object\EntityMap $EntityMap, Relational\Database $Database) {
+    protected function InitializeMappings(Object\IEntityMap $EntityMap, Relational\Database $Database) {
         /* @var $EntityMap \StormExamples\One\Domain\Maps\AuthorMap */
         /* @var $Table \StormExamples\One\Relational\Tables\Authors */
         $Table = $Database->Authors;

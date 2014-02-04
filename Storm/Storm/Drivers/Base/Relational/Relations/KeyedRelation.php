@@ -14,7 +14,7 @@ abstract class KeyedRelation extends Relation {
     
     public function __construct(
             ForeignKey $ForeignKey,
-            Relational\Table $RelatedTable, 
+            Relational\ITable $RelatedTable, 
             $PersistingOrder, 
             $DiscardingOrder) {
         parent::__construct($RelatedTable, 

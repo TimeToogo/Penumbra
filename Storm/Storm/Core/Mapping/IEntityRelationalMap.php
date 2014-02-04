@@ -24,14 +24,14 @@ interface IEntityRelationalMap {
     /**
      * The entity map of represented entity.
      * 
-     * @return Object\EntityMap
+     * @return Object\IEntityMap
      */
     public function GetEntityMap();
     
     /**
      * The table in which the identity is stored.
      * 
-     * @return Relational\Table
+     * @return Relational\ITable
      */
     public function GetPrimaryKeyTable();
     
@@ -39,21 +39,21 @@ interface IEntityRelationalMap {
     /**
      * The properties that mapped.
      * 
-     * @return Relational\Table
+     * @return Object\IProperties[]
      */
     public function GetMappedProperties();
     
     /**
      * The tables that are mapped to for persistence.
      * 
-     * @return Relational\Table[]
+     * @return Relational\ITable[]
      */
     public function GetMappedPersistTables();
     
     /**
      * The tables that are mapped from for revival.
      * 
-     * @return Relational\Table[]
+     * @return Relational\ITable[]
      */
     public function GetMappedReviveTables();
     

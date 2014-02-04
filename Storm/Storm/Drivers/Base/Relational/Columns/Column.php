@@ -3,7 +3,7 @@
 namespace Storm\Drivers\Base\Relational\Columns;
 
 use \Storm\Core\Relational\IColumn;
-use \Storm\Core\Relational\Table;
+use \Storm\Core\Relational\ITable;
 use \Storm\Core\Relational\ColumnData;
 
 class Column implements IColumn {
@@ -51,7 +51,7 @@ class Column implements IColumn {
         return $this->Table !== null;
     }
     
-    final public function SetTable(Table $Table = null) {
+    final public function SetTable(ITable $Table = null) {
         $this->Table = $Table;
         $this->UpdateIdentifier();
     }

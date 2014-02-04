@@ -25,7 +25,7 @@ interface IColumn {
     public function IsPrimaryKey();    
     
     /**
-     * @return Table|null
+     * @return ITable|null
      */
     public function GetTable();
     
@@ -37,10 +37,10 @@ interface IColumn {
     /**
      * Set the parent table.
      * 
-     * @param Table|null $Table The parent table
+     * @param ITable|null $Table The parent table
      * @return void
      */
-    public function SetTable(Table $Table = null);
+    public function SetTable(ITable $Table = null);
     
     /**
      * Gets the name of the column.

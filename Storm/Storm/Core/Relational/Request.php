@@ -12,14 +12,14 @@ class Request {
     /**
      * The tables to load from.
      * 
-     * @var Table[]
+     * @var ITable[]
      */
     private $Tables = array();
     
     /**
      * The columns to load from.
      * 
-     * @var Table[]
+     * @var IColumn[]
      */
     private $Columns = array();
     
@@ -69,10 +69,10 @@ class Request {
     /**
      * Add a table to the request.
      * 
-     * @param Table $Table The table to add
+     * @param ITable $Table The table to add
      * @return void
      */
-    final public function AddTable(Table $Table) {
+    final public function AddTable(ITable $Table) {
         $this->Tables[$Table->GetName()] = $Table;
         $this->Criterion->AddTable($Table);
     }
@@ -80,14 +80,14 @@ class Request {
     /**
      * Add an array of tables to the request.
      * 
-     * @param Table[] $Tables The tables to add
+     * @param ITable[] $Tables The tables to add
      * @return void
      */
     final public function AddTables(array $Tables) {
         array_walk($Tables, [$this, 'AddTable']);
     }
     
-    final public function RemoveTable(Table $Table) {
+    final public function RemoveTable(ITable $Table) {
         unset($this->Tables[$Table->GetName()]);
         array_walk($Table->GetColumns(), [$this, 'RemoveColumn']);
     }
@@ -104,7 +104,7 @@ class Request {
     }
     
     /**
-     * @return Table[]
+     * @return ITable[]
      */
     final public function GetTables() {
         return $this->Tables;

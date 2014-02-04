@@ -7,7 +7,7 @@ use \Storm\Core\Object\Expressions\Expression;
 
 abstract class ASTBase implements IAST {
     /**
-     * @var Object\EntityMap|null
+     * @var Object\IEntityMap|null
      */
     protected $EntityMap;
     
@@ -21,7 +21,7 @@ abstract class ASTBase implements IAST {
     
     public function __construct(
             array $Nodes, 
-            Object\EntityMap $EntityMap, 
+            Object\IEntityMap $EntityMap, 
             $EntityVariableName) {
         $this->Nodes = $Nodes;
         $this->EntityMap = $EntityMap;
@@ -43,7 +43,7 @@ abstract class ASTBase implements IAST {
     final public function GetEntityMap() {
         return $this->EntityMap;
     }
-    final public function SetEntityMap(Object\EntityMap $EntityMap) {
+    final public function SetEntityMap(Object\IEntityMap $EntityMap) {
         $this->EntityMap = $EntityMap;
     }
 

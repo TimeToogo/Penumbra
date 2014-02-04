@@ -16,7 +16,7 @@ class JoinTable extends \Storm\Drivers\Base\Relational\Relations\JoinTable {
     private $Table2;
     private $ForeignKey2Map = array();
     
-    public function __construct($Name, Relational\Table $Table1, Relational\Table $Table2) {
+    public function __construct($Name, Relational\ITable $Table1, Relational\ITable $Table2) {
         $this->Name = $Name;
         $this->Table1 = $Table1;
         $this->Table2 = $Table2;

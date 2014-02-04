@@ -19,7 +19,7 @@ abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
     private $PropertyMappings = array();
     private $DefaultLoadingMode;
         
-    protected abstract function InitializeMappings(Object\EntityMap $EntityMap, Relational\Database $Database);
+    protected abstract function InitializeMappings(Object\IEntityMap $EntityMap, Relational\Database $Database);
     
     protected function OnInitialize(\Storm\Core\Mapping\DomainDatabaseMap $DomainDatabaseMap) {
         parent::OnInitialize($DomainDatabaseMap);
@@ -35,7 +35,7 @@ abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
     }
     
     final protected function RegisterPropertyMappings(Registrar $Registrar, 
-            Object\EntityMap $EntityMap, Relational\Database $Database) {
+            Object\IEntityMap $EntityMap, Relational\Database $Database) {
         $this->PropertyMappings = array();
         $this->InitializeMappings($EntityMap, $Database);
         $Registrar->RegisterAll($this->PropertyMappings);

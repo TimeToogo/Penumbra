@@ -7,11 +7,9 @@ use \Storm\Core\Containers\Map;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 
 /**
- * The entity map represents the properties of a type of entity.
- * 
- * @author Elliot Levin <elliot@aanet.com.au>
+ *{@inheritDoc}
  */
-abstract class EntityMap {
+abstract class EntityMap implements IEntityMap {
     use \Storm\Core\Helpers\Type;   
     
     /**
@@ -66,10 +64,7 @@ abstract class EntityMap {
     }
     
     /**
-     * Initializes the properties of the entity within the context of the parent domain.
-     * 
-     * @param Domain $Domain The parent domain
-     * @return void
+     * {@inheritDoc}
      */
     final public function InititalizeProperties(Domain $Domain) {
         $Registrar = new Registrar(IProperty::IPropertyType);
@@ -146,40 +141,28 @@ abstract class EntityMap {
     }
     
     /**
-     * Whether or not this map contains a property withthe supplied identifier
-     * 
-     * @param string $Identifier The property identifier
-     * @return boolean
+     * {@inheritDoc}
      */
     final public function HasProperty($Identifier) {
         return isset($this->Properties[$Identifier]);
     }
     
     /**
-     * Whether or not this map contains a property with the supplied identifier
-     * 
-     * @param string $Identifier The property identifier
-     * @return boolean
+     * {@inheritDoc}
      */
     final public function HasIdentityProperty($Identifier) {
         return isset($this->IdentityProperties[$Identifier]);
     }
     
     /**
-     * Whether or not this map contains a relationship property with the supplied identifier
-     * 
-     * @param string $Identifier The property identifier
-     * @return void
+     * {@inheritDoc}
      */
     final public function HasRelationshipProperty($Identifier) {
         return isset($this->EntityProperties[$Identifier]) || isset($this->CollectionProperties[$Identifier]);
     }
     
     /**
-     * Gets a property by its identifier
-     * 
-     * @param string $Identifier The property identifier
-     * @return IProperty|null The matched property
+     * {@inheritDoc}
      */
     final public function GetProperty($Identifier) {
         return $this->HasProperty($Identifier) ? $this->Properties[$Identifier] : null;
@@ -193,64 +176,54 @@ abstract class EntityMap {
     }
     
     /**
-     * @return string
+     * {@inheritDoc}
      */
     final public function GetEntityType() {
         return $this->EntityType;
     }
     
     /**
-     * Whether or not this and the supplied entity map represent the same entity.
-     * 
-     * @param EntityMap $OtherEntityMap Another entity map
-     * @return boolean
+     * {@inheritDoc}
      */
-    final public function Is(EntityMap $OtherEntityMap) {
+    final public function Is(IEntityMap $OtherEntityMap) {
         return $this->EntityType === $OtherEntityMap->EntityType;
     }
     
     /**
-     * @return IProperty[]
+     * {@inheritDoc}
      */
     final public function GetProperties() {
         return $this->Properties;
     }
     
-    
     /**
-     * @return IRelationshipProperty[]
+     * {@inheritDoc}
      */
     final public function GetRelationshipProperties() {
         return $this->RelationshipProperties;
     }
     
     /**
-     * @return IEntityProperty[]
+     * {@inheritDoc}
      */
     final public function GetEntityProperties() {
         return $this->EntityProperties;
     }
     
     /**
-     * @return ICollectionProperty[]
+     * {@inheritDoc}
      */
     final public function GetCollectionProperties() {
         return $this->CollectionProperties;
     }
     
     /**
-     * This method should be implemented such that it returns a blank new instance of 
-     * the entity
-     * 
-     * @return object The constructed entity instance
+     * {@inheritDoc}
      */
     protected abstract function ConstructEntity();
     
     /**
-     * Whether or not the entity has a full identity.
-     * 
-     * @param object $Entity The entity to check
-     * @return boolean
+     * {@inheritDoc}
      */
     final public function HasIdentity($Entity) {
         foreach($this->Identity($Entity) as $Value) {
@@ -263,11 +236,7 @@ abstract class EntityMap {
     
     private $Identity = null;
     /**
-     * If the entity is null returns a new blank identity otherwise returns the identity
-     * of the supplied entity.
-     * 
-     * @param object|null $Entity
-     * @return Identity The entity's identity
+     * {@inheritDoc}
      */
     final public function Identity($Entity = null) {
         if($this->Identity === null) {
@@ -290,7 +259,7 @@ abstract class EntityMap {
      */
     private $RevialData = null;
     /**
-     * @return RevivalData
+     * {@inheritDoc}
      */
     final public function RevivalData(array $RevivalData = array()) {
         if($this->RevialData === null) {
@@ -304,7 +273,7 @@ abstract class EntityMap {
      */
     private $PersistenceData = null;
     /**
-     * @return PersistenceData
+     * {@inheritDoc}
      */
     final public function PersistanceData(array $PersistanceData = array()) {
         if($this->PersistenceData === null) {
@@ -318,7 +287,7 @@ abstract class EntityMap {
      */
     private $DiscardenceData = null;
     /**
-     * @return DiscardenceData
+     * {@inheritDoc}
      */
     final public function DiscardenceData(array $DiscardenceData = array()) {
         if($this->DiscardenceData === null) {
@@ -328,11 +297,7 @@ abstract class EntityMap {
     }
     
     /**
-     * Persists an entity's relationships to the supplied unit of work and returns the persistence data.
-     * 
-     * @param UnitOfWork $UnitOfWork The unit of work to persist to
-     * @param object $Entity The entity to persist
-     * @return PersistenceData The persistence data of the entity
+     * {@inheritDoc}
      */
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
@@ -352,11 +317,7 @@ abstract class EntityMap {
     }
     
     /**
-     * Persists an entity's relationships to the supplied unit of work.
-     * 
-     * @param UnitOfWork $UnitOfWork The unit of work to persist to
-     * @param object $Entity The entity to persist
-     * @return PersistenceData The persistence data of the entity
+     * {@inheritDoc}
      */
     final public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
@@ -373,11 +334,7 @@ abstract class EntityMap {
     }
     
     /**
-     * Discards an entity's relationships to the supplied unit of work and returns the discardence data.
-     * 
-     * @param UnitOfWork $UnitOfWork The unit of work to discard from
-     * @param object $Entity The entity to discard
-     * @return DiscardenceData The discardence data of the entity
+     * {@inheritDoc}
      */
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity($Entity);
@@ -397,12 +354,7 @@ abstract class EntityMap {
     }
     
     /**
-     * Applies the supplied property data to the supplied entity instance.
-     * 
-     * @param Domain $Domain The object domain to revive in entity in.
-     * @param object $Entity The entity to apply the property data
-     * @param PropertyData $PropertyData The property data apply
-     * @return void
+     * {@inheritDoc}
      */
     final public function Apply(Domain $Domain, $Entity, PropertyData $PropertyData) {
         foreach($PropertyData as $PropertyIdentifier => $Value) {
@@ -419,11 +371,7 @@ abstract class EntityMap {
     }
     
     /**
-     * Revives an array of entities from the supplied array of revival data.
-     * 
-     * @param string $EntityType The type of entities to revive
-     * @param RevivalData[] $RevivalData The array of revival data
-     * @return object[] The revived entities
+     * {@inheritDoc}
      */
     final public function ReviveEntities(Domain $Domain, array $RevivalDatas) {
         $Entities = array();
@@ -437,11 +385,7 @@ abstract class EntityMap {
     }
     
     /**
-     * Loads an entity instance with the supplied revival data.
-     * 
-     * @param RevivalData $RevivalData The revival data to load the entity with
-     * @param object $Entity The entity to load
-     * @return void
+     * {@inheritDoc}
      */
     final public function LoadEntity(Domain $Domain, RevivalData $RevivalData, $Entity) {
         $this->Apply($Domain, $Entity, $RevivalData);

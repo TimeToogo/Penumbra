@@ -8,7 +8,7 @@ namespace Storm\Core\Relational;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 final class PrimaryKey extends TableColumnData {
-    public function __construct(Table $Table, array $PrimaryKeyData = array()) {
+    public function __construct(ITable $Table, array $PrimaryKeyData = array()) {
         parent::__construct($Table, $PrimaryKeyData);
     }
     

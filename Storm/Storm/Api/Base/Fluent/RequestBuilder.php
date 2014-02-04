@@ -17,7 +17,7 @@ class RequestBuilder extends CriterionBuilder {
     private $IsSingleEntity;
     
     public function __construct(
-            Object\EntityMap $EntityMap, 
+            Object\IEntityMap $EntityMap, 
             ClosureToASTConverter $ClosureToASTConverter) {
         parent::__construct($EntityMap, $ClosureToASTConverter);
         

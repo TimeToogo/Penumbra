@@ -18,12 +18,12 @@ abstract class Domain {
     /**
      * The registered entity maps.
      * 
-     * @var EntityMap[] 
+     * @var IEntityMap[] 
      */
     private $EntityMaps = array();
     
     public function __construct() {
-        $Registrar = new Registrar(EntityMap::GetType());
+        $Registrar = new Registrar(IEntityMap::IEntityMapType);
         $this->RegisterEntityMaps($Registrar);
         foreach($Registrar->GetRegistered() as $EntityMap) {
             $this->AddEntityMap($EntityMap);
@@ -44,7 +44,7 @@ abstract class Domain {
      * @param EntityMap $EntityMap The entity map to add.
      * @return void
      */
-    final protected function AddEntityMap(EntityMap $EntityMap) {
+    final protected function AddEntityMap(IEntityMap $EntityMap) {
         $EntityMap->InititalizeProperties($this);
         $this->EntityMaps[$EntityMap->GetEntityType()] = $EntityMap;
     }
@@ -58,7 +58,7 @@ abstract class Domain {
     }
     
     /**
-     * @return EntityMap[] The registered entity maps
+     * @return IEntityMap[] The registered entity maps
      */
     final public function GetEntityMaps() {
         return $this->EntityMaps;
@@ -66,7 +66,7 @@ abstract class Domain {
     
     /**
      * @param string $EntityType The type of entity that the entity map represents
-     * @return EntityMap|null The entity map or null if it is not registered
+     * @return IEntityMap|null The entity map or null if it is not registered
      */
     final public function GetEntityMap($EntityType) {
         return $this->HasEntityMap($EntityType) ? $this->EntityMaps[$EntityType] : null;
@@ -76,7 +76,7 @@ abstract class Domain {
      * Verifies that an entity is valid in this domain.
      * 
      * @param object $Entity The entity to verify
-     * @return EntityMap The matching entity map
+     * @return IEntityMap The matching entity map
      * @throws \Storm\Core\Exceptions\UnmappedEntityException
      */
     private function VerifyEntity($Entity) {

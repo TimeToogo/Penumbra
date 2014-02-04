@@ -16,7 +16,7 @@ class IdentityMap {
     /**
      * The EntityMap for this identity map.
      * 
-     * @var Object\EntityMap
+     * @var Object\IEntityMap
      */
     protected $EntityMap;
     
@@ -27,7 +27,7 @@ class IdentityMap {
      */
     private $Cache;
     
-    public function __construct(Object\EntityMap $EntityMap, ICache $Cache) {
+    public function __construct(Object\IEntityMap $EntityMap, ICache $Cache) {
         $this->EntityMap = $EntityMap;
         $this->Cache = $Cache;
     }

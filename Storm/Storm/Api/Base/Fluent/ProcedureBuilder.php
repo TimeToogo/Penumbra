@@ -16,7 +16,7 @@ class ProcedureBuilder extends CriterionBuilder {
     private $ProcedureClosure;
     
     public function __construct(
-            Object\EntityMap $EntityMap, 
+            Object\IEntityMap $EntityMap, 
             ClosureToASTConverter $ClosureToASTConverter,
             \Closure $ProcedureClosure) {
         parent::__construct($EntityMap, $ClosureToASTConverter);
