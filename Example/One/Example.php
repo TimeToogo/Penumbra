@@ -11,7 +11,7 @@ use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
 class One implements \StormExamples\IStormExample {
-    const DevelopmentMode = 0;
+    const DevelopmentMode = 1;
     const UseCache = false;
     
     public static function GetPlatform() {
@@ -40,7 +40,7 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
 
-    const Id = 489;
+    const Id = 235;
     
     const Persist = 0;
     const Retreive = 1;
@@ -52,13 +52,14 @@ class One implements \StormExamples\IStormExample {
     public function Run(Storm $BloggingStorm) {
         $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
+        $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::Retreive;
+        $Action = self::Discard;
         $Amount = 1;
         
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
-            $Last = $this->Act($Action, $BloggingStorm, $BlogRepository, $TagRepository);
+            $Last = $this->Act($Action, $BloggingStorm, $BlogRepository, $AuthorRepository, $TagRepository);
         }
 
         return $Last;
@@ -76,11 +77,11 @@ class One implements \StormExamples\IStormExample {
         return $Blog;
     }
 
-    private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+    private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository, Repository $AuthorRepository, Repository $TagRepository) {
         $Id = self::Id;
         switch ($Action) {
             case self::Persist:
-                return $this->Persist($Id, $BloggingStorm, $BlogRepository, $TagRepository);
+                return $this->Persist($Id, $BloggingStorm, $BlogRepository, $AuthorRepository, $TagRepository);
 
 
             case self::Retreive:
@@ -107,13 +108,17 @@ class One implements \StormExamples\IStormExample {
         }
     }
     
-    private function Persist($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+    private function Persist($Id, Storm $BloggingStorm, 
+            Repository $BlogRepository, 
+            Repository $AuthorRepository,
+            Repository $TagRepository) {
         
         $Blog = $this->CreateBlog();
         foreach ($Blog->Posts as $Post) {
             $TagRepository->PersistAll($Post->Tags->ToArray());
+            $AuthorRepository->Persist($Post->Author);
         }
-        $TagRepository->SaveChanges();
+        $BloggingStorm->SaveChanges();
 
         $BlogRepository->Persist($Blog);
         $BlogRepository->SaveChanges();
@@ -126,7 +131,10 @@ class One implements \StormExamples\IStormExample {
         if(extension_loaded('xdebug')) {
             var_dump($RevivedBlog);
         }
-        $RevivedBlog->Posts[0]->Tags->ToArray();
+        
+        $Post = $RevivedBlog->Posts[0];
+        $Author = $Post->Author;
+        $Test = $Author->FirstName;
         $RevivedBlog->Posts[1]->Tags->ToArray();
         $BlogRepository->GetIdentityMap()->Clear();
         
@@ -155,19 +163,19 @@ class One implements \StormExamples\IStormExample {
 
                     $Maybe = $Blog->Description != 45 || (~3 - 231 * 77) . $Blog->Name == 'Sandwich' && $True || $Awaited;
 
-                    return $Foo === $Blog->Id && (true || mt_rand(1, 10) > 10 || $Blog->Id === $Foo  || $Blog->CreatedDate < new \DateTime() && $Maybe || $Possibly);
+                    return (~1 - 500 ^ 2) && $Foo === $Blog->Id && (true || mt_rand(1, 10) > 10 || $Blog->Id === $Foo  || $Blog->CreatedDate < new \DateTime() && $Maybe || $Possibly);
                 })
                 ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
                 ->OrderByDescending(function ($Blog) { return $Blog->Id; })
                 ->GroupBy(function ($Blog) { return $Blog->Id; })
                 ->First());
-
         
         if(extension_loaded('xdebug')) {
             var_dump($RevivedBlog);
         }
         $RevivedBlog->Posts[0]->Tags->ToArray();
         $RevivedBlog->Posts[1]->Tags->ToArray();
+        $BlogRepository->GetIdentityMap()->Clear();
 
         return null;
     }
@@ -175,8 +183,9 @@ class One implements \StormExamples\IStormExample {
     private function PersistExisting($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
         
         $Blog = $BlogRepository->LoadById($Id);
-        $Blog->Posts[0]->Content .= 'foobar';
-        $Blog->Posts[1]->Content = 'BarBar--------------!';
+        $Blog->Posts[0]->Content = 'foobar';
+        $Blog->Posts[0]->Author->FirstName .= 'a';
+        $Blog->Posts[1]->Content = 'BarBar---------------!';
         
         $BlogRepository->Persist($Blog);
         $BlogRepository->SaveChanges();
@@ -187,12 +196,12 @@ class One implements \StormExamples\IStormExample {
     private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
         $Procedure = $BlogRepository->Procedure(
                 function (Entities\Blog $Blog) {
-                    $Blog->Description = md5(new \DateTime());
+                    $Blog->Description = md5(time());
 
                     $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?
                             'Foobar' . (string)$Blog->CreatedDate : $Blog->Name . 'Hi';
 
-                    $Blog->CreatedDate = (new \DateTime())->diff($Blog->CreatedDate, true);
+                    $Blog->CreatedDate = (new \DateTime())->add((new \DateTime())->diff($Blog->CreatedDate, true));
                 })
                 ->Where(function ($Blog) use ($Id) {
                     return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
@@ -227,9 +236,21 @@ class One implements \StormExamples\IStormExample {
         return $Blog;
     }
 
+    private function CreateAuthor() {
+        $FirstNames = ['Joe', 'Jack', 'Bill', 'Tom', 'Sandy', 'Mat'];
+        $LastNames = ['Runt', 'Paffy', 'Derka', 'Shammy', 'Tuple', 'White'];
+        
+        $Author = new Entities\Author();
+        $Author->FirstName = $FirstNames[rand(0, count($FirstNames) - 1)];
+        $Author->LastName = $LastNames[rand(0, count($LastNames) - 1)];
+        
+        return $Author;
+    }
+
     private function CreatePosts(Entities\Blog $Blog) {
         $Post1 = new Entities\Post();
         $Post1->Blog = $Blog;
+        $Post1->Author = $this->CreateAuthor();
         $Post1->Title = 'Hello World';
         $Post1->Content = 'What\'s up?';
         $Post1->CreatedDate = new \DateTime();
@@ -239,6 +260,7 @@ class One implements \StormExamples\IStormExample {
 
         $Post2 = new Entities\Post();
         $Post2->Blog = $Blog;
+        $Post2->Author = $this->CreateAuthor();
         $Post2->Title = 'Hello Neptune';
         $Post2->Content = 'What\'s going on nup?';
         $Post2->CreatedDate = new \DateTime();

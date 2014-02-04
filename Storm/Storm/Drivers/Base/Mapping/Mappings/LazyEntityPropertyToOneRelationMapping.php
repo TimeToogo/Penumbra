@@ -30,12 +30,16 @@ class LazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelation
             return $ParentKeyRelatedRevivalDataMap[$ParentRowKey];
         };
         
-        foreach($RevivalDataArray as $Key => &$RevivalData) {
+        foreach($RevivalDataArray as $Key => $RevivalData) {
             $Loader = function () use (&$RelatedRevivalDataLoader, $Key) {
                 return $RelatedRevivalDataLoader($Key);
             };
             
-            $RevivalData[$this->Property] = $Loader;
+            $RevivalData[$this->Property] = 
+                    $this->MakeLazyRevivalData(
+                            $DomainDatabaseMap, 
+                            $ResultRowArray[$Key], 
+                            $Loader);
         }
     }
 }

@@ -43,10 +43,10 @@ class ClosureToASTConverter {
         $EntityVariableName = $Parameters[0]->name;
         $AST = $this->Parser->Parse($ClosureData->GetBodySource(), $EntityMap, $EntityVariableName);
         $AST->ExpandVariables();
-        $AST->Simplify();
         if($ResolveVariables) {
             $AST->Resolve($ClosureData->GetUsedVariablesMap());
         }
+        $AST->Simplify();
         
         return $AST;
     }

@@ -22,6 +22,7 @@ class PostMap extends EntityMap {
     public $Content;
     public $CreatedDate;
     public $Blog;
+    public $Author;
     public $Tags;
     
     protected function CreateProperties(Domain $Domain) {
@@ -35,6 +36,13 @@ class PostMap extends EntityMap {
         $this->CreatedDate = new Properties\DataProperty(new Accessors\Field('CreatedDate'));
         
         $this->Blog = new Properties\DataProperty(new Accessors\Field('Blog'));
+        
+        $this->Author = new Properties\EntityProperty(new Accessors\Field('Author'), 
+                \StormExamples\One\Entities\Author::GetType(), 
+                new Properties\Relationships\CascadeNonIdentifying(),
+                false,
+                null,
+                $ProxyGenerator);
         
         $this->Tags = new Properties\CollectionProperty(new Accessors\Field('Tags'), 
                 \StormExamples\One\Entities\Tag::GetType(),

@@ -35,6 +35,14 @@ interface IEntityRelationalMap {
      */
     public function GetPrimaryKeyTable();
     
+    
+    /**
+     * The properties that mapped.
+     * 
+     * @return Relational\Table
+     */
+    public function GetMappedProperties();
+    
     /**
      * The tables that are mapped to for persistence.
      * 

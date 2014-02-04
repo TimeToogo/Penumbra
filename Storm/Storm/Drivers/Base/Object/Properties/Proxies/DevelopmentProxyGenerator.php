@@ -66,30 +66,39 @@ NOW;
         parent::__construct($ProxyNamespace, $ProxyCachePath);
     }
     
-    public function GenerateProxies(Object\Domain $Domain, $EntityType, array $RevivalDataLoaderFunctions) {
+    public function GenerateProxies(Object\Domain $Domain, $EntityType, 
+            array $AlreadyKnownRevivalDataArray,
+            array $RevivalDataLoaderFunctions) {
         $EntityReflection = new \ReflectionClass($EntityType);
         $ProxyClassName = $this->GenerateProxyClassName($EntityReflection->getName());
         $FullProxyName = $this->GetProxyFullName($ProxyClassName);
         
         $Proxies = array();
-        foreach($RevivalDataLoaderFunctions as $RevivalDataLoaderFunction) {
-            $Proxies[] = $this->GenerateProxyInstance($Domain, $EntityReflection, $ProxyClassName, $FullProxyName, $RevivalDataLoaderFunction);
+        foreach($RevivalDataLoaderFunctions as $Key => $RevivalDataLoaderFunction) {
+            $Proxies[] = $this->GenerateProxyInstance($Domain, $EntityReflection, $ProxyClassName, $FullProxyName, 
+                    $AlreadyKnownRevivalDataArray[$Key],
+                    $RevivalDataLoaderFunction);
         }
         
         return $Proxies;
     }
 
-    public function GenerateProxy(Object\Domain $Domain, $EntityType, callable $RevivalDataLoaderFunction) {
+    public function GenerateProxy(Object\Domain $Domain, $EntityType, 
+            Object\RevivalData $AlreadyKnownRevivalData,
+            callable $RevivalDataLoaderFunction) {
         $EntityReflection = new \ReflectionClass($EntityType);
         $ProxyClassName = $this->GenerateProxyClassName($EntityReflection->getName());
         $FullProxyName = $this->GetProxyFullName($ProxyClassName);
         
-        return $this->GenerateProxyInstance($Domain, $EntityReflection, $ProxyClassName, $FullProxyName, $RevivalDataLoaderFunction);
+        return $this->GenerateProxyInstance($Domain, $EntityReflection, $ProxyClassName, $FullProxyName, 
+                $AlreadyKnownRevivalData, $RevivalDataLoaderFunction);
     }
     
-    private function GenerateProxyInstance(Object\Domain $Domain, $EntityReflection, $ProxyClassName, $FullProxyName, callable $RevivalDataLoaderFunction) {
+    private function GenerateProxyInstance(Object\Domain $Domain, $EntityReflection, $ProxyClassName, $FullProxyName, 
+            Object\RevivalData $AlreadyKnownRevivalData,
+            callable $RevivalDataLoaderFunction) {
         if(class_exists($FullProxyName, false)) {
-            return new $FullProxyName($Domain, $RevivalDataLoaderFunction);
+            return new $FullProxyName($Domain, $AlreadyKnownRevivalData, $RevivalDataLoaderFunction);
         }
         else {
             $ProxyFileName = $this->GenerateProxyFileName($ProxyClassName);
@@ -97,7 +106,7 @@ NOW;
             $this->GenerateProxyClassFile($ProxyFileName, $ProxyClassName, $EntityReflection);
             
             require $ProxyFileName;
-            return new $FullProxyName($Domain, $RevivalDataLoaderFunction);
+            return new $FullProxyName($Domain, $AlreadyKnownRevivalData, $RevivalDataLoaderFunction);
         }
     }
     
@@ -118,19 +127,8 @@ NOW;
         $ProxyTemplate = self::ProxyTemplate;
 
         $EntityClass = '\\' . $EntityReflection->getName();
-
-        $OverridenMethods = array();
-        foreach($EntityReflection->getMethods() as $Method) {
-            if(isset(self::$NullProxyMethods[$Method->getName()])
-                    || !$Method->isPublic()
-                    || $Method->isStatic()
-                    || $Method->isFinal())
-                continue;
-            else {
-                $OverridenMethods[] = $this->GenerateOverridingMethodTemplate($Method);
-            }
-        }
-        $OverridenMethods = implode(PHP_EOL, $OverridenMethods);
+        
+        $OverridenMethods = '';// $this->GenerateOverridingMethods($EntityReflection);
         
         $Replacements = [
                     '<ProxyInterface>' => IProxy::IProxyType,
@@ -144,6 +142,22 @@ NOW;
         $ProxyTemplate = str_replace(array_keys($Replacements), $Replacements, $ProxyTemplate);
 
         return $ProxyTemplate;
+    }
+    
+    private function GenerateOverridingMethods(\ReflectionClass $EntityReflection) {
+        $OverridenMethods = array();
+        foreach($EntityReflection->getMethods() as $Method) {
+            if(isset(self::$NullProxyMethods[$Method->getName()])
+                    || !$Method->isPublic()
+                    || $Method->isStatic()
+                    || $Method->isFinal())
+                continue;
+            else {
+                $OverridenMethods[] = $this->GenerateOverridingMethodTemplate($Method);
+            }
+        }
+        
+        return implode(PHP_EOL, $OverridenMethods);
     }
 
     private function GenerateOverridingMethodTemplate(\ReflectionMethod $EntityMethod) {

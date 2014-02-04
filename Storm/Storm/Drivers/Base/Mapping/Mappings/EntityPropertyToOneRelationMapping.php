@@ -7,19 +7,18 @@ use \Storm\Core\Mapping\IEntityPropertyToOneRelationMapping;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Object\LazyRevivalData;
 
-abstract class EntityPropertyToOneRelationMapping extends PropertyMapping implements IEntityPropertyToOneRelationMapping {
+abstract class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMapping implements IEntityPropertyToOneRelationMapping {
     private $EntityProperty;
-    private $EntityType;
     private $ToOneRelation;
     
     public function __construct(
             Object\IEntityProperty $EntityProperty, 
             Relational\IToOneRelation $ToOneRelation) {
-        parent::__construct($EntityProperty);
+        parent::__construct($EntityProperty, $ToOneRelation);
         
         $this->EntityProperty = $EntityProperty;
-        $this->EntityType = $EntityProperty->GetEntityType();
         $this->ToOneRelation = $ToOneRelation;
     }
 
@@ -29,32 +28,17 @@ abstract class EntityPropertyToOneRelationMapping extends PropertyMapping implem
     final public function GetEntityProperty() {
         return $this->EntityProperty;
     }
-    
-    final public function GetEntityType() {
-        return $this->EntityType;
-    }
-
     /**
      * @return Relational\IToOneRelation
      */
     final public function GetToOneRelation() {
         return $this->ToOneRelation;
-    }
-    
-    public function AddToRelationalRequest(DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest) {
-        
-    }
-    
-    final protected function LoadRelatedRows(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows) {
-        $RelatedRowRequest = $this->ToOneRelation->RelationRequest($ParentRows);
-        $DomainDatabaseMap->MapEntityToRelationalRequest($this->EntityType, $RelatedRowRequest);
-        return $DomainDatabaseMap->GetDatabase()->Load($RelatedRowRequest);
-    }
+    }    
     
     final protected function MapParentRowKeysToRelatedRevivalData(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows, array $RelatedRows) {
         $ParentKeyRelatedRowMap = $this->ToOneRelation->MapParentKeysToRelatedRow($ParentRows, $RelatedRows);
         
-        $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($this->EntityType, $ParentKeyRelatedRowMap);
+        $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $ParentKeyRelatedRowMap);
         
         $MappedRelatedRevivalData = array();
         foreach($ParentRows as $Key => $ParentRow) {            
@@ -65,24 +49,16 @@ abstract class EntityPropertyToOneRelationMapping extends PropertyMapping implem
         return $MappedRelatedRevivalData;
     }
     
-    final protected function MapToParentRowRelatedRevivalDataMap(DomainDatabaseMap $DomainDatabaseMap, Map $ParentRowRevivalDataMap, array $RelatedRows) {
-        $ParentRows = $ParentRowRevivalDataMap->GetInstances();
-        $ParentRelatedRowMap = $this->ToOneRelation->MapParentKeysToRelatedRow($ParentRows, $RelatedRows);
+    final protected function MakeLazyRevivalData(
+            DomainDatabaseMap $DomainDatabaseMap,
+            Relational\ResultRow $ParentData,
+            callable $RevivalDataLoader) {
+        $RelatedData = $DomainDatabaseMap->GetEntityRelationalMap($this->GetEntityType())->ResultRow();
+        $this->ToOneRelation->MapRelationalParentDataToRelatedData($ParentData, $RelatedData);
+        $AlreadyKnownRelatedRevivalData = 
+                $DomainDatabaseMap->MapResultRowDataToRevivalData($this->GetEntityType(), $RelatedData);
         
-        $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $RelatedRows);
-        $RelatedRowRevivalDataMap = Map::From($RelatedRows, $RelatedRevivalData);
-
-        $ParentRowRelatedRevivalDataMap = new Map();
-        foreach($ParentRowRevivalDataMap as $ParentRow) {
-            $RelatedRow = $ParentRelatedRowMap[$ParentRow];
-            if($RelatedRow !== null) {
-                $RelatedRevivalData = $RelatedRowRevivalDataMap[$RelatedRow];
-
-                $ParentRowRelatedRevivalDataMap[$ParentRow] = $RelatedRevivalData;
-            }
-        }
-        
-        return $ParentRowRelatedRevivalDataMap;
+        return new LazyRevivalData($AlreadyKnownRelatedRevivalData, $RevivalDataLoader);
     }
     
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, Relational\RelationshipChange $RelationshipChange) {

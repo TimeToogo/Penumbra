@@ -3,6 +3,8 @@
 namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
+use \Storm\Drivers\Base\Object\LazyRevivalData;
+use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 
 class ArrayProperty extends MultipleEntityProperty {
     protected function ReviveProxies(Object\Domain $Domain, $Entity, array $Proxies) {

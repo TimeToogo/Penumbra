@@ -242,7 +242,7 @@ class QueryBuilder {
     
     final public function AppendAllColumnData(\Storm\Core\Relational\ColumnData $Data, $Delimiter) {     
         $First = true;
-        foreach($Data->GetColumnData() as $ColumnIdentifier => $Value) {
+        foreach($Data->GetData() as $ColumnIdentifier => $Value) {
             if($First) $First = false;
             else
                 $this->QueryString .= $Delimiter;

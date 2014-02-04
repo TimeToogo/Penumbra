@@ -61,9 +61,9 @@ final class UnitOfWork {
     }
     
     /**
-     * Persist an entity to the unit of work.
+     * Persist an entities data and relationships to the unit of work.
      * 
-     * @param type $Entity The entity to persist
+     * @param object $Entity The entity to persist
      * @return void 
      */
     public function Persist($Entity) {
@@ -81,6 +81,21 @@ final class UnitOfWork {
             $this->PersistenceDataGroups[$EntityType] = array();
         }
         $this->PersistenceDataGroups[$EntityType][] = $PersistenceData;
+    }
+    
+    /**
+     * Persist an entity's relationships to the unit of work.
+     * 
+     * @param object $Entity The entity to persist
+     * @return void 
+     */
+    public function PersistRelationships($Entity) {
+        $Hash = spl_object_hash($Entity);
+        if(isset($this->PersistenceData[$Hash])) {
+             return;
+        }
+        
+        $this->Domain->PersistRelationships($this, $Entity);
     }
     
     /**

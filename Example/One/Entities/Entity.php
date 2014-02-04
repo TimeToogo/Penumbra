@@ -24,10 +24,6 @@ abstract class Entity {
     public static function GetType() {
         return get_called_class();
     }
-    
-    public function __clone() {
-        self::$Instances[static::GetType()]++;
-    }
 }
 
 ?>

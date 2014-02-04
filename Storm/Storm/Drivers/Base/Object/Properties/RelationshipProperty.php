@@ -4,6 +4,8 @@ namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
 use \Storm\Core\Object\Domain;
+use \Storm\Drivers\Base\Object\LazyRevivalData;
+use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 
 abstract class RelationshipProperty extends Property implements Object\IRelationshipProperty {
     private $EntityType;
@@ -55,29 +57,48 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
             return $this->ReviveNull($Domain, $Entity);
         }
         if($PropertyRevivalValue instanceof Object\RevivalData) {
-            if($this->BackReferenceProperty !== null) {
-                $PropertyRevivalValue[$this->BackReferenceProperty] = $Entity;
-            }
+            $this->AddBackReference($PropertyRevivalValue, $Entity);
             return $this->ReviveRevivalData($Domain, $Entity, $PropertyRevivalValue);
         }
-        else if(is_callable($PropertyRevivalValue)) {
-            return $this->ReviveCallable($Domain, $Entity, $PropertyRevivalValue, $this->BackReferenceProperty);
+        if($PropertyRevivalValue instanceof LazyRevivalData) {
+            $this->AddBackReference($PropertyRevivalValue->GetAlreadyKnownRevivalData(), $Entity);
+            return $this->ReviveLazyRevivalData($Domain, $Entity, $PropertyRevivalValue);
+        }
+        if($PropertyRevivalValue instanceof MultipleLazyRevivalData) {
+            $this->AddBackReference($PropertyRevivalValue->GetAlreadyKnownRevivalData(), $Entity);
+            return $this->ReviveMultipleLazyRevivalData($Domain, $Entity, $PropertyRevivalValue);
         }
         else if(is_array($PropertyRevivalValue)) {
-            if(count(array_filter($PropertyRevivalValue, function ($Value) { return $Value instanceof Object\RevivalData; })) === count($PropertyRevivalValue)) {
-                if($this->BackReferenceProperty !== null) {
-                    foreach($PropertyRevivalValue as $RevivalData) {
-                        $RevivalData[$this->BackReferenceProperty] = $Entity;
-                    }
-                }
+            if($this->IsAll($PropertyRevivalValue, function ($I) { return $I instanceof Object\RevivalData; })) {
+                $this->AddBackReferences($PropertyRevivalValue, $Entity);
                 return $this->ReviveArrayOfRevivalData($Domain, $Entity, $PropertyRevivalValue);
             }
-            else if(count(array_filter($PropertyRevivalValue, function ($Value) { return is_callable($Value); })) === count($PropertyRevivalValue)) {
-                return $this->ReviveArrayOfCallables($Domain, $Entity, $PropertyRevivalValue, $this->BackReferenceProperty);
+            if($this->IsAll($PropertyRevivalValue, function ($I) { return $I instanceof LazyRevivalData; })) {
+                foreach($PropertyRevivalValue as $LazyRevivalData) {
+                    $this->AddBackReference($LazyRevivalData->GetAlreadyKnownRevivalData(), $Entity);
+                }
+                return $this->ReviveArrayOfLazyRevivalData($Domain, $Entity, $PropertyRevivalValue);
             }
         }
         
         throw new \Exception;//TODO:error message
+    }
+    
+    private function IsAll(array $Values, callable $Filter) {
+        return count(array_filter($Values, $Filter)) === count($Values);
+    }
+    
+    private function AddBackReference(Object\RevivalData $RevivalData, $ParentEntity) {
+        if($this->BackReferenceProperty !== null) {
+            $RevivalData[$this->BackReferenceProperty] = $ParentEntity;
+        }
+    }
+    private function AddBackReferences(array $RevivalDataArray, $ParentEntity) {
+        if($this->BackReferenceProperty !== null) {
+            foreach($RevivalDataArray as $RevivalData) {
+                $this->AddBackReference($RevivalData, $ParentEntity);
+            }
+        }
     }
     
     protected function ReviveNull(Domain $Domain, $Entity) {
@@ -88,7 +109,11 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         throw new \Exception;//TODO:error message
     }
     
-    protected function ReviveCallable(Domain $Domain, $Entity, callable $Callback, Object\IProperty $BackReferenceProperty = null) {
+    protected function ReviveLazyRevivalData(Domain $Domain, $Entity, LazyRevivalData $LazyRevivalData) {
+        throw new \Exception;//TODO:error message
+    }
+    
+    protected function ReviveMultipleLazyRevivalData(Domain $Domain, $Entity, MultipleLazyRevivalData $MultipleLazyRevivalData) {
         throw new \Exception;//TODO:error message
     }
     
@@ -96,7 +121,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         throw new \Exception;//TODO:error message
     }
     
-    protected function ReviveArrayOfCallables(Domain $Domain, $Entity, array $Callbacks, Object\IProperty $BackReferenceProperty = null) {
+    protected function ReviveArrayOfLazyRevivalData(Domain $Domain, $Entity, array $LazyRevivalDataArray) {
         throw new \Exception;//TODO:error message
     }
     

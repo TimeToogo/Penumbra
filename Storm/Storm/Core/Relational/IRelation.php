@@ -43,20 +43,36 @@ interface IRelation {
      * If parent rows are specified the request will be constrained such
      * that it only loads the related rows of the parents.
      * 
-     * @parent ResultRows[]|null $ParentRows The parent rows
+     * @param ResultRows[]|null $ParentRows The parent rows
      * @return Request
      */
     public function RelationRequest(array $ParentRows = null);
+    
+    /**
+     * Adds the columns required by the relation to the parent request.
+     * 
+     * @return void
+     */
+    public function GetRelationalParentColumns();
     
     /**
      * Adds the relation constraint to the supplied request.
      * If parent rows are specified the request will be constrained such
      * that it only loads the related rows of the parents.
      * 
-     * @parent ResultRows[]|null $ParentRows The parent rows
+     * @param ResultRows[]|null $ParentRows The parent rows
      * @return void
      */
     public function AddRelationToRequest(Request $Request, array $ParentRows = null);
+    
+    /**
+     * Map the relational data (foreign key data) from the parent row to the related row.
+     * 
+     * @param ResultRow $ParentRow The parent row
+     * @param ResultRow $RelatedRow The related row
+     * @return void
+     */
+    public function MapRelationalParentDataToRelatedData(ColumnData $ParentRow, ColumnData $RelatedRow);
 }
 
 ?>

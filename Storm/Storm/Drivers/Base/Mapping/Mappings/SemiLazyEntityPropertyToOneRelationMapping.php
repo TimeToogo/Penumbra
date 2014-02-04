@@ -48,7 +48,11 @@ class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRela
                 return $RelatedRevivalDataLoader($Key);
             };
             
-            $RevivalData[$this->Property] = $Loader;
+            $RevivalData[$this->Property] = 
+                    $this->MakeLazyRevivalData(
+                            $DomainDatabaseMap, 
+                            $ResultRowArray[$Key], 
+                            $Loader);
         }
     }
     

@@ -27,6 +27,7 @@ final class PostRelationalMap extends Mapping\EntityRelationalMap {
         $this->Map($EntityMap->CreatedDate)->ToColumn($Table->CreatedDate);
         
         //$this->Map($EntityMap->Blog)->ToEntity($Table->Blog);
+        $this->Map($EntityMap->Author)->ToEntity($Table->Author);
         $this->Map($EntityMap->Tags)->ToCollection($Table->Tags);
     }
 }

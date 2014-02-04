@@ -26,12 +26,16 @@ class LazyCollectionPropertyToManyRelationMapping extends CollectionPropertyToMa
             return $ParentKeyRevivalDataArraysMap[$ParentRowKey];
         };
         
-        foreach($RevivalDataArray as $Key => &$RevivalData) {
+        foreach($RevivalDataArray as $Key => $RevivalData) {
             $Loader = function () use (&$RelatedRevivalDataArrayLoader, $Key) {
                 return $RelatedRevivalDataArrayLoader($Key);
             };
             
-            $RevivalData[$this->Property] = $Loader;
+            $RevivalData[$this->Property] = 
+                    $this->MakeMultipleLazyRevivalData(
+                            $DomainDatabaseMap, 
+                            $ResultRowArray[$Key], 
+                            $Loader);
         }
     }
 }

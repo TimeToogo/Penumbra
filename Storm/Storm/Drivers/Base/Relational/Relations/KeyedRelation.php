@@ -34,6 +34,10 @@ abstract class KeyedRelation extends Relation {
     final public function IsInversed() {
         return $this->IsInversed;
     }
+    
+    public function GetRelationalParentColumns() {
+        return $this->GetParentColumns();
+    }
 
     public function AddConstraintToRequest(Relational\Request $Request) {
         $Request->GetCriterion()->AddPredicateExpression($this->ForeignKey->GetConstraintPredicate());
@@ -56,6 +60,7 @@ abstract class KeyedRelation extends Relation {
         $Request->GetCriterion()->AddPredicateExpression(
                 Expressions\Expression::CompoundBoolean($MatchExpressions, Expressions\Operators\Binary::LogicalOr));
     }
+    
     /**
      * @return Relational\Table
      */
@@ -63,6 +68,15 @@ abstract class KeyedRelation extends Relation {
         return $this->IsInversed ? 
                 $this->ForeignKey->GetReferencedTable() : $this->ForeignKey->GetParentTable();
     }
+    
+    /**
+     * @return Relational\IColumn[]
+     */
+    protected function GetParentColumns() {
+        return $this->IsInversed ? 
+                $this->ForeignKey->GetReferencedColumns() : $this->ForeignKey->GetParentColumns();
+    }
+    
     /**
      * @return Relational\IColumn[]
      */

@@ -44,7 +44,11 @@ class SemiLazyCollectionPropertyToManyRelationMapping extends CollectionProperty
                 return $RelatedRevivalDataArrayLoader($Key);
             };
             
-            $RevivalData[$this->Property] = $Loader;
+            $RevivalData[$this->Property] = 
+                    $this->MakeMultipleLazyRevivalData(
+                            $DomainDatabaseMap, 
+                            $ResultRowArray[$Key], 
+                            $Loader);
         }
     }
     

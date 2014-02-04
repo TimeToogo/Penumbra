@@ -70,13 +70,14 @@ abstract class StandardPersister extends BasePersister {
             array $Rows, 
             $ShouldReturnKeyData);
     
-    final public function AppendDataAsDerivedTable(
+    final public function AppendDataAsInlineTable(
             QueryBuilder $QueryBuilder, 
             array $Columns,
             $DerivedTableName,
             array $ColumnDataArray) {
         
         $QueryBuilder->Append(' SELECT ');
+        
         /*
          * Apply all the persisting data expressions as a select on the derived table
          * rather than on every row
@@ -85,20 +86,20 @@ abstract class StandardPersister extends BasePersister {
             $QueryBuilder->AppendExpression(
                     Expression::PersistData($Column, Expression::Identifier([$DerivedTableName, $ColumnName])));
         }
-        
+
         $QueryBuilder->Append(' FROM (');
-        
+
         $ColumnDataArray = array_map(
                 function(Relational\ColumnData $ColumnData) { 
-                    return $ColumnData->GetColumnData();
+                    return $ColumnData->GetData();
                 }, 
                 $ColumnDataArray);
-        
+
         $ColumnNames = array_map(function($Column) { return $Column->GetName(); }, $Columns);
         $Identifiers = array_combine($ColumnNames, 
                 array_map(function($Column) { return $Column->GetIdentifier(); }, $Columns));
         $ParameterTypes = $this->GetParamterTypes($Columns);
-                
+
         $First = true;
         $QueryBuilder->Append('SELECT ');
         foreach($QueryBuilder->Delimit($ColumnDataArray, ' UNION ALL SELECT ') as $ColumnData) {
@@ -107,18 +108,30 @@ abstract class StandardPersister extends BasePersister {
                 if($FirstValue) $FirstValue = false;
                 else 
                     $QueryBuilder->Append(',');
-                
+
                 $Value = isset($ColumnData[$Identifier]) ? $ColumnData[$Identifier] : null;
                 $QueryBuilder->AppendSingleValue($Value, $Value === null ? ParameterType::Null : $ParameterTypes[$ColumnName]);
-                
+
                 if($First) {
                     $QueryBuilder->AppendIdentifier(' AS #', [$ColumnName]);
                 }
             }
             $First = false;
         }
-        
+
         $QueryBuilder->AppendIdentifier(') #', [$DerivedTableName]);
+    }
+    
+    public function AppendDataAsInlineRow(
+            QueryBuilder $QueryBuilder, 
+            array $Columns, 
+            Relational\ColumnData $ColumnData) {
+        
+        $QueryBuilder->Append(' SELECT ');
+        foreach($QueryBuilder->Delimit($Columns, ', ') as $Column) {
+            $QueryBuilder->AppendExpression(
+                    Expression::PersistData($Column, Expression::Constant($ColumnData[$Column])));
+        }
     }
     
     private function GetParamterTypes(array $Columns) {

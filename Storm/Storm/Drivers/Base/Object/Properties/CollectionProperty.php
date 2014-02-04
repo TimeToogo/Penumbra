@@ -3,14 +3,19 @@
 namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
+use \Storm\Drivers\Base\Object\LazyRevivalData;
+use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 
 class CollectionProperty extends MultipleEntityProperty {
     protected function ReviveProxies(Object\Domain $Domain, $Entity, array $Proxies) {
         return new Collections\Collection($this->GetEntityType(), $Proxies);
     }
     
-    protected function ReviveCallableProperty(Object\Domain $Domain, $Entity, callable $Callback) {
-        return new Collections\LazyCollection($Domain, $this->GetEntityType(), $Callback, $this->ProxyGenerator);
+    protected function ReviveMultipleLazyRevivalData(Object\Domain $Domain, $Entity, MultipleLazyRevivalData $LazyRevivalData) {
+        return new Collections\LazyCollection($Domain, $this->GetEntityType(), 
+                $LazyRevivalData->GetAlreadyKnownRevivalData(), 
+                $LazyRevivalData->GetMultipleRevivalDataLoader(),
+                $this->ProxyGenerator);
     }
     
     protected function ReviveArrayOfRevivalData(Object\Domain $Domain, $Entity, array $RevivalDataArray) {
@@ -35,7 +40,16 @@ class CollectionProperty extends MultipleEntityProperty {
                 }
             }
         }
-        else if($CurrentValue == $OriginalValue && !$CurrentValue->__IsAltered()) {
+        else if($CurrentValue instanceof Collections\LazyCollection && !$CurrentValue->__IsLoaded()) {
+            return array();
+        }
+        else if(!$CurrentValue->__IsAltered()) {
+            foreach($CurrentValue->ToArray() as $Entity) {
+                if($Entity instanceof Proxies\IProxy && !$Entity->__IsAltered()) {
+                    continue;
+                }
+                $UnitOfWork->PersistRelationships($Entity);
+            }
             return array();
         }
         else {

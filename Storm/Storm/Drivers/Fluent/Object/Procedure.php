@@ -18,7 +18,7 @@ class Procedure extends Object\Procedure {
                 $EntityType, 
                 $this->ParseAssignmentExpressions($AST), 
                 $Criterion ?: new Criterion($EntityType));
-    }  
+    }
     
     private function ParseAssignmentExpressions(Closure\IAST $AST) {
         $AST->SetPropertyMode(Closure\IAST::PropertiesAreSetters);

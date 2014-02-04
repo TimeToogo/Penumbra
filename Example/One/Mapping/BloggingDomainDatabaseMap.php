@@ -21,11 +21,13 @@ class BloggingDomainDatabaseMap extends Mapping\DomainDatabaseMap {
     }
     
     public $BlogRelationalMap;
+    public $AuthorRelationalMap;
     public $PostRelationalMap;
     public $TagRelationalMap;
 
     protected function CreateRelationalMaps() {
         $this->BlogRelationalMap = new Maps\BlogRelationalMap();
+        $this->AuthorRelationalMap = new Maps\AuthorRelationalMap();
         $this->PostRelationalMap = new Maps\PostRelationalMap();
         $this->TagRelationalMap = new Maps\TagRelationalMap();
     }

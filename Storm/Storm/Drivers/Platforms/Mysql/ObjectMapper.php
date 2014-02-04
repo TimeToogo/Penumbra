@@ -20,7 +20,7 @@ final class ObjectMapper extends E\ObjectMapper {
     
     
     public function DateInterval(\DateInterval $Value) {
-        return $Value;
+        return Expression::Constant($Value);
     }
     
     public function DateInterval___construct(array $ArgumentExpressions) {
@@ -28,7 +28,7 @@ final class ObjectMapper extends E\ObjectMapper {
             throw new \Exception();
         }
         
-        return new \DateInterval($ArgumentExpressions[0]->GetValue());
+        return Expression::Constant(new \DateInterval($ArgumentExpressions[0]->GetValue()));
     }
 
     // </editor-fold>

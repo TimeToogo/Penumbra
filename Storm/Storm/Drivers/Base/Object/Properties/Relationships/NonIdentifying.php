@@ -40,7 +40,6 @@ class NonIdentifying extends RelationshipType {
         }
         return $Domain->DiscardedRelationship($ParentEntity, $RelatedEntity);
     }
-
 }
 
 

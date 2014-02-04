@@ -7,8 +7,19 @@ use \Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\PHPParserConst
 class ConstantValueNodeReplacerVisitor extends \PHPParser_NodeVisitorAbstract {
     
     public function leaveNode(\PHPParser_Node $Node) {
-        $Value = null;
-        switch (true) {                
+        $IsConstant = null;
+        $Value = $this->GetConstantValue($Node, $IsConstant);
+        
+        if($IsConstant) {
+            return new PHPParserConstantValueNode($Value);
+        }
+    }
+    
+    private function GetConstantValue(\PHPParser_Node $Node, &$IsConstant) {
+        switch (true) {
+            case $Node instanceof PHPParserConstantValueNode:
+                return $Node->Value;
+            
             case $Node instanceof \PHPParser_Node_Scalar_DNumber:
             case $Node instanceof \PHPParser_Node_Scalar_LNumber:
             case $Node instanceof \PHPParser_Node_Scalar_String:
@@ -30,12 +41,28 @@ class ConstantValueNodeReplacerVisitor extends \PHPParser_NodeVisitorAbstract {
                 $ClassName = (string)$Node->class;
                 $Value = $ClassName::${$Node->name};
                 break;
+            
+            case $Node instanceof \PHPParser_Node_Expr_Array:
+                $Value = array();
+                foreach ($Node->items as $Key => $Item) {
+                    $IsKeyConstant = true;
+                    $IsValueConstant = true;
+                    $Key = $Item->key === null ? null : $this->GetConstantValue($Item->key, $IsKeyConstant);
+                    $ItemValue = $this->GetConstantValue($Item->value, $IsValueConstant);
+                    if(!$IsKeyConstant || !$IsValueConstant) {
+                        $IsConstant = false;
+                        return;
+                    }
+                    $Key !== null ? $Value[$Key] = $ItemValue : $Value[] = $ItemValue;
+                }
+                break;
                 
             default:
+                $IsConstant = false;
                 return;
         }
-        
-        return new PHPParserConstantValueNode($Value);
+        $IsConstant = true;
+        return $Value;
     }
 }
 

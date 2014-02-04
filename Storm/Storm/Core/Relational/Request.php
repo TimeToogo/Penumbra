@@ -33,6 +33,10 @@ class Request {
         $this->AddColumns($Columns);
     }
     
+    final public function HasColumn(IColumn $Column) {
+        return isset($this->Columns[$Column->GetIdentifier()]);
+    }
+    
     /**
      * Add a column to the request.
      * 
@@ -54,6 +58,14 @@ class Request {
         array_walk($Columns, [$this, 'AddColumn']);
     }
     
+    final public function RemoveColumn(IColumn $Column) {
+        unset($this->Columns[$Column->GetIdentifier()]);
+    }
+    
+    final public function RemoveColumns(array $Columns) {
+        array_walk($Columns, [$this, 'RemoveColumn']);
+    }
+    
     /**
      * Add a table to the request.
      * 
@@ -73,6 +85,15 @@ class Request {
      */
     final public function AddTables(array $Tables) {
         array_walk($Tables, [$this, 'AddTable']);
+    }
+    
+    final public function RemoveTable(Table $Table) {
+        unset($this->Tables[$Table->GetName()]);
+        array_walk($Table->GetColumns(), [$this, 'RemoveColumn']);
+    }
+    
+    final public function RemoveTables(array $Tables) {
+        array_walk($Tables, [$this, 'RemoveTable']);
     }
     
     /**

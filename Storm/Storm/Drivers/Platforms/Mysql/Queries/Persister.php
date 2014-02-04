@@ -20,7 +20,6 @@ class Persister extends Queries\StandardPersister {
             Table $Table, 
             array $Rows, 
             $ShouldReturnKeyData) {
-        
         if($ShouldReturnKeyData) {
             throw new \Exception('Mysql does not support returning data');
         }
@@ -40,8 +39,16 @@ class Persister extends Queries\StandardPersister {
         $QueryBuilder->AppendIdentifier('INSERT INTO #', [$TableName]);
         $QueryBuilder->AppendIdentifiers('(#)', $ColumnNames, ',');
         
-        $this->AppendDataAsDerivedTable($QueryBuilder, $Table->GetColumns(), $DerivedTableName, $Rows);
-        
+        /*
+         * MySQL cannot prepare a statment with an inline table with only a
+         * single row. Bug reported.
+         */
+        if(count($Rows) === 1) {
+            $this->AppendDataAsInlineRow($QueryBuilder, $Table->GetColumns(), reset($Rows));
+        }
+        else {
+            $this->AppendDataAsInlineTable($QueryBuilder, $Table->GetColumns(), $DerivedTableName, $Rows);
+        }
         $this->AppendOnDuplicateKeyUpdate($QueryBuilder, $TableName, $Columns, $PrimaryKeyIdentifiers);
     }
     

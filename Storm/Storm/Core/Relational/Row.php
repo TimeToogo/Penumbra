@@ -28,18 +28,41 @@ final class Row extends TableColumnData {
         $this->PrimaryKey = clone $this->PrimaryKey;
     }
     
-    protected function AddColumn(IColumn $Column, $Data) {
-        parent::AddColumn($Column, $Data);
+    public function GetData() {
+        return $this->PrimaryKey->Data + $this->Data;
+    }
+    
+    public function SetData(array $Data) {
+        parent::SetData($Data);
+        $this->PrimaryKey->SetData($Data);
+    }
+    
+    protected function AddColumnData(IColumn $Column, $Data) {
+        parent::AddColumnData($Column, $Data);
         if($Column->IsPrimaryKey()) {
-            $this->PrimaryKey[$Column] = $Data;
+            $this->PrimaryKey->AddColumnData($Column, $Data);
         }
     }
     
-    protected function RemoveColumn(IColumn $Column) {
+    protected function RemoveColumnData(IColumn $Column) {
         parent::RemoveColumn($Column);
         if($Column->IsPrimaryKey()) {
-            unset($this->PrimaryKey[$Column]);
+            $this->PrimaryKey->RemoveColumnData($Column);
         }
+    }
+    
+    protected function GetColumnData(IColumn $Column) {
+        if($Column->IsPrimaryKey()) {
+            return $this->PrimaryKey->GetColumnData($Column);
+        }
+        return parent::GetColumnData($Column);
+    }
+    
+    protected function HasColumnData(IColumn $Column) {
+        if($Column->IsPrimaryKey()) {
+            return $this->PrimaryKey->HasColumnData($Column);
+        }
+        return parent::HasColumnData($Column);
     }
     
     /**
@@ -48,7 +71,7 @@ final class Row extends TableColumnData {
      * @return boolean
      */
     final public function HasPrimaryKey() {
-        return count(array_filter($this->PrimaryKey->GetColumnData(),
+        return count(array_filter($this->PrimaryKey->GetData(),
                         function ($Value) { return $Value !== null; }))
                 === 
                 $this->PrimaryKeyColumnsAmount;

@@ -232,6 +232,7 @@ abstract class DomainDatabaseMap {
         $this->MapUnitOfWorkToTransaction($UnitOfWork, $Transaction);
         
         $this->Database->Commit($Transaction);
+        
     }
     
     // <editor-fold defaultstate="collapsed" desc="Request  mappers">
@@ -264,8 +265,15 @@ abstract class DomainDatabaseMap {
      * @param Relational\Request $RelationalRequest The request to add to
      * @return void
      */
-    final public function MapEntityToRelationalRequest($EntityType, Relational\Request $RelationalRequest) {
-        $this->MapPropetiesToRelationalRequest($this->VerifyEntityTypeIsMapped($EntityType), $RelationalRequest);
+    final public function MapEntityToRelationalRequest($EntityType, Relational\Request $RelationalRequest, array $AlreadyKnownProperties = array()) {
+        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
+        $Properties = $EntityRelationalMap->GetMappedProperties();
+        if(count($AlreadyKnownProperties) > 0) {
+            foreach($AlreadyKnownProperties as $AlreadyKnownProperty) {
+                unset($Properties[$AlreadyKnownProperty->GetIdentifier()]);
+            } 
+        }
+        $this->MapPropetiesToRelationalRequest($this->VerifyEntityTypeIsMapped($EntityType), $RelationalRequest, $Properties);
     }
     
     /**
@@ -280,7 +288,7 @@ abstract class DomainDatabaseMap {
      */
     private function MapPropetiesToRelationalRequest(IEntityRelationalMap $EntityRelationalMap, Relational\Request $RelationalRequest, array $Properties = null) {
         if($Properties === null) {
-            $Properties = $EntityRelationalMap->GetEntityMap()->GetProperties();
+            $Properties = $EntityRelationalMap->GetMappedProperties();
         }
         
         $DataPropertyColumnMappings = $EntityRelationalMap->GetDataPropertyColumnMappings();
@@ -405,7 +413,7 @@ abstract class DomainDatabaseMap {
      */
     private function MapExpressions(IEntityRelationalMap $EntityRelationalMap, array $Expressions) {
         return call_user_func_array('array_merge',                 array_map(
-                        function ($Expression) use (&$EntityRelationalMap) {
+                function ($Expression) use (&$EntityRelationalMap) {
                     return $this->MapExpression($EntityRelationalMap, $Expression);
                 }, $Expressions));
     }
@@ -471,6 +479,23 @@ abstract class DomainDatabaseMap {
             $CollectionPropertyToManyRelationMapping->Revive($this, $ResultRowArray, $RevivalDataArray);
         }
     }
+    
+    /**
+     * @access private
+     */
+    final public function MapResultRowDataToRevivalData(
+            $EntityType, 
+            Relational\ResultRow $ResultRow) {
+        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
+        $RevivalData = $EntityRelationalMap->GetEntityMap()->RevivalData();
+        
+        foreach($EntityRelationalMap->GetDataPropertyColumnMappings() as $PropertyColumnMapping) {
+            $PropertyColumnMapping->Revive([$ResultRow], [$RevivalData]);
+        }
+        
+        return $RevivalData;
+    }
+    
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Entity Persistence mapping">

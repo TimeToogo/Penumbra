@@ -11,7 +11,7 @@ use \Storm\Core\Object\Expressions\Operators;
 use \Storm\Drivers\Base\Object\Properties\Property;
 use \Storm\Drivers\Base\Object\Properties\Accessors\Accessor;
 
-$NodeSimplifiers = require_once 'NodeSimplifiers.php';
+require_once 'NodeSimplifiers.php';
 
 class AST extends ASTBase {
     private $OriginalNodes = array();
@@ -20,10 +20,7 @@ class AST extends ASTBase {
     
     private $VariableExpander;
     
-    /**
-     * @var NodeSimplifier[] 
-     */
-    private $NodeSimplifiers = array();
+    private $NodeSimplifier = array();
     
     private $UnresolvedVariables = array();
     private $VariableResolverVisiter;
@@ -40,15 +37,16 @@ class AST extends ASTBase {
         parent::__construct(array(), $EntityMap, $EntityVariableName);
         $this->OriginalNodes = $Nodes;
         $this->LoadNodes();
-        
+                
+        $this->InitializeVisitors($EntityVariableName);
+    }
+    
+    private function InitializeVisitors($EntityVariableName) {
         $this->VariableExpander = new \PHPParser_NodeTraverser();
         $this->VariableExpander->addVisitor(new Visitors\VariableExpanderVisitor($this->VariableExpander));
         
-        $NodeSimplifiers = $_GLOBALS['NodeSimplifiers'];
-        foreach($NodeSimplifiers as $NodeSimplifier) {
-            $this->NodeSimplifiers[$NodeSimplifier->GetNodeType()] = $NodeSimplifier;
-        }
-        
+        $this->NodeSimplifier = new \PHPParser_NodeTraverser();
+        $this->NodeSimplifier->addVisitor(new Visitors\SimplifierVisitor(GetNodeSimplifiers()));
         
         $this->VariableResolver = new \PHPParser_NodeTraverser();
         $this->VariableResolverVisiter = new Visitors\VariableResolverVisitor();
@@ -60,6 +58,7 @@ class AST extends ASTBase {
         $this->AccessorBuilderVisitor = new Visitors\AccessorBuilderVisitor($EntityVariableName);
         $this->AccessorBuilder = new \PHPParser_NodeTraverser();
         $this->AccessorBuilder->addVisitor($this->AccessorBuilderVisitor);
+        
     }
     
     private function LoadNodes() {
@@ -99,33 +98,7 @@ class AST extends ASTBase {
     }
     
     public function Simplify() {
-        $this->OriginalNodes = $this->SimplifyNodes($this->OriginalNodes);
-        $this->LoadNodes();
-    }
-    
-    public function SimplifyNodes(array $Nodes) {
-        $SimplifiedNodes = array();
-        foreach($Nodes as $Key => $Node) {
-            $SubNodes = iterator_to_array($Nodes);
-            $SimplifiedSubNodes = $this->SimplifyNodes($SubNodes);
-            foreach ($SimplifiedSubNodes as $Key => $SimplifiedSubNode) {
-                $Node[$Key] = $SimplifiedSubNode;
-            }
-            
-            $SimplifiedNodes[$Key] = $this->SimplifyNode($Node);
-        }
-        
-        return $SimplifiedNodes;
-    }
-    
-    private function SimplifyNode(\PHPParser_NodeAbstract $Node) {
-        foreach($this->NodeSimplifiers as $NodeType => $NodeSimplifier) {
-            if($Node instanceof $NodeType) {
-                return $NodeSimplifier->SimplifyNode($Node);
-            }
-        }
-        
-        return $Node;
+        $this->Traverse($this->NodeSimplifier);
     }
     
     public function GetUnresolvedVariables() {

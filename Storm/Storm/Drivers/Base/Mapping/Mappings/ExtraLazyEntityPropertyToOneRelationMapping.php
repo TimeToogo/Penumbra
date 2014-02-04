@@ -7,6 +7,7 @@ use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Core\Mapping\IEntityPropertyToOneRelationMapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Object\LazyRevivalData;
 
 class ExtraLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelationMapping {
     public function __construct(
@@ -31,7 +32,11 @@ class ExtraLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRel
                 return reset($RelatedRevivalData);
             };
             
-            $RevivalDataArray[$Key][$this->Property] = $RelatedRevivalDataLoader;
+            $RevivalDataArray[$Key][$this->Property] = 
+                    $this->MakeLazyRevivalData(
+                            $DomainDatabaseMap, 
+                            $ParentRow, 
+                            $RelatedRevivalDataLoader);
         }
     }
 }

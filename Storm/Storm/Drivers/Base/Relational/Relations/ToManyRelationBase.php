@@ -58,7 +58,7 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
                 $PersistedRelationship = $RelationshipChange->GetPersistedRelationship();
                 
                 if($PersistedRelationship->IsIdentifying()) {
-                    $IdentifyingChildRows[] = $PersistedRelationship->GetChildResultRow()->GetRow($Table);
+                    $IdentifyingChildRows[] = $PersistedRelationship->GetChildResultRow();
                 }
             }
             
@@ -77,13 +77,13 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
                 }
             }
         }
-        $ParentRow = $ParentData->GetRow($this->GetParentTable());
+        
         if(count($IdentifyingChildRows) > 0) {
-            $this->PersistIdentifyingRelationship($Transaction, $ParentRow, $IdentifyingChildRows);
+            $this->PersistIdentifyingRelationship($Transaction, $ParentData, $IdentifyingChildRows);
         }
     }
     protected abstract function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
-            Relational\Row $ParentRow, array $ChildRows);
+            Relational\ResultRow $ParentRow, array $ChildRows);
     
 }
 

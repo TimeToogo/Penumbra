@@ -16,21 +16,27 @@ trait EntityProxyFunctionality {
     private $__LoadRevivalDataFunction;
     
     protected static $__Reflection;
-    protected static $__ClassName;
+    protected static $__ProxyClassName;
     protected static $__EntityClassName;
     protected static $__EntityReflection;
     protected static $__EntityProperties = array();
-    protected static $__UnsetPropertyNames = array();
+    protected static $__PropertiesToUnset = array();
     protected static $__EntityMethods = array();
     protected static $__IsInitialized = false;
     
-    private function __ConstructProxy(Domain $Domain, callable $LoadRevivalDataFunction) {
+    private function __ConstructProxy(Domain $Domain, RevivalData $AlreadyKnownRevivalData, callable $LoadRevivalDataFunction) {
         $this->Initialize();
         $this->__Domain = $Domain;
         $this->__LoadRevivalDataFunction = $LoadRevivalDataFunction;
-        foreach(static::$__UnsetPropertyNames as $PropertyName) {
+        
+        $Unsetter = function ($PropertyName) {
             unset($this->$PropertyName);
+        };
+        foreach(static::$__PropertiesToUnset as $DeclaringClass => $PropertyNames) {
+            \Closure::bind($Unsetter, $this, $DeclaringClass);
+            array_walk($PropertyNames, $Unsetter);
         }
+        $Domain->LoadEntity($AlreadyKnownRevivalData, $this);
         $this->__IsConstructed = true;
     }
     private function Initialize() {
@@ -39,17 +45,20 @@ trait EntityProxyFunctionality {
         }
         
         static::$__Reflection = new \ReflectionClass($this);
-        static::$__ClassName = static::$__Reflection->getName();
+        static::$__ProxyClassName = static::$__Reflection->getName();
         static::$__EntityClassName = static::$__Reflection->getParentClass()->getName();
         
         static::$__EntityReflection = new \ReflectionClass(get_parent_class());    
         foreach(static::$__EntityReflection->getProperties() as $Property) {
             $Name = $Property->getName();
             static::$__EntityProperties[$Name] = $Property;
-            if($Property->getDeclaringClass()->getName() !== static::$__ClassName
-                    && $Property->isPublic() 
+            $DeclaringClassName = $Property->getDeclaringClass()->getName();
+            if($DeclaringClassName !== static::$__ProxyClassName
                     && !$Property->isStatic()) {
-                static::$__UnsetPropertyNames[] = $Name;
+                if(!isset(static::$__PropertiesToUnset[$DeclaringClassName])) {
+                    static::$__PropertiesToUnset[$DeclaringClassName] = array();
+                }
+                static::$__PropertiesToUnset[$DeclaringClassName][] = $Name;
             }
         }
         foreach(static::$__EntityReflection->getMethods() as $Method) {
@@ -142,7 +151,7 @@ trait EntityProxyFunctionality {
 
     public function __set($Name, $Value) {
         $this->__Load();
-        if($this->HasParentMethod(__FUNCTION__))
+        if($this->HasParentMethod(__FUNCTION__) && $this->__IsConstructed)
             return $this->FowardMethodCall(__FUNCTION__, func_get_args());
         else
             $this->$Name = $Value;
@@ -157,11 +166,12 @@ trait EntityProxyFunctionality {
     }
 
     public function __unset($Name) {
-        if($this->HasParentMethod(__FUNCTION__)) {
+        $IsDoneLoading = $this->__IsLoaded && $this->__IsConstructed;
+        if($this->HasParentMethod(__FUNCTION__) && $IsDoneLoading) {
             $this->__Load();
             return $this->FowardMethodCall(__FUNCTION__, func_get_args());
         }
-        else if($this->__ShouldNotLoad()) {
+        else if($IsDoneLoading) {
             $this->__UnsetQueue[] = $Name;
         }
         else {

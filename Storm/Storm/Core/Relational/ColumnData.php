@@ -16,9 +16,9 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     /**
      * @var array
      */
-    private $ColumnData;
+    protected $Data;
     
-    protected function __construct(array $Columns, array $ColumnData) {
+    protected function __construct(array $Columns, array $Data) {
         $IndexedColumns = array();
         foreach ($Columns as $Column) {
             $IndexedColumns[$Column->GetIdentifier()] = $Column;
@@ -26,7 +26,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
         
         $this->Columns = $IndexedColumns;
         
-        $this->ColumnData = array_intersect_key($ColumnData, $this->Columns) + array_fill_keys(array_keys($this->Columns), null);
+        $this->Data = array_intersect_key($Data, $this->Columns);
     }
     
     /**
@@ -39,20 +39,27 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     /**
      * @return array
      */
-    final public function GetColumnData() {
-        return $this->ColumnData;
+    public function GetData() {
+        return $this->Data;
+    }
+    
+    /**
+     * @return void
+     */
+    public function SetData(array $Data) {
+        $this->Data = array_intersect_key($Data, $this->Columns);
     }
     
     /**
      * Get another column data instance with new data.
      * 
-     * @param array $ColumnData
-     * @return ColumnData
+     * @param array $Data
+     * @return static
      */
-    final public function Another(array $ColumnData) {
+    public function Another(array $Data) {
         $ClonedColumnData = clone $this;
         $ClonedColumnData->Columns =& $this->Columns;
-        $ClonedColumnData->ColumnData = array_intersect_key($ColumnData, $this->Columns) + array_fill_keys(array_keys($this->Columns), null);
+        $ClonedColumnData->SetData($Data);
         return $ClonedColumnData;
     }
     
@@ -67,62 +74,69 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
     
     /**
-     * Sets the column to a supplied value
+     * Get the column with the supplied identifier
      * 
-     * @param IColumn $Column The column to set the value to
-     * @param mixed $Data The value to set
-     * @return void
+     * @param string $Identifier The column identifier
+     * @return IColumn|null The matched column or null if it does not exist
      */
-    final public function SetColumn(IColumn $Column, $Data) {
-        $this->AddColumn($Column, $Data);
+    final public function HasColumn(IColumn $Column) {
+        return isset($this->Columns[$Column->GetIdentifier()]);
     }
-    
-    protected function AddColumn(IColumn $Column, $Data) {
+        
+    protected function AddColumnData(IColumn $Column, $Data) {
         $ColumnIdentifier = $Column->GetIdentifier();
         if(!isset($this->Columns[$ColumnIdentifier])) {
             throw new \InvalidArgumentException('$Column must be one of: ' . 
                     implode(', ', array_keys($this->Columns)));
         }
         
-        $this->ColumnData[$ColumnIdentifier] = $Data;
+        $this->Data[$ColumnIdentifier] = $Data;
     }
     
-    protected function RemoveColumn(IColumn $Column) {
-        $this->ColumnData[$Column->GetIdentifier()] = null;
+    protected function RemoveColumnData(IColumn $Column) {
+        unset($this->Data[$Column->GetIdentifier()]);
+    }
+    
+    protected function HasColumnData(IColumn $Column) {
+        return isset($this->Data[$Column->GetIdentifier()]);
+    }
+    
+    protected function GetColumnData(IColumn $Column) {
+        $Identifier = $Column->GetIdentifier();
+        if(isset($this->Data[$Identifier]))
+            return $this->Data[$Identifier];
+        else
+            return null;
     }
     
     final public function Hash() {
-        asort($this->ColumnData);
-        return md5(json_encode($this->ColumnData));
+        asort($this->Data);
+        return md5(json_encode($this->Data));
     }
     
     final public function HashData() {
-        asort($this->ColumnData);
-        return md5(json_encode(array_values($this->ColumnData)));
+        asort($this->Data);
+        return md5(json_encode(array_values($this->Data)));
     }
     
     final public function getIterator() {
-        return new \ArrayIterator($this->ColumnData);
+        return new \ArrayIterator($this->Data);
     }
 
     final public function offsetExists($Column) {
-        return isset($this->Columns[$Column->GetIdentifier()]);
+        return $this->HasColumnData($Column);
     }
     
     final public function offsetGet($Column) {
-        $Identifier = $Column->GetIdentifier();
-        if(!isset($this->ColumnData[$Identifier]))
-            return null;
-        else
-            return $this->ColumnData[$Identifier];
+        return $this->GetColumnData($Column);
     }
 
     final public function offsetSet($Column, $Data) {
-        $this->AddColumn($Column, $Data);
+        $this->AddColumnData($Column, $Data);
     }
 
     final public function offsetUnset($Column) {
-        $this->RemoveColumn($Column);
+        $this->RemoveColumnData($Column);
     }
     
     /**
@@ -132,9 +146,9 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
      * @return boolean
      */
     public function Matches(ColumnData $Data) {
-        ksort($this->ColumnData);
-        ksort($Data->ColumnData);
-        return $this->ColumnData === $Data->ColumnData;
+        ksort($this->Data);
+        ksort($Data->Data);
+        return $this->Data === $Data->Data;
     }
 }
 

@@ -62,6 +62,7 @@ abstract class QueryExecutor implements IQueryExecutor {
             }
             
             $Connection->CommitTransaction();
+            
         }
         catch (\Exception $Exception) {
             $Connection->RollbackTransaction();

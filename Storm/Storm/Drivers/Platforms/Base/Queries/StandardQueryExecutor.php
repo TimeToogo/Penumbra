@@ -54,24 +54,25 @@ abstract class StandardQueryExecutor extends QueryExecutor {
     
     protected function DeletePrimaryKeysQuery(QueryBuilder $QueryBuilder, Table $Table, array $PrimaryKeys) {
         $TableName = $Table->GetName();        
-        $DerivedTableName = $TableName . '__PrimaryKeys';
+        $DerivedTableName = $TableName . 'PrimaryKeys';
+        $TransformedDerivedTableName = $TableName . 'PersistencePrimaryKeys';
         
         $PrimaryKeysColumns = $Table->GetPrimaryKeyColumns();
         $PrimaryKeyNames = array_keys($PrimaryKeysColumns);
         
         $QueryBuilder->AppendIdentifier('DELETE # FROM # INNER JOIN (', [$TableName]);        
-        $this->StandardPersister->AppendDataAsDerivedTable(
+        $this->StandardPersister->AppendDataAsInlineTable(
                 $QueryBuilder,
                 $PrimaryKeysColumns, 
                 $DerivedTableName, 
                 $PrimaryKeys);
-        $QueryBuilder->AppendIdentifier(') #', [$DerivedTableName]);   
+        $QueryBuilder->AppendIdentifier(') #', [$TransformedDerivedTableName]);   
         
         $QueryBuilder->Append(' ON ');
         
         foreach($QueryBuilder->Delimit($PrimaryKeyNames, ' AND ') as $PrimaryKeyName) {
             $QueryBuilder->AppendIdentifier('# = ', [$TableName, $PrimaryKeyName]);
-            $QueryBuilder->AppendIdentifier('#', [$DerivedTableName, $PrimaryKeyName]);
+            $QueryBuilder->AppendIdentifier('#', [$TransformedDerivedTableName, $PrimaryKeyName]);
         }
 
     }

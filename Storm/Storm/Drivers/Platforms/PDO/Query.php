@@ -31,7 +31,9 @@ class Query implements Queries\IQuery {
     
     public function Execute() {
         $this->BindAll();
+        
         $this->Statement->execute();
+        
         return $this;
     }
     

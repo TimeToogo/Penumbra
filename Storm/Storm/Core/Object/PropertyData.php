@@ -26,11 +26,18 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
         $this->Properties = $IndexedProperties;
         $this->PropertyData = array_intersect_key($PropertyData, $this->Properties);
     }
-
+    
+    /**
+     * @return IProperty[]
+     */
+    final public function GetProperties(array $Identifiers = null) {
+        return $Identifiers === null ? $this->Properties : array_intersect_key($this->Properties, array_flip(array_values($Identifiers)));
+    }
+        
     /**
      * @return array<string, mixed>
      */
-    final protected function GetPropertyData() {
+    final public function GetPropertyData() {
         return $this->PropertyData;
     }
     

@@ -261,6 +261,7 @@ abstract class EntityMap {
         return true;
     }
     
+    private $Identity = null;
     /**
      * If the entity is null returns a new blank identity otherwise returns the identity
      * of the supplied entity.
@@ -269,18 +270,19 @@ abstract class EntityMap {
      * @return Identity The entity's identity
      */
     final public function Identity($Entity = null) {
-        if($Entity === null) {
-            return new Identity($this);
+        if($this->Identity === null) {
+            $this->Identity = new Identity($this);
         }
         
-        $this->VerifyEntity($Entity);
-        
-        $Identity = new Identity($this);
-        foreach($this->IdentityProperties as $IdentityProperty) {
-            $Identity[$IdentityProperty] = $IdentityProperty->GetValue($Entity);
+        $IdentityData = array();
+        if($Entity !== null) {
+            $this->VerifyEntity($Entity);
+            foreach($this->IdentityProperties as $Identifier => $IdentityProperty) {
+                $IdentityData[$Identifier] = $IdentityProperty->GetValue($Entity);
+            }
         }
         
-        return $Identity;
+        return $this->Identity->Another($IdentityData);
     }
     
     /**
@@ -339,6 +341,27 @@ abstract class EntityMap {
         foreach($this->DataProperties as $Identifier => $DataProperty) {
             $PersistenceData[$Identifier] = $DataProperty->GetValue($Entity);
         }
+        foreach($this->EntityProperties as $Identifier => $EntityProperty) {
+            $PersistenceData[$Identifier] = $EntityProperty->Persist($UnitOfWork, $Entity);
+        }
+        foreach($this->CollectionProperties as $Identifier => $CollectionProperty) {
+            $PersistenceData[$Identifier] = $CollectionProperty->Persist($UnitOfWork, $Entity);
+        }
+        
+        return $this->PersistanceData($PersistenceData);
+    }
+    
+    /**
+     * Persists an entity's relationships to the supplied unit of work.
+     * 
+     * @param UnitOfWork $UnitOfWork The unit of work to persist to
+     * @param object $Entity The entity to persist
+     * @return PersistenceData The persistence data of the entity
+     */
+    final public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity) {
+        $this->VerifyEntity($Entity);
+        
+        $PersistenceData = array();
         foreach($this->EntityProperties as $Identifier => $EntityProperty) {
             $PersistenceData[$Identifier] = $EntityProperty->Persist($UnitOfWork, $Entity);
         }

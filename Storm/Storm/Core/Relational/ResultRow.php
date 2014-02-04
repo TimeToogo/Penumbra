@@ -38,16 +38,40 @@ class ResultRow extends ColumnData {
         parent::__construct($Columns, $ColumnData);
     }
     
-    protected function AddColumn(IColumn $Column, $Data) {
-        parent::AddColumn($Column, $Data);
+    public function GetData() {
+        $Data = array();
+        foreach($this->Rows as $Row) {
+            $Data += $Row->GetData();
+        }
         
-        $this->Rows[$Column->GetTable()->GetName()][$Column] = $Data;
+        return $Data;
     }
     
-    protected function RemoveColumn(IColumn $Column) {
-        parent::RemoveColumn($Column);
+    public function SetData(array $Data) {
+        parent::SetData($Data);
+        foreach($this->Rows as $Row) {
+            $Row->SetData($Data);
+        }
+    }
+    
+    protected function AddColumnData(IColumn $Column, $Data) {
+        parent::AddColumnData($Column, $Data);
         
-        unset($this->Rows[$Column->GetTable()->GetName()][$Column]);
+        $this->Rows[$Column->GetTable()->GetName()]->AddColumnData($Column, $Data);
+    }
+    
+    protected function RemoveColumnData(IColumn $Column) {
+        parent::RemoveColumnData($Column);
+        
+        $this->Rows[$Column->GetTable()->GetName()][$Column]->RemoveColumnData($Column);
+    }
+    
+    protected function GetColumnData(IColumn $Column) {
+        return $this->Rows[$Column->GetTable()->GetName()]->GetColumnData($Column);
+    }    
+    
+    protected function HasColumnData(IColumn $Column) {
+        return $this->Rows[$Column->GetTable()->GetName()]->HasColumnData($Column);
     }
     
     public function __clone() {
@@ -119,7 +143,7 @@ class ResultRow extends ColumnData {
      * @return ResultRow The data of the supplied columns
      */
     final public function GetDataFromColumns(array $Columns) {
-        return new ResultRow($Columns, $this->GetColumnData());
+        return new ResultRow($Columns, $this->GetData());
     }
     
     
@@ -136,7 +160,7 @@ class ResultRow extends ColumnData {
         
         $NewResultRows = array();
         foreach($ResultRows as $Key => $ResultRow) {
-            $NewResultRows[$Key] = $NewResultRow->Another($ResultRow->GetColumnData());
+            $NewResultRows[$Key] = $NewResultRow->Another($ResultRow->GetData());
         }
         
         return $NewResultRows;

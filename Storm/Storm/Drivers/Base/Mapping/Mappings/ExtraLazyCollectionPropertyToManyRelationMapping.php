@@ -6,6 +6,7 @@ use \Storm\Core\Containers\Map;
 use \Storm\Core\Mapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Object\LazyRevivalData;
 
 class ExtraLazyCollectionPropertyToManyRelationMapping extends CollectionPropertyToManyRelationMapping {
     public function __construct(
@@ -28,7 +29,11 @@ class ExtraLazyCollectionPropertyToManyRelationMapping extends CollectionPropert
                         return $RelatedRevivalDataArray;
                     };
             
-            $RevivalDataArray[$Key][$this->Property] = $RelatedRevivalDataArrayLoader;
+            $RevivalDataArray[$Key][$this->Property] = 
+                    $this->MakeMultipleLazyRevivalData(
+                            $DomainDatabaseMap, 
+                            $ParentRow, 
+                            $RelatedRevivalDataArrayLoader);
         }
     }
 }

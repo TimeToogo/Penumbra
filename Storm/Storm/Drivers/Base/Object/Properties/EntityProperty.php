@@ -3,6 +3,7 @@
 namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
+use \Storm\Drivers\Base\Object\LazyRevivalData;
 
 class EntityProperty extends RelationshipProperty implements Object\IEntityProperty {
     private $IsOptional;
@@ -47,16 +48,11 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
             return reset($RevivedEntities);
         }
     }
-    
-    protected function ReviveCallable(Object\Domain $Domain, $Entity, callable $Callback, Object\IProperty $BackReferenceProperty = null) {
+    protected function ReviveLazyRevivalData(Object\Domain $Domain, $Entity, LazyRevivalData $LazyRevivalData) {
         if ($this->ProxyGenerator !== null) {
-            if($BackReferenceProperty !== null) {
-                $Callback = function () use ($Callback, &$BackReferenceProperty, &$Entity) {
-                    $RevivalData = call_user_func_array($Callback, func_get_args());
-                    $RevivalData[$BackReferenceProperty] = $Entity;
-                };
-            }
-            return $this->ProxyGenerator->GenerateProxy($Domain, $this->GetEntityType(), $Callback);
+            return $this->ProxyGenerator->GenerateProxy($Domain, $this->GetEntityType(), 
+                    $LazyRevivalData->GetAlreadyKnownRevivalData(),
+                    $LazyRevivalData->GetRevivalDataLoader());
         }
         else {
             throw new \Exception;//TODO:error message
@@ -82,7 +78,9 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
             
         }
         else if($CurrentValue == $OriginalValue) {
-            
+            $PersistedRelationship = $this->RelationshipType->GetPersistedRelationship(
+                    $Domain, $UnitOfWork, 
+                    $ParentEntity, $CurrentValue);
         }
         else if($Domain->DoShareIdentity($CurrentValue, $OriginalValue)) {
             $PersistedRelationship = $this->RelationshipType->GetPersistedRelationship(

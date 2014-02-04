@@ -22,21 +22,25 @@ class ToManyRelation extends ToManyRelationBase {
         $this->MapParentRowKeysToGroupedRelatedRows($MappedRelatedRows, $ParentRows, $ReferencedColumns, $GroupedRelatedRows);
     }
     
-    protected function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
-            Relational\Row $ParentRow, array $ChildRows) {
+    public function MapRelationalParentDataToRelatedData
+            (Relational\ColumnData $ParentRow, Relational\ColumnData $RelatedRow) {
         $ForeignKey = $this->GetForeignKey();
-        
-        if($ParentRow->HasPrimaryKey()) {
+        $ForeignKey->MapReferencedToParentKey($ParentRow, $RelatedRow);
+    }
+    
+    protected function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
+            Relational\ResultRow $ParentData, array $ChildRows) {
+        if($this->GetForeignKey()->HasReferencedKey($ParentData)) {
             foreach($ChildRows as $ChildRow) {
-                $ForeignKey->MapReferencedToParentKey($ParentRow, $ChildRow);
+                $this->MapRelationalParentDataToRelatedData($ParentData, $ChildRow);
             }
         }
         else {
             $Transaction->SubscribeToPrePersistEvent(
                     $this->GetTable(), 
-                    function () use (&$ForeignKey, &$ParentRow, &$ChildRows) {
+                    function () use (&$ParentData, &$ChildRows) {
                         foreach($ChildRows as $ChildRow) {
-                            $ForeignKey->MapReferencedToParentKey($ParentRow, $ChildRow);
+                            $this->MapRelationalParentDataToRelatedData($ParentData, $ChildRow);
                         }
                     });
         }

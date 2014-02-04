@@ -3,6 +3,8 @@
 namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
+use \Storm\Drivers\Base\Object\LazyRevivalData;
+use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 
 abstract class MultipleEntityProperty extends RelationshipProperty implements Object\ICollectionProperty {
     /**
@@ -26,47 +28,34 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
         $this->ProxyGenerator = $ProxyGenerator;
     }
     
-    final function ReviveArrayOfCallables(Object\Domain $Domain, $Entity, array $Callbacks, Object\IProperty $BackReferenceProperty = null) {
+    final public function SetProxyGenerator(Proxies\IProxyGenerator $ProxyGenerator) {
+        $this->ProxyGenerator = $ProxyGenerator;
+    }
+    
+    final protected function ReviveArrayOfLazyRevivalData(Object\Domain $Domain, $Entity, array $LazyRevivalDataArray, Object\IProperty $BackReferenceProperty = null) {
         if($this->ProxyGenerator !== null) {
-            if($BackReferenceProperty !== null) {
-                foreach($Callbacks as $Key => $Callback) {
-                    $Callbacks[$Key] = function() use($Callback, &$BackReferenceProperty, $Entity) {
-                        $RevivalData = call_user_func_array($Callback, func_get_args());
-                        $RevivalData[$BackReferenceProperty] = $Entity;
-                        
-                        return $RevivalData;
-                    };
-                }
-            }
             $EntityType = $this->GetEntityType();
-            $Proxies = $this->ProxyGenerator->GenerateProxies($Domain, $EntityType, $Callbacks);
+            
+            $AlreadyKnownRevivalData = array();
+            $LoaderFunctions = array();
+            array_walk($LazyRevivalDataArray,
+                    function (LazyRevivalData $I, $Key) use (&$AlreadyKnownRevivalData, &$LoaderFunctions) { 
+                        $AlreadyKnownRevivalData[$Key] = $I->GetAlreadyKnownRevivalData();
+                        $LoaderFunctions[$Key] = $I->GetRevivalDataLoader(); 
+                    });
+                    
+            $Proxies = $this->ProxyGenerator->GenerateProxies($Domain, $EntityType, $AlreadyKnownRevivalData, $LoaderFunctions);
             return $this->ReviveProxies($Domain, $Proxies, $Entity);
         }
         else {
             throw new \Exception;//TODO:error
         }
     }
+    
     protected function ReviveProxies(Object\Domain $Domain, $Entity, array $Proxies) {
         throw new \Exception();
     }
-    
-    final protected function ReviveCallable(Object\Domain $Domain, $Entity, callable $Callback, Object\IProperty $BackReferenceProperty = null) {
-        if($BackReferenceProperty !== null) {
-            $Callback = function () use ($Callback, &$BackReferenceProperty, &$Entity) {
-                $RevivalDataArray = call_user_func_array($Callback, func_get_args());
-                foreach($RevivalDataArray as $RevivalData) {
-                    $RevivalData[$BackReferenceProperty] = $Entity;
-                }
-                
-                return $RevivalDataArray;
-            };
-        }
-        return new Collections\LazyCollection($Domain, $this->GetEntityType(), $Callback);
-    }
-    protected function ReviveCallableProperty(Object\Domain $Domain, $Entity, callable $Callback) {
-        throw new \Exception();
-    }
-    
+        
     public function Persist(Object\UnitOfWork $UnitOfWork, $ParentEntity) {
         $Domain = $UnitOfWork->GetDomain();
         list(

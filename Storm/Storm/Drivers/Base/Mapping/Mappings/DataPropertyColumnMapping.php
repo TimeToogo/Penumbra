@@ -54,9 +54,6 @@ class DataPropertyColumnMapping extends PropertyMapping implements IDataProperty
             if(isset($ColumnData[$this->Column])) {
                 $PropertyDataArray[$Key][$this->DataProperty] = $this->Column->ToPropertyValue($ColumnData[$this->Column]);
             }
-            else {
-                $PropertyDataArray[$Key][$this->DataProperty] = null;
-            }
         }
     }
     
@@ -64,9 +61,6 @@ class DataPropertyColumnMapping extends PropertyMapping implements IDataProperty
         foreach($PropertyDataArray as $Key => $PropertyData) {
             if(isset($PropertyData[$this->DataProperty])) {
                 $ColumnDataArray[$Key][$this->Column] = $this->Column->ToPersistenceValue($PropertyData[$this->DataProperty]);
-            }
-            else {
-                $ColumnDataArray[$Key][$this->Column] = null;
             }
         }
     }

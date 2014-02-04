@@ -53,34 +53,50 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
                 $ChildRow = $PersistedRelationship->GetChildResultRow()->GetRow($this->GetTable());
                 $this->PersistIdentifyingRelationship($Transaction, $ParentRow, $ChildRow);
             }
+            else {
+                $RelatedPrimaryKey = $PersistedRelationship->GetRelatedPrimaryKey();
+                if($this->IsInversed()) {
+                    $this->GetForeignKey()->MapParentToReferencedKey($RelatedPrimaryKey, $ParentData);
+                }
+                else {
+                    $this->GetForeignKey()->MapReferencedToParentKey($RelatedPrimaryKey, $ParentData);
+                }
+            }
+        }
+    }
+    
+    public function MapRelationalParentDataToRelatedData(
+            Relational\ColumnData $ParentRow, Relational\ColumnData $RelatedRow) {
+        $ForeignKey = $this->GetForeignKey();
+        if($this->IsInversed()) {
+            $ForeignKey->MapReferencedToParentKey($ParentRow, $RelatedRow);
+        }
+        else {
+            $ForeignKey->MapParentToReferencedKey($ParentRow, $RelatedRow);
         }
     }
     
     final protected function PersistIdentifyingRelationship(
             Relational\Transaction $Transaction, 
-            Relational\Row $ParentRow, Relational\Row $ChildRow) {
+            Relational\ResultRow $ParentData, Relational\ResultRow $ChildData) {
+        $ForeignKey = $this->GetForeignKey();
         
-        if($this->IsInversed()) {
-            if($ParentRow->HasPrimaryKey()) {
-                $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildRow);
-            }
-            else {
-                $Transaction->SubscribeToPrePersistEvent($ChildRow, 
-                        function () use (&$ParentRow, &$ChildRow) {
-                            $this->GetForeignKey()->MapReferencedToParentKey($ParentRow, $ChildRow);
-                        });
-            }
+        /**
+         * In case the foreign key is part of the primary key and the row has
+         * not been persisted yet.
+         */
+        $HasForeignKey = $this->IsInversed() ?
+            $ForeignKey->HasReferencedKey($ParentData) :
+            $ForeignKey->HasParentKey($ParentData);
+        
+        if($HasForeignKey) {
+            $this->MapRelationalParentDataToRelatedData($ParentData, $ChildData);
         }
         else {
-            if($ParentRow->HasPrimaryKey()) {
-                $this->GetForeignKey()->MapParentToReferencedKey($ParentRow, $ChildRow);
-            }
-            else {
-                $Transaction->SubscribeToPrePersistEvent($ChildRow, 
-                        function () use (&$ParentRow, &$ChildRow) {
-                            $this->GetForeignKey()->MapParentToReferencedKey($ParentRow, $ChildRow);
-                        });
-            }
+            $Transaction->SubscribeToPrePersistEvent($ChildData, 
+                    function () use (&$ParentData, &$ChildData) {
+                        $this->MapRelationalParentDataToRelatedData($ParentRow, $ChildRow);
+                    });
         }
     }
     

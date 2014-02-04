@@ -42,6 +42,7 @@ class Query implements Queries\IQuery {
                case Queries\ParameterType::String:
                    $Value = "'" . $Value . "'";
                    break;
+               case Queries\ParameterType::Double:
                case Queries\ParameterType::Integer:
                    $Value = (string)$Value;
                    break;

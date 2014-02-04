@@ -204,6 +204,13 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * {@inheritDoc}
      */
+    final public function GetMappedProperties() {
+        return $this->MappedProperties;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
     final public function GetMappedReviveTables() {
         return $this->ReviveTables;
     }
@@ -263,7 +270,9 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      */
     public function ResultRow($ColumnData = array()) {
         if($this->ResultRow === null) {
-            $this->ResultRow = new Relational\ResultRow($this->MappedPersistColumns, $ColumnData);
+            $AllPersistColumns = call_user_func_array('array_merge', 
+                    array_map(function($Table) { return $Table->GetColumns(); }, $this->PersistTables));
+            $this->ResultRow = new Relational\ResultRow($AllPersistColumns, $ColumnData);
         }
         
         return $this->ResultRow->Another($ColumnData);

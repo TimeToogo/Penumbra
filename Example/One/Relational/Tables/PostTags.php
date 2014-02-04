@@ -16,7 +16,7 @@ class PostTags extends Relational\Relations\JoinTable {
     protected function Name() {
         return 'PostTags';
     }
- 
+    
     public $PostBlogId;
     public $PostTitle;
     public $TagId;

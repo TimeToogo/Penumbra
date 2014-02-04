@@ -12,15 +12,18 @@ class LazyCollection extends Collection {
      * @var IProxyGenerator|null
      */
     private $ProxyGenerator;
+    private $AlreadyKnownRevivalData;
     private $ArrayLoaderFunction;
     private $IsLoaded = false;
     
     public function __construct(
             Domain $Domain, 
             $EntityType, 
+            Object\RevivalData $AlreadyKnownRevivalData,
             callable $ArrayLoaderFunction,
             IProxyGenerator $ProxyGenerator = null) {
         parent::__construct($EntityType, array());
+        $this->AlreadyKnownRevivalData = $AlreadyKnownRevivalData;
         $this->ArrayLoaderFunction = $ArrayLoaderFunction;
         $this->Domain = $Domain;
         $this->ProxyGenerator = $ProxyGenerator;
@@ -35,10 +38,9 @@ class LazyCollection extends Collection {
         
         $Loader = $this->ArrayLoaderFunction;
         $RevivalData = $Loader();
-        $Entities = $this->LoadEntities($RevivalData);
         $this->exchangeArray($this->LoadEntities($RevivalData));
         $this->SetIsAltered(false);
-        $this->OriginalEntities = $Entities;
+        $this->OriginalEntities = $this->LoadEntities($RevivalData);
     }
     private function LoadEntities(array $RevivalData) {
         if($this->ProxyGenerator !== null) {
@@ -52,7 +54,8 @@ class LazyCollection extends Collection {
             
             return $this->ProxyGenerator->GenerateProxies(
                     $this->Domain, 
-                    $this->GetEntityType(), 
+                    $this->GetEntityType(),
+                    array_fill_keys(array_keys($LoaderFunctions), $this->AlreadyKnownRevivalData),
                     $LoaderFunctions);
         }
         else {

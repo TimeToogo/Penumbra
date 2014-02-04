@@ -209,6 +209,17 @@ abstract class Domain {
     }
     
     /**
+     * Persists an entity relationships to the supplied unit of work.
+     * 
+     * @param UnitOfWork $UnitOfWork The unit of work to persist to
+     * @param object $Entity The entity to persist
+     * @return void The persistence data of the entity
+     */
+    final public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity) {
+        $this->VerifyEntity($Entity)->PersistRelationships($UnitOfWork, $Entity);
+    }
+    
+    /**
      * Discard an entity relationships to the supplied unit of work and returns the entity's
      * discardence data.
      * 
@@ -247,6 +258,21 @@ abstract class Domain {
         $EntityMap = $this->EntityMaps[$RevivalData->GetEntityType()];
         
         $EntityMap->LoadEntity($this, $RevivalData, $Entity);
+    }
+    
+    /**
+     * Loads an array of entities with the supplied revival data.
+     * 
+     * @param RevivalData $RevivalData The revival data to load the entity with
+     * @param array $Entities The entities to load
+     * @return void
+     */
+    final public function LoadEntities(RevivalData $RevivalData, array $Entities) {
+        $EntityMap = $this->EntityMaps[$RevivalData->GetEntityType()];
+        
+        foreach($Entities as $Entity) {
+            $EntityMap->LoadEntity($this, $RevivalData, $Entity);
+        }
     }
     
     /**

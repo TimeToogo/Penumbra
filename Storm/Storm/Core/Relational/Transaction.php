@@ -51,8 +51,8 @@ final class Transaction {
     private $DiscardedCriteria = array();
     
     public function __construct() {
-        $this->PrePersistRowEventMap = new Map;
-        $this->PostPersistRowEventMap = new Map;
+        $this->PrePersistRowEventMap = new Map();
+        $this->PostPersistRowEventMap = new Map();
     }
     
     /**
