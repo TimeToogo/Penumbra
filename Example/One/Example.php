@@ -21,12 +21,8 @@ class One implements \StormExamples\IStormExample {
     public static function GetConnection() {
         $PDOConnection = Platforms\PDO\Connection::Connect('mysql:host=localhost;dbname=StormTest', 'root', 'admin');
               
-        if(self::DevelopmentMode > 0) {
-            return new Logging\Connection(new Logging\DumpLogger(), $PDOConnection);
-        }
-        else {
-            return $PDOConnection;
-        }
+        return new Logging\Connection(self::DevelopmentMode > 0 ? new Logging\DumpLogger() : new Logging\NullLogger(), 
+                $PDOConnection);
     }
     
     public function GetStorm() {
@@ -40,7 +36,7 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
 
-    const Id = 495;
+    const Id = 496;
     
     const Persist = 0;
     const Retreive = 1;
@@ -54,7 +50,7 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::Retreive;
+        $Action = self::Procedure;
         $Amount = 1;        
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
@@ -197,8 +193,8 @@ class One implements \StormExamples\IStormExample {
                 function (Entities\Blog $Blog) {
                     $Blog->Description = md5(time());
 
-                    $Blog->Name .= strpos($Blog->Description, 'Test') !== false ?
-                            'Foobar' . (string)$Blog->CreatedDate : $Blog->Name . 'Hi';
+                    $Blog->Name = substr($Blog->Name . (strpos($Blog->Description, 'Test') !== false ?
+                            'Foobar' . (string)$Blog->CreatedDate : $Blog->Name . 'Hi'), 0, 50);
 
                     $Blog->CreatedDate = (new \DateTime())->add((new \DateTime())->diff($Blog->CreatedDate, true));
                 })
