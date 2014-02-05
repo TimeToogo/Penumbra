@@ -40,7 +40,7 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
 
-    const Id = 237;
+    const Id = 495;
     
     const Persist = 0;
     const Retreive = 1;
@@ -55,8 +55,7 @@ class One implements \StormExamples\IStormExample {
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
         $Action = self::Retreive;
-        $Amount = 1;
-        
+        $Amount = 1;        
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
             $Last = $this->Act($Action, $BloggingStorm, $BlogRepository, $AuthorRepository, $TagRepository);
