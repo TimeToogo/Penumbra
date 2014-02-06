@@ -4,6 +4,7 @@ namespace Storm\Drivers\Fluent\Object\Closure;
 
 use \Storm\Core\Object;
 use \Storm\Core\Object\Expressions\Expression;
+use \Storm\Drivers\Base\Object\Properties\Accessors\Accessor;
 
 abstract class ASTBase implements IAST {
     /**
@@ -56,7 +57,9 @@ abstract class ASTBase implements IAST {
     }
     
     final public function SetPropertyMode($PropertyMode) {
-        if($PropertyMode !== self::PropertiesAreGetters && $PropertyMode !== self::PropertiesAreSetters) {
+        if($PropertyMode !== self::PropertiesAreGetters && 
+                $PropertyMode !== self::PropertiesAreSetters &&
+                $PropertyMode !== self::PropertiesAreGettersAndSetters) {
             throw new \InvalidArgumentException('Invalid $PropertyMode supplied');
         }
         $this->PropertyMode = $PropertyMode;
@@ -89,6 +92,23 @@ abstract class ASTBase implements IAST {
         return $this->ParseNodeAsExpression($Node);
     }
     protected abstract function ParseNodeAsExpression(INode $Node);
+    
+    final protected function AccesorsMatch(Accessor $Accessor, Accessor $OtherAccessor) {
+        switch ($this->PropertyMode) {
+            case self::PropertiesAreGetters:
+                return $Accessor->GetGetterIdentifier() === $OtherAccessor->GetGetterIdentifier();
+                
+            case self::PropertiesAreSetters:
+                return $Accessor->GetSetterIdentifier() === $OtherAccessor->GetSetterIdentifier();
+                
+            case self::PropertiesAreGettersAndSetters:
+                return $Accessor->GetGetterIdentifier() === $OtherAccessor->GetGetterIdentifier() ||
+                     $Accessor->GetSetterIdentifier() === $OtherAccessor->GetSetterIdentifier();
+
+            default:
+                throw new \Exception();
+        }
+    }
 }
 
 ?>

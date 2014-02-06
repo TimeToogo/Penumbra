@@ -8,6 +8,7 @@ use \Storm\Core\Object\Expressions\Expression;
 interface IAST {
     const PropertiesAreGetters = 1;
     const PropertiesAreSetters = 2;
+    const PropertiesAreGettersAndSetters = 3;
     
     /**
      * @return Object\IEntityMap

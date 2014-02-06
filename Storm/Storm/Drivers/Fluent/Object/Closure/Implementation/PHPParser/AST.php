@@ -244,6 +244,7 @@ class AST extends ASTBase {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Statement node parsers">
+    
     private function ParseStatmentNode(\PHPParser_Node_Stmt $Node) {
         switch (true) {
             case $Node instanceof \PHPParser_Node_Stmt_Return:
@@ -286,16 +287,14 @@ class AST extends ASTBase {
         
         $this->AccessorBuilder->traverse([$Node]);
         $Accessor = $this->AccessorBuilderVisitor->GetAccessor();
-        $Identifier = $this->GetAccessorIdentifier($Accessor);
         
         $PropertyExpression = null;
         
         foreach($Properties as $Property) {
             if($Property instanceof Property) {
                 $OtherAccessor = $Property->GetAccessor();
-                $OtherIdentifier = $this->GetAccessorIdentifier($OtherAccessor);
                 
-                if($Identifier === $OtherIdentifier) {
+                if($this->AccesorsMatch($Accessor, $OtherAccessor)) {
                     $PropertyExpression = Expression::Property($Property);
                     break;
                 }
@@ -303,11 +302,6 @@ class AST extends ASTBase {
         }
         
         return $PropertyExpression;
-    }
-    
-    private function GetAccessorIdentifier(Accessor $Accessor) {
-        return $this->PropertyMode === self::PropertiesAreGetters ?
-                $Accessor->GetGetterIdentifier() : $Accessor->GetSetterIdentifier();
     }
     
     // </editor-fold>
