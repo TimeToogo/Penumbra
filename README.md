@@ -6,7 +6,7 @@ Domain oriented ORM, crafted with passion for PHP 5.4+.
 
 The goals of Storm
 ==================
- - To provide a maintainable and sensible approach to the complex ORM realm
+ - To provide a maintainable and sensible approach to the complex ORM realm.
  - To reward the user with unpolluted and flexible domain models.
  - To provide a fluent [language integrated query (Similar to C#'s LINQ)](#phpinq)
  - To [reduce the amount of queries](#queries) to the underlying platform and assist in [eliminating n+1 queries](#queries).
@@ -63,7 +63,7 @@ $UserRepository->Execute($InactiveUserProcedure);
      - `Eager` - Relationships are loaded along with the parent and children are joined where appropriate.
      - `SemiLazy` - Relationships are not loaded with the parent entity but when one is required, globally every unloaded relationship will be loaded .
      - `Lazy` (Recommended) - Relationships are loaded when required for all entities in the request object graph.
-     - `ExtraLazy` (N+1 likely) - Relationships are loaded when required from for a single parent entity.
+     - `ExtraLazy` (N+1 likely) - Relationships are loaded when required from for each parent entity.
 
 
 
