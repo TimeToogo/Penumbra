@@ -85,3 +85,5 @@ Now here is the number of queries executed for each loading mode (N=Number of Po
  - `SemiLazy` - **4** For loading a single parent in a request the will be equivalent as `Lazy` mode below.
  - `Lazy` - **4** (the user | posts | all authors | all tags), the posts will be loaded when `$User->GetPosts()` is iterated and all the tags will be loaded when the first `$Post->GetTags()` is iterated.
  - `ExtraLazy` - **(N * 2) + 2** - (user | posts | *each post's* author | *each post's* tags).
+
+*NOTE: Relationship loading mode is per-relationship, the above example assumes every relationship will have one loading mode for simplicity.
