@@ -22,6 +22,13 @@ class AccessorBuilderVisitor extends \PHPParser_NodeVisitorAbstract {
     }
     
     public function enterNode(\PHPParser_Node $Node) {
+        //Do not want to traverse arguments of any invocations/method calls
+        $ClonedNode = clone $Node;
+        unset($ClonedNode->args);
+        return $ClonedNode;
+    }
+    
+    public function leaveNode(\PHPParser_Node $Node) {
         switch (true) {
             //Field
             case $Node instanceof \PHPParser_Node_Expr_PropertyFetch:
@@ -57,10 +64,6 @@ class AccessorBuilderVisitor extends \PHPParser_NodeVisitorAbstract {
             default:
                 return;
         }
-        //Do not want to traverse arguments of any invocations/method calls
-        $ClonedNode = clone $Node;
-        unset($ClonedNode->args);
-        return $ClonedNode;
     }
     
     public function GetNodeValues(array $ArgumentNodes) {
