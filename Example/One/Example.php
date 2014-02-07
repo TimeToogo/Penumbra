@@ -36,7 +36,7 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
 
-    const Id = 496;
+    const Id = 498;
     
     const Persist = 0;
     const Retreive = 1;
@@ -50,7 +50,7 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::Procedure;
+        $Action = self::Retreive;
         $Amount = 1;        
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
@@ -156,8 +156,8 @@ class One implements \StormExamples\IStormExample {
 
                     $Possibly = $Foo . 'Hello' <> ';' || $Sandy == time() && $Outside->getTimestamp() > (time() - 3601);
 
-                    $Maybe = $Blog->Description != 45 || (~3 - 231 * 77) . $Blog->Name == 'Sandwich' && $True || $Awaited;
-
+                    $Maybe = $Blog->Description != 45 || (~3 - 231 * 77) . $Blog->GetName() == 'Sandwich' && $True || $Awaited;
+                    
                     return (~1 - 500 ^ 2) && $Foo === $Blog->Id && (true || mt_rand(1, 10) > 10 || $Blog->Id === $Foo  || $Blog->CreatedDate < new \DateTime() && $Maybe || $Possibly);
                 })
                 ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
@@ -191,10 +191,10 @@ class One implements \StormExamples\IStormExample {
     private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
         $Procedure = $BlogRepository->Procedure(
                 function (Entities\Blog $Blog) {
-                    $Blog->Description = md5(time());
+                    $Blog->Description = md5($Blog->GetName());
 
-                    $Blog->Name = substr($Blog->Name . (strpos($Blog->Description, 'Test') !== false ?
-                            'Foobar' . (string)$Blog->CreatedDate : $Blog->Name . 'Hi'), 0, 50);
+                    $Blog->SetName(substr($Blog->GetName() . (strpos($Blog->Description, 'Test') !== false ?
+                            'Foobar' . (string)$Blog->CreatedDate : $Blog->GetName() . 'Hi'), 0, 50));
 
                     $Blog->CreatedDate = (new \DateTime())->add((new \DateTime())->diff($Blog->CreatedDate, true));
                 })
@@ -208,13 +208,8 @@ class One implements \StormExamples\IStormExample {
     }
     
     private function Discard($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        
-        
-        $Blogs = $BlogRepository->Load($BlogRepository->Request()
-                ->Where(function (Entities\Blog $Blog) use ($Id) {
-                    return in_array($Blog->Id, [$Id]);
-                }));
-        $BlogRepository->DiscardAll($Blogs);
+
+        $BlogRepository->Discard($BlogRepository->LoadById($Id));
 
         $BlogRepository->SaveChanges();
     }

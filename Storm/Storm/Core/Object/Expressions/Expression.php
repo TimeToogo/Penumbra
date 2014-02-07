@@ -106,7 +106,7 @@ abstract class Expression {
      * @return AssignmentExpression
      */
     final public static function Assign(
-            Expression $AssignToValueExpression, 
+            PropertyExpression $AssignToValueExpression, 
             $AssignmentOperator,
             Expression $AssignmentValueExpression) {
         return new AssignmentExpression($AssignToValueExpression, $AssignmentOperator, $AssignmentValueExpression);

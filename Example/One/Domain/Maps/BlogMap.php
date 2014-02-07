@@ -20,6 +20,7 @@ class BlogMap extends EntityMap {
     
     public $Id;
     public $Name;
+    public $NameGetter;
     public $Description;
     public $CreatedDate;
     public $Posts;
@@ -30,7 +31,7 @@ class BlogMap extends EntityMap {
                 str_replace('\\', DIRECTORY_SEPARATOR, __DIR__) . DIRECTORY_SEPARATOR . 'Proxies');
         
         $this->Id = new Properties\DataProperty(new Accessors\Field('Id'), true);
-        $this->Name = new Properties\DataProperty(new Accessors\Field('Name'));
+        $this->Name = new Properties\DataProperty(new Accessors\MethodPair('GetName', 'SetName'));
         $this->Description = new Properties\DataProperty(new Accessors\Field('Description'));
         $this->CreatedDate = new Properties\DataProperty(new Accessors\Field('CreatedDate'));
         

@@ -288,20 +288,31 @@ class AST extends ASTBase {
         $this->AccessorBuilder->traverse([$Node]);
         $Accessor = $this->AccessorBuilderVisitor->GetAccessor();
         
-        $PropertyExpression = null;
-        
         foreach($Properties as $Property) {
             if($Property instanceof Property) {
                 $OtherAccessor = $Property->GetAccessor();
                 
-                if($this->AccesorsMatch($Accessor, $OtherAccessor)) {
-                    $PropertyExpression = Expression::Property($Property);
-                    break;
+                $MatchedAccessorType = null;
+                if($this->AccessorsMatch($Accessor, $OtherAccessor, $MatchedAccessorType)) {
+                    return $this->ParseNodeAsProperty($Node, $Property, $MatchedAccessorType);
                 }
             }
         }
-        
-        return $PropertyExpression;
+    }
+    
+    private function ParseNodeAsProperty(\PHPParser_Node_Expr $Node, Property $Property, $MatchedAccessorType) {
+        if($MatchedAccessorType === self::PropertiesAreSetters && $Node instanceof \PHPParser_Node_Expr_MethodCall) {
+            if(count($Node->args) === 0) {
+                throw new \Exception();
+            }
+            return Expression::Assign(
+                    Expression::Property($Property), 
+                    Operators\Assignment::Equal, 
+                    $this->ParseNodeInternal($Node->args[0]));
+        }
+        else {
+            return Expression::Property($Property);
+        }
     }
     
     // </editor-fold>

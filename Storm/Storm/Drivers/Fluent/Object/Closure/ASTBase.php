@@ -59,7 +59,7 @@ abstract class ASTBase implements IAST {
     final public function SetPropertyMode($PropertyMode) {
         if($PropertyMode !== self::PropertiesAreGetters && 
                 $PropertyMode !== self::PropertiesAreSetters &&
-                $PropertyMode !== self::PropertiesAreGettersAndSetters) {
+                $PropertyMode !== self::PropertiesAreGettersOrSetters) {
             throw new \InvalidArgumentException('Invalid $PropertyMode supplied');
         }
         $this->PropertyMode = $PropertyMode;
@@ -93,21 +93,37 @@ abstract class ASTBase implements IAST {
     }
     protected abstract function ParseNodeAsExpression(INode $Node);
     
-    final protected function AccesorsMatch(Accessor $Accessor, Accessor $OtherAccessor) {
+    final protected function AccessorsMatch(Accessor $Accessor, Accessor $OtherAccessor, &$MatchedAccessorType = null) {
         switch ($this->PropertyMode) {
             case self::PropertiesAreGetters:
-                return $Accessor->GetGetterIdentifier() === $OtherAccessor->GetGetterIdentifier();
+                return $this->GetterAccessorsMatch($Accessor, $OtherAccessor, $MatchedAccessorType);
                 
             case self::PropertiesAreSetters:
-                return $Accessor->GetSetterIdentifier() === $OtherAccessor->GetSetterIdentifier();
+                return $this->SetterAccessorsMatch($Accessor, $OtherAccessor, $MatchedAccessorType);
                 
-            case self::PropertiesAreGettersAndSetters:
-                return $Accessor->GetGetterIdentifier() === $OtherAccessor->GetGetterIdentifier() ||
-                     $Accessor->GetSetterIdentifier() === $OtherAccessor->GetSetterIdentifier();
-
+            case self::PropertiesAreGettersOrSetters:
+                return $this->GetterAccessorsMatch($Accessor, $OtherAccessor, $MatchedAccessorType) ||
+                        $this->SetterAccessorsMatch($Accessor, $OtherAccessor, $MatchedAccessorType);
+                
             default:
                 throw new \Exception();
         }
+    }
+    
+    private function GetterAccessorsMatch(Accessor $Accessor, Accessor $OtherAccessor, &$MatchedAccessorType = null) {
+        if($Accessor->GetGetterIdentifier() === $OtherAccessor->GetGetterIdentifier()) {
+            $MatchedAccessorType = self::PropertiesAreGetters;
+            return true;
+        }
+        return false;
+    }
+    
+    private function SetterAccessorsMatch(Accessor $Accessor, Accessor $OtherAccessor, &$MatchedAccessorType = null) {
+        if($Accessor->GetSetterIdentifier() === $OtherAccessor->GetSetterIdentifier()) {
+            $MatchedAccessorType = self::PropertiesAreSetters;
+            return true;
+        }
+        return false;
     }
 }
 

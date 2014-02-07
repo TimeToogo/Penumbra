@@ -21,7 +21,7 @@ class AccessorBuilderVisitor extends \PHPParser_NodeVisitorAbstract {
         return $this->AccessorBuilder->GetAccessor();
     }
     
-    public function leaveNode(\PHPParser_Node $Node) {
+    public function enterNode(\PHPParser_Node $Node) {
         switch (true) {
             //Field
             case $Node instanceof \PHPParser_Node_Expr_PropertyFetch:
@@ -38,7 +38,7 @@ class AccessorBuilderVisitor extends \PHPParser_NodeVisitorAbstract {
                 if(!is_string($Name)) {
                     throw new \Exception('Cannot build accessor: Method call cannot be dynamic');
                 }
-                call_user_func_array([$this->AccessorBuilder, $Name], $this->GetNodeValues($Node->args));
+                $this->AccessorBuilder->$Name();
                 break;
                 
             //Indexor
@@ -50,13 +50,17 @@ class AccessorBuilderVisitor extends \PHPParser_NodeVisitorAbstract {
             case $Node instanceof \PHPParser_Node_Expr_FuncCall:
                 if($Node->name instanceof \PHPParser_Node_Expr_Variable && 
                         $Node->name->name === $this->EntityVariableName) {
-                    call_user_func_array($this->AccessorBuilder, $this->GetNodeValues($Node->args));
+                    $this->AccessorBuilder();
                 }
                 break;
             
             default:
                 return;
         }
+        //Do not want to traverse arguments of any invocations/method calls
+        $ClonedNode = clone $Node;
+        unset($ClonedNode->args);
+        return $ClonedNode;
     }
     
     public function GetNodeValues(array $ArgumentNodes) {
@@ -68,7 +72,7 @@ class AccessorBuilderVisitor extends \PHPParser_NodeVisitorAbstract {
             $Node->Value;
         }
         else {
-            throw new \Exception('Cannot ');
+            throw new \Exception();
         }
     }
 }
