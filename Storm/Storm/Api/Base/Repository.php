@@ -114,12 +114,13 @@ class Repository {
     /**
      * Verifies an entity to be valid for use in this repository.
      * 
+     * @param string $Method __METHOD__
      * @param object $Entity The entity to verify
-     * @throws \InvalidArgumentException
+     * @throws InvalidEntityException
      */
-    final protected function VerifyEntity($Entity) {
+    final protected function VerifyEntity($Method, $Entity) {
         if(!($Entity instanceof $this->EntityType)) {
-            throw new \InvalidArgumentException('');
+            throw new InvalidEntityException('Call to method %s with invalid entity type %s', $Method, $Entity);
         }
     }
     
@@ -175,11 +176,11 @@ class Repository {
      * 
      * @param Object\IRequest $Request The request to load
      * @return object|null|array
-     * @throws \Exception
+     * @throws Object\TypeMismatchException
      */
     public function LoadRequest(Object\IRequest $Request) {
         if($Request->GetEntityType() !== $this->EntityType) {
-            throw new \Exception();//TODO: error messages
+            throw new Object\TypeMismatchException('The supplied request is of type %s, expecting: %s', $Request->GetEntityType(), $this->EntityType);
         }
         $Entities = $this->DomainDatabaseMap->Load($Request);
         
@@ -198,12 +199,15 @@ class Repository {
      * 
      * @param mixed ... The identity value(s)  
      * @return object|null The returned entity or null
-     * @throws \Exception
+     * @throws \Storm\Core\StormException
      */
     public function LoadById($_) {
         $IdentityValues = func_get_args();
         if(count($IdentityValues) !== count($this->IdentityProperties)) {
-            throw new \Exception();
+            throw new \Storm\Core\StormException(
+                    'The supplied amount of parameters does not match the number of '
+                    . 'identity properties for %s, expecting $d: $d were supplied', 
+                    $this->EntityType, count($this->IdentityProperties), count($IdentityValues));
         }
         
         $Identity = $this->EntityMap->Identity();
@@ -250,7 +254,7 @@ class Repository {
      * @return void
      */
     public function Persist($Entity) {
-        $this->VerifyEntity($Entity);
+        $this->VerifyEntity(__METHOD__, $Entity);
         $this->IdentityMap->CacheEntity($Entity);
         
         $this->PersistedQueue[] = $Entity;
@@ -291,7 +295,7 @@ class Repository {
      */
     public function ExecuteProcedure(Object\IProcedure $Procedure) {
         if($Procedure->GetEntityType() !== $this->EntityType) {
-            throw new \Exception();//TODO: error messages;
+            throw new Object\TypeMismatchException('The supplied procedure is of type %s, expecting: %s', $Procedure->GetEntityType(), $this->EntityType);
         }
         $this->ExecutionQueue[] = $Procedure;
         $this->AutoSave();
@@ -312,7 +316,7 @@ class Repository {
             $this->DiscardedCriterionQueue[] = $EntityOrCriterion;
         }
         else {
-            $this->VerifyEntity($EntityOrCriterion);
+            $this->VerifyEntity(__METHOD__, $EntityOrCriterion);
             $this->IdentityMap->RemoveFromCache($EntityOrCriterion);
             $this->DiscardedQueue[] = $EntityOrCriterion;
         }

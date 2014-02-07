@@ -26,11 +26,11 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
      * @param array $Instances The array of objects to map.
      * @param array $ToInstances The array of object to map to.
      * @return \Storm\Core\Containers\Map The created map
-     * @throws \InvalidArgumentException If the amount of instances is not equal to the amount of to instances
+     * @throws \Storm\Core\StormException If the amount of instances is not equal to the amount of to instances
      */
     public static function From(array $Instances, array $ToInstances) {
         if(count($Instances) !== count($ToInstances)) {
-            throw new \InvalidArgumentException('Inequal length arrays given');
+            throw new \Storm\Core\StormException('Lengths of supplied arrays must be equal: %d != %d', count($Instances), count($ToInstances));
         }
         
         $Map = new Map();
@@ -63,11 +63,11 @@ final class Map implements \IteratorAggregate, \ArrayAccess {
      * @param object $Instance
      * @param object $ToInstance
      * @return Map
-     * @throws \InvalidArgumentException If either of the parameters is not an object
+     * @throws \Storm\Core\StormException If either of the parameters is not an object
      */
     public function Map($Instance, $ToInstance) {
         if(!is_object($Instance) || !is_object($ToInstance)) {
-            throw new \InvalidArgumentException('$Instance and $ToInstance must be valid object intances');
+            throw new \Storm\Core\StormException('Map only supports mapping object: %s and %s given', gettype($Instance), gettype($ToInstance));
         }
         
         if($this->Storage->contains($Instance) || $this->InversedStorage->contains($Instance)) {

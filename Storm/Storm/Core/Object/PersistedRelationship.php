@@ -31,10 +31,10 @@ class PersistedRelationship {
     public function __construct(Identity $ParentIdentity, 
             Identity $RelatedIdentity = null, PersistenceData $ChildPersistenceData = null) {
         if($RelatedIdentity === null && $ChildPersistenceData === null) {
-            throw new \InvalidArgumentException('Related identity and persistence data cannot both be null');
+            throw new ObjectException('The supplied related identity and persistence data cannot both be null');
         }
         if($RelatedIdentity !== null && $ChildPersistenceData !== null) {
-            throw new \InvalidArgumentException('Related identity and persistence data cannot both be not null');
+            throw new ObjectException('Either the supplied related identity or persistence data must be null');
         }
         $this->IsIdentifying = $RelatedIdentity === null;
         $this->ParentIdentity = $ParentIdentity;
@@ -58,22 +58,22 @@ class PersistedRelationship {
     
     /**
      * @return Identity
-     * @throws \BadMethodCallException
+     * @throws ObjectException
      */
     public function GetRelatedIdentity() {
         if($this->IsIdentifying) {
-            throw new \BadMethodCallException('Relationship is identifying');
+            throw new ObjectException('An identifying relationship does not contain a related identity');
         }
         return $this->RelatedIdentity;
     }
     
     /**
      * @return Identity
-     * @throws \BadMethodCallException
+     * @throws BadMethodCallException
      */
     public function GetChildPersistenceData() {
         if(!$this->IsIdentifying) {
-            throw new \BadMethodCallException('Relationship is not identifying');
+            throw new ObjectException('An non-identifying relationship does not contain child persistence data');
         }
         return $this->ChildPersistenceData;
     }

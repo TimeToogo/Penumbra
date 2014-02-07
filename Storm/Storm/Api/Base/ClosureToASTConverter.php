@@ -37,7 +37,7 @@ class ClosureToASTConverter {
         $Parameters = $ClosureData->GetParameters();
         
         if(count($Parameters) !== 1) {
-            throw new \Exception('Closure must contain exaclty one parameter');
+            throw new InvalidClosureException($ClosureData, 'Signature must contain a single parameter');
         }
         
         $EntityVariableName = $Parameters[0]->name;

@@ -8,7 +8,7 @@ $RequiredDependencies = [
 
 foreach ($RequiredDependencies as $RequiredClass => $DependencyName) {
     if(!class_exists($RequiredClass)) {
-        throw new \Exception('Unloaded storm dependency: ' . $DependencyName);
+        throw new Core\StormException('Cannot load Storm: unloaded storm dependency - %s', $DependencyName);
     }
 }
 

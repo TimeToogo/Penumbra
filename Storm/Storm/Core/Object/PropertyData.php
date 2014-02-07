@@ -60,13 +60,16 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
      * 
      * @param IProperty $Property The property to set the value for
      * @param mixed $Data The value to set for the property
-     * @throws \InvalidArgumentException
+     * @throws InvalidPropertyException
      */
     final public function SetProperty(IProperty $Property, $Data) {
         $Identifier = $Property->GetIdentifier();
         
         if(!isset($this->Properties[$Identifier])) {
-            throw new \InvalidArgumentException('$PropertyOrPropertyName must be a property of this property data ');
+            throw new InvalidPropertyException(
+                    'The supplied property belonging to %s is not part of this %s.',
+                    \Storm\Core\Utilities::GetTypeOrClass($Property->GetEntityMap()),
+                    get_class($this));
         }
         
         $this->VerifyProperty($Property, $Identifier);

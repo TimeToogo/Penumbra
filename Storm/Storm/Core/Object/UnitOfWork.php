@@ -119,7 +119,9 @@ final class UnitOfWork {
      */
     public function Execute(IProcedure $Procedure) {
         if(!$this->Domain->HasEntityMap($Procedure->GetEntityType())) {
-            throw new \InvalidArgumentException();
+            throw new TypeMismatchException(
+                    'The supplied procedure of entity %s is part of the given domain:',
+                    $Procedure->GetEntityType());
         }
         $this->ProcedureToExecute[] = $Procedure;
     }

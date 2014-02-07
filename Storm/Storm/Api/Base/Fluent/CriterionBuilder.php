@@ -34,12 +34,12 @@ class CriterionBuilder {
      * 
      * @return \Storm\Drivers\Fluent\Object\Closure\IAST The return
      * 
-     * @throws \UnexpectedValueException
+     * @throws \Storm\Api\Base\InvalidClosureException
      */
     final protected function ClosureToExpandedAST(\Closure $Closure) {
         $AST = $this->ClosureToASTConverter->ClosureToAST($this->EntityMap, $Closure);
         if(!$AST->IsResolved()) {
-            throw new \UnexpectedValueException('Closure constains unresolved variables: $' . implode(', $', $AST->GetUnresolvedVariables()));
+            throw new \Storm\Api\Base\InvalidClosureException('Constains unresolvable variables: $' . implode(', $', $AST->GetUnresolvedVariables()));
         }
         
         return $AST;

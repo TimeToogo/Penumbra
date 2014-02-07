@@ -75,18 +75,22 @@ abstract class Domain {
     /**
      * Verifies that an entity is valid in this domain.
      * 
+     * @param string $Method __METHOD__
      * @param object $Entity The entity to verify
      * @return IEntityMap The matching entity map
      * @throws \Storm\Core\Exceptions\UnmappedEntityException
      */
-    private function VerifyEntity($Entity) {
+    private function VerifyEntity($Method, $Entity) {
         $EntityTypes = array_reverse(array_merge([get_class($Entity)], array_values(class_parents($Entity, false))));
         foreach($EntityTypes as $EntityType) {
             if(isset($this->EntityMaps[$EntityType])) {
                 return $this->EntityMaps[$EntityType];
             }
         }           
-        throw new \Storm\Core\Exceptions\UnmappedEntityException($EntityType);
+        throw new UnmappedEntityException(
+                'Call to %s with supplied entity of type %s has not been mapped',
+                $Method, 
+                get_class($Entity));
     }
     
     /**
@@ -94,7 +98,7 @@ abstract class Domain {
      * @return boolean Whether or not the entity has an identity
      */
     final public function HasIdentity($Entity) {
-        return $this->VerifyEntity($Entity)->HasIdentity($Entity);
+        return $this->VerifyEntity(__METHOD__, $Entity)->HasIdentity($Entity);
     }
     
     /**
@@ -105,7 +109,7 @@ abstract class Domain {
      * @return boolean Whether or not that the entities have the same identity
      */
     final public function DoShareIdentity($Entity, $OtherEntity) {
-        $EntityMap = $this->VerifyEntity($Entity);
+        $EntityMap = $this->VerifyEntity(__METHOD__, $Entity);
         $EntityType = $EntityMap->GetEntityType();
         if(!($OtherEntity instanceof $EntityType)) {
             return false;
@@ -122,7 +126,7 @@ abstract class Domain {
      * @return Identity 
      */
     final public function Identity($Entity) {
-        return $this->VerifyEntity($Entity)->Identity($Entity);
+        return $this->VerifyEntity(__METHOD__, $Entity)->Identity($Entity);
     }
     
     /**
@@ -133,7 +137,7 @@ abstract class Domain {
      * @return void
      */
     final public function Apply($Entity, PropertyData $PropertyData) {
-        return $this->VerifyEntity($Entity)->Apply($this, $Entity, $PropertyData);
+        return $this->VerifyEntity(__METHOD__, $Entity)->Apply($this, $Entity, $PropertyData);
     }
     
     /**
@@ -144,8 +148,8 @@ abstract class Domain {
      * @return DiscardedRelationship The discarded relationship
      */
     final public function DiscardedRelationship($Entity, $RelatedEntity) {
-        $ParentIdentity = $this->VerifyEntity($Entity)->Identity($Entity);
-        $RelatedIdentity = $this->VerifyEntity($RelatedEntity)->Identity($RelatedEntity);
+        $ParentIdentity = $this->VerifyEntity(__METHOD__, $Entity)->Identity($Entity);
+        $RelatedIdentity = $this->VerifyEntity(__METHOD__, $RelatedEntity)->Identity($RelatedEntity);
         
         return new DiscardedRelationship(false, $ParentIdentity, $RelatedIdentity);
     }
@@ -160,8 +164,8 @@ abstract class Domain {
      * @return DiscardedRelationship The discarded relationship
      */
     final public function DiscardedIdentifyingRelationship($ParentEntity, $ChildEntity, UnitOfWork $UnitOfWork) {
-        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
-        $ChildIdentity = $this->VerifyEntity($ChildEntity)->Discard($UnitOfWork, $ChildEntity)->GetIdentity();
+        $ParentIdentity = $this->VerifyEntity(__METHOD__, $ParentEntity)->Identity($ParentEntity);
+        $ChildIdentity = $this->VerifyEntity(__METHOD__, $ChildEntity)->Discard($UnitOfWork, $ChildEntity)->GetIdentity();
         
         return new DiscardedRelationship(true, $ParentIdentity, $ChildIdentity);
     }
@@ -174,8 +178,8 @@ abstract class Domain {
      * @return PersistedRelationship The persisted relationship
      */
     final public function PersistedRelationship($ParentEntity, $RelatedEntity) {
-        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
-        $RelatedIdentity = $this->VerifyEntity($RelatedEntity)->Identity($RelatedEntity);
+        $ParentIdentity = $this->VerifyEntity(__METHOD__, $ParentEntity)->Identity($ParentEntity);
+        $RelatedIdentity = $this->VerifyEntity(__METHOD__, $RelatedEntity)->Identity($RelatedEntity);
         
         return new PersistedRelationship($ParentIdentity, $RelatedIdentity);
     }
@@ -190,8 +194,8 @@ abstract class Domain {
      * @return PersistedRelationship The persisted relationship
      */
     final public function PersistedIdentifyingRelationship($ParentEntity, $ChildEntity, UnitOfWork $UnitOfWork) {
-        $ParentIdentity = $this->VerifyEntity($ParentEntity)->Identity($ParentEntity);
-        $RelatedPersistenceData = $this->VerifyEntity($ChildEntity)->Persist($UnitOfWork, $ChildEntity);
+        $ParentIdentity = $this->VerifyEntity(__METHOD__, $ParentEntity)->Identity($ParentEntity);
+        $RelatedPersistenceData = $this->VerifyEntity(__METHOD__, $ChildEntity)->Persist($UnitOfWork, $ChildEntity);
         
         return new PersistedRelationship($ParentIdentity, null, $RelatedPersistenceData);
     }
@@ -205,7 +209,7 @@ abstract class Domain {
      * @return PersistenceData The persistence data of the entity
      */
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
-        return $this->VerifyEntity($Entity)->Persist($UnitOfWork, $Entity);
+        return $this->VerifyEntity(__METHOD__, $Entity)->Persist($UnitOfWork, $Entity);
     }
     
     /**
@@ -216,7 +220,7 @@ abstract class Domain {
      * @return void The persistence data of the entity
      */
     final public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity) {
-        $this->VerifyEntity($Entity)->PersistRelationships($UnitOfWork, $Entity);
+        $this->VerifyEntity(__METHOD__, $Entity)->PersistRelationships($UnitOfWork, $Entity);
     }
     
     /**
@@ -228,7 +232,7 @@ abstract class Domain {
      * @return DiscardenceData The discardence data of the entity
      */
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
-        return $this->VerifyEntity($Entity)->Discard($UnitOfWork, $Entity);
+        return $this->VerifyEntity(__METHOD__, $Entity)->Discard($UnitOfWork, $Entity);
     }
     
     /**

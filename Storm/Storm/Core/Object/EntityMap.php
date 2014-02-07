@@ -100,7 +100,9 @@ abstract class EntityMap implements IEntityMap {
     private function AddProperty(IProperty $Property) {
         if($Property->GetEntityMap()) {
             if(!$Property->GetEntityMap()->Is($this)) {
-                throw new \Exception('Property belongs to another EntityMap');
+                throw new InvalidPropertyException(
+                        'The supplied property is registered with another entity map %s.',
+                        get_class($Property->GetEntityMap()));
             }
         }
         $Property->SetEntityMap($this);
@@ -119,7 +121,12 @@ abstract class EntityMap implements IEntityMap {
             $this->CollectionProperties[$Identifier] = $Property;
         }
         else {
-            throw new \Exception;//TODO:error message
+            throw new InvalidPropertyException(
+                    'The supplied property must be of type %s, %s, %s: %s given',
+                    IDataProperty::IDataPropertyType,
+                    IEntityProperty::IEntityPropertyType,
+                    ICollectionProperty::ICollectionPropertyType,
+                    get_class($Property));
         }
         if($Property instanceof IRelationshipProperty) {
             $this->RelationshipProperties[$Identifier] = $Property;
@@ -134,9 +141,13 @@ abstract class EntityMap implements IEntityMap {
      * @param object $Entity The entity to verify
      * @throws \InvalidArgumentException
      */
-    private function VerifyEntity($Entity) {
+    private function VerifyEntity($Method, $Entity) {
         if(!($Entity instanceof $this->EntityType)) {
-            throw new \InvalidArgumentException('$Entity must be of the type ' . $this->EntityType);
+            throw new TypeMismatchException(
+                    'The supplied entity to %s must be of the type %s: %s given',
+                    $Method,
+                    $this->EntityType,
+                    \Storm\Core\Utilities::GetTypeOrClass($Entity));
         }
     }
     

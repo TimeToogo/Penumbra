@@ -111,14 +111,15 @@ abstract class DomainDatabaseMap {
      * Adds an entity relational map instance to this domain database map.
      * 
      * @param IEntityRelationalMap $EntityRelationalMap The entity relational mapping class.
-     * @throws \InvalidArgumentException If the entity is not part of the given domain
+     * @throws MappingException If the entity is not part of the given domain
      */
     private function AddEntityRelationMap(IEntityRelationalMap $EntityRelationalMap) {
         $EntityRelationalMap->Initialize($this);
         
         $EntityType = $EntityRelationalMap->GetEntityType();
-        if(!$this->Domain->HasEntityMap($EntityType))
-            throw new \InvalidArgumentException('$EntityRelationMap must have an EntityMap of this Domain');
+        if(!$this->Domain->HasEntityMap($EntityType)) {
+            throw new MappingException('The supplied entity relational map for %s is not part of the given domain.', $EntityType);
+        }
         
         $this->EntityRelationMaps[$EntityType] = $EntityRelationalMap;
         $this->EntityRelationMapsByPrimaryKeyTable[$EntityRelationalMap->GetPrimaryKeyTable()->GetName()] = $EntityRelationalMap;
@@ -170,12 +171,12 @@ abstract class DomainDatabaseMap {
      * 
      * @param string $EntityType The entity type
      * @return IEntityRelationalMap The registered entity relational map
-     * @throws \Storm\Core\Exceptions\UnmappedEntityException If the relational map has not been registered
+     * @throws UnmappedEntityException If the relational map has not been registered
      */
     final protected function VerifyEntityTypeIsMapped($EntityType) {
         $EntityRelationalMap = $this->GetEntityRelationalMap($EntityType);
         if($EntityRelationalMap === null) {
-            throw new \Storm\Core\Exceptions\UnmappedEntityException($EntityType);
+            throw new UnmappedEntityException('The entity %s is not mapped within this domain database map', $EntityType);
         }
         
         return $EntityRelationalMap;
@@ -190,6 +191,7 @@ abstract class DomainDatabaseMap {
      */
     final public function Load(Object\IRequest $ObjectRequest) {
         $EntityType = $ObjectRequest->GetEntityType();
+        $this->VerifyEntityTypeIsMapped($EntityType);
         
         $RelationalRequest = $this->MapRequest($ObjectRequest);
         

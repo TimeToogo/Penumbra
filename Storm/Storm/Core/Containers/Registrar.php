@@ -22,8 +22,9 @@ final class Registrar {
     public function Register($Instance) {
         if($this->RegistrableType !== null) {
             if(!($Instance instanceof $this->RegistrableType)) {
-                throw new \InvalidArgumentException
-                    ('$Instance must be an instance of ' . $this->RegistrableType);
+                throw new \Storm\Core\Object\TypeMismatchException
+                        ('Registered type does not match, expecting %s, supplied %s', 
+                        $this->RegistrableType, \Storm\Core\Utilities::GetTypeOrClass($Instance));
             }
         }
         

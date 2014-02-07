@@ -88,15 +88,24 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         
         $this->EntityMap = $this->EntityMap($DomainDatabaseMap->GetDomain());
         $this->EntityType = $this->EntityMap->GetEntityType();
-        if(!($this->EntityMap instanceof Object\IEntityMap))
-            throw new \UnexpectedValueException
-                    ('Return value from ' . get_class($this) . '->EntityMap() must be a valid IEntityMap');
+        if(!($this->EntityMap instanceof Object\IEntityMap)) {
+            throw new \Storm\Core\UnexpectedValueException(
+                    'Return value from %s->EntityMap() must be an instance of %s, %s given', 
+                    get_class($this), 
+                    Object\IEntityMap::IEntityMapType, 
+                    \Storm\Core\Utilities::GetTypeOrClass($this->EntityMap));
+        }
         
         $Database = $DomainDatabaseMap->GetDatabase();
         $this->PrimaryKeyTable = $this->PrimaryKeyTable($Database);
-        if(!($this->PrimaryKeyTable instanceof Relational\ITable))
-            throw new \UnexpectedValueException
-                    ('Return value from ' . get_class($this) . '->PrimaryKeyTable() must be a valid Table');
+        
+        if(!($this->PrimaryKeyTable instanceof Relational\ITable)) {
+            throw new \Storm\Core\UnexpectedValueException(
+                    'Return value from %s->PrimaryKeyTable() must be an instance of %s, %s given', 
+                    get_class($this), 
+                    Object\IEntityMap::IEntityMapType, 
+                    \Storm\Core\Utilities::GetTypeOrClass($this->EntityMap));
+        }
         
         $Registrar = new Registrar(IPropertyMapping::IPropertyMappingType);
         $this->RegisterPropertyMappings($Registrar, $this->EntityMap, $Database);
@@ -140,15 +149,6 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     protected abstract function EntityMap(Object\Domain $Domain);
     
     /**
-     * The method to specify the table containing the primary key/identity for this
-     * entity.
-     * 
-     * @param Relational\Database The current database
-     * @return Relational\ITable
-     */
-    protected abstract function PrimaryKeyTable(Relational\Database $Database);
-    
-    /**
      * The method to register all the property mappings for this entity relational map.
      * 
      * @param Registrar $Registrar The registrar to register the property mappings
@@ -171,7 +171,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
             $this->MappedReviveColumns = array_merge($this->MappedReviveColumns, $PropertyMapping->GetReviveColumns());
             $this->MappedPersistColumns = array_merge($this->MappedPersistColumns, $PropertyMapping->GetPersistColumns());
             if($PropertyMapping->IsIdentityPrimaryKeyMapping()) {
-                $this->IdentityPropertyPrimaryKeyMappings[] = $PropertyMapping;
+                $this->AddIdentityPrimaryKeyMapping($PropertyMapping);
             }
         }
         else if($PropertyMapping instanceof IEntityPropertyToOneRelationMapping) {
@@ -181,10 +181,30 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
             $this->CollectionPropertyToManyRelationMappings[$ProperyIdentifier] = $PropertyMapping;
         }
         else {
-            throw new \UnexpectedValueException('$PropertyMapping not instance of ^');//TODO: error messages
+            throw new MappingException('Supplied property mapping must be of type %s, %s, %s: %s given',
+                    IDataPropertyColumnMapping::IDataPropertyColumnMappingType,
+                    IEntityPropertyToOneRelationMapping::IEntityPropertyToOneRelationMappingType,
+                    ICollectionPropertyToManyRelationMapping::ICollectionPropertyToManyRelationMappingType,
+                    get_class($PropertyMapping));
         }
         $this->MappedProperties[$ProperyIdentifier] = $PropertyMapping->GetProperty();
         $this->PropertyMappings[$ProperyIdentifier] = $PropertyMapping;
+    }
+    
+    private function AddIdentityPrimaryKeyMapping(IDataPropertyColumnMapping $PropertyMapping) {
+        //Infer primary key table
+        if($this->PrimaryKeyTable === null) {
+            $this->PrimaryKeyTable = reset($PropertyMapping->GetPersistColumns() + $PropertyMapping->GetReviveColumns())->GetTable();
+        }
+        foreach(array_merge($PropertyMapping->GetPersistColumns(), $PropertyMapping->GetReviveColumns()) as $Column) {
+            if(!$Column->GetTable()->Is($this->PrimaryKeyTable)) {
+                throw new MappingException('Identity properties of %s cannot map across multiple tables: %s, %s',
+                        $this->EntityType,
+                        $Column->GetTable()->GetName(),
+                        $this->PrimaryKeyTable->GetName());
+            }
+        }
+        $this->IdentityPropertyPrimaryKeyMappings[] = $PropertyMapping;
     }
     
     /**
