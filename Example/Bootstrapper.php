@@ -84,6 +84,9 @@ if(isset($_GET['Test'])) {
             
             var_dump('Test');
             var_dump($Benchmark->getTime());
+            $TimeSpentQuerying = $Storm->GetDomainDatabaseMap()->GetDatabase()->GetPlatform()->GetConnection()->GetTimeSpentQuerying();
+            var_dump('Time spent querying: ' . round($TimeSpentQuerying * 1000) . 'ms');
+            var_dump('Time spent querying percentage: ' . ($TimeSpentQuerying / $Benchmark->getTime(true) * 100) . '%');
             var_dump($Benchmark->getMemoryPeak());
             $Success = true;
         }

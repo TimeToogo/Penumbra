@@ -7,10 +7,12 @@ use Storm\Drivers\Base\Relational\Queries;
 class Query implements Queries\IQuery {
     private $Logger;
     private $Query;
+    private $TimeSpentQuerying;
     
-    public function __construct(ILogger $Logger, Queries\IQuery $Query) {
+    public function __construct(ILogger $Logger, Queries\IQuery $Query, &$TimeSpentQuerying) {
         $this->Logger = $Logger;
         $this->Query = $Query;
+        $this->TimeSpentQuerying =& $TimeSpentQuerying;
     }
 
     public function Execute() {
@@ -19,7 +21,10 @@ class Query implements Queries\IQuery {
         $this->Logger->Log(
                 'Executing Query: ' . $this->InterpolateQuery($this->GetQueryString(), $Bindings->Get()));
         
-        return $this->Query->Execute();
+        $Start = microtime(true);
+        $Result = $this->Query->Execute();
+        $this->TimeSpentQuerying += microtime(true) - $Start;
+        return $Result;
     }
     
    /**
@@ -71,11 +76,17 @@ class Query implements Queries\IQuery {
     }
 
     public function FetchAll() {
-        return $this->Query->FetchAll();
+        $Start = microtime(true);
+        $Result = $this->Query->FetchAll();
+        $this->TimeSpentQuerying += microtime(true) - $Start;
+        return $Result;
     }
 
     public function FetchRow() {
-        return $this->Query->FetchRow();
+        $Start = microtime(true);
+        $Result = $this->Query->FetchRow();
+        $this->TimeSpentQuerying += microtime(true) - $Start;
+        return $Result;
     }
 
     public function GetBindings() {

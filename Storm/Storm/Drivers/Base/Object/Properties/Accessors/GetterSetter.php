@@ -7,8 +7,8 @@ class GetterSetter extends Accessor {
     private $PropertySetter;
     
     public function __construct(
-            IPropertyGetter $PropertyGetter = null, 
-            IPropertySetter $PropertySetter = null) {
+            IPropertyGetter $PropertyGetter, 
+            IPropertySetter $PropertySetter) {
         
         $this->PropertyGetter = $PropertyGetter;
         $this->PropertySetter = $PropertySetter;

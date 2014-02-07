@@ -35,7 +35,6 @@ final class FunctionMapper extends E\FunctionMapper {
             'base_convert' => 'CONV',
             'deg2rad' => 'RADIANS',
             'rad2deg' => 'DEGREES',
-            'rad2deg' => 'DEGREES',
             'acos' => 'ACOS',
             'asin' => 'ASIN',
             'atan' => 'ATAN',
@@ -57,7 +56,7 @@ final class FunctionMapper extends E\FunctionMapper {
     public function substr(&$MappedName, array &$ArgumentExpressions) {
         $MappedName = 'SUBSTR';
         
-        $ArgumentExpressions[1] = $this->Add($ArgumentExpressions, 1);
+        $ArgumentExpressions[1] = $this->Add($ArgumentExpressions[1], 1);
     }
 
     public function strpos(&$MappedName, array &$ArgumentExpressions, $CaseSensitive = true) {
@@ -88,14 +87,13 @@ final class FunctionMapper extends E\FunctionMapper {
     public function trim(&$MappedName, array &$ArgumentExpressions, $Direction = 'BOTH') {
         $MappedName = 'TRIM';
         $TrimCharacters = isset($ArgumentExpressions[1]) ?
-
                 $ArgumentExpressions[1] : Expression::Constant(" \t\n\r\0\x0B");
 
 
         if (!($TrimCharacters instanceof EE\ConstantExpression) ||
                 strlen($TrimCharacters->GetValue()) !== 1) {
             
-            throw new \Exception('Mysql does not support trimming multiple characters (only a specified string)');
+            throw new \Exception('Mysql does not support trimming multiple individual characters');
         }
 
         $ArgumentExpressions = [
@@ -276,7 +274,7 @@ final class FunctionMapper extends E\FunctionMapper {
     public function pi(&$MappedName, array &$ArgumentExpressions) {
         return Expression::BinaryOperation(
                 $this->FunctionCall('PI'), 
-                O\Binary::Addition, 
+                O\Binary::Addition,
                 Expression::Keyword('0.0000000000000'));
     }
     

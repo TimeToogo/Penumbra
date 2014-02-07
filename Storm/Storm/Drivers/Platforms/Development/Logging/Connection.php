@@ -6,6 +6,7 @@ use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Queries;
 
 class Connection implements Queries\IConnection {
+    private $TimeSpentQuerying = 0.0;
     private $Logger;
     private $Connection;
     
@@ -16,21 +17,29 @@ class Connection implements Queries\IConnection {
 
     public function BeginTransaction() {
         $this->Logger->Log('Beginning transaction');
-        return $this->Connection->BeginTransaction();
+        $Start = microtime(true);
+        $this->Connection->BeginTransaction();
+        $this->TimeSpentQuerying += microtime(true) - $Start;
     }
 
     public function CommitTransaction() {
         $this->Logger->Log('Commiting transaction');
-        return $this->Connection->CommitTransaction();
+        $Start = microtime(true);
+        $this->Connection->CommitTransaction();
+        $this->TimeSpentQuerying += microtime(true) - $Start;
     }
 
     public function RollbackTransaction() {
         $this->Logger->Log('Rolling back transaction');
-        return $this->Connection->RollbackTransaction();
+        $Start = microtime(true);
+        $this->Connection->RollbackTransaction();
+        $this->TimeSpentQuerying += microtime(true) - $Start;
     }
 
     public function Disconnect() {
-        return $this->Connection->Disconnect();
+        $Start = microtime(true);
+        $this->Connection->Disconnect();
+        $this->TimeSpentQuerying += microtime(true) - $Start;
     }
 
     public function Escape($Value, $ParameterType) {
@@ -39,16 +48,25 @@ class Connection implements Queries\IConnection {
 
     public function Execute($QueryString, Queries\Bindings $Bindings = null) {
         $this->Logger->Log('Executing plain query: ' . $QueryString);
-        return $this->Connection->Execute($QueryString, $Bindings);
+        $Start = microtime(true);
+        $Query = $this->Connection->Execute($QueryString, $Bindings);
+        $this->TimeSpentQuerying += microtime(true) - $Start;
+        return $Query;
     }
 
     public function FetchValue($QueryString, Queries\Bindings $Bindings = null) {
         $this->Logger->Log('Fetching value with query: ' . $QueryString);
-        return $this->Connection->FetchValue($QueryString);
+        $Start = microtime(true);
+        $Query = $this->Connection->FetchValue($QueryString);
+        $this->TimeSpentQuerying += microtime(true) - $Start;
+        return $Query;
     }
 
     public function GetLastInsertIncrement() {
-        return $this->Connection->GetLastInsertIncrement();
+        $Start = microtime(true);
+        $Increment = $this->Connection->GetLastInsertIncrement();
+        $this->TimeSpentQuerying += microtime(true) - $Start;
+        return $Increment;
     }
 
     public function IsInTransaction() {
@@ -56,7 +74,10 @@ class Connection implements Queries\IConnection {
     }
     
     public function Prepare($QueryString, Queries\Bindings $Bindings = null) {
-        return new Query($this->Logger, $this->Connection->Prepare($QueryString, $Bindings));
+        $Start = microtime(true);
+        $Query = new Query($this->Logger, $this->Connection->Prepare($QueryString, $Bindings), $this->TimeSpentQuerying);
+        $this->TimeSpentQuerying += microtime(true) - $Start;
+        return $Query;
     }
 
     public function QueryBuilder(Queries\Bindings $Bindings = null) {
@@ -69,7 +90,11 @@ class Connection implements Queries\IConnection {
                 $QueryBuilder->GetCriterionCompiler(),
                 $QueryBuilder->GetIdentifierEscaper());
     }
-
+    
+    public function GetTimeSpentQuerying() {
+        return $this->TimeSpentQuerying;
+    }
+   
     public function SetIdentifierEscaper(Queries\IIdentifierEscaper $IdentifierEscaper) {
         return $this->Connection->SetIdentifierEscaper($IdentifierEscaper);
     }
