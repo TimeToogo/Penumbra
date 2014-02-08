@@ -20,7 +20,9 @@ abstract class KeyGenerator implements IKeyGenerator {
         }
         $PrimaryKeyColumns = $Table->GetPrimaryKeyColumns();
         if(count($PrimaryKeyColumns) === 0) {
-            throw new \Exception;//TODO:error message
+            throw new Relational\RelationalException(
+                    'Cannot generate keys for table %s without any primary key columns',
+                    $Table->GetName());
         }
         $this->OnSetPrimaryKeyColumns($PrimaryKeyColumns);
         $this->PrimaryKeyColumns = $PrimaryKeyColumns;

@@ -256,7 +256,7 @@ abstract class EntityMap implements IEntityMap {
         
         $IdentityData = array();
         if($Entity !== null) {
-            $this->VerifyEntity($Entity);
+            $this->VerifyEntity(__METHOD__, $Entity);
             foreach($this->IdentityProperties as $Identifier => $IdentityProperty) {
                 $IdentityData[$Identifier] = $IdentityProperty->GetValue($Entity);
             }
@@ -311,7 +311,7 @@ abstract class EntityMap implements IEntityMap {
      * {@inheritDoc}
      */
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
-        $this->VerifyEntity($Entity);
+        $this->VerifyEntity(__METHOD__, $Entity);
         
         $PersistenceData = array();
         foreach($this->DataProperties as $Identifier => $DataProperty) {
@@ -331,7 +331,7 @@ abstract class EntityMap implements IEntityMap {
      * {@inheritDoc}
      */
     final public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity) {
-        $this->VerifyEntity($Entity);
+        $this->VerifyEntity(__METHOD__, $Entity);
         
         $PersistenceData = array();
         foreach($this->EntityProperties as $Identifier => $EntityProperty) {
@@ -348,7 +348,7 @@ abstract class EntityMap implements IEntityMap {
      * {@inheritDoc}
      */
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
-        $this->VerifyEntity($Entity);
+        $this->VerifyEntity(__METHOD__, $Entity);
         
         $DiscardingData = array();
         foreach($this->IdentityProperties as $Identifier => $IdentityProperty) {

@@ -90,18 +90,21 @@ abstract class JoinTable extends Base\Relational\Table {
     
     /**
      * @return ForeignKey
-     * @throws Exception
+     * @throws \Storm\Core\UnexpectedValueException
      */
     final public function GetForeignKey(Relational\ITable $Table) {
-        if($this->GetTable1()->Is($Table)) {
+        if($this->Table1->Is($Table)) {
             return $this->GetForeignKey1();
         }
-        else if($this->GetTable2()->Is($Table)) {
+        else if($this->Table2->Is($Table)) {
             return $this->GetForeignKey2();
         }
         else {
-            //TODO: error
-            throw new \Exception;
+            throw new \Storm\Core\UnexpectedValueException(
+                    'The supplied table must one of %s, %s: %s given',
+                    $this->Table1->GetName(),
+                    $this->Table2->GetName(),
+                    $Table->GetName());
         }
     }
     

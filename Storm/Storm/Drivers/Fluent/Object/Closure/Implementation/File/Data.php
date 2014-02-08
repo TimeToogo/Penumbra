@@ -74,7 +74,7 @@ class Data implements IData {
     private function LoadSourceLines() {
         $FileName = $this->Reflection->getFileName();
         if(!file_exists($FileName)) {
-            throw new \Exception('Cannot parse closure: Closure does not belong to a valid file');
+            throw new ClosureException('Cannot parse closure: Closure does not belong to a valid file');
         }
         $SourceLines = array();
         $File = new \SplFileObject($this->Reflection->getFileName());

@@ -8,6 +8,7 @@ use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Expressions as E;
 use \Storm\Core\Relational\Expressions as EE;
 use \Storm\Drivers\Base\Relational\Expressions\Operators as O;
+use \Storm\Drivers\Base\Relational\PlatformException;
 
 final class FunctionMapper extends E\FunctionMapper {
     
@@ -93,7 +94,8 @@ final class FunctionMapper extends E\FunctionMapper {
         if (!($TrimCharacters instanceof EE\ConstantExpression) ||
                 strlen($TrimCharacters->GetValue()) !== 1) {
             
-            throw new \Exception('Mysql does not support trimming multiple individual characters');
+            throw new PlatformException(
+                    'Mysql does not support trimming a set of characters');
         }
 
         $ArgumentExpressions = [
@@ -119,7 +121,8 @@ final class FunctionMapper extends E\FunctionMapper {
 
     public function preg_match(&$MappedName, array &$ArgumentExpressions) {
         if(count($ArgumentExpressions) > 2) {
-            throw new \Exception();
+            throw new PlatformException(
+                    'function preg_match cannot be called with more than two arguments');
         }
         
         return Expression::BinaryOperation(
@@ -168,7 +171,7 @@ final class FunctionMapper extends E\FunctionMapper {
         unset($ArgumentExpressions[0]);
         
         if(!($HashNameExpression instanceof EE\ConstantExpression)) {
-            throw new \Exception('Hash algorithm must be a constant value');
+            throw new PlatformException('Hash algorithm must be a constant value');
         }
         $HashName = $HashNameExpression->GetValue();
         $DataExpression = $ArgumentExpressions[1];
@@ -190,7 +193,7 @@ final class FunctionMapper extends E\FunctionMapper {
                 $ArgumentExpressions[1] = Expression::Constant($ShaLength);
 
             default:
-                throw new \Exception('Unsupported hash algorithm: ' . $HashName);
+                throw new PlatformException('Unsupported hash algorithm: must be one of md5, sha1, sha224, sha256, sha384 or sha512, %s given ', $HashName);
         }
         
         
@@ -211,22 +214,22 @@ final class FunctionMapper extends E\FunctionMapper {
     
     public function ParseMcryptArguments(array &$ArgumentExpressions) {
         if(!($ArgumentExpressions[0] instanceof EE\ConstantExpression)) {
-            throw new \Exception('Cipher algorithm must be constant');
+            throw new PlatformException('Cipher algorithm must be constant');
         }
         
         if(!($ArgumentExpressions[3] instanceof EE\ConstantExpression)) {
-            throw new \Exception('Cipher mode must be constant');
+            throw new PlatformException('Cipher mode must be constant');
         }
         
         if(isset($ArgumentExpressions[4])) {
-            throw new \Exception('Mysql does not support a custom IV');
+            throw new PlatformException('Mysql does not support a custom IV');
         }
         
         $Algorithm = $ArgumentExpressions[0]->GetValue();
         $Mode = $ArgumentExpressions[3]->GetValue();
         
         if($Mode !== MCRYPT_MODE_ECB) {
-            throw new \Exception('Mysql only support ECB cipher mode');
+            throw new PlatformException('Mysql only support ECB cipher mode');
         }
         
         unset($ArgumentExpressions[0]);
@@ -252,7 +255,9 @@ final class FunctionMapper extends E\FunctionMapper {
             $MappedName = self::$EncryptCipherAlgorithms[$Algorithm];
         }
         else {
-            throw new \Exception('Unsupported cipher algorithm');
+            throw new PlatformException(
+                    'Unsupported cipher algorithm: must be MCRYPT_RIJNDAEL_128 or MCRYPT_TRIPLEDES, %s given', 
+                    $Algorithm);
         }
     }
     
@@ -263,7 +268,9 @@ final class FunctionMapper extends E\FunctionMapper {
             $MappedName = self::$DecryptCipherAlgorithms[$Algorithm];
         }
         else {
-            throw new \Exception('Unsupported cipher algorithm');
+            throw new PlatformException(
+                    'Unsupported cipher algorithm: must be MCRYPT_RIJNDAEL_128 or MCRYPT_TRIPLEDES, %s given', 
+                    $Algorithm);
         }
     }
 
@@ -281,7 +288,7 @@ final class FunctionMapper extends E\FunctionMapper {
     public function round(&$MappedName, array &$ArgumentExpressions) {
         $MappedName = 'ROUND';
         if(isset($ArgumentExpressions[2])) {
-            throw new \Exception('Does not support rounding modes');
+            throw new PlatformException('Mysql does not support rounding modes');
         }
     }
     

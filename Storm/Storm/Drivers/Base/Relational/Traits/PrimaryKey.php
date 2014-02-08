@@ -11,7 +11,8 @@ class PrimaryKey extends StructuralTableTrait {
     
     public function __construct(array $Columns) {
         if(count($Columns) === 0) {
-            throw new \Exception;//TODO:error message
+            throw new \Storm\Core\Relational\RelationalException(
+                    'A primary key must contain atleast one column');
         }
         $this->Columns = array_values($Columns);
         foreach($this->Columns as $Column) {

@@ -7,8 +7,13 @@ use \Storm\Drivers\Platforms\Base\PrimaryKeys\IndividualAutoIncrementGenerator;
 
 class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
     
+    private function Unsupported($KeyGeneratorType) {
+        return new \Storm\Drivers\Platforms\Base\UnsupportedKeyGeneratorTypeException('SQLLite', $KeyGeneratorType);
+    }
+    
+    
     public function Guid() {
-        throw new \Exception();
+        throw $this->Unsupported(__FUNCTION__);
     }
 
     public function Increment() {
@@ -16,7 +21,7 @@ class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
     }
 
     public function Sequence($Name) {
-        throw new \Exception();
+        throw $this->Unsupported(__FUNCTION__);
     }
 
 }

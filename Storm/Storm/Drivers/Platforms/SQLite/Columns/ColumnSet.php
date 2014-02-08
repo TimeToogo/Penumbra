@@ -9,6 +9,10 @@ use \Storm\Drivers\Base\Relational\Columns\DataType;
 
 class ColumnSet implements IColumnSet {
     
+    private function Unsupported($ColumnType) {
+        return new \Storm\Drivers\Platforms\Base\UnsupportedColumnTypeException('SQLLite', $ColumnType);
+    }
+    
     public function Guid($Name, $PrimaryKey = true) {
         return new Column($Name, new DataTypes\HexedBinaryDataType(16), $PrimaryKey);
     }
@@ -51,19 +55,19 @@ class ColumnSet implements IColumnSet {
     }
     
     public function UnsignedByte($Name, $PrimaryKey = false) {
-        throw new \Exception();
+        throw $this->Unsupported(__FUNCTION__);
     }
     
     public function UnsignedInt16($Name, $PrimaryKey = false) {
-        throw new \Exception();
+        throw $this->Unsupported(__FUNCTION__);
     }
     
     public function UnsignedInt32($Name, $PrimaryKey = false) {
-        throw new \Exception();
+        throw $this->Unsupported(__FUNCTION__);
     }
     
     public function UnsignedInt64($Name, $PrimaryKey = false) {
-        throw new \Exception();
+        throw $this->Unsupported(__FUNCTION__);
     }
     
     public function Double($Name, $PrimaryKey = false) {
@@ -83,7 +87,7 @@ class ColumnSet implements IColumnSet {
     }
     
     public function Time($Name, $PrimaryKey = false) {
-        throw new \Exception();
+        throw $this->Unsupported(__FUNCTION__);
     }
     
     public function Binary($Name, $Length, $PrimaryKey = false) {

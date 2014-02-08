@@ -16,8 +16,11 @@ abstract class TimestampedDataType extends Columns\FunctionCallDataType {
     }
     
     public function ToPersistedValue($PropertyValue) {
-        if(!($PropertyValue instanceof \DateTime))
-            throw new \InvalidArgumentException('$PropertyValue must be an instance of DateTime');
+        if(!($PropertyValue instanceof \DateTime)) {
+            throw new Columns\DataTypeException(
+                    'The supplied property values must be an instance of \\DateTime: %s given',
+                    \Storm\Core\Utilities::GetTypeOrClass($PropertyValue));
+        }
         
         return $PropertyValue->getTimestamp();
     }

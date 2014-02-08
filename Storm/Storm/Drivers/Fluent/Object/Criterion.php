@@ -24,15 +24,20 @@ class Criterion extends Object\Criterion {
     }
     
     private function ParseReturnExpression(Closure\IAST $AST) {
-        if($AST->GetEntityMap()->GetEntityType() !== $this->GetEntityType()) {
-            throw new \Exception('Closure must be for entity of type: ' . $this->GetEntityType());
-        }        
+        if(!$AST->HasEntityMap() || $AST->GetEntityMap()->GetEntityType() !== $this->GetEntityType()) {
+            throw new \Storm\Core\Object\TypeMismatchException(
+                    'The supplied AST must be of entity type %s: %s given',
+                    $this->GetEntityType(),
+                    $AST->HasEntityMap() ?  $AST->GetEntityMap()->GetEntityType() : 'null');
+        }
         if(!$AST->HasReturnNode()) {
-            throw new \Exception('Closure must contain a valid \'return\' statement for criterion');
+            throw new FluentException(
+                    'The supplied closure must contain a valid return statement');
         }
         $ReturnNodes = $AST->GetReturnNodes();
         if(count($ReturnNodes) > 1) {
-            throw new \Exception('Closure must contain a single \'return\' statement for criterion');
+            throw new FluentException(
+                    'The supplied closure must contain a single return statement');
         }
         
         $AST->SetPropertyMode(Closure\IAST::PropertiesAreGetters);

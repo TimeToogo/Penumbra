@@ -56,11 +56,6 @@ class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRela
         }
     }
     
-    /**
-     * TODO: bugfix for loading mapping related rows as it will throw an exception when
-     * attempts to map the parent rows to the related rows in the reletion due to there
-     * being more related rows than parent rows
-     */
     private function LoadAllRelatedRows(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows) {
         if(count($this->ParentRowArrays) > 0) {
             $AllParentRows = call_user_func_array('array_merge', $this->ParentRowArrays);

@@ -9,9 +9,6 @@ use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 abstract class ToOneRelationBase extends KeyedRelation implements Relational\IToOneRelation {
     
     final public function MapParentKeysToRelatedRow(array $ParentRows, array $RelatedRows) {
-        if(count($RelatedRows) > count($ParentRows)) {
-            throw new \Exception;//TODO: error message
-        }
         if(count($RelatedRows) === 0) {
             return array();
         }

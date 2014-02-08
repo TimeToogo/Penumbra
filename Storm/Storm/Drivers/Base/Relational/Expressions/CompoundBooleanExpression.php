@@ -11,7 +11,9 @@ class CompoundBooleanExpression extends Expression {
     
     public function __construct(array $BooleanExpressions, $LogicalOperator = Binary::LogicalAnd) {
         if($LogicalOperator !== Binary::LogicalAnd && $LogicalOperator !== Binary::LogicalOr) {
-            throw new \Exception();
+            throw new \Storm\Core\UnexpectedValueException(
+                    'The supplied operator must be the logical and/or, %s given',
+                    \Storm\Core\Utilities::GetTypeOrClass($LogicalOperator));
         }
         $this->LogicalOperator = $LogicalOperator;
         $this->BooleanExpressions = $BooleanExpressions;

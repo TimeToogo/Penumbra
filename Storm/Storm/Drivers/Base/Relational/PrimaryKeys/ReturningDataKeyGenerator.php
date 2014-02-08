@@ -15,7 +15,10 @@ abstract class ReturningDataKeyGenerator implements IKeyGenerator {
     
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows, array $ReturnedKeyData) {
         if(count($UnkeyedRows) !== count($ReturnedKeyData)) {
-            throw new \Exception;//TODO:error message
+            throw new \Storm\Core\Relational\RelationalException(
+                    'The amouny unkeyed rows must match the amount of returned key data arrays: %d rows != %d key data',
+                    count($UnkeyedRows),
+                    count($ReturnedKeyData));
         }
         else {
             $this->FillPrimaryKeyValues($Connection, array_values($UnkeyedRows), array_values($ReturnedKeyData));

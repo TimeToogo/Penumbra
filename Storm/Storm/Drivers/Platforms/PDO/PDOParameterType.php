@@ -20,7 +20,9 @@ final class PDOParameterType {
             return self::$ParameterTypesMap[$ParameterType];
         }
         else {
-            throw new \InvalidArgumentException('$ParameterType must be a valid ParameterType');
+            throw new \Storm\Core\UnexpectedValueException(
+                    'Cannot map the supplied parameter type: %s given',
+                    \Storm\Core\Utilities::GetTypeOrClass($ParameterType));
         }
     }
 }

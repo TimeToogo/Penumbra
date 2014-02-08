@@ -44,6 +44,11 @@ abstract class ASTBase implements IAST {
     final public function GetEntityMap() {
         return $this->EntityMap;
     }
+    
+    final public function HasEntityMap() {
+        return $this->EntityMap !== null;
+    }
+    
     final public function SetEntityMap(Object\IEntityMap $EntityMap) {
         $this->EntityMap = $EntityMap;
     }
@@ -60,7 +65,9 @@ abstract class ASTBase implements IAST {
         if($PropertyMode !== self::PropertiesAreGetters && 
                 $PropertyMode !== self::PropertiesAreSetters &&
                 $PropertyMode !== self::PropertiesAreGettersOrSetters) {
-            throw new \InvalidArgumentException('Invalid $PropertyMode supplied');
+            throw new ClosureException(
+                    'The supplied property mode is invalid: %s given',
+                    \Storm\Core\Utilities::GetTypeOrClass($PropertyMode));
         }
         $this->PropertyMode = $PropertyMode;
     }
@@ -83,10 +90,13 @@ abstract class ASTBase implements IAST {
     
     final public function ParseNode(INode $Node) {
         if($this->PropertyMode === null) {
-            throw new \BadMethodCallException('PropertyMode has not been set');
+            throw new ClosureException(
+                    'Invalid call to %s: property mode must be set',
+                    __METHOD__);
         }
         if(array_search($Node, $this->Nodes, true) === false) {
-            throw new \InvalidArgumentException('AST does not contain supplied node');
+            throw new ClosureException(
+                    'This supplied node is not part of this AST');
         }
         
         return $this->ParseNodeAsExpression($Node);
@@ -106,7 +116,7 @@ abstract class ASTBase implements IAST {
                         $this->SetterAccessorsMatch($Accessor, $OtherAccessor, $MatchedAccessorType);
                 
             default:
-                throw new \Exception();
+                throw new ClosureException('No');
         }
     }
     

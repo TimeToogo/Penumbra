@@ -18,6 +18,11 @@ interface IPlatform {
     public function GetConnection();
     
     /**
+     * @return boolean
+     */
+    public function HasConnection();
+    
+    /**
      * @return void
      */
     public function SetConnection(Queries\IConnection $Connection);

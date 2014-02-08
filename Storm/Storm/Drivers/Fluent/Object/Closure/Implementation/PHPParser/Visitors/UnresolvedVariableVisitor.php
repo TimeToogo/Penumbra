@@ -2,6 +2,8 @@
 
 namespace Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\Visitors;
 
+use Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\AST;
+
 class UnresolvedVariableVisitor extends \PHPParser_NodeVisitorAbstract {
     private $UnresolvedVariables;
     private $IgnoreVariables;
@@ -18,10 +20,7 @@ class UnresolvedVariableVisitor extends \PHPParser_NodeVisitorAbstract {
     public function leaveNode(\PHPParser_Node $Node) {
         switch (true) {
             case $Node instanceof \PHPParser_Node_Expr_Variable:
-                $Name = $Node->name;
-                if(!is_string($Name)) {
-                    throw new \Exception('Does not support variable variables');
-                }
+                $Name = AST::VerifyNameNode($Node->name);
                 $this->UnresolvedVariables[$Name] = true;
         }
     }

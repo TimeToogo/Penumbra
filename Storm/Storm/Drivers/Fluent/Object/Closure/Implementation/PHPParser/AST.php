@@ -10,6 +10,7 @@ use \Storm\Core\Object\Expressions\Expression;
 use \Storm\Core\Object\Expressions\Operators;
 use \Storm\Drivers\Base\Object\Properties\Property;
 use \Storm\Drivers\Base\Object\Properties\Accessors\Accessor;
+use \Storm\Drivers\Fluent\Object\Closure\ASTException;
 
 require_once 'NodeSimplifiers.php';
 
@@ -137,7 +138,9 @@ class AST extends ASTBase {
                 return $this->ParseNodeInternal($Node->value);
                 
             default:
-                throw new \Exception('Unknown node type: ' . get_class($Node));
+                throw new ASTException(
+                        'Unsupported node type: %s',
+                        get_class($Node));
         }
     }
     
@@ -158,12 +161,13 @@ class AST extends ASTBase {
         }
     }
     
-    private function VerifyNameNode(\PHPParser_Node $Node) {
-        if(!($Node instanceof \PHPParser_Node_Name)) {
-            throw new \Exception('Dynamic function calls, method calls, property accessing... are not supported');
+    final public static function VerifyNameNode($Node) {
+        if(!($Node instanceof \PHPParser_Node_Name) && !is_string($Node)) {
+            throw new ASTException(
+                    'Dynamic function calls, method calls, property accessing are not supported');
         }
         
-        return $Node->toString();
+        return is_string($Node) ? $Node : $Node->toString();
     }
     
     // <editor-fold defaultstate="collapsed" desc="Expression node parsers">
@@ -201,29 +205,20 @@ class AST extends ASTBase {
                         $this->ParseNodesInternal($Node->args));
             
             case $Node instanceof \PHPParser_Node_Expr_MethodCall:
-                if(!is_string($Node->name)) {
-                    throw new \Exception();
-                }
                 return Expression::MethodCall(
                         $this->ParseNodeInternal($Node->var),
-                        $Node->name,
+                        $this->VerifyNameNode($Node->name),
                         $this->ParseNodesInternal($Node->args));
             
             case $Node instanceof \PHPParser_Node_Expr_PropertyFetch:
-                if(!is_string($Node->name)) {
-                    throw new \Exception();
-                }
                 return Expression::PropertyFetch(
                         $this->ParseNodeInternal($Node->var),
-                        $Node->name);
+                        $this->VerifyNameNode($Node->name));
             
             case $Node instanceof \PHPParser_Node_Expr_StaticCall:
-                if(!is_string($Node->name)) {
-                    throw new \Exception();
-                }
                 return Expression::MethodCall(
                         Expression::Object($this->VerifyNameNode($Node->class)),
-                        $Node->name,
+                        $this->VerifyNameNode($Node->name),
                         $this->ParseNodesInternal($Node->args));
              
             case ($Node instanceof \PHPParser_Node_Expr_Ternary):
@@ -234,10 +229,21 @@ class AST extends ASTBase {
                         $this->ParseNodeInternal($Node->else));
                      
             case $Node instanceof \PHPParser_Node_Expr_Variable:
-                throw new \Exception('Unresolved variable node: ' . $Node->name);
+                $Name = $this->VerifyNameNode($Node->name);
+                if($Name !== $this->EntityVariableName) {
+                    throw new ASTException(
+                            'Cannot parse AST with unresolvable variable $%s',
+                            $Name);
+                }
+                else {
+                    throw new ASTException(
+                            'Cannot parse AST with unresolvable entity property');
+                }
                 
             default:
-                throw new \Exception('Unknown node type');
+                throw new ASTException(
+                        'Cannot parse AST with unknown expression node: %s',
+                        get_class($Node));
         }
     }
 
@@ -251,7 +257,9 @@ class AST extends ASTBase {
                 return $this->ParseExpressionNode($Node->expr);
             
             default:
-                throw new \Exception();
+                throw new ASTException(
+                        'Cannot parse AST with unknown statement node: %s',
+                        get_class($Node));
         }
     }
 
@@ -281,7 +289,9 @@ class AST extends ASTBase {
     
     private function ParsePropertyNode(\PHPParser_Node_Expr $Node) {
         if($this->EntityMap === null) {
-            throw new \Exception();
+            throw new ASTException(
+                    'Cannot parse property node without setting the entity map',
+                    get_class($Node));
         }
         $Properties = $this->EntityMap->GetProperties();
         
@@ -303,7 +313,9 @@ class AST extends ASTBase {
     private function ParseNodeAsProperty(\PHPParser_Node_Expr $Node, Property $Property, $MatchedAccessorType) {
         if($MatchedAccessorType === self::PropertiesAreSetters && $Node instanceof \PHPParser_Node_Expr_MethodCall) {
             if(count($Node->args) === 0) {
-                throw new \Exception();
+                throw new ASTException(
+                        'Cannot method setter property node: expecting 1 argument, 0 given',
+                        get_class($Node));
             }
             return Expression::Assign(
                     Expression::Property($Property), 

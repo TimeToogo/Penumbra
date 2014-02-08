@@ -3,6 +3,7 @@
 namespace Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\Visitors;
 
 use \Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\PHPParserConstantValueNode;
+use \Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\AST;
 
 class ConstantValueNodeReplacerVisitor extends \PHPParser_NodeVisitorAbstract {
     
@@ -35,9 +36,7 @@ class ConstantValueNodeReplacerVisitor extends \PHPParser_NodeVisitorAbstract {
                 break;
                         
             case $Node instanceof \PHPParser_Node_Expr_StaticPropertyFetch:
-                if(!($Node->class instanceof \PHPParser_Node_Name) || !is_string($Node->name)) {
-                    throw new \Exception('Static property must not be expressions');
-                }
+                $Name = AST::VerifyNameNode($Node->class);
                 $ClassName = (string)$Node->class;
                 $Value = $ClassName::${$Node->name};
                 break;

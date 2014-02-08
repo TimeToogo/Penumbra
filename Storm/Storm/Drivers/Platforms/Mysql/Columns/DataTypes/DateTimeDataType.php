@@ -34,8 +34,9 @@ class DateTimeDataType extends Columns\ObjectDataType {
     public function DateTime__construct(array $ArgumentExpressions) {
         if (count($ArgumentExpressions) === 0) {
             return Expression::FunctionCall('NOW');
-        }         else {
-            throw new \Exception();
+        }         
+        else {
+            throw new Columns\DataTypeException('Cannot map DateTime::_construct() with parameters.');
         }
     }
 

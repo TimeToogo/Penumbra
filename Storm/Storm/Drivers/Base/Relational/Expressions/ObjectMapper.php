@@ -24,7 +24,7 @@ abstract class ObjectMapper implements IObjectMapper {
      * @return ObjectDataType[]
      */
     protected function ObjectDataTypes() {
-        return [];
+        return array();
     }
 
 
@@ -37,7 +37,10 @@ abstract class ObjectMapper implements IObjectMapper {
         $MethodName = str_replace('\\', '_', $Type);
         
         if(!method_exists($this, $MethodName)) {
-            throw new \Exception('Unimplemented object mapper');
+            throw new \Storm\Core\NotSupportedException(
+                    '%s does not support mapping object instance of type %s',
+                    get_class($this),
+                    $Type);
         }
         
         return $this->$MethodName($Value);
@@ -56,7 +59,11 @@ abstract class ObjectMapper implements IObjectMapper {
         $MethodName = str_replace('\\', '_', $Type) . '_' . $Name;
         
         if(!method_exists($this, $MethodName)) {
-            throw new \Exception('Unimplemented method mapper');
+            throw new \Storm\Core\NotSupportedException(
+                    '%s does not support mapping method call %s::%s',
+                    get_class($this),
+                    $Type,
+                    $Name);
         }
         
         $IsStatic = $ObjectValueExpression === null;
@@ -77,7 +84,11 @@ abstract class ObjectMapper implements IObjectMapper {
         $MethodName = str_replace('\\', '_', $Type) . '_Prop_' . $Name;
         
         if(!method_exists($this, $MethodName)) {
-            throw new \Exception('Unimplemented method mapper');
+            throw new \Storm\Core\NotSupportedException(
+                    '%s does not support mapping proptety fetch %s::$%s',
+                    get_class($this),
+                    $Type,
+                    $Name);
         }
         
         $IsStatic = $ObjectValueExpression === null;

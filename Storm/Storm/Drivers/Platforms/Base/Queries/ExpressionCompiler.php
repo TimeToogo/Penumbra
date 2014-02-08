@@ -29,7 +29,10 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
             return ' ' . $this->BinaryOperators[$Operator] . ' ';
         }
         else {
-            throw new \Exception;
+            throw new \Storm\Drivers\Base\Relational\PlatformException(
+                    '%s does not support the supplied binary operator: %s', 
+                    get_class($this),
+                    $Operator);
         }
     }
 
@@ -41,7 +44,10 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
             return ' ' . $this->SetOperators[$Operator] . ' ';
         }
         else {
-            throw new \Exception;
+            throw new \Storm\Drivers\Base\Relational\PlatformException(
+                    '%s does not support the supplied set operator: %s', 
+                    get_class($this),
+                    $Operator);
         }
     }
     
@@ -59,7 +65,10 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
             return $this->UnaryOperators[$Operator];
         } 
         else {
-            throw new \Exception();
+            throw new \Storm\Drivers\Base\Relational\PlatformException(
+                    '%s does not support the supplied unary operator: %s', 
+                    get_class($this),
+                    $Operator);
         }
     }
     
@@ -71,7 +80,10 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
             return $this->CastTypes[$Operator];
         } 
         else {
-            throw new \Exception();
+            throw new \Storm\Drivers\Base\Relational\PlatformException(
+                    '%s does not support the supplied cast type: %s', 
+                    get_class($this),
+                    $Operator);
         }
     }
     

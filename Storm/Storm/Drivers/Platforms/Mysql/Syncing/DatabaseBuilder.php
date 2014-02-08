@@ -140,7 +140,9 @@ class DatabaseBuilder implements IDatabaseBuilder {
             case 'HASH':
                 return Tables\IndexStorageType::Hash;
             default:
-                throw new \InvalidArgumentException('Unknown index storage type');
+                throw new \Storm\Drivers\Base\Relational\PlatformException(
+                        'Unknown index storage type: %s', 
+                        $StorageType);
         }
     }
     // </editor-fold>
@@ -202,7 +204,9 @@ class DatabaseBuilder implements IDatabaseBuilder {
             case 'CASCADE':
                 return Traits\ForeignKeyMode::Cascade;
             default:
-                throw new \InvalidArgumentException('Unknown ForeignKeyMode');
+                throw new \Storm\Drivers\Base\Relational\PlatformException(
+                        'Unknown foreing key mode: %s', 
+                        $Mode);
         }
     }
     // </editor-fold>

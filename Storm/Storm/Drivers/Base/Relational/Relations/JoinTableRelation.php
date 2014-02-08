@@ -125,7 +125,8 @@ class JoinTableRelation extends ToManyRelationBase {
     }
     private function MapPersistedRelationshipToJoinRow (Relational\PersistedRelationship $Relationship) {
         if($Relationship->IsIdentifying()) {
-            throw new \Exception;//TODO:error message
+            throw new RelationException(
+                    'JoinTableRelation cannot persist identifying relationships');
         }
         return $this->MapRelationshipToJoinRow($Relationship);        
     }

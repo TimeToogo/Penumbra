@@ -4,6 +4,7 @@ namespace Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\Visitors;
 
 use \Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\PHPParserConstantValueNode;
 use \Storm\Drivers\Fluent\Object\Properties\Accessors;
+use \Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\AST;
 
 class AccessorBuilderVisitor extends \PHPParser_NodeVisitorAbstract {
     private $EntityVariableName;
@@ -32,24 +33,22 @@ class AccessorBuilderVisitor extends \PHPParser_NodeVisitorAbstract {
         switch (true) {
             //Field
             case $Node instanceof \PHPParser_Node_Expr_PropertyFetch:
-                $Name = $Node->name;
-                if(!is_string($Name)) {
-                    throw new \Exception('Cannot build accessor: Property fetch cannot be dynamic');
-                }
+                $Name = AST::VerifyNameNode($Node->name);
                 $this->AccessorBuilder->$Name;
                 break;
             
             //Method
             case $Node instanceof \PHPParser_Node_Expr_MethodCall:
-                $Name = $Node->name;
-                if(!is_string($Name)) {
-                    throw new \Exception('Cannot build accessor: Method call cannot be dynamic');
-                }
+                $Name = AST::VerifyNameNode($Node->name);
                 $this->AccessorBuilder->$Name();
                 break;
                 
             //Indexor
             case $Node instanceof \PHPParser_Node_Expr_ArrayDimFetch:
+                if(!($Node->dim instanceof PHPParserConstantValueNode)) {
+                    throw new \Storm\Drivers\Fluent\Object\Closure\ASTException(
+                            'Property indexor must be a constant value');
+                }
                 $this->AccessorBuilder[$this->GetNodeValue($Node->dim)];
                 break;
                 
@@ -63,19 +62,6 @@ class AccessorBuilderVisitor extends \PHPParser_NodeVisitorAbstract {
             
             default:
                 return;
-        }
-    }
-    
-    public function GetNodeValues(array $ArgumentNodes) {
-        return array_map([$this, 'GetNodeValue'], $ArgumentNodes);
-    }
-    
-    public function GetNodeValue(\PHPParser_Node $Node) {
-        if($Node instanceof PHPParserConstantValueNode) {
-            $Node->Value;
-        }
-        else {
-            throw new \Exception();
         }
     }
 }

@@ -61,10 +61,10 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
     
     final protected function ProxyGeneratorIsRequired() {
         return new \Storm\Core\NotSupportedException(
-                    'Cannot revive %s property for %s, related entity %s in lazy context: proxy generator is required',
-                    get_class($this),
-                    $this->GetEntityMap()->GetEntityType(),
-                    $this->GetEntityType());
+                'Cannot revive %s property for %s, related entity %s in lazy context: proxy generator is required',
+                get_class($this),
+                $this->GetEntityMap()->GetEntityType(),
+                $this->GetEntityType());
     }
 
 
@@ -109,7 +109,10 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
             }
         }
         
-        throw new \Storm\Core\UnexpectedValueException('Cannot revive supplied value: ')
+        throw new \Storm\Core\UnexpectedValueException(
+                '%s cannot revive supplied value: %s given',
+                __CLASS__,
+                \Storm\Core\Utilities::GetTypeOrClass($PropertyRevivalValue));
     }
     
     private function IsAll(array $Values, callable $Filter) {
@@ -129,28 +132,37 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         }
     }
     
+    private function Unimplemented($Method) {
+        return new \Storm\Core\NotSupportedException(
+                'Cannot revive %s property for %s, related type %s: %s must be overriden',
+                get_class($this),
+                $this->GetEntityMap()->GetEntityType(),
+                $this->GetEntityType(),
+                $Method);
+    }
+    
     protected function ReviveNull(Domain $Domain, $Entity) {
-        throw new \Exception;//TODO:error message
+        throw $this->Unimplemented(__METHOD__);
     }
     
     protected function ReviveRevivalData(Domain $Domain, $Entity, Object\RevivalData $RevivalData) {
-        throw new \Exception;//TODO:error message
+        throw $this->Unimplemented(__METHOD__);
     }
     
     protected function ReviveLazyRevivalData(Domain $Domain, $Entity, LazyRevivalData $LazyRevivalData) {
-        throw new \Exception;//TODO:error message
+        throw $this->Unimplemented(__METHOD__);
     }
     
     protected function ReviveMultipleLazyRevivalData(Domain $Domain, $Entity, MultipleLazyRevivalData $MultipleLazyRevivalData) {
-        throw new \Exception;//TODO:error message
+        throw $this->Unimplemented(__METHOD__);
     }
     
     protected function ReviveArrayOfRevivalData(Domain $Domain, $Entity, array $RevivalDataArray) {
-        throw new \Exception;//TODO:error message
+        throw $this->Unimplemented(__METHOD__);
     }
     
     protected function ReviveArrayOfLazyRevivalData(Domain $Domain, $Entity, array $LazyRevivalDataArray) {
-        throw new \Exception;//TODO:error message
+        throw $this->Unimplemented(__METHOD__);
     }
     
     

@@ -25,7 +25,11 @@ abstract class ObjectDataType extends DataType {
             return null;
         }
         if(!($PropertyValue instanceof $this->ClassType)) {
-            throw new \Exception('Expecting ' . $this->ClassType . ': ' . $PropertyValue . ' given');
+            throw new DataTypeException(
+                    'Invalid property value for %s: expecting %s, %s given',
+                    get_class($this),
+                    $this->ClassType,
+                    \Storm\Core\Utilities::GetTypeOrClass($PropertyValue));
         }
         
         return $this->PersistedValue($PropertyValue);
@@ -46,7 +50,10 @@ abstract class ObjectDataType extends DataType {
             $MapperMethodName = $this->ClassType . $Name;
         }
         if(!method_exists($this, $MapperMethodName)) {
-            throw new \Exception('Unimplemented method mapper');
+            throw new \Storm\Core\NotSupportedException(
+                    'Data type does not support method %s::%s',
+                    $this->ClassType,
+                    $Name);
         }
 
         $IsStatic = $ObjectValueExpression === null;
@@ -61,7 +68,10 @@ abstract class ObjectDataType extends DataType {
     final public function MapPropertyFetchExpression(Expression $ObjectValueExpression = null, $Name) {
         $MapperMethodName = 'Prop_' . $Name;
         if(!method_exists($this, $MapperMethodName)) {
-            throw new \Exception('Unimplemented property mapper');
+            throw new \Storm\Core\NotSupportedException(
+                    'Data type does not support property %s::$%s',
+                    $this->ClassType,
+                    $Name);
         }
 
         $IsStatic = $ObjectValueExpression === null;

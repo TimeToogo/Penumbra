@@ -21,7 +21,9 @@ class CompositePreInsertPrimaryKeyGenerator extends PreInsertKeyGenerator {
     protected function OnSetPrimaryKeyColumns(array $PrimaryKeyColumns) {
         foreach($PrimaryKeyColumns as $PrimaryKeyColumn) {
             if(!isset($this->ColumnGeneratorMap[$PrimaryKeyColumn])) {
-                throw new \Exception('Unmapped primary key: ' . $PrimaryKeyColumn->GetName());
+                throw new \Storm\Core\Relational\InvalidColumnException(
+                        'The supplied primary key column %s is not mapped to a key generator',
+                        $PrimaryKeyColumn->GetName());
             }
         }
     }

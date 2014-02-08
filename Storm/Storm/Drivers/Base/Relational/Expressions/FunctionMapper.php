@@ -20,7 +20,10 @@ abstract class FunctionMapper implements IFunctionMapper {
         }
         
         if(!method_exists($this, $FunctionName)) {
-            throw new \Exception('Unimplemented function mapper');
+            throw new \Storm\Core\NotSupportedException(
+                    '%s does not support mapping function: %s',
+                    get_class($this),
+                    $FunctionName);
         }
         $MappedName = $FunctionName;
         $OverrideExpression = $this->$FunctionName($MappedName, $ArgumentExpressions);

@@ -12,23 +12,15 @@ use \Storm\Drivers\Base\Relational\Queries\IConnection;
  * are guaranteed to be sequential.
  */
 class MultiAutoIncrementGenerator extends PrimaryKeys\PostMultiInsertKeyGenerator {
-    protected function OnSetPrimaryKeyColumns(array $PrimaryKeyColumns) {
-        if(count($PrimaryKeyColumns) !== 1) {
-            throw new \Exception('Only supports single auto increment column');
-        }
-        else if(!reset($PrimaryKeyColumns)->HasTrait(Relational\Columns\Traits\Increment::GetType())) {
-            throw new \Exception('Column must be an AUTO_INCREMENT column');
-        }
-    }
+    use \Storm\Drivers\Platforms\Base\PrimaryKeys\AutoIncrementColumnGenerator;
+    
     
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {
-        $PrimaryKeyColumns = $this->GetPrimaryKeyColumns();
-        $IncrementColumn = reset($PrimaryKeyColumns);
         //Mysql will return the first auto increment from a multi insert
         $FirstInsertId = (int)$Connection->GetLastInsertIncrement();
         $IncrementId = $FirstInsertId;
         foreach ($UnkeyedRows as $Row) {
-            $Row[$IncrementColumn] = $IncrementColumn->ToPersistenceValue($IncrementId);
+            $Row[$this->IncrementColumn] = $this->IncrementColumn->ToPersistenceValue($IncrementId);
             $IncrementId++;
         }
     }

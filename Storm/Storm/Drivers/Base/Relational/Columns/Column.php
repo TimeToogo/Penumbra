@@ -2,11 +2,9 @@
 
 namespace Storm\Drivers\Base\Relational\Columns;
 
-use \Storm\Core\Relational\IColumn;
-use \Storm\Core\Relational\ITable;
-use \Storm\Core\Relational\ColumnData;
+use \Storm\Core\Relational;
 
-class Column implements IColumn {
+class Column implements Relational\IColumn {
     use \Storm\Core\Helpers\Type;
     
     private $Name;
@@ -51,7 +49,7 @@ class Column implements IColumn {
         return $this->Table !== null;
     }
     
-    final public function SetTable(ITable $Table = null) {
+    final public function SetTable(Relational\ITable $Table = null) {
         $this->Table = $Table;
         $this->UpdateIdentifier();
     }
@@ -79,7 +77,9 @@ class Column implements IColumn {
     
     final public function AddTrait(ColumnTrait $Trait) {
         if(!$Trait->AllowMultiple() && $this->HasTrait($Trait->GetType()))
-            throw new \InvalidArgumentException('Cannot contain duplicate traits of type: ' . $Trait->GetType());
+            throw new Relational\RelationalException(
+                    'Column cannot contain multiple traits of type %s',
+                    $Trait->GetType());
         else
             $this->Traits[] = $Trait;
     }

@@ -22,7 +22,7 @@ class Persister extends Queries\StandardPersister {
             $ShouldReturnKeyData) {
         
         if($ShouldReturnKeyData) {
-            throw new \Exception('SQLite does not support returning data');
+            throw new \Storm\Drivers\Base\Relational\PlatformException('SQLite does not support returning data');
         }
         
         $Columns = $Table->GetColumns();

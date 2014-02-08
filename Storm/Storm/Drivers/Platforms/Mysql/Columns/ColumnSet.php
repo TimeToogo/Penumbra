@@ -35,7 +35,9 @@ class ColumnSet implements IColumnSet {
             return new Column($Name, new DataType('LONGTEXT'), $PrimaryKey);
         }
         else {
-            throw new \InvalidArgumentException('Exceeded maxium string length Mysql TEXT datatypes');
+            throw new \Storm\Drivers\Base\Relational\PlatformException(
+                    'Exceeded maximum string 4294967295 length Mysql TEXT datatypes: $d given',
+                    $Length);
         }
     }
     
@@ -109,7 +111,9 @@ class ColumnSet implements IColumnSet {
             return new Column($Name, new DataType('LONGBLOB'), $PrimaryKey);
         }
         else {
-            throw new \InvalidArgumentException('Exceeded maxium binary length Mysql BLOB datatypes');
+            throw new \Storm\Drivers\Base\Relational\PlatformException(
+                    'Exceeded maximum binary 4294967295 length Mysql TEXT datatypes: $d given',
+                    $Length);
         }
     }
     

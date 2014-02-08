@@ -39,6 +39,10 @@ class Platform implements IPlatform {
         return $this->Connection;
     }
     
+    public function HasConnection() {
+        return $this->Connection !== null;
+    }
+    
     public function SetConnection(Queries\IConnection $Connection) {
         $this->Connection = $Connection;
         $this->Connection->SetExpressionCompiler($this->ExpressionCompiler);
@@ -48,9 +52,11 @@ class Platform implements IPlatform {
     }
     protected function OnSetConnection(Queries\IConnection $Connection) { }
     
-    final protected function VerifyConnection() {
+    final protected function VerifyConnection($Method) {
         if(!($this->Connection instanceof Queries\IConnection)) {
-            throw new \Exception();
+            throw new Core\Relational\RelationalException(
+                    'Call to %s requires connection to be set',
+                    $Method);
         }
     }
     
@@ -91,13 +97,13 @@ class Platform implements IPlatform {
     }
     
     final public function Sync(Database $Database) {
-        $this->VerifyConnection();
+        $this->VerifyConnection(__METHOD__);
         
         return $this->DatabaseSyncer->Sync($this->Connection, $Database);
     }
     
     final public function Select(Core\Relational\Request $Request) {
-        $this->VerifyConnection();
+        $this->VerifyConnection(__METHOD__);
         
         return $this->QueryExecutor->Select($this->Connection, $Request);
     }
@@ -106,7 +112,7 @@ class Platform implements IPlatform {
             array $TablesOrderedByPersistingDependency, 
             array $TablesOrderedByDiscardingDependency, 
             Core\Relational\Transaction $Transaction) {
-        $this->VerifyConnection();
+        $this->VerifyConnection(__METHOD__);
         
         return $this->QueryExecutor->Commit(
                 $this->Connection, 

@@ -66,7 +66,9 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
                 return $this->AppendIf($QueryBuilder, $Expression);
 
             default:
-                throw new \Exception();
+                throw new \Storm\Core\Relational\RelationalException(
+                        'Unknown relational expression type: %s',
+                        get_class($Expression));
         }
     }
     

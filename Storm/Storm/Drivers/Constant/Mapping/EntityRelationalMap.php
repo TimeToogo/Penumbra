@@ -70,6 +70,12 @@ final class FluentPropertyMapping {
         $Callback(new Mappings\DataPropertyColumnMapping($this->Property, $Column));
     }
     
+    private function UnsupportedLoadingMode($LoadingMode) {
+        return new Mappings\MappingException(
+                'The supplied loading mode is unsupported: %s given',
+                \Storm\Core\Utilities::GetTypeOrClass($LoadingMode));
+    }
+    
     public function ToEntity(Relational\IToOneRelation $ToOneRelation, $LoadingMode = null) {
         $Callback = $this->PropertyMappingCallback;
         $Callback($this->MakeToEntityMapping($ToOneRelation, $this->GetLoadingMode($LoadingMode)));
@@ -85,7 +91,7 @@ final class FluentPropertyMapping {
             case LoadingMode::ExtraLazy:
                 return new Mappings\ExtraLazyEntityPropertyToOneRelationMapping($this->Property, $ToOneRelation);
             default:
-                throw new \InvalidArgumentException('Unsupported loading mode');
+                throw $this->UnsupportedLoadingMode($LoadingMode);
         }
     }
     
@@ -104,7 +110,7 @@ final class FluentPropertyMapping {
             case LoadingMode::ExtraLazy:
                 return new Mappings\ExtraLazyCollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation);
             default:
-                throw new \InvalidArgumentException('Unsupported loading mode');
+                throw $this->UnsupportedLoadingMode($LoadingMode);
         }
     }
 }

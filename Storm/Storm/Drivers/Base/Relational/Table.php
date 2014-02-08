@@ -71,7 +71,11 @@ abstract class Table extends Relational\Table {
             $this->Traits[] = $Trait;
         }
         else {
-            throw new \InvalidArgumentException('Invalid TableTrait');
+            throw new \Storm\Core\UnexpectedValueException(
+                    'The supplied trait must derive from either %s or %s: %s given',
+                    StructuralTableTrait::GetType(),
+                    RelationalTableTrait::GetType(),
+                    $Trait->GetType());
         }
     }
     

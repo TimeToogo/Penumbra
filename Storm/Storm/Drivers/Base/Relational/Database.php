@@ -23,9 +23,11 @@ abstract class Database extends Relational\Database {
         return $this->Platform;
     }
     
-    private function VerifyPlatform() {
+    private function VerifyConnection($Method) {
         if($this->Platform === null) {
-            throw new \BadMethodCallException('Platform has not been supplied');
+            throw new Relational\RelationalException(
+                    'Call to %s requires the connection to be set',
+                    $Method);
         }
     }
     
@@ -41,12 +43,12 @@ abstract class Database extends Relational\Database {
     }
     
     final protected function LoadResultRowData(Relational\Request $Request) {
-        $this->VerifyPlatform();
+        $this->VerifyConnection(__METHOD__);
         return $this->Platform->Select($Request);
     }
     
     final public function CommitTransaction(Relational\Transaction $Transaction) {
-        $this->VerifyPlatform();
+        $this->VerifyConnection(__METHOD__);
         return $this->Platform->Commit(
                 $this->GetTablesOrderedByPersistingDependency(), 
                 $this->GetTablesOrderedByDiscardingDependency(), 

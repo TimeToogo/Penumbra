@@ -134,7 +134,9 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
             case Traits\ForeignKeyMode::SetNull:
                 return 'SET NULL';
             default:
-                throw new \InvalidArgumentException();
+                throw new \Storm\Core\UnexpectedValueException(
+                        'Unknown foreign key mode: %s', 
+                        $Mode);
         }
     }
 
@@ -177,7 +179,9 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
             case Traits\IndexType::FullText:
                 return 'FULLTEXT';
             default:
-                throw new \InvalidArgumentException();
+                throw new \Storm\Core\UnexpectedValueException(
+                        'Unknown index type: %s', 
+                        $Type);
         }
     }
 
@@ -188,7 +192,9 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
             case Traits\IndexDirection::Descending:
                 return 'DESC';
             default:
-                throw new \InvalidArgumentException();
+                throw new \Storm\Core\UnexpectedValueException(
+                        'Unknown index direction: %s', 
+                        $Direction);
         }
     }
 
@@ -201,7 +207,9 @@ class TableTraitManager extends Syncing\Traits\TableTraitManager {
             case Mysql\Tables\IndexStorageType::Hash:
                 return 'HASH';
             default:
-                throw new \InvalidArgumentException();
+                throw new \Storm\Core\UnexpectedValueException(
+                        'Unknown index storage type: %s', 
+                        $StorageType);
         }
     }
 

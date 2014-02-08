@@ -17,8 +17,11 @@ final class TraitMethodManager {
                 if($Trait instanceof $Type)
                     $AppenderFunction = $this->AppenderFunctions[$Type];
             }
-            if($AppenderFunction === null)
-                throw new \BadMethodCallException('The supplied Trait type is unsupported');
+            if($AppenderFunction === null) {
+                throw new \Storm\Core\NotSupportedException(
+                        'The supplied trait %s has no registered definition',
+                        $TraitType);
+            }
         }
         else {
             $AppenderFunction = $this->AppenderFunctions[$TraitType];

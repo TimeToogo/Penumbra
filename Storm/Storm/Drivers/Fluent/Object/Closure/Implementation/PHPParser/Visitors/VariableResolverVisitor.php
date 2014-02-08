@@ -3,6 +3,7 @@
 namespace Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\Visitors;
 
 use \Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\PHPParserConstantValueNode;
+use \Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\AST;
 
 class VariableResolverVisitor extends \PHPParser_NodeVisitorAbstract {
     private $VariableValueMap = array();
@@ -14,10 +15,7 @@ class VariableResolverVisitor extends \PHPParser_NodeVisitorAbstract {
     public function leaveNode(\PHPParser_Node $Node) {
         switch (true) {
             case $Node instanceof \PHPParser_Node_Expr_Variable:
-                $Name = $Node->name;
-                if(!is_string($Name)) {
-                    throw new \Exception('Variable resolver does not support variable variables');
-                }
+                $Name = AST::VerifyNameNode($Node->name);
                 if(isset($this->VariableValueMap[$Name])) {
                     return new PHPParserConstantValueNode($this->VariableValueMap[$Name]);
                 }

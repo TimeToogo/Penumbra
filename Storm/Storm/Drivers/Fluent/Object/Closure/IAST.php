@@ -14,6 +14,11 @@ interface IAST {
      * @return Object\IEntityMap
      */
     public function GetEntityMap();
+    
+    /**
+     * @return boolean
+     */
+    public function HasEntityMap();
     /**
      * @return Object\IEntityMap
      */

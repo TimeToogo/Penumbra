@@ -44,10 +44,16 @@ class ForeignKey extends RelationalTableTrait {
             }
             else {
                 if(!$this->ParentTable->Is($ParentColumn->GetTable())) {
-                    throw new \Exception;//TODO:error message
+                    throw new Relational\InvalidColumnException(
+                            'The supplied parent columns must belong to the same table: %s and %s given',
+                            $this->ParentTable->GetName(),
+                            $ParentColumn->GetTable()->GetName());
                 }
                 if(!$this->ReferencedTable->Is($ReferencedColumn->GetTable())) {
-                    throw new \Exception;//TODO:error message
+                    throw new Relational\InvalidColumnException(
+                            'The supplied referenced columns must belong to the same table: %s and %s given',
+                            $this->ReferencedTable->GetName(),
+                            $ReferencedColumn->GetTable()->GetName());
                 }                
             }
             $ParentIdentifier = $ParentColumn->GetIdentifier();

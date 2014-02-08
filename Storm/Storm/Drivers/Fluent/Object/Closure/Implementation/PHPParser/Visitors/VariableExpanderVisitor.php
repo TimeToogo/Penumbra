@@ -2,6 +2,8 @@
 
 namespace Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\Visitors;
 
+use \Storm\Drivers\Fluent\Object\Closure\Implementation\PHPParser\AST;
+
 class VariableExpanderVisitor extends \PHPParser_NodeVisitorAbstract {
     private $Traverser;
     private $VariableExpressionMap = array();
@@ -11,9 +13,7 @@ class VariableExpanderVisitor extends \PHPParser_NodeVisitorAbstract {
     }
     
     private function VerifyVariableNode(\PHPParser_Node_Expr_Variable $Node) {
-        if(!is_string($Node->name)) {
-            throw new \Exception('Variable expander does not support variable variables');
-        }
+        AST::VerifyNameNode($Node->name);
     }
     
     public function enterNode(\PHPParser_Node $Node) {

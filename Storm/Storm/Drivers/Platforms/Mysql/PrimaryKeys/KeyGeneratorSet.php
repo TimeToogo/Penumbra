@@ -21,7 +21,8 @@ class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
 
     public function Sequence($Name) {
         if($this->SequenceTable === null) {
-            throw new \BadMethodCallException('$KeyGeneratorTable was not supplied');
+            throw new \Storm\Core\NotSupportedException(
+                    'Must supply sequence table for a sequence generator');
         }
         
         return new SequenceGenerator($Name, $this->SequenceTable);
