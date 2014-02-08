@@ -8,6 +8,14 @@ class Blog extends Entity {
     public $Description;
     public $CreatedDate;
     public $Posts;
+    
+    public function GetName() {
+        return $this->Name;
+    }
+    
+    public function SetName($Name) {
+        $this->Name = $Name;
+    }
 }
 
 ?>

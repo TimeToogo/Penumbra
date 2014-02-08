@@ -29,7 +29,9 @@ abstract class StandardPersister extends BasePersister {
         $this->AppendInsert($QueryBuilder, $TableName, $ColumnNames);
         
         $QueryBuilder->Append('(');
-        $QueryBuilder->AppendAllColumnData(reset($Rows), ',');
+        foreach($QueryBuilder->Delimit($Columns, ',') as $Column) {
+            $QueryBuilder->AppendColumnData($Column, null);
+        }
         $QueryBuilder->Append(')');
         
         $PreparedInsert = $QueryBuilder->Build();
@@ -79,7 +81,7 @@ abstract class StandardPersister extends BasePersister {
         $QueryBuilder->Append(' SELECT ');
         
         /*
-         * Apply all the persisting data expressions as a select on the derived table
+         * Apply all the persisting data expressions as a select on the inline table
          * rather than on every row
          */
         foreach($QueryBuilder->Delimit($Columns, ', ') as $ColumnName => $Column) {

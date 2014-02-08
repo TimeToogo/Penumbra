@@ -62,7 +62,9 @@ class DateTimeDataType extends Columns\ObjectDataType {
     }
 
     private function AddConstantDateTimeInterval(CoreExpression &$ObjectExpression, $Value, $Unit) {
-        $this->AddDateTimeInterval($ObjectExpression, Expression::Constant($Value), $Unit);
+        if($Value !== 0) {
+            $this->AddDateTimeInterval($ObjectExpression, Expression::Constant($Value), $Unit);
+        }
     }
 
     public function add(CoreExpression $ObjectExpression, array $ArgumentExpressions) {
@@ -75,18 +77,12 @@ class DateTimeDataType extends Columns\ObjectDataType {
             $IntervalValue = $IntervalExpression->GetValue();
             $Inversion = $IntervalValue->invert === 1 ? -1 : 1;
             
-            if($IntervalValue->d !== 0)
-                $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->d * $Inversion, 'DAY');
-            if($IntervalValue->m !== 0)
-                $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->m * $Inversion, 'MONTH');
-            if($IntervalValue->y !== 0)
-                $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->y * $Inversion, 'YEAR');
-            if($IntervalValue->h !== 0)
-                $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->h * $Inversion, 'HOUR');
-            if($IntervalValue->i !== 0)
-                $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->i * $Inversion, 'MINUTE');
-            if($IntervalValue->s !== 0)
-                $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->s * $Inversion, 'SECOND');
+            $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->d * $Inversion, 'DAY');
+            $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->m * $Inversion, 'MONTH');
+            $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->y * $Inversion, 'YEAR');
+            $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->h * $Inversion, 'HOUR');
+            $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->i * $Inversion, 'MINUTE');
+            $this->AddConstantDateTimeInterval($DateTimeExpression, $IntervalValue->s * $Inversion, 'SECOND');
         }         
         else {
             $this->AddDateTimeInterval($DateTimeExpression, $IntervalExpression, 'SECOND');

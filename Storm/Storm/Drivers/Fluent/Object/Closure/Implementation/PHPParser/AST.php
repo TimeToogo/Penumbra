@@ -244,6 +244,7 @@ class AST extends ASTBase {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Statement node parsers">
+    
     private function ParseStatmentNode(\PHPParser_Node_Stmt $Node) {
         switch (true) {
             case $Node instanceof \PHPParser_Node_Stmt_Return:
@@ -286,28 +287,32 @@ class AST extends ASTBase {
         
         $this->AccessorBuilder->traverse([$Node]);
         $Accessor = $this->AccessorBuilderVisitor->GetAccessor();
-        $Identifier = $this->GetAccessorIdentifier($Accessor);
-        
-        $PropertyExpression = null;
         
         foreach($Properties as $Property) {
             if($Property instanceof Property) {
                 $OtherAccessor = $Property->GetAccessor();
-                $OtherIdentifier = $this->GetAccessorIdentifier($OtherAccessor);
                 
-                if($Identifier === $OtherIdentifier) {
-                    $PropertyExpression = Expression::Property($Property);
-                    break;
+                $MatchedAccessorType = null;
+                if($this->AccessorsMatch($Accessor, $OtherAccessor, $MatchedAccessorType)) {
+                    return $this->ParseNodeAsProperty($Node, $Property, $MatchedAccessorType);
                 }
             }
         }
-        
-        return $PropertyExpression;
     }
     
-    private function GetAccessorIdentifier(Accessor $Accessor) {
-        return $this->PropertyMode === self::PropertiesAreGetters ?
-                $Accessor->GetGetterIdentifier() : $Accessor->GetSetterIdentifier();
+    private function ParseNodeAsProperty(\PHPParser_Node_Expr $Node, Property $Property, $MatchedAccessorType) {
+        if($MatchedAccessorType === self::PropertiesAreSetters && $Node instanceof \PHPParser_Node_Expr_MethodCall) {
+            if(count($Node->args) === 0) {
+                throw new \Exception();
+            }
+            return Expression::Assign(
+                    Expression::Property($Property), 
+                    Operators\Assignment::Equal, 
+                    $this->ParseNodeInternal($Node->args[0]));
+        }
+        else {
+            return Expression::Property($Property);
+        }
     }
     
     // </editor-fold>
