@@ -67,8 +67,8 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
         
         if(!isset($this->Properties[$Identifier])) {
             throw new InvalidPropertyException(
-                    'The supplied property belonging to %s is not part of this %s.',
-                    \Storm\Core\Utilities::GetTypeOrClass($Property->GetEntityMap()),
+                    'The supplied property of entity %s is not part of this %s.',
+                    $Property->HasEntityMap() ? $Property->GetEntityMap()->GetEntityType() : 'null',
                     get_class($this));
         }
         

@@ -16,7 +16,7 @@ class ObjectExpression extends Expression {
         if(!is_object($InstanceOrType) && !class_exists($InstanceOrType)) {
             throw new \Storm\Core\Object\ObjectException(
                     'The supplied value must be either an object or a valid class name: %s given',
-                    is_string($InstanceOrType) ? $InstanceOrType : \Storm\Core\Utilities::GetTypeOrClass($InstanceOrType));
+                    is_string($InstanceOrType) ? '\'' . $InstanceOrType . '\'': \Storm\Core\Utilities::GetTypeOrClass($InstanceOrType));
         }
         $this->HasInstance = is_object($InstanceOrType);
         $this->ClassType = $this->HasInstance ? get_class($InstanceOrType) : $InstanceOrType;

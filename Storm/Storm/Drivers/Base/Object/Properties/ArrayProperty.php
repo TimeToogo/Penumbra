@@ -30,7 +30,10 @@ class ArrayProperty extends MultipleEntityProperty {
             $CurrentEntities =& $CurrentValue;
         }
         else {
-            throw new \Exception();
+            throw new Object\ObjectException(
+                    'Invalid value for property on entity %s, array expected, %s given',
+                    $this->GetEntityType(),
+                    \Storm\Core\Utilities::GetTypeOrClass($CurrentValue));
         }
         
         if($CurrentEntities === $OriginalEntities) {

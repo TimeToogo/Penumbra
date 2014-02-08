@@ -6,25 +6,44 @@ use \Storm\Core\Object;
 use \Storm\Core\Object\Domain;
 use \Storm\Drivers\Base\Object\LazyRevivalData;
 use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
+use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 
 abstract class RelationshipProperty extends Property implements Object\IRelationshipProperty {
     private $EntityType;
     private $IsIdentifying;
     private $OriginalValueStorageKey;
     private $BackReferenceProperty;
+    /**
+     * @var Proxies\IProxyGenerator|null
+     */
+    protected $ProxyGenerator;
     
     public function __construct(
             Accessors\Accessor $Accessor, 
             $EntityType, 
             $IsIdentifying,
-            Object\IProperty $BackReferenceProperty = null) {
+            Object\IProperty $BackReferenceProperty = null,
+            IProxyGenerator $ProxyGenerator = null) {
         parent::__construct($Accessor);
         $this->EntityType = $EntityType;
         $this->IsIdentifying = $IsIdentifying;
         $this->BackReferenceProperty = $BackReferenceProperty;
         $this->OriginalValueStorageKey = $EntityType . $this->GetIdentifier();
+        $this->ProxyGenerator = $ProxyGenerator;
     }
     
+    final public function HasProxyGenerator() {
+        return $this->ProxyGenerator !== null;
+    }
+    
+    final public function GetProxyGenerator() {
+        return $this->ProxyGenerator;
+    }
+
+    final public function SetProxyGenerator(IProxyGenerator $ProxyGenerator) {
+        $this->ProxyGenerator = $ProxyGenerator;
+    }
+        
     final public function GetEntityType() {
         return $this->EntityType;
     }
@@ -40,6 +59,15 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         return $this->BackReferenceProperty;
     }
     
+    final protected function ProxyGeneratorIsRequired() {
+        return new \Storm\Core\NotSupportedException(
+                    'Cannot revive %s property for %s, related entity %s in lazy context: proxy generator is required',
+                    get_class($this),
+                    $this->GetEntityMap()->GetEntityType(),
+                    $this->GetEntityType());
+    }
+
+
     final public function Revive(Domain $Domain, $PropertyValue, $Entity) {
         $RevivedPropertyValue = $this->ReviveValue($Domain, $Entity, $PropertyValue);
         if($RevivedPropertyValue instanceof Proxies\IProxy) {
@@ -81,7 +109,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
             }
         }
         
-        throw new \Exception;//TODO:error message
+        throw new \Storm\Core\UnexpectedValueException('Cannot revive supplied value: ')
     }
     
     private function IsAll(array $Values, callable $Filter) {

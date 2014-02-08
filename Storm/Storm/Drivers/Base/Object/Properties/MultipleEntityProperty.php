@@ -10,11 +10,7 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
     /**
      * @var IRelationshipType 
      */
-    protected $RelationshipType; 
-    /**
-     * @var Proxies\IProxyGenerator
-     */
-    protected $ProxyGenerator;
+    protected $RelationshipType;
     
     public function __construct(
             Accessors\Accessor $Accessor,
@@ -22,14 +18,9 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
             IRelationshipType $RelationshipType,
             Object\IProperty $BackReferenceProperty = null,
             Proxies\IProxyGenerator $ProxyGenerator = null) {
-        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying(), $BackReferenceProperty);
+        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying(), $BackReferenceProperty, $ProxyGenerator);
         
         $this->RelationshipType = $RelationshipType;
-        $this->ProxyGenerator = $ProxyGenerator;
-    }
-    
-    final public function SetProxyGenerator(Proxies\IProxyGenerator $ProxyGenerator) {
-        $this->ProxyGenerator = $ProxyGenerator;
     }
     
     final protected function ReviveArrayOfLazyRevivalData(Object\Domain $Domain, $Entity, array $LazyRevivalDataArray, Object\IProperty $BackReferenceProperty = null) {
@@ -48,12 +39,15 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
             return $this->ReviveProxies($Domain, $Proxies, $Entity);
         }
         else {
-            throw new \Exception;//TODO:error
+            throw $this->ProxyGeneratorIsRequired();
         }
     }
     
     protected function ReviveProxies(Object\Domain $Domain, $Entity, array $Proxies) {
-        throw new \Exception();
+        throw new \Storm\Core\NotSupportedException(
+                '%s cannot revive proxies, please override %s',
+                get_class($this),
+                __METHOD__);
     }
         
     public function Persist(Object\UnitOfWork $UnitOfWork, $ParentEntity) {

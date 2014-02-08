@@ -2,19 +2,17 @@
 
 namespace Storm\Drivers\Base\Mapping\Mappings;
 
-use \Storm\Core\Containers\Map;
+use \Storm\Core\Mapping;
 use \Storm\Core\Mapping\DomainDatabaseMap;
-use \Storm\Core\Mapping\IEntityPropertyToOneRelationMapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Object\LazyRevivalData;
 
 class ExtraLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelationMapping {
     public function __construct(
             Object\IEntityProperty $EntityProperty, 
             Relational\IToOneRelation $ToOneRelation) {
         if($EntityProperty->IsOptional()) {
-            throw new \Exception;//TODO:error message
+            throw MappingException::OptionalEntityInLazyContext($ToOneRelation);
         }
         
         parent::__construct($EntityProperty, $ToOneRelation);

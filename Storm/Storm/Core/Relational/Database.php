@@ -116,9 +116,12 @@ abstract class Database {
      * @param ITable $Table The table to verify
      * @throws \InvalidArgumentException If the table is not registered
      */
-    private function VerifyTable(ITable $Table) {
+    private function VerifyTable($Method, ITable $Table) {
         if(!$this->HasTable($Table->GetName())) {
-            throw new \InvalidArgumentException('$Table must be of this database');
+            throw new InvalidTableException(
+                    'Call to %s with supplied table %s does not belong to this database',
+                    $Method,
+                    $Table->GetName());
         }
     }
     
@@ -152,7 +155,7 @@ abstract class Database {
     final public function Load(Request $Request) {
         $Columns = array();
         foreach($Request->GetTables() as $Table) {
-            $this->VerifyTable($Table);
+            $this->VerifyTable(__METHOD__, $Table);
             $Columns += $Table->GetColumnsByIdentifier();
         }
         $ResultRowData = $this->LoadResultRowData($Request);

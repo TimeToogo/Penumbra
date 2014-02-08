@@ -15,7 +15,7 @@ class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRela
             Object\IEntityProperty $EntityProperty, 
             Relational\IToOneRelation $ToOneRelation) {
         if($EntityProperty->IsOptional()) {
-            throw new \Exception;//TODO:error message
+            throw MappingException::OptionalEntityInLazyContext($ToOneRelation);
         }
         
         parent::__construct($EntityProperty, $ToOneRelation);

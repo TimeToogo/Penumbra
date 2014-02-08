@@ -2,6 +2,8 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
+use \Storm\Core\Object;
+
 class Traversing extends Accessor {
     /**
      * @var Accessor[] 
@@ -18,7 +20,7 @@ class Traversing extends Accessor {
     
     public function __construct(array $NestedAccessors) {
         if(count($NestedAccessors) === 0) {
-            throw new \InvalidArgumentException('$NestedGetterProperties must not be empty');
+            throw new Object\ObjectException('The supplied nested accessors must contain atleast one accessor');
         }
         
         foreach($NestedAccessors as $NestedProperty) {

@@ -30,7 +30,10 @@ class Request implements Object\IRequest {
         $this->IsSingleEntity = $IsSingleEntity;
         $this->Criterion = $Criterion ?: new Criterion($this->EntityType);
         if($this->Criterion->GetEntityType() !== $this->EntityType) {
-            throw new \Exception();
+            throw new Object\TypeMismatchException(
+                    'The supplied criterion must be for %s, %s given',
+                    $this->EntityType,
+                    $this->Criterion->GetEntityType());
         }
     }
     

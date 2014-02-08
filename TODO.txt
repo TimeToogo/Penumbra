@@ -2,6 +2,7 @@ The near future:
  - Finish implementing discarding of entities ~
  - Begin to document existing functionality ~
  - Redo all exceptions with meaningful exception classes and intuitive error messages
+ - Refactor property expression mapping into the IPropertyMapping.
  - Release to the public
  - Break apart the DomainDatabaseMap into more concise classes
  - 
