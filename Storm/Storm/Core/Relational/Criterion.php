@@ -166,7 +166,9 @@ final class Criterion {
      */
     final public function SetRangeOffset($RangeOffset) {
         if (!is_int($RangeOffset)) {
-            throw new \InvalidArgumentException('$RangeOffset');
+            throw new \Storm\Core\UnexpectedValueException(
+                    'The supplied range offset must be a valid integer: %s given',
+                    \Storm\Core\Utilities::GetTypeOrClass($RangeOffset));
         }
         $this->RangeOffset = $RangeOffset;
     }
@@ -186,7 +188,9 @@ final class Criterion {
      */
     final public function SetRangeAmount($RangeAmount) {
         if (!is_int($RangeAmount) && $RangeAmount !== null) {
-            throw new \InvalidArgumentException('$RangeOffset');
+            throw new \Storm\Core\UnexpectedValueException(
+                    'The supplied range amount must be a valid integer or null: %s given',
+                    \Storm\Core\Utilities::GetTypeOrClass($RangeAmount));
         }
         $this->RangeAmount = $RangeAmount;
     }

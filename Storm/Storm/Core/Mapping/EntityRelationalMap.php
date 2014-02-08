@@ -162,7 +162,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * Adds a property mapping to the entity relation map.
      * 
      * @param IDataPropertyColumnMapping|IEntityPropertyToOneRelationMapping|ICollectionPropertyToManyRelationMapping $PropertyMapping
-     * @throws \UnexpectedValueException If the property mapping is not
+     * @throws MappingException If the property mapping is not
      */
     private function AddPropertyMapping(IPropertyMapping $PropertyMapping) {
         $ProperyIdentifier = $PropertyMapping->GetProperty()->GetIdentifier();
@@ -198,9 +198,10 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         }
         foreach(array_merge($PropertyMapping->GetPersistColumns(), $PropertyMapping->GetReviveColumns()) as $Column) {
             if(!$Column->GetTable()->Is($this->PrimaryKeyTable)) {
-                throw new MappingException('Identity properties of %s cannot map across multiple tables: %s, %s',
+                throw new MappingException('Identity properties of %s cannot map across multiple tables: %s.%s does not belong to %s',
                         $this->EntityType,
                         $Column->GetTable()->GetName(),
+                        $Column->GetName(),
                         $this->PrimaryKeyTable->GetName());
             }
         }
@@ -317,13 +318,15 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * @return IDataPropertyColumnMapping The property mapping
      * @throws \Storm\Core\Exceptions\UnmappedPropertyException If property is not mapped
      */
-    private function VerifyDataPropertyColumnMapping(IProperty $Property) {
+    private function VerifyDataPropertyColumnMapping($Method, IProperty $Property) {
         $PropertyIdentifier = $Property->GetIdentifier();
         if(isset($this->DataPropertyColumnMappings[$PropertyIdentifier])) {
             return $this->DataPropertyColumnMappings[$PropertyIdentifier];
         }
         else {
-            throw new \Storm\Core\Exceptions\UnmappedPropertyException();
+            throw new UnmappedPropertyException(
+                    'The supplied property to %s has not been mapped',
+                    $Method);
         }
     }
     
@@ -331,14 +334,14 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * {@inheritDoc}
      */
     final public function GetMappedReviveColumns(IProperty $Property) {
-        return $this->VerifyDataPropertyColumnMapping($Property)->GetReviveColumns();
+        return $this->VerifyDataPropertyColumnMapping(__METHOD__, $Property)->GetReviveColumns();
     }
     
     /**
      * {@inheritDoc}
      */
     final public function GetMappedPersistColumns(IProperty $Property) {
-        return $this->VerifyDataPropertyColumnMapping($Property)->GetPersistColumns();
+        return $this->VerifyDataPropertyColumnMapping(__METHOD__, $Property)->GetPersistColumns();
     }
     
     /**

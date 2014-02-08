@@ -8,7 +8,6 @@ use \Storm\Drivers\Base\Object\LazyRevivalData;
 class EntityProperty extends RelationshipProperty implements Object\IEntityProperty {
     private $IsOptional;
     private $RelationshipType;
-    private $ProxyGenerator;
     public function __construct(
             Accessors\Accessor $Accessor,
             $EntityType,
@@ -16,7 +15,7 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
             $IsOptional = false,
             Object\IProperty $BackReferenceProperty = null,
             Proxies\IProxyGenerator $ProxyGenerator = null) {
-        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying(), $BackReferenceProperty);
+        parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying(), $BackReferenceProperty, $ProxyGenerator);
         $this->IsOptional = $IsOptional;
         $this->RelationshipType = $RelationshipType;
         $this->ProxyGenerator = $ProxyGenerator;
@@ -31,7 +30,10 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
             return null;
         }
         else {
-            throw new \Exception;//TODO:error message
+            throw new \Storm\Core\UnexpectedValueException(
+                    'Cannot revive entity property for %s, related entity %s is required',
+                    $this->GetEntityMap()->GetEntityType(),
+                    $this->GetEntityType());
         }
     }
     
@@ -55,8 +57,16 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
                     $LazyRevivalData->GetRevivalDataLoader());
         }
         else {
-            throw new \Exception;//TODO:error message
+            throw $this->ProxyGeneratorIsRequired();
         }
+    }
+    
+    private function InvalidEntityAndIsRequired($CurrentValue) {
+        return new Object\ObjectException(
+                'Invalid value for required relationship property on entity %s, %s expected, %s given',
+                $this->GetEntityMap()->GetEntityType(),
+                $this->GetEntityType(),
+                \Storm\Core\Utilities::GetTypeOrClass($CurrentValue));
     }
     
     public function Persist(Object\UnitOfWork $UnitOfWork, $ParentEntity) {
@@ -72,7 +82,7 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
         $DiscardedRelationship = null;
         
         if(!$CurrentIsValidEntity && !$this->IsOptional) {
-            throw new \Exception;//TODO:error message
+            throw $this->InvalidEntityAndIsRequired($CurrentValue);
         }
         else if(!$CurrentIsValidEntity && !$OriginalIsValidEntity) {
             
@@ -115,7 +125,7 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
         $DiscardedRelationship = null;
         
         if(!$CurrentIsValidEntity && !$this->IsOptional) {
-            throw new \Exception;//TODO:error message
+            throw $this->InvalidEntityAndIsRequired($CurrentValue);
         }
         if($OriginalIsValidEntity) {
             $DiscardedRelationship = $this->RelationshipType->GetDiscardedRelationship(

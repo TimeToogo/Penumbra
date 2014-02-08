@@ -42,7 +42,8 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
                         
             case $Expression instanceof O\ObjectExpression:
                 if(!$Expression->HasInstance()) {
-                    throw new \Exception();
+                    throw new Mapping\MappingException(
+                            'Cannot map object expression without a valid object instance.');
                 }
                 return [$ExpressionMapper->MapObjectExpression(
                         $Expression->GetClassType(), 
@@ -124,7 +125,9 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
                         )];
             
             default:
-                throw new \Exception();
+                throw new Mapping\MappingException(
+                        'Unsupported object expression type %s given',
+                        get_class($Expression));
         }
     }
     

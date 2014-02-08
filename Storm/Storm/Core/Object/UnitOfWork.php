@@ -111,6 +111,14 @@ final class UnitOfWork {
         }
     }
     
+    private function TypeMismatch($ObjectName, $EntityType) {
+        return new TypeMismatchException(
+                'The supplied %s of entity %s is part of the given domain %s',
+                $ObjectName,
+                $EntityType,
+                $this->Domain->GetType());
+    }
+    
     /**
      * Add a procedure to be executed.
      * 
@@ -119,9 +127,7 @@ final class UnitOfWork {
      */
     public function Execute(IProcedure $Procedure) {
         if(!$this->Domain->HasEntityMap($Procedure->GetEntityType())) {
-            throw new TypeMismatchException(
-                    'The supplied procedure of entity %s is part of the given domain:',
-                    $Procedure->GetEntityType());
+            throw $this->TypeMismatch('procedure', $Procedure->GetEntityType());
         }
         $this->ProcedureToExecute[] = $Procedure;
     }
@@ -158,7 +164,7 @@ final class UnitOfWork {
      */
     public function DiscardWhere(ICriterion $Criterion) {
         if(!$this->Domain->HasEntityMap($Criterion->GetEntityType())) {
-            throw new \InvalidArgumentException();
+            throw $this->TypeMismatch('criterion', $Criterion->GetEntityType());
         }
         $this->DiscardedCriteria[spl_object_hash($Criterion)] = $Criterion;
     }

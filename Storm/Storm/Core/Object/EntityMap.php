@@ -95,7 +95,7 @@ abstract class EntityMap implements IEntityMap {
      * 
      * @param \Storm\Core\Object\IProperty $Property The property to add
      * @return void
-     * @throws \Exception
+     * @throws InvalidPropertyException
      */
     private function AddProperty(IProperty $Property) {
         if($Property->GetEntityMap()) {
@@ -139,7 +139,7 @@ abstract class EntityMap implements IEntityMap {
      * Verifies an object to be of the type represented by this entity map.
      * 
      * @param object $Entity The entity to verify
-     * @throws \InvalidArgumentException
+     * @throws TypeMismatchException
      */
     private function VerifyEntity($Method, $Entity) {
         if(!($Entity instanceof $this->EntityType)) {

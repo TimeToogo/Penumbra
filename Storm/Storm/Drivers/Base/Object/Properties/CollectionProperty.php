@@ -32,7 +32,10 @@ class CollectionProperty extends MultipleEntityProperty {
         
         if(!($CurrentValue instanceof Collections\ICollection)) {
             if(!($CurrentValue instanceof \Traversable)) {
-                throw new \Exception;//TODO:error message
+            throw new Object\ObjectException(
+                    'Invalid value for collection property on entity %s, Traversable expected, %s given',
+                    $this->GetEntityMap()->GetEntityType(),
+                    \Storm\Core\Utilities::GetTypeOrClass($CurrentValue));
             }
             foreach($CurrentValue as $Entity) {
                 if($this->IsValidEntity($Entity)) {

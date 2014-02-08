@@ -106,16 +106,23 @@ class ResultRow extends ColumnData {
         return $this->PrimaryKeys;
     }
     
+    private function InvalidTable(ITable $Table) {
+        return new InvalidTableException(
+                    'The supplied table is not part of this result row, expecting on of %s: %s given',
+                    implode(', ', array_keys($this->Rows)),
+                    $Table->GetName());
+    }
+    
     /**
      * Get a the row of the supplied table
      * 
      * @param ITable $Table The table of the row to retreive
      * @return Row The matching row
-     * @throws \InvalidArgumentException If the table is not part of this result row
+     * @throws InvalidTableException If the table is not part of this result row
      */
     final public function GetRow(ITable $Table) {
         if(!$this->IsOf($Table)) {
-            throw new \InvalidArgumentException('$Table must be a part of this row');
+            throw $this->InvalidTable($Table);
         }
         
         return $this->Rows[$Table->GetName()];
@@ -126,11 +133,11 @@ class ResultRow extends ColumnData {
      * 
      * @param ITable $Table The table of the primary key to retreive
      * @return PrimaryKey The matching primary key
-     * @throws \InvalidArgumentException If the table is not part of this result row
+     * @throws InvalidTableException If the table is not part of this result row
      */
     final public function GetPrimaryKey(ITable $Table) {
         if(!$this->IsOf($Table)) {
-            throw new \InvalidArgumentException('$Table must be a part of this row');
+            throw $this->InvalidTable($Table);
         }
         
         return $this->PrimaryKeys[$Table->GetName()];

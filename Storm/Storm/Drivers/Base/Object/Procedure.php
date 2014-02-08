@@ -15,15 +15,19 @@ class Procedure implements Object\IProcedure {
     
     public function __construct($EntityOrType, array $AssignmentExpressions, Object\ICriterion $Criterion = null) {
         if(count($AssignmentExpressions) === 0) {
-            throw new \Exception('Must have atleast one assignment expression');
+            throw new Object\ObjectException(
+                    'Procedure must contain atleast one assignment expression: none given');
         }
         
-        $this->EntityType = $EntityOrType;
+        $this->EntityType = is_object($EntityOrType) ? get_class($EntityOrType) : $EntityOrType;
         $this->AssignmentExpressions = $AssignmentExpressions;
         $this->Criterion = $Criterion ?: new Criterion($this->EntityType);
         
         if($this->Criterion->GetEntityType() !== $this->EntityType) {
-            throw new \Exception();
+            throw new Object\TypeMismatchException(
+                    'The supplied criterion must be for %s, %s given',
+                    $this->EntityType,
+                    $this->Criterion->GetEntityType());
         }
     }
     

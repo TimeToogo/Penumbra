@@ -3,11 +3,11 @@
 namespace Storm\Drivers\Base\Mapping\Mappings;
 
 use \Storm\Core\Containers\Map;
-use \Storm\Core\Mapping\IDataPropertyColumnMapping;
+use \Storm\Core\Mapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
-class DataPropertyColumnMapping extends PropertyMapping implements IDataPropertyColumnMapping {
+class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IDataPropertyColumnMapping {
     private $IsIdentityPrimaryKeyMapping = false;
     private $DataProperty;
     private $Column;
@@ -17,10 +17,16 @@ class DataPropertyColumnMapping extends PropertyMapping implements IDataProperty
             Relational\IColumn $Column) {
         parent::__construct($DataProperty);
         if($DataProperty->IsIdentity() && !$Column->IsPrimaryKey()) {
-            throw new \InvalidArgumentException('Cannot map identity property to non primary key column');
+            throw new MappingException(
+                    'Cannot map an identity property to a non primary key column %s.%s',
+                    $Column->GetTable()->GetName(),
+                    $Column->GetName());
         }
         else if($Column->IsPrimaryKey() && !$DataProperty->IsIdentity()) {
-            throw new \InvalidArgumentException('Cannot map primary key to non identity column');
+            throw new MappingException(
+                    'Cannot map an non identity property to a primary key column %s.%s',
+                    $Column->GetTable()->GetName(),
+                    $Column->GetName());
         }
         else if($Column->IsPrimaryKey() && $DataProperty->IsIdentity()) {
             $this->IsIdentityPrimaryKeyMapping = true;

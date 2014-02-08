@@ -86,8 +86,11 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     protected function AddColumnData(IColumn $Column, $Data) {
         $ColumnIdentifier = $Column->GetIdentifier();
         if(!isset($this->Columns[$ColumnIdentifier])) {
-            throw new \InvalidArgumentException('$Column must be one of: ' . 
-                    implode(', ', array_keys($this->Columns)));
+            throw new InvalidColumnException(
+                    'The supplied column %s.%s is not part of this %s.',
+                    $Column->HasTable() ? $Column->GetTable()->GetName() : '<Unknown>',
+                    $Column->GetName(),
+                    get_class($this));
         }
         
         $this->Data[$ColumnIdentifier] = $Data;

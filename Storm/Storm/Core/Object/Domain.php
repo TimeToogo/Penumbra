@@ -78,7 +78,7 @@ abstract class Domain {
      * @param string $Method __METHOD__
      * @param object $Entity The entity to verify
      * @return IEntityMap The matching entity map
-     * @throws \Storm\Core\Exceptions\UnmappedEntityException
+     * @throws UnmappedEntityException
      */
     private function VerifyEntity($Method, $Entity) {
         $EntityTypes = array_reverse(array_merge([get_class($Entity)], array_values(class_parents($Entity, false))));

@@ -2,6 +2,8 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
+use \Storm\Core\Object;
+
 class InvocationBase extends FunctionBase {
     protected $ConstantArguments;
     /**
@@ -19,7 +21,9 @@ class InvocationBase extends FunctionBase {
 
     final public function SetEntityType($EntityType) {
         if(!method_exists($EntityType, '__invoke')) {
-            throw new \Exception();
+            throw new Object\ObjectException(
+                    'The entity of type %s does not contain a valid method __invoke()',
+                    $EntityType);
         }
         $this->Reflection = new \ReflectionMethod($EntityType, '__invoke');
     }

@@ -2,6 +2,8 @@
 
 namespace Storm\Drivers\Base\Object\Construction;
 
+use \Storm\Core\Object;
+
 class DeepClonedInstance extends Constructor {
     private $SerializedInstance;
     private $Instance;
@@ -12,7 +14,10 @@ class DeepClonedInstance extends Constructor {
     
     protected function OnSetEntityType($EntityType) {
         if(!($this->Instance instanceof $EntityType)) {
-            throw new \InvalidArgumentException('Unsupported Entity Type');
+            throw new Object\TypeMismatchException(
+                    'Supplied entity type %s does not match the set entity type %s',
+                    get_class($this->Instance),
+                    $EntityType);
         }
     }
     

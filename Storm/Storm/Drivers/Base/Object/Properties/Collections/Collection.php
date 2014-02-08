@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Collections;
 
-use \Storm\Core\Object\Domain;
+use \Storm\Core\Object;
 
 class Collection extends \ArrayObject implements ICollection {
     private $EntityType;
@@ -22,9 +22,13 @@ class Collection extends \ArrayObject implements ICollection {
         return $this->EntityType;
     }
     
-    private function VerifyEntity($Entity) {
+    private function VerifyEntity($Method, $Entity) {
         if(!($Entity instanceof $this->EntityType)) {
-            throw new \InvalidArgumentException('$Entity must be a valid instance of ' . $this->EntityType);
+            throw new Object\TypeMismatchException(
+                    'Supplied entity to %s must be of type %s: %s given',
+                    $Method,
+                    $this->EntityType,
+                    \Storm\Core\Utilities::GetTypeOrClass($Entity));
         }
     }
 
@@ -47,7 +51,7 @@ class Collection extends \ArrayObject implements ICollection {
     }
     
     public function append($Entity) {
-        $this->VerifyEntity($Entity);
+        $this->VerifyEntity(__METHOD__, $Entity);
         $this->IsAltered = true;
         return parent::append($Entity);
     }
@@ -75,7 +79,7 @@ class Collection extends \ArrayObject implements ICollection {
     }
 
     public function offsetSet($Index, $Entity) {
-        $this->VerifyEntity($Entity);
+        $this->VerifyEntity(__METHOD__, $Entity);
         if(isset($this[$Index])) {
             if($this[$Index] === $Entity) {
                 return;

@@ -31,10 +31,10 @@ final class PersistedRelationship {
     public function __construct(PrimaryKey $ParentPrimaryKey, 
             PrimaryKey $RelatedPrimaryKey = null, ResultRow $ChildResultRow = null) {
         if($RelatedPrimaryKey === null && $ChildResultRow === null) {
-            throw new \InvalidArgumentException('Related primary key and result row cannot both be null');
+            throw new RelationalException('The supplied related primary key and child result row cannot both be null');
         }
         if($RelatedPrimaryKey !== null && $ChildResultRow !== null) {
-            throw new \InvalidArgumentException('Related primary key and result row cannot both be not null');
+            throw new RelationalException('Either the supplied related primary key or child result row must be null');
         }
         $this->IsIdentifying = $RelatedPrimaryKey === null;
         $this->ParentPrimaryKey = $ParentPrimaryKey;
@@ -58,22 +58,22 @@ final class PersistedRelationship {
 
     /**
      * @return PrimaryKey
-     * @throws \BadMethodCallException If relationship is identifying
+     * @throws RelationalException If relationship is identifying
      */
     public function GetRelatedPrimaryKey() {
         if($this->IsIdentifying) {
-            throw new \BadMethodCallException('Relationship is identifying');
+            throw new RelationalException('An identifying relationship does not contain a related primary key');
         }
         return $this->RelatedPrimaryKey;
     }
 
     /**
      * @return ResultRow
-     * @throws \BadMethodCallException If relationship is not identifying
+     * @throws RelationalException If relationship is not identifying
      */
     public function GetChildResultRow() {
         if(!$this->IsIdentifying) {
-            throw new \BadMethodCallException('Relationship is not identifying');
+            throw new RelationalException('A non-identifying relationship does not contain a child result row');
         }
         return $this->ChildResultRow ;
     }

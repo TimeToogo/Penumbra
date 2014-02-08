@@ -133,12 +133,15 @@ abstract class Table implements ITable {
      * Add a column to the table.
      * 
      * @param IColumn $Column The column to add
-     * @throws \Exception If the column belongs to another table
+     * @throws InvalidColumnException If the column belongs to another table
      */
     private function AddColumn(IColumn $Column) {
         if($Column->HasTable()) {
             if(!$Column->GetTable()->Is($this)) {
-                throw new \Exception('Column belongs to another table');
+                throw new InvalidColumnException(
+                        'The registered column %s is already registered with another table %s.',
+                        $Column->GetName(),
+                        $Column->GetTable()->GetName());
             }
         }
         $Column->SetTable($this);
