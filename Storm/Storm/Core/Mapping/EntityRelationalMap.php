@@ -97,15 +97,6 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         }
         
         $Database = $DomainDatabaseMap->GetDatabase();
-        $this->PrimaryKeyTable = $this->PrimaryKeyTable($Database);
-        
-        if(!($this->PrimaryKeyTable instanceof Relational\ITable)) {
-            throw new \Storm\Core\UnexpectedValueException(
-                    'Return value from %s->PrimaryKeyTable() must be an instance of %s, %s given', 
-                    get_class($this), 
-                    Object\IEntityMap::IEntityMapType, 
-                    \Storm\Core\Utilities::GetTypeOrClass($this->EntityMap));
-        }
         
         $Registrar = new Registrar(IPropertyMapping::IPropertyMappingType);
         $this->RegisterPropertyMappings($Registrar, $this->EntityMap, $Database);
@@ -121,7 +112,11 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
             $Table = $MappedPersistColumn->GetTable();
             $this->PersistTables[$Table->GetName()] = $Table;
         }
-        
+        if($this->PrimaryKeyTable === null) {
+            throw new MappingException(
+                    'The property mappings of %s must contain atleast 1 identity primary key mapping',
+                    get_class($this));
+        }
         
         $this->OnInitialized($DomainDatabaseMap);
     }
@@ -181,7 +176,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
             $this->CollectionPropertyToManyRelationMappings[$ProperyIdentifier] = $PropertyMapping;
         }
         else {
-            throw new MappingException('Supplied property mapping must be of type %s, %s, %s: %s given',
+            throw new MappingException('Supplied property mapping must be of type %s, %s or %s: %s given',
                     IDataPropertyColumnMapping::IDataPropertyColumnMappingType,
                     IEntityPropertyToOneRelationMapping::IEntityPropertyToOneRelationMappingType,
                     ICollectionPropertyToManyRelationMapping::ICollectionPropertyToManyRelationMappingType,
@@ -193,10 +188,11 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     
     private function AddIdentityPrimaryKeyMapping(IDataPropertyColumnMapping $PropertyMapping) {
         //Infer primary key table
+        $AllColumns = array_merge($PropertyMapping->GetPersistColumns(), $PropertyMapping->GetReviveColumns());
         if($this->PrimaryKeyTable === null) {
-            $this->PrimaryKeyTable = reset($PropertyMapping->GetPersistColumns() + $PropertyMapping->GetReviveColumns())->GetTable();
+            $this->PrimaryKeyTable = reset($AllColumns)->GetTable();
         }
-        foreach(array_merge($PropertyMapping->GetPersistColumns(), $PropertyMapping->GetReviveColumns()) as $Column) {
+        foreach($AllColumns as $Column) {
             if(!$Column->GetTable()->Is($this->PrimaryKeyTable)) {
                 throw new MappingException('Identity properties of %s cannot map across multiple tables: %s.%s does not belong to %s',
                         $this->EntityType,

@@ -36,7 +36,7 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
     
-    const Id = 499;
+    const Id = 26;
     
     const Persist = 0;
     const Retreive = 1;
