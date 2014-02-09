@@ -10,10 +10,10 @@ class InvalidClosureException extends \Storm\Core\StormException {
      */
     private $ClosureData;
     
-    public function __construct(Closure\IData $ClosureData, $Message) {
-        $Reflection = $ClosureData->GetReflection();
+    public function __construct(\Closure $Closure, $Message) {
+        $Reflection = new \ReflectionFunction($Closure);
         
-        parent::__construct(null,
+        parent::__construct(
                 'Invalid closure defined in %s:%d-%d: %s', 
                 $Reflection->getFileName(),
                 $Reflection->getStartLine(),

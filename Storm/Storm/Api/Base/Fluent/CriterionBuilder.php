@@ -39,7 +39,7 @@ class CriterionBuilder {
     final protected function ClosureToExpandedAST(\Closure $Closure) {
         $AST = $this->ClosureToASTConverter->ClosureToAST($this->EntityMap, $Closure);
         if(!$AST->IsResolved()) {
-            throw new \Storm\Api\Base\InvalidClosureException('Constains unresolvable variables: $' . implode(', $', $AST->GetUnresolvedVariables()));
+            throw new \Storm\Api\Base\InvalidClosureException($Closure, 'Contains unresolvable variables: $' . implode(', $', $AST->GetUnresolvedVariables()));
         }
         
         return $AST;
