@@ -13,10 +13,6 @@ final class PostRelationalMap extends Mapping\EntityRelationalMap {
         return $Domain->GetEntityMap(Post::GetType());
     }
     
-    protected function PrimaryKeyTable(Relational\Database $Database) {
-        return $Database->GetTable('Posts');
-    }
-    
     protected function InitializeMappings(Object\IEntityMap $EntityMap, Relational\Database $Database) {
         /* @var $EntityMap \StormExamples\One\Domain\Maps\PostMap */
         /* @var $Table \StormExamples\One\Relational\Tables\Posts */

@@ -13,10 +13,6 @@ final class TagRelationalMap extends Mapping\EntityRelationalMap {
         return $Domain->GetEntityMap(Tag::GetType());
     }
     
-    protected function PrimaryKeyTable(Relational\Database $Database) {
-        return $Database->GetTable('Tags');
-    }
-    
     protected function InitializeMappings(Object\IEntityMap $EntityMap, Relational\Database $Database) {
         /* @var $EntityMap \StormExamples\One\Domain\Maps\TagMap */
         /* @var $Table \StormExamples\One\Relational\Tables\Tags */
