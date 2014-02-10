@@ -7,16 +7,25 @@ Domain oriented ORM, crafted with passion for PHP 5.4+.
 The goals of Storm
 ==================
  - To provide a maintainable and sensible approach to the complex ORM realm.
- - To reward the user with unpolluted and flexible domain models.
+ - To reward the user with unpolluted and [flexible domain models](#domainmodels).
  - To provide a fluent [language integrated query (Similar to C#'s LINQ)](#phpinq)
  - To [reduce the amount of queries](#queries) to the underlying platform and assist in [eliminating n+1 queries](#queries).
 
 What Storm is not
 =================
  - The much loved active record pattern (although possible in the future).
- - The answer to all your problems
+ - The answer to all your problems.
  - Stable or complete - Storm needs contributers!
 
+<a name="domainmodels"></a>Storm - Flexible domain models
+=========================================================
+**Storm aims to provide as little restriction to domain models as possible**
+ - Storm natively supports: fields, getters/setters and even indexors or innvocation as entity properties.
+ - Your entities can remain completely unaware of Storm: no base class, no annotations and no persistence logic.
+ - Seamless identifying and non-identifying relationships between entities:
+     - Required child entity - A `User` has a `Profile`
+     - Optional child entity - A `User` may have a `CreditCard`
+     - Array/ArrayObject of many child entities - A `User` has multiple `Posts`, *ArrayObject must be used for lazy loading*
  
 <a name="phpinq"></a>Storm - PHP integerated query
 ==================================================
@@ -82,8 +91,8 @@ foreach($User->GetPosts() as $Post) {
 ```
 Now here is the number of queries executed for each loading mode (N=Number of Posts);
  - `Eager` - **3** (the user | posts joined with the author | all tags), when the user is loaded.
- - `SemiLazy` - **4** For loading a single parent in a request the will be equivalent as `Lazy` mode below.
+ - `SemiLazy` - For loading a single request this is equivalent to `Lazy` mode below.
  - `Lazy` - **4** (the user | posts | all authors | all tags), the posts will be loaded when `$User->GetPosts()` is iterated and all the tags will be loaded when the first `$Post->GetTags()` is iterated.
  - `ExtraLazy` - **(N * 2) + 2** - (user | posts | *each post's* author | *each post's* tags).
 
-*NOTE: Relationship loading mode is per-relationship, the above example assumes every relationship will have one loading mode for simplicity.
+*NOTE: Relationship loading mode is per-relationship, the above example assumes every relationship will have one loading mode for simplicity.*
