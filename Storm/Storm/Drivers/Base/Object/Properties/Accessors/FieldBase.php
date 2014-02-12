@@ -2,9 +2,8 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
-abstract class FieldBase {
-    private $EntityType;
-    private $FieldName;
+abstract class FieldBase extends ReflectionBase {
+    protected $FieldName;
     /**
      * @var \ReflectionProperty 
      */
@@ -21,15 +20,16 @@ abstract class FieldBase {
     public function Identifier(&$Identifier) {
         $Identifier .= $this->FieldName;
     }
-
-    public function SetEntityType($EntityType) { 
-        $this->EntityType = $EntityType;
-        $this->Reflection = new \ReflectionProperty($EntityType, $this->FieldName);
-        $this->Reflection->setAccessible(true);
+    
+    public function __sleep() {
+        return array_merge(parent::__sleep(), ['FieldName']);
     }
     
-    public function __wakeup() {
-        $this->SetEntityType($this->EntityType);
+    final protected function LoadReflection() {
+        $Reflection = new \ReflectionProperty($this->EntityType, $this->FieldName);
+        $Reflection->setAccessible(true);
+        
+        return $Reflection;
     }
 }
 
