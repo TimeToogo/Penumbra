@@ -2,31 +2,34 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
-abstract class MethodBase extends FunctionBase {
-    private $MethodName;
-    protected $ConstantArguments;
+abstract class ReflectionBase {
     /**
-     * @var \ReflectionMethod
+     * @var string
+     */
+    protected $EntityType;
+    /**
+     * @var \IReflector
      */
     protected $Reflection;
     
-    public function __construct($MethodName, array $ConstantArguments = array()) {
-        $this->MethodName = $MethodName;
-        $this->ConstantArguments = $ConstantArguments;
+    public function __sleep() {
+        return ['EntityType'];
     }
     
-    final public function GetMethodName() {
-        return $this->MethodName;
+    final public function __wakeup() {
+        $this->Reflection = $this->LoadReflection();
     }
     
-    final public function Identifier(&$Identifier) {
-        $Identifier .= $this->Format($this->MethodName, $this->ConstantArguments);
+    final public function SetEntityType($EntityType) { 
+        $this->EntityType = $EntityType;
+        $this->Reflection = $this->LoadReflection();
     }
     
-    public function SetEntityType($EntityType) { 
-        $this->Reflection = new \ReflectionMethod($EntityType, $this->MethodName);
-        $this->Reflection->setAccessible(true);
-    }   
+    
+    /**
+     * @return \IReflector
+     */
+    protected abstract function LoadReflection();
 }
 
 ?>
