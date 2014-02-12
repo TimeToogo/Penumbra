@@ -32,7 +32,7 @@ class ClosureToASTConverter {
     /**
      * @return Closure\IAST
      */
-    public function ClosureToAST(Object\EntityMap $EntityMap, \Closure $Closure, $ResolveVariables = true) {
+    public function ClosureToAST(Object\IEntityMap $EntityMap, \Closure $Closure, $ResolveVariables = true) {
         $ClosureData = $this->Reader->Read($Closure);
         $Parameters = $ClosureData->GetParameters();
         
