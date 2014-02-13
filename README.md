@@ -3,6 +3,9 @@ Storm - Still in development
 
 Domain oriented ORM, crafted with passion for PHP 5.4+.
 
+Storm is not finished, the foundation and architecture is there, but the codebase has almost no unit tests. Since storm was originally a learning exercise with the goal of creating an orm that does not influence the domain model, this project maintained a good code quality, but it is quickly becoming apparent that I cannot single handedly develop and maintain this project, especially with school. Serious contributors are needed, please feel free to clone the repository and look around the code base, if you have any questions, inquiries or want to begin contributing please email me at: [elliot@aanet.com.au](mailto:elliot@aanet.com.au).
+
+Please be aware that this is my first large open source project, so any tips/recommendations are welcome.
 
 The goals of Storm
 ==================
@@ -15,7 +18,6 @@ What Storm is not
 =================
  - The much loved active record pattern (although possible in the future).
  - The answer to all your problems.
- - Stable or complete - Storm needs contributers!
 
 <a name="domainmodels"></a>Storm - Flexible domain models
 =========================================================
