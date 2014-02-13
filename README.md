@@ -33,6 +33,7 @@ What Storm is not
 ==================================================
  - Code in terms of the domain, not your database (SQL).
  - Abstract yourself from the underlying database.
+ - Maintain full IDE auto-completion.
  - Remove the hassle of magic strings and prevent SQL injection.
 
 **Requests (`SELECT`) - Example:**
