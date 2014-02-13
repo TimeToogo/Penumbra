@@ -27,7 +27,7 @@ What Storm is not
  - Seamless identifying and non-identifying relationships between entities:
      - Required child entity - A `User` has a `Profile`
      - Optional child entity - A `User` may have a `CreditCard`
-     - Array/ArrayObject of many child entities - A `User` has multiple `Posts`, *ArrayObject must be used for lazy loading*
+     - [Array](http://php.net/manual/en/language.types.array.php)/[Traversable](http://au1.php.net/manual/en/class.traversable.php) of many child entities - A `User` has multiple `Posts`, *Traversable must be used for lazy loading*
  
 <a name="phpinq"></a>Storm - PHP integerated query
 ==================================================
