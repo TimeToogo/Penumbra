@@ -9,22 +9,12 @@ use \Storm\Drivers\Base\Relational\Expressions as RR;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
 abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
-    private $MappingConfiguration;
     private $OperatorMapper;
     
     public function __construct() {
-        $this->MappingConfiguration = $this->MappingConfiguration();
         $this->OperatorMapper = new OperatorMapper();
         
         parent::__construct();
-    }
-    protected abstract function MappingConfiguration();
-    
-    /**
-     * @return IMappingConfiguration
-     */
-    final public function GetMappingConfiguration() {
-        return $this->MappingConfiguration;
     }
     
     final protected function MapExpression(Mapping\IEntityRelationalMap $EntityRelationalMap, 

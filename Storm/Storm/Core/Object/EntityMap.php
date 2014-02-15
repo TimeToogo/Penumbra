@@ -98,7 +98,7 @@ abstract class EntityMap implements IEntityMap {
      * @throws InvalidPropertyException
      */
     private function AddProperty(IProperty $Property) {
-        if($Property->GetEntityMap()) {
+        if($Property->HasEntityMap()) {
             if(!$Property->GetEntityMap()->Is($this)) {
                 throw new InvalidPropertyException(
                         'The supplied property is registered with another entity map %s.',
@@ -210,6 +210,13 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
+    final public function GetDataProperties() {
+        return $this->DataProperties;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
     final public function GetRelationshipProperties() {
         return $this->RelationshipProperties;
     }
@@ -231,7 +238,7 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    protected abstract function ConstructEntity();
+    protected abstract function ConstructEntity(RevivalData $RevivalData);
     
     /**
      * {@inheritDoc}
@@ -387,7 +394,7 @@ abstract class EntityMap implements IEntityMap {
     final public function ReviveEntities(Domain $Domain, array $RevivalDatas) {
         $Entities = array();
         foreach($RevivalDatas as $Key => $RevivalData) {
-            $Entity = $this->ConstructEntity();
+            $Entity = $this->ConstructEntity($RevivalData);
             $this->Apply($Domain, $Entity, $RevivalData);
             $Entities[$Key] = $Entity;
         }

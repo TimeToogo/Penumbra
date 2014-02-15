@@ -4,7 +4,7 @@ namespace Storm\Api\Base;
 
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 
 /**
  * The Storm class provides the api surrounding a DomainDatabaseMap.
@@ -27,24 +27,24 @@ class Storm {
     protected $DomainDatabaseMap;
     
     /**
-     * @var ClosureToASTConverter 
+     * @var FunctionToASTConverter 
      */
     protected $ClosureToASTConverter;
     
     public function __construct(
             DomainDatabaseMap $DomainDatabaseMap,
             IConnection $Connection,
-            Closure\IReader $ClosureReader, 
-            Closure\IParser $ClosureParser) {
+            Functional\IReader $FunctionReader, 
+            Functional\IParser $FunctionParser) {
         $this->DomainDatabaseMap = $DomainDatabaseMap;
         $this->DomainDatabaseMap->GetDatabase()->SetConnection($Connection);
-        $this->ClosureToASTConverter = $this->GetClosureToASTConverter($ClosureReader, $ClosureParser);
+        $this->ClosureToASTConverter = $this->GetClosureToASTConverter($FunctionReader, $FunctionParser);
     }
     
     protected function GetClosureToASTConverter(
-            Closure\IReader $ClosureReader, 
-            Closure\IParser $ClosureParser) {
-        return new ClosureToASTConverter($ClosureReader, $ClosureParser);
+            Functional\IReader $FunctionReader, 
+            Functional\IParser $FunctionParser) {
+        return new FunctionToASTConverter($FunctionReader, $FunctionParser);
     }
     
     /**

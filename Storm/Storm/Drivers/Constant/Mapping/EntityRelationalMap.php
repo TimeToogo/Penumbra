@@ -9,6 +9,8 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 final class LoadingMode {
+    private function __construct() {}
+    
     const Eager = 0;
     const SemiLazy = 1;
     const Lazy = 2;
@@ -23,7 +25,7 @@ abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
     
     protected function OnInitialize(\Storm\Core\Mapping\DomainDatabaseMap $DomainDatabaseMap) {
         parent::OnInitialize($DomainDatabaseMap);
-        $this->DefaultLoadingMode = $this->GetMappingConfiguration()->GetDefaultLoadingMode();
+        $this->DefaultLoadingMode = LoadingMode::Lazy;
     }
     
     final protected function Map(Object\IProperty $Property) {

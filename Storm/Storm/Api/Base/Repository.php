@@ -6,7 +6,7 @@ use \Storm\Api\IConfiguration;
 use \Storm\Core\Object;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base;
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 
 /**
  * The Repository provides the clean api for querying on a specific
@@ -23,9 +23,9 @@ class Repository {
     protected $DomainDatabaseMap;
     
     /**
-     * @var ClosureToASTConverter
+     * @var FunctionToASTConverter
      */
-    protected $ClosureToASTConverter;
+    protected $FunctionToASTConverter;
     
     /**
      * The type of entity represented by this repository.
@@ -92,12 +92,12 @@ class Repository {
     
     public function __construct(
             DomainDatabaseMap $DomainDatabaseMap,
-            ClosureToASTConverter $ClosureToASTConverter,
+            FunctionToASTConverter $FunctionToASTConverter,
             $EntityType) {
         $this->DomainDatabaseMap = $DomainDatabaseMap;
         $this->EntityMap = $this->DomainDatabaseMap->GetDomain()->GetEntityMap($EntityType);
         $this->IdentityProperties = $this->EntityMap->GetIdentityProperties();
-        $this->ClosureToASTConverter = $ClosureToASTConverter;
+        $this->FunctionToASTConverter = $FunctionToASTConverter;
         $this->EntityType = $EntityType;
         $this->IdentityMap = new IdentityMap($this->EntityMap, new \Storm\Utilities\Cache\MemoryCache());
     }
@@ -140,7 +140,7 @@ class Repository {
      * @return Fluent\RequestBuilder 
      */
     final public function Request() {
-        return new Fluent\RequestBuilder($this->EntityMap, $this->ClosureToASTConverter);
+        return new Fluent\RequestBuilder($this->EntityMap, $this->FunctionToASTConverter);
     }
     
     /**
@@ -148,8 +148,8 @@ class Repository {
      * 
      * @return Fluent\ProcedureBuilder
      */
-    final function Procedure(\Closure $ProcedureClosure) {
-        return new Fluent\ProcedureBuilder($this->EntityMap, $this->ClosureToASTConverter, $ProcedureClosure);
+    final function Procedure(callable $ProcedureClosure) {
+        return new Fluent\ProcedureBuilder($this->EntityMap, $this->FunctionToASTConverter, $ProcedureClosure);
     }
     
     /**
@@ -158,7 +158,7 @@ class Repository {
      * @return Fluent\CriterionBuilder
      */
     final function Criterion() {
-        return new Fluent\CriterionBuilder($this->EntityMap, $this->ClosureToASTConverter);
+        return new Fluent\CriterionBuilder($this->EntityMap, $this->FunctionToASTConverter);
     }
     
     /**

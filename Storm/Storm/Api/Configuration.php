@@ -4,7 +4,7 @@ namespace Storm\Api;
 
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 use \Storm\Utilities\Cache\ICache;
 
 /**
@@ -43,8 +43,8 @@ class Configuration implements IConfiguration {
     public function __construct(
             callable $DomainDatabaseMapFactory, 
             IConnection $Connection,
-            Closure\IReader $ClosureReader, 
-            Closure\IParser $ClosureParser, 
+            Functional\IReader $ClosureReader, 
+            Functional\IParser $ClosureParser, 
             ICache $Cache = null) {
         $this->DomainDatabaseMapFactory = $DomainDatabaseMapFactory;
         $this->Connection = $Connection;
@@ -88,7 +88,7 @@ class Configuration implements IConfiguration {
     /**
      * @return static
      */
-    final public function SetClosureReader(Closure\IReader $ClosureReader) {
+    final public function SetFunctionReader(Functional\IReader $ClosureReader) {
         $this->ClosureReader = $ClosureReader;
         return $this;
     }
@@ -96,7 +96,7 @@ class Configuration implements IConfiguration {
     /**
      * @return static
      */
-    final public function SetClosureParser(Closure\IParser $ClosureParser) {
+    final public function SetFunctionParser(Functional\IParser $ClosureParser) {
         $this->ClosureParser = $ClosureParser;
         return $this;
     }

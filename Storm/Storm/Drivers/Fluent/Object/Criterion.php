@@ -3,7 +3,7 @@
 namespace Storm\Drivers\Fluent\Object;
 
 use \Storm\Drivers\Base\Object;
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 
 class Criterion extends Object\Criterion {
     
@@ -11,19 +11,19 @@ class Criterion extends Object\Criterion {
         parent::__construct($EntityType);
     }
     
-    public function AddPredicateClosure(Closure\IAST $PredicateAST) {
+    public function AddPredicateClosure(Functional\IAST $PredicateAST) {
         $this->AddPredicate($this->ParseReturnExpression($PredicateAST));
     }
     
-    public function AddOrderByClosure(Closure\IAST $OrderByAST, $Ascending) {
+    public function AddOrderByClosure(Functional\IAST $OrderByAST, $Ascending) {
         $this->AddOrderByExpression($this->ParseReturnExpression($OrderByAST), $Ascending);
     }
     
-    public function AddGroupByClosure(Closure\IAST $GroupByAST) {
+    public function AddGroupByClosure(Functional\IAST $GroupByAST) {
         $this->AddGroupByExpression($this->ParseReturnExpression($GroupByAST));
     }
     
-    private function ParseReturnExpression(Closure\IAST $AST) {
+    private function ParseReturnExpression(Functional\IAST $AST) {
         if(!$AST->HasEntityMap() || $AST->GetEntityMap()->GetEntityType() !== $this->GetEntityType()) {
             throw new \Storm\Core\Object\TypeMismatchException(
                     'The supplied AST must be of entity type %s: %s given',
@@ -40,7 +40,7 @@ class Criterion extends Object\Criterion {
                     'The supplied closure must contain a single return statement');
         }
         
-        $AST->SetPropertyMode(Closure\IAST::PropertiesAreGetters);
+        $AST->SetPropertyMode(Functional\IAST::PropertiesAreGetters);
         
         return $AST->ParseNode($ReturnNodes[0]);
     }

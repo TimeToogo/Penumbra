@@ -2,7 +2,7 @@
 
 namespace Storm\Api;
 
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Utilities\Cache\ICache;
 
@@ -30,12 +30,12 @@ interface IConfiguration {
     /**
      * @return static
      */
-    public function SetClosureReader(Closure\IReader $ClosureReader);
+    public function SetFunctionReader(Functional\IReader $ClosureReader);
     
     /**
      * @return static
      */
-    public function SetClosureParser(Closure\IParser $ClosureParser);
+    public function SetFunctionParser(Functional\IParser $ClosureParser);
         
     /**
      * @return static

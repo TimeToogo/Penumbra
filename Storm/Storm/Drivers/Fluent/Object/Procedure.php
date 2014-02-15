@@ -4,12 +4,12 @@ namespace Storm\Drivers\Fluent\Object;
 
 use \Storm\Drivers\Base\Object;
 use \Storm\Core\Object\Expressions\AssignmentExpression;
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 
 
 class Procedure extends Object\Procedure {
     public function __construct(
-            Closure\IAST $AST,
+            Functional\IAST $AST,
             \Storm\Core\Object\ICriterion $Criterion = null) {
         
         $EntityType = $AST->GetEntityMap()->GetEntityType();
@@ -20,8 +20,8 @@ class Procedure extends Object\Procedure {
                 $Criterion ?: new Criterion($EntityType));
     }
     
-    private function ParseAssignmentExpressions(Closure\IAST $AST) {
-        $AST->SetPropertyMode(Closure\IAST::PropertiesAreGettersOrSetters);
+    private function ParseAssignmentExpressions(Functional\IAST $AST) {
+        $AST->SetPropertyMode(Functional\IAST::PropertiesAreGettersOrSetters);
         $Expressions = $AST->ParseNodes();
         
         foreach ($Expressions as $Key => $Expression) {

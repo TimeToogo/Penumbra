@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace StormExamples\One;
 
@@ -50,7 +50,8 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::Retreive;
+        $Action = self::Procedure;
+        
         $Amount = 1;        
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
@@ -189,15 +190,7 @@ class One implements \StormExamples\IStormExample {
     }
     
     private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $Procedure = $BlogRepository->Procedure(
-                function (Entities\Blog $Blog) {
-                    $Blog->Description = md5($Blog->GetName());
-
-                    $Blog->SetName(substr($Blog->GetName() . (strpos($Blog->Description, 'Test') !== false ?
-                            'Foobar' . (string)$Blog->CreatedDate : $Blog->GetName() . 'Hi'), 0, 50));
-
-                    $Blog->CreatedDate = (new \DateTime())->add((new \DateTime())->diff($Blog->CreatedDate, true));
-                })
+        $Procedure = $BlogRepository->Procedure([$this, 'UpdateBlog'])
                 ->Where(function ($Blog) use ($Id) {
                     return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
                 }); 
@@ -205,6 +198,15 @@ class One implements \StormExamples\IStormExample {
         $BlogRepository->Execute($Procedure);
 
         $BlogRepository->SaveChanges();
+    }
+    
+    public function UpdateBlog(Entities\Blog $Blog) {
+        $Blog->Description = md5($Blog->GetName());
+
+        $Blog->SetName(substr($Blog->GetName() . (strpos($Blog->Description, 'Test') !== false ?
+                'Foobar' . (string)$Blog->CreatedDate : $Blog->GetName() . 'Hi'), 0, 50));
+
+        $Blog->CreatedDate = (new \DateTime())->add((new \DateTime())->diff($Blog->CreatedDate, true));
     }
     
     private function Discard($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {

@@ -52,7 +52,7 @@ $InactiveUserProcedure = $UserRepository->Procedure(
 $UserRepository->Execute($InactiveUserProcedure);
 ```
 
-*NOTE: The supplied closures never actually executed, they are parsed and then mapped to the underlying platform as queries.*
+*NOTE: The supplied functions never actually executed, they are parsed and then mapped to the underlying platform as queries.*
 
 
 <a name="queries"></a>Storm - Sensible querying

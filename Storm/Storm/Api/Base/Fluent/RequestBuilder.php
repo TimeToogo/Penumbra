@@ -3,9 +3,9 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
-use \Storm\Api\Base\ClosureToASTConverter;
+use \Storm\Api\Base\FunctionToASTConverter;
 use \Storm\Drivers\Fluent\Object\Request;
-use  \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 
 /**
  * The RequestBuilder provides a fluent interface for building requests
@@ -18,8 +18,8 @@ class RequestBuilder extends CriterionBuilder {
     
     public function __construct(
             Object\IEntityMap $EntityMap, 
-            ClosureToASTConverter $ClosureToASTConverter) {
-        parent::__construct($EntityMap, $ClosureToASTConverter);
+            FunctionToASTConverter $FunctionToASTConverter) {
+        parent::__construct($EntityMap, $FunctionToASTConverter);
         
         $this->EntityMap = $EntityMap;
         $this->Properties = $this->EntityMap->GetProperties();
