@@ -7,6 +7,8 @@ use \Storm\Drivers\Dynamic\Relational\Table;
 use \Storm\Core\Object\IDataProperty;
 use \Storm\Core\Object\IEntityProperty;
 use \Storm\Core\Object\ICollectionProperty;
+use \Storm\Core\Mapping\IPropertyMapping;
+use \Storm\Drivers\Base\Mapping\Mappings;
 use \Storm\Drivers\CodeFirst\Object\Metadata;
 use \Storm\Drivers\Base\Relational\IPlatform;
 use \Storm\Drivers\Base\Relational\Columns\IColumnSet;
@@ -15,6 +17,10 @@ use \Storm\Drivers\Base\Relational\PrimaryKeys\IKeyGeneratorSet;
 use \Storm\Drivers\Base\Relational\Columns\Column;
 
 class DatabaseCreator {
+    /**
+     * @var IPropertyMappings[] 
+     */
+    private $GroupedMappings = array();
     /**
      * @var EntityMap[] 
      */
@@ -26,7 +32,11 @@ class DatabaseCreator {
     public function __construct(array $EntityMaps) {
         $this->EntityMaps = $EntityMaps;
     }
-
+    
+    public function GetGroupedMappings() {
+        return $this->GroupedMappings;
+    }
+    
     /**
      * @return Table[]
      */
@@ -41,9 +51,35 @@ class DatabaseCreator {
     
     private function GenerateTable(EntityMap $EntityMap, IColumnSet $ColumnSet) {
         $Columns = array();
+        $StructuralTraits = array();
+        $RelationalTraits = array();
+        $ToOneRelations = array();
+        $ToManyRelations = array();
+        
         foreach($EntityMap->GetDataProperties() as $Property) {
-            $Columns[] = $this->GenerateColumn($Property, $EntityMap->Get, $ColumnSet);
+            $Column = $this->GenerateColumn($Property, $EntityMap->GetMetadata($Property), $ColumnSet);
+            $this->AddMapping($EntityMap, new Mappings\DataPropertyColumnMapping($Property, $Column));
+            $Columns[] = $Column;
         }
+        foreach($EntityMap->GetEntityProperties() as $Property) {
+            $ToOneRelation = $this->GenerateToOneRelation($Columns, $Property, $EntityMap->GetMetadata($Property), $ColumnSet);
+            $this->AddMapping($EntityMap, new Mappings\DataPropertyColumnMapping($Property, $Column));
+            $ToOneRelations[] = $Column;
+        }
+        foreach($EntityMap->GetCollectionProperties() as $Property) {
+            $Columns[] = $this->GenerateToManyRelation($Columns, $Property, $EntityMap->GetMetadata($Property), $ColumnSet);
+        }
+        
+        return new Table($Name, $KeyGenerator, $Columns, $StructuralTraits, $RelationalTraits, $ToOneRelations, $ToManyRelations);
+    }
+    
+    private function AddMapping(EntityMap $EntityMap, IPropertyMapping $Mapping) {
+        $EntityType = $EntityMap->GetEntityType();
+        if(!isset($this->GroupedMappings[$EntityType])) {
+            $this->GroupedMappings[$EntityType] = array();
+        }
+        
+        $this->GroupedMappings[$EntityType][] = $Mapping;
     }
     
     private function GenerateColumn(IDataProperty $Property, Metadata\Collection $Metadata, IColumnSet $ColumnSet) {

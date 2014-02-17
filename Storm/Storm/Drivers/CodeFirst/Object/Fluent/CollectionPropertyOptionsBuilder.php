@@ -9,4 +9,8 @@ class CollectionPropertyOptionsBuilder extends LoadableRelationshipPropertyOptio
     public function __construct(&$RelationshipType, &$BackReferenceProperty) {
         parent::__construct($RelationshipType, $BackReferenceProperty);
     }
+    
+    public function WithShareableEntities() {
+        $this->Metadata->Add(new Metadata\EntitiesAreShareable());
+    }
 }
