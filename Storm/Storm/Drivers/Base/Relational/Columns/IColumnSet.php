@@ -92,6 +92,11 @@ interface IColumnSet {
     /**
      * @return Column
      */
+    public function Interval($Name, $PrimaryKey = false);
+    
+    /**
+     * @return Column
+     */
     public function Time($Name, $PrimaryKey = false);
     
     /**
@@ -103,6 +108,11 @@ interface IColumnSet {
      * @return Column
      */
     public function Enum($Name, array $ValuesMap, $PrimaryKey = false);    
+    
+    /**
+     * @return Column
+     */
+    public function ArrayOf(Column $DataTypeColumn);    
 }
 
 ?>

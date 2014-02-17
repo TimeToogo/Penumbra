@@ -3,7 +3,7 @@
 namespace Storm\Api;
 
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 use \Storm\Utilities\Cache\ICache;
 
 /**
@@ -20,8 +20,8 @@ class DefaultConfiguration extends Configuration {
         parent::__construct(
                 $DomainDatabaseMapFactory, 
                 $Connection, 
-                new Closure\Implementation\File\Reader(), 
-                new Closure\Implementation\PHPParser\Parser(), 
+                new Functional\Implementation\File\Reader(), 
+                new Functional\Implementation\PHPParser\Parser(), 
                 $Cache);
     }
 }

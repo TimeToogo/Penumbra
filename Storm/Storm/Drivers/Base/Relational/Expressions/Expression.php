@@ -79,6 +79,13 @@ abstract class Expression extends Expressions\Expression {
     }
     
     /**
+     * @return LiteralExpression
+     */
+    public static function Literal($String) {
+        return new LiteralExpression($String);
+    }
+    
+    /**
      * @return SetExpression
      */
     public static function Set(Expressions\ColumnExpression $AssignToColumnExpression, $AssignmentOperator, parent $AssignmentValueExpression) {

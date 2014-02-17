@@ -78,6 +78,11 @@ interface IEntityMap {
     public function GetProperties();
     
     /**
+     * @return IDataProperty[]
+     */
+    public function GetDataProperties();
+    
+    /**
      * @return IRelationshipProperty[]
      */
     public function GetRelationshipProperties();

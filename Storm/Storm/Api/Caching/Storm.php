@@ -5,7 +5,7 @@ namespace Storm\Api\Caching;
 use \Storm\Api\Base;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 use \Storm\Utilities\Cache;
 use \Storm\Drivers\Base\Relational\IPlatform;
 
@@ -28,8 +28,8 @@ class Storm extends Base\Storm {
     public function __construct(
             callable $DomainDatabaseMapFactory,
             IConnection $Connection,
-            Closure\IReader $ClosureReader, 
-            Closure\IParser $ClosureParser,
+            Functional\IReader $FunctionReader, 
+            Functional\IParser $FunctionParser,
             Cache\ICache $Cache) {
         $this->Cache = $Cache;
         
@@ -40,11 +40,11 @@ class Storm extends Base\Storm {
             $this->Cache->Save(self::DomainDatabaseMapInstanceKey, $DomainDatabaseMap);
         }
         
-        parent::__construct($DomainDatabaseMap, $Connection, $ClosureReader, $ClosureParser);
+        parent::__construct($DomainDatabaseMap, $Connection, $FunctionReader, $FunctionParser);
     }
     
-    protected function GetClosureToASTConverter(Closure\IReader $ClosureReader, Closure\IParser $ClosureParser) {
-        return new ClosureToASTConverter($this->Cache, $ClosureReader, $ClosureParser);
+    protected function GetClosureToASTConverter(Functional\IReader $FunctionReader, Functional\IParser $FunctionParser) {
+        return new FunctionToASTConverter($this->Cache, $FunctionReader, $FunctionParser);
     }
 }
 

@@ -116,9 +116,17 @@ class ColumnSet implements IColumnSet {
                     $Length);
         }
     }
+
+    public function Interval($Name, $PrimaryKey = false) {
+        throw new \Storm\Drivers\Base\Relational\PlatformException('Mysql does not support an interval datatype');
+    }
     
     public function Enum($Name, array $ValuesMap, $PrimaryKey = false) {
         return new Column($Name, new Columns\DataTypes\EnumDataType('ENUM', $ValuesMap, array_keys($ValuesMap)), $PrimaryKey);
+    }
+    
+    public function ArrayOf(Column $DataTypeColumn) {
+        throw new \Storm\Drivers\Base\Relational\PlatformException('Mysql does not support an array datatype');
     }
 }
 

@@ -3,9 +3,9 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
-use \Storm\Api\Base\ClosureToASTConverter;
+use \Storm\Api\Base\FunctionToASTConverter;
 use \Storm\Drivers\Fluent\Object\Procedure;
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 
 /**
  * The ProcedureBuilder provides a fluent interface for building procedures
@@ -13,15 +13,15 @@ use \Storm\Drivers\Fluent\Object\Closure;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class ProcedureBuilder extends CriterionBuilder {
-    private $ProcedureClosure;
+    private $ProcedureFunction;
     
     public function __construct(
             Object\IEntityMap $EntityMap, 
-            ClosureToASTConverter $ClosureToASTConverter,
-            \Closure $ProcedureClosure) {
+            FunctionToASTConverter $ClosureToASTConverter,
+            callable $ProcedureFunction) {
         parent::__construct($EntityMap, $ClosureToASTConverter);
         
-        $this->ProcedureClosure = $ProcedureClosure;
+        $this->ProcedureFunction = $ProcedureFunction;
     }
     
     /**
@@ -31,7 +31,7 @@ class ProcedureBuilder extends CriterionBuilder {
      */
     final public function BuildProcedure() {
         return new Procedure(
-            $this->ClosureToExpandedAST($this->ProcedureClosure), 
+            $this->FunctionToExpandedAST($this->ProcedureFunction), 
             $this->BuildCriterion());
     }
 }

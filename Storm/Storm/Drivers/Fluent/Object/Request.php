@@ -4,7 +4,7 @@ namespace Storm\Drivers\Fluent\Object;
 
 use \Storm\Drivers\Base\Object;
 use \Storm\Core\Object\EntityMap;
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 
 class Request extends Object\Request {    
     public function __construct(

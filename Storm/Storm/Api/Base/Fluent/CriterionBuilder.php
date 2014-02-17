@@ -3,9 +3,9 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
-use \Storm\Api\Base\ClosureToASTConverter;
+use \Storm\Api\Base\FunctionToASTConverter;
 use \Storm\Drivers\Fluent\Object\Criterion;
-use \Storm\Drivers\Fluent\Object\Closure;
+use \Storm\Drivers\Fluent\Object\Functional;
 
 /**
  * The CriterionBuilder provides a fluent interface for building criteria
@@ -15,32 +15,29 @@ use \Storm\Drivers\Fluent\Object\Closure;
 class CriterionBuilder {
     protected $EntityType;
     protected $EntityMap;
-    private $ClosureToASTConverter;
+    private $FunctionToASTConverter;
     private $Criterion;
     
     public function __construct(
             Object\IEntityMap $EntityMap,
-            ClosureToASTConverter $ClosureToASTConverter) {
+            FunctionToASTConverter $FunctionToASTConverter) {
         $this->EntityMap = $EntityMap;
         $this->EntityType = $EntityMap->GetEntityType();
-        $this->ClosureToASTConverter = $ClosureToASTConverter;
+        $this->FunctionToASTConverter = $FunctionToASTConverter;
         $this->Criterion = new Criterion($EntityMap->GetEntityType());
     }
     
     /**
-     * Parses a given closure into an IAST structure using the provider converter
+     * Parses a given function into an IAST structure using the provider converter
      * 
-     * @param \Closure $Closure The closure to parse
+     * @param callable $Function The function to parse
      * 
-     * @return \Storm\Drivers\Fluent\Object\Closure\IAST The return
+     * @return \Storm\Drivers\Fluent\Object\Functional\IAST The return
      * 
-     * @throws \Storm\Api\Base\InvalidClosureException
+     * @throws \Storm\Api\Base\InvalidFunctionException
      */
-    final protected function ClosureToExpandedAST(\Closure $Closure) {
-        $AST = $this->ClosureToASTConverter->ClosureToAST($this->EntityMap, $Closure);
-        if(!$AST->IsResolved()) {
-            throw new \Storm\Api\Base\InvalidClosureException($Closure, 'Contains unresolvable variables: $' . implode(', $', $AST->GetUnresolvedVariables()));
-        }
+    final protected function FunctionToExpandedAST(callable $Function) {
+        $AST = $this->FunctionToASTConverter->FunctionToAST($this->EntityMap, $Function);
         
         return $AST;
     }
@@ -55,11 +52,11 @@ class CriterionBuilder {
      *  }
      * </code>
      * 
-     * @param \Closure $PredicateClosure The predicate closure
+     * @param callable $Predicate The predicate function
      * @return CriterionBuilder 
      */
-    final public function Where(\Closure $PredicateClosure) {
-        $this->Criterion->AddPredicateClosure($this->ClosureToExpandedAST($PredicateClosure));        
+    final public function Where(callable $Predicate) {
+        $this->Criterion->AddPredicateClosure($this->FunctionToExpandedAST($Predicate));        
         return $this;
     }
     
@@ -73,16 +70,16 @@ class CriterionBuilder {
      * }
      * </code>
      * 
-     * @param \Closure $ExpressionClosure The expression closure
+     * @param callable $Expression The expression closure
      * @return CriterionBuilder
      */
-    final public function OrderBy(\Closure $ExpressionClosure) {
-        $this->Criterion->AddOrderByClosure($this->ClosureToExpandedAST($ExpressionClosure), true);        
+    final public function OrderBy(callable $Expression) {
+        $this->Criterion->AddOrderByClosure($this->FunctionToExpandedAST($Expression), true);        
         return $this;
     }
     
     /**
-     * Specifies the closure to use as an descending ordering for the criterion.
+     * Specifies the function to use as an descending ordering for the criterion.
      * 
      * Example expression closure:
      * <code>
@@ -91,16 +88,16 @@ class CriterionBuilder {
      * }
      * </code>
      * 
-     * @param \Closure $ExpressionClosure The expression closure
+     * @param callable $Expression The expression closure
      * @return CriterionBuilder
      */
-    final public function OrderByDescending(\Closure $ExpressionClosure) {
-        $this->Criterion->AddOrderByClosure($this->ClosureToExpandedAST($ExpressionClosure), false);        
+    final public function OrderByDescending(callable $Expression) {
+        $this->Criterion->AddOrderByClosure($this->FunctionToExpandedAST($Expression), false);        
         return $this;
     }
         
     /**
-     * Specifies the closure to use as grouping for the criterion.
+     * Specifies the function to use as grouping for the criterion.
      * 
      * Example expression closure:
      * <code>
@@ -109,11 +106,11 @@ class CriterionBuilder {
      * }
      * </code>
      * 
-     * @param \Closure $ExpressionClosure The expression closure
+     * @param callable $Expression The expression function
      * @return CriterionBuilder
      */
-    final public function GroupBy(\Closure $ExpressionClosure) {
-        $this->Criterion->AddGroupByClosure($this->ClosureToExpandedAST($ExpressionClosure));        
+    final public function GroupBy(callable $Expression) {
+        $this->Criterion->AddGroupByClosure($this->FunctionToExpandedAST($Expression));        
         return $this;
     }
     

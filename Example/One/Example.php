@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace StormExamples\One;
 
@@ -12,7 +12,7 @@ use \Storm\Drivers\Platforms\Development\Logging;
 
 class One implements \StormExamples\IStormExample {
     const DevelopmentMode = 0;
-    const UseCache = true;
+    const UseCache = false;
     
     public static function GetPlatform() {
         return new Platforms\Mysql\Platform(self::DevelopmentMode > 1);
@@ -36,7 +36,7 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
     
-    const Id = 499;
+    const Id = 500;
     
     const Persist = 0;
     const Retreive = 1;
@@ -51,6 +51,7 @@ class One implements \StormExamples\IStormExample {
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
         $Action = self::Persist;
+        
         $Amount = 1;        
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
@@ -123,10 +124,12 @@ class One implements \StormExamples\IStormExample {
     
     private function Retreive($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
         $RevivedBlog = $BlogRepository->LoadById($Id);
+        if($RevivedBlog === null) {
+            throw new \Exception("Entity with id: $Id does not exist");
+        }
         if(extension_loaded('xdebug')) {
             var_dump($RevivedBlog);
         }
-        
         $Post = $RevivedBlog->Posts[0];
         $Author = $Post->Author;
         $Test = $Author->FirstName;
@@ -165,6 +168,9 @@ class One implements \StormExamples\IStormExample {
                 ->GroupBy(function ($Blog) { return $Blog->Id; })
                 ->First());
         
+        if($RevivedBlog === null) {
+            throw new \Exception("Entity with id: $Id does not exist");
+        }
         if(extension_loaded('xdebug')) {
             var_dump($RevivedBlog);
         }
@@ -189,15 +195,7 @@ class One implements \StormExamples\IStormExample {
     }
     
     private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $Procedure = $BlogRepository->Procedure(
-                function (Entities\Blog $Blog) {
-                    $Blog->Description = md5($Blog->GetName());
-
-                    $Blog->SetName(substr($Blog->GetName() . (strpos($Blog->Description, 'Test') !== false ?
-                            'Foobar' . (string)$Blog->CreatedDate : $Blog->GetName() . 'Hi'), 0, 50));
-
-                    $Blog->CreatedDate = (new \DateTime())->add((new \DateTime())->diff($Blog->CreatedDate, true));
-                })
+        $Procedure = $BlogRepository->Procedure([$this, 'UpdateBlog'])
                 ->Where(function ($Blog) use ($Id) {
                     return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
                 }); 
@@ -205,6 +203,15 @@ class One implements \StormExamples\IStormExample {
         $BlogRepository->Execute($Procedure);
 
         $BlogRepository->SaveChanges();
+    }
+    
+    public function UpdateBlog(Entities\Blog $Blog) {
+        $Blog->Description = md5($Blog->GetName());
+
+        $Blog->SetName(substr($Blog->GetName() . (strpos($Blog->Description, 'Test') !== false ?
+                'Foobar' . (string)$Blog->CreatedDate : $Blog->GetName() . 'Hi'), 0, 50));
+
+        $Blog->CreatedDate = (new \DateTime())->add((new \DateTime())->diff($Blog->CreatedDate, true));
     }
     
     private function Discard($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
@@ -262,7 +269,7 @@ class One implements \StormExamples\IStormExample {
     public function AddTags(Entities\Post $Post) {
         $Names = ['Tagged', 'Tummy', 'Tailgater', 'Food Fight', 'Andy'];
         
-        for ($Count = 1000; $Count > 0; $Count--) {
+        for ($Count = 500; $Count > 0; $Count--) {
             $Tag = new Entities\Tag();
             $Tag->Name = $Names[rand(0, count($Names) - 1)];
             $Tag->Description = 'This is a description - ' . $Count;

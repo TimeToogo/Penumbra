@@ -11,7 +11,8 @@ final class Assignment {
     const Multiplication = 103;
     const Division = 104;
     const Modulus = 105;
-    
+    const Power = 106;
+        
     //Bitwise
     const BitwiseAnd = 200;
     const BitwiseOr = 201;
