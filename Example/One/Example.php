@@ -12,7 +12,7 @@ use \Storm\Drivers\Platforms\Development\Logging;
 
 class One implements \StormExamples\IStormExample {
     const DevelopmentMode = 0;
-    const UseCache = true;
+    const UseCache = false;
     
     public static function GetPlatform() {
         return new Platforms\Mysql\Platform(self::DevelopmentMode > 1);
