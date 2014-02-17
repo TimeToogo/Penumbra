@@ -36,7 +36,7 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
     
-    const Id = 499;
+    const Id = 500;
     
     const Persist = 0;
     const Retreive = 1;
@@ -50,7 +50,7 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::Retreive;
+        $Action = self::PersistExisting;
         
         $Amount = 1;        
         $Last;
