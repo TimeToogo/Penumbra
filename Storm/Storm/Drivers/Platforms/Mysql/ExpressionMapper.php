@@ -20,6 +20,7 @@ final class ExpressionMapper extends E\ExpressionMapper {
         O\Assignment::Division => O\Binary::Division,
         O\Assignment::Modulus => O\Binary::Modulus,
         O\Assignment::Multiplication => O\Binary::Multiplication,
+        O\Assignment::Power => O\Binary::Power,
         O\Assignment::ShiftLeft => O\Binary::ShiftLeft,
         O\Assignment::ShiftRight => O\Binary::ShiftRight,
         O\Assignment::Subtraction => O\Binary::Subtraction,
@@ -66,6 +67,9 @@ final class ExpressionMapper extends E\ExpressionMapper {
             case O\Binary::Concatenation:
                 return new E\FunctionCallExpression('CONCAT', Expression::ValueList([$LeftOperandExpression, $RightOperandExpression]));
                 
+            case O\Binary::Power:
+                return new E\FunctionCallExpression('POW', Expression::ValueList([$LeftOperandExpression, $RightOperandExpression]));
+                
             case O\Binary::NullSafeInequality:
                 return Expression::UnaryOperation(O\Unary::Not, 
                         Expression::BinaryOperation(
@@ -95,6 +99,7 @@ final class ExpressionMapper extends E\ExpressionMapper {
                         O\Binary::Subtraction, 
                         new EE\ConstantExpression(1));
             
+            //Just for looks
             case O\Unary::PreIncrement:
                 return new E\BinaryOperationExpression(
                         new EE\ConstantExpression(1), 
@@ -124,7 +129,7 @@ final class ExpressionMapper extends E\ExpressionMapper {
                 return Expression::BinaryOperation(
                         $CastValueExpression, 
                         O\Binary::Addition, 
-                        '0.0D');
+                        Expression::Literal('0.0'));
              
             default:
                 return Expression::Cast($CastType, $CastValueExpression);

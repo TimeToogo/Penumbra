@@ -6,7 +6,7 @@ use \Storm\Drivers\Fluent\Object\Functional;
 
 class Reader implements Functional\IReader {
     
-    public function GetReflecton(callable $Function) {
+    public function GetReflection(callable $Function) {
         return is_array($Function) ? 
                 new \ReflectionMethod($Function[0], $Function[1]) : new \ReflectionFunction($Function);
     }

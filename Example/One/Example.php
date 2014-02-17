@@ -50,7 +50,7 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::Procedure;
+        $Action = self::Retreive;
         
         $Amount = 1;        
         $Last;
@@ -124,10 +124,12 @@ class One implements \StormExamples\IStormExample {
     
     private function Retreive($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
         $RevivedBlog = $BlogRepository->LoadById($Id);
+        if($RevivedBlog === null) {
+            throw new \Exception("Entity with id: $Id does not exist");
+        }
         if(extension_loaded('xdebug')) {
             var_dump($RevivedBlog);
         }
-        
         $Post = $RevivedBlog->Posts[0];
         $Author = $Post->Author;
         $Test = $Author->FirstName;
@@ -166,6 +168,9 @@ class One implements \StormExamples\IStormExample {
                 ->GroupBy(function ($Blog) { return $Blog->Id; })
                 ->First());
         
+        if($RevivedBlog === null) {
+            throw new \Exception("Entity with id: $Id does not exist");
+        }
         if(extension_loaded('xdebug')) {
             var_dump($RevivedBlog);
         }
@@ -264,7 +269,7 @@ class One implements \StormExamples\IStormExample {
     public function AddTags(Entities\Post $Post) {
         $Names = ['Tagged', 'Tummy', 'Tailgater', 'Food Fight', 'Andy'];
         
-        for ($Count = 1000; $Count > 0; $Count--) {
+        for ($Count = 500; $Count > 0; $Count--) {
             $Tag = new Entities\Tag();
             $Tag->Name = $Names[rand(0, count($Names) - 1)];
             $Tag->Description = 'This is a description - ' . $Count;

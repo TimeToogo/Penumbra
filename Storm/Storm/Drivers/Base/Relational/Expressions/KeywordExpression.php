@@ -2,14 +2,9 @@
 
 namespace Storm\Drivers\Base\Relational\Expressions;
  
-class KeywordExpression extends Expression {
-    private $Keyword;
-    public function __construct($Keyword) {
-        $this->Keyword = $Keyword;
-    }
-    
-    public function GetKeyword() {
-        return $this->Keyword;
+class KeywordExpression extends LiteralExpression {
+    public function __construct($String) {
+        parent::__construct($String);
     }
 }
 

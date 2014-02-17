@@ -6,7 +6,7 @@ interface IReader {
     /**
      * @return \ReflectionFunctionAbstract
      */
-    public function GetReflecton(callable $Function);
+    public function GetReflection(callable $Function);
     
     /**
      * @return IData

@@ -57,6 +57,9 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
                 
             case $Expression instanceof E\KeywordExpression:
                 return $this->AppendKeyword($QueryBuilder, $Expression);
+                
+            case $Expression instanceof E\LiteralExpression:
+                return $this->AppendLiteral($QueryBuilder, $Expression);
                                 
             case $Expression instanceof E\ValueListExpression:
                 return $this->AppendList($QueryBuilder, $Expression);
@@ -106,7 +109,11 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
     protected abstract function GetUnaryOperatorString($Operator);
 
     protected function AppendKeyword(QueryBuilder $QueryBuilder, E\KeywordExpression $Expression) {
-        $QueryBuilder->Append(' ' . $Expression->GetKeyword() . ' ');
+        $QueryBuilder->Append(' ' . $Expression->GetString() . ' ');
+    }
+    
+    protected function AppendLiteral(QueryBuilder $QueryBuilder, E\LiteralExpression $Expression) {
+        $QueryBuilder->Append($Expression->GetString());
     }
 
     protected abstract function AppendCast(QueryBuilder $QueryBuilder, E\CastExpression $Expression);

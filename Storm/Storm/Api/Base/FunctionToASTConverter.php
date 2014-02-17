@@ -9,11 +9,11 @@ class FunctionToASTConverter {
     /**
      * @var Functional\IReader 
      */
-    private $Reader;
+    protected $Reader;
     /**
      * @var Functional\IParser 
      */
-    private $Parser;
+    protected $Parser;
     
     public function __construct(Functional\IReader $Reader, Functional\IParser $Parser) {
         $this->Reader = $Reader;
@@ -33,7 +33,7 @@ class FunctionToASTConverter {
      * @return Functional\IAST
      */
     public function FunctionToAST(Object\IEntityMap $EntityMap, callable $Function, $ResolveVariables = true) {
-        $FunctionData = $this->Reader->Read($this->Reader->GetReflecton($Function));
+        $FunctionData = $this->Reader->Read($this->Reader->GetReflection($Function));
         $Parameters = $FunctionData->GetParameters();
         
         if(count($Parameters) !== 1) {
