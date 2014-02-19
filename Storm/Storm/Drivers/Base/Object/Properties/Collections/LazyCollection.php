@@ -66,7 +66,7 @@ class LazyCollection extends Collection {
     final public function __IsLoaded() {
         return $this->IsLoaded;
     }
-    
+
     public function count() {
         $this->Load();
         return parent::count();
@@ -100,6 +100,46 @@ class LazyCollection extends Collection {
     public function offsetUnset($index) {
         $this->Load();
         return parent::offsetUnset($index);
+    }
+    
+    public function asort() {
+        $this->Load();
+        return parent::asort();
+    }
+
+    public function getArrayCopy() {
+        $this->Load();
+        return parent::getArrayCopy();
+    }
+
+    public function ksort() {
+        $this->Load();
+        return parent::ksort();
+    }
+
+    public function natcasesort() {
+        $this->Load();
+        return parent::natcasesort();
+    }
+
+    public function natsort() {
+        $this->Load();
+        return parent::natsort();
+    }
+
+    public function serialize() {
+        $this->Load();
+        return parent::serialize();
+    }
+
+    public function uasort($cmp_function) {
+        $this->Load();
+        return parent::uasort($cmp_function);
+    }
+
+    public function uksort($cmp_function) {
+        $this->Load();
+        return parent::uksort($cmp_function);
     }
 
 }

@@ -116,11 +116,14 @@ class Repository {
      * 
      * @param string $Method __METHOD__
      * @param object $Entity The entity to verify
-     * @throws InvalidEntityException
+     * @throws Object\TypeMismatchException
      */
     final protected function VerifyEntity($Method, $Entity) {
         if(!($Entity instanceof $this->EntityType)) {
-            throw new InvalidEntityException('Call to method %s with invalid entity type %s', $Method, $Entity);
+            throw new Object\TypeMismatchException('Call to method %s with invalid entity: %s expected, %s given', 
+                    $Method, 
+                    $this->EntityType,
+                    \Storm\Core\Utilities::GetTypeOrClass($Entity));
         }
     }
     

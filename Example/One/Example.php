@@ -6,12 +6,11 @@ use \StormExamples\One\Entities;
 use \Storm\Api;
 use \Storm\Api\Base\Storm;
 use \Storm\Api\Base\Repository;
-use \Storm\Drivers\Base\Object\Properties\Collections\Collection;
 use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 
 class One implements \StormExamples\IStormExample {
-    const DevelopmentMode = 0;
+    const DevelopmentMode = 1;
     const UseCache = false;
     
     public static function GetPlatform() {
@@ -111,7 +110,7 @@ class One implements \StormExamples\IStormExample {
         
         $Blog = $this->CreateBlog();
         foreach ($Blog->Posts as $Post) {
-            $TagRepository->PersistAll($Post->Tags->ToArray());
+            $TagRepository->PersistAll($Post->Tags->getArrayCopy());
             $AuthorRepository->Persist($Post->Author);
         }
         $BloggingStorm->SaveChanges();
@@ -133,7 +132,7 @@ class One implements \StormExamples\IStormExample {
         $Post = $RevivedBlog->Posts[0];
         $Author = $Post->Author;
         $Test = $Author->FirstName;
-        $RevivedBlog->Posts[1]->Tags->ToArray();
+        $Foo = $RevivedBlog->Posts[1]->Tags->getArrayCopy();
         $BlogRepository->GetIdentityMap()->Clear();
         
         return null;
@@ -174,8 +173,8 @@ class One implements \StormExamples\IStormExample {
         if(extension_loaded('xdebug')) {
             var_dump($RevivedBlog);
         }
-        $RevivedBlog->Posts[0]->Tags->ToArray();
-        $RevivedBlog->Posts[1]->Tags->ToArray();
+        $RevivedBlog->Posts[0]->Tags->getArrayCopy();
+        $RevivedBlog->Posts[1]->Tags->getArrayCopy();
         $BlogRepository->GetIdentityMap()->Clear();
 
         return null;
@@ -227,7 +226,7 @@ class One implements \StormExamples\IStormExample {
         $Blog->Name = 'Test blog';
         $Blog->Description = 'The tested blog';
         $Blog->CreatedDate = new \DateTime();
-        $Blog->Posts = new Collection(Entities\Post::GetType());
+        $Blog->Posts = new \ArrayObject([]);
         $this->CreatePosts($Blog);
 
         return $Blog;
@@ -251,7 +250,7 @@ class One implements \StormExamples\IStormExample {
         $Post1->Title = 'Hello World';
         $Post1->Content = 'What\'s up?';
         $Post1->CreatedDate = new \DateTime();
-        $Post1->Tags = new Collection(Entities\Tag::GetType());
+        $Post1->Tags = new \ArrayObject([]);
         $this->AddTags($Post1);
         $Blog->Posts[] = $Post1;
 
@@ -261,7 +260,7 @@ class One implements \StormExamples\IStormExample {
         $Post2->Title = 'Hello Neptune';
         $Post2->Content = 'What\'s going on nup?';
         $Post2->CreatedDate = new \DateTime();
-        $Post2->Tags = new Collection(Entities\Tag::GetType());
+        $Post2->Tags = new \ArrayObject([]);
         $this->AddTags($Post2);
         $Blog->Posts[] = $Post2;
     }
