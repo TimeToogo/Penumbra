@@ -49,7 +49,7 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::Retreive;
+        $Action = self::RetreiveComplex;
         
         $Amount = 1;        
         $Last;
@@ -58,18 +58,6 @@ class One implements \StormExamples\IStormExample {
         }
 
         return $Last;
-    }
-    
-    private function SimpleExample(Repository $Repository) {
-        $Id = 40;
-        
-        $Blog = $Repository->Load($Repository->Request()
-                ->Where(function (Entities\Blog $Blog) use ($Id) {
-                    return $Blog->Id === $Id;
-                })
-                ->First());
-                
-        return $Blog;
     }
 
     private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository, Repository $AuthorRepository, Repository $TagRepository) {

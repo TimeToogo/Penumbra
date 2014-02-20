@@ -52,15 +52,7 @@ class FunctionToASTConverter {
         $AST->Simplify();
         
         return $AST;
-    }
-    
-    final protected function ResolveVariables() {
-        $AST->Resolve($FunctionData->GetUsedVariablesMap());
-        if(!$AST->IsResolved()) {
-            throw new InvalidFunctionException($FunctionData, 'Contains unresolvable variables: $' . implode(', $', $AST->GetUnresolvedVariables()));
-        }
-    }
-            
+    }            
 }
 
 ?>
