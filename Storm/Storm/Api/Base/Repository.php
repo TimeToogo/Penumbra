@@ -209,7 +209,7 @@ class Repository {
         if(count($IdentityValues) !== count($this->IdentityProperties)) {
             throw new \Storm\Core\StormException(
                     'The supplied amount of parameters does not match the number of '
-                    . 'identity properties for %s, expecting $d: $d were supplied', 
+                    . 'identity properties for %s, expecting %d: %d were supplied', 
                     $this->EntityType, count($this->IdentityProperties), count($IdentityValues));
         }
         
