@@ -69,7 +69,7 @@ final class MapTest extends StormTestCase {
     }
     
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \Storm\Core\StormException
      */
     public function testMapOnlyAcceptsObjects() {
         $this->Map->Map(new \stdClass(), 'Not a object!');

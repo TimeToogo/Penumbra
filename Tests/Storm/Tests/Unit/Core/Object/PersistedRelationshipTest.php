@@ -43,14 +43,14 @@ class PersistedRelationshipTest extends StormTestCase {
     }
     
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \Storm\Core\Object\ObjectException
      */
     public function testRelatedIdentityOrChildPersistenceDataMustBeSupplied() {
         new PersistedRelationship($this->Identity1, null, null);
     }
     
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \Storm\Core\Object\ObjectException
      */
     public function testRelatedIdentityAndChildPersistenceDataCannotBothBeSupplied() {
         new PersistedRelationship($this->Identity1,$this->Identity2, $this->PersistenceData);

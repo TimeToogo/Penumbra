@@ -114,7 +114,7 @@ class UnitOfWorkTest extends StormTestCase {
     }
     
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \Storm\Core\Object\ObjectException
      */
     public function testUnmappedProcedureIsDisallowed() {
         $Procedure = $this->getMock(self::CoreObjectNamespace . 'IProcedure');
@@ -137,7 +137,7 @@ class UnitOfWorkTest extends StormTestCase {
     }
     
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \Storm\Core\Object\ObjectException
      */
     public function testUnmappedCriterionIsDisallowed() {
         $Criterion = $this->getMock(self::CoreObjectNamespace . 'ICriterion');

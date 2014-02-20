@@ -37,7 +37,7 @@ class RegistrarTest extends StormTestCase {
     }
     
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \Storm\Core\StormException
      */
     public function testDisallowsIncorrectRegisterableType() {
         $this->TypedRegistrar->Register(new \SplStack());
