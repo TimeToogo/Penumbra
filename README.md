@@ -7,6 +7,17 @@ Storm is not finished, the foundation and architecture is there, but the codebas
 
 Please be aware that this is my first large open source project, so any tips/recommendations are welcome.
 
+Summary of the current state of Storm
+=====================================
+ - ORM [functionality is running](https://github.com/TimeToogo/Storm/blob/master/Example/One/Example.php) but far from stable.
+ - Overall, maintains a [good code quality](https://scrutinizer-ci.com/g/TimeToogo/Storm).
+ - Plenty of work is required just [to set up](https://github.com/TimeToogo/Storm/tree/master/Example/One).
+ - Decent size codebase (~15,000 LOC).
+ - [API](https://github.com/TimeToogo/Storm/tree/master/Storm/Storm/Api) structure is not finialized.
+ - Apalling [test suite](https://github.com/TimeToogo/Storm/tree/master/Tests/Storm/Tests).
+ - Lacking in documentation / code comments.
+ - Serious contributors [are needed](mailto:elliot@aanet.com.au).
+
 The goals of Storm
 ==================
  - To provide a maintainable and sensible approach to the complex ORM realm.
