@@ -97,6 +97,15 @@ class ColumnSet implements IColumnSet {
     public function Enum($Name, array $ValuesMap, $PrimaryKey = false) {
         return new Column($Name, new Columns\DataTypes\EnumDataType('ENUM', $ValuesMap, array_keys($ValuesMap)), $PrimaryKey);
     }
+
+    public function ArrayOf(Column $DataTypeColumn) {
+        
+    }
+
+    public function Interval($Name, $PrimaryKey = false) {
+        throw $this->Unsupported(__FUNCTION__);
+    }
+
 }
 
 ?>
