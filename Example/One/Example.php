@@ -49,7 +49,7 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::Persist;
+        $Action = self::Retreive;
         
         $Amount = 1;        
         $Last;

@@ -7,15 +7,7 @@ use \Storm\Drivers\Base\Mapping;
 use \Storm\Drivers\Base\Mapping\Mappings;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
-
-final class LoadingMode {
-    private function __construct() {}
-    
-    const Eager = 0;
-    const SemiLazy = 1;
-    const Lazy = 2;
-    const ExtraLazy = 3;
-}
+use \Storm\Drivers\Base\Mapping\Mappings\LoadingMode;
 
 abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
     private $PropertyMappings = array();
@@ -72,29 +64,12 @@ final class FluentPropertyMapping {
         $Callback(new Mappings\DataPropertyColumnMapping($this->Property, $Column));
     }
     
-    private function UnsupportedLoadingMode($LoadingMode) {
-        return new Mappings\MappingException(
-                'The supplied loading mode is unsupported: %s given',
-                \Storm\Core\Utilities::GetTypeOrClass($LoadingMode));
-    }
-    
     public function ToEntity(Relational\IToOneRelation $ToOneRelation, $LoadingMode = null) {
         $Callback = $this->PropertyMappingCallback;
         $Callback($this->MakeToEntityMapping($ToOneRelation, $this->GetLoadingMode($LoadingMode)));
     }
     private function MakeToEntityMapping(Relational\IToOneRelation  $ToOneRelation, $LoadingMode) {
-        switch ($LoadingMode) {
-            case LoadingMode::Eager:
-                return new Mappings\EagerEntityPropertyToOneRelationMapping($this->Property, $ToOneRelation);
-            case LoadingMode::SemiLazy:
-                return new Mappings\SemiLazyEntityPropertyToOneRelationMapping($this->Property, $ToOneRelation);
-            case LoadingMode::Lazy:
-                return new Mappings\LazyEntityPropertyToOneRelationMapping($this->Property, $ToOneRelation);
-            case LoadingMode::ExtraLazy:
-                return new Mappings\ExtraLazyEntityPropertyToOneRelationMapping($this->Property, $ToOneRelation);
-            default:
-                throw $this->UnsupportedLoadingMode($LoadingMode);
-        }
+        return new Mappings\CompositeEntityPropertyToOneRelationMapping($this->Property, $ToOneRelation, $LoadingMode);
     }
     
     public function ToCollection(Relational\IToManyRelation $ToManyRelation, $LoadingMode = null) {
@@ -102,18 +77,7 @@ final class FluentPropertyMapping {
         $Callback($this->MakeToCollectionMapping($ToManyRelation, $this->GetLoadingMode($LoadingMode)));
     }
     private function MakeToCollectionMapping(Relational\IToManyRelation $ToManyRelation, $LoadingMode) {
-        switch ($LoadingMode) {
-            case LoadingMode::Eager:
-                return new Mappings\EagerCollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation);
-            case LoadingMode::SemiLazy:
-                return new Mappings\SemiLazyCollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation);
-            case LoadingMode::Lazy:
-                return new Mappings\LazyCollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation);
-            case LoadingMode::ExtraLazy:
-                return new Mappings\ExtraLazyCollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation);
-            default:
-                throw $this->UnsupportedLoadingMode($LoadingMode);
-        }
+        return new Mappings\CompositeCollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation, $LoadingMode);
     }
 }
 
