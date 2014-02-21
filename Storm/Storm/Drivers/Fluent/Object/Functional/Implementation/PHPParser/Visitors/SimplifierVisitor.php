@@ -9,7 +9,7 @@ class SimplifierVisitor extends \PHPParser_NodeVisitorAbstract {
     /**
      * @var NodeSimplifier[] 
      */
-    private $NodeSimplifiers = array();
+    private $NodeSimplifiers = [];
     
     public function __construct(array $NodeSimplifiers) {
         foreach($NodeSimplifiers as $NodeSimplifier) {

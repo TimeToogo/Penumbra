@@ -15,7 +15,7 @@ define('BASE_PATH', str_replace('\\', DIRECTORY_SEPERATOR, __DIR__) . DIRECTORY_
 define('ROOT_NAMESPACE', __NAMESPACE__);
 
 $GLOBALS['LoadCount'] = 0;
-$GLOBALS['LoadList'] = array();
+$GLOBALS['LoadList'] = [];
 
 function autoload($ClassName) {
     if(strpos($ClassName, ROOT_NAMESPACE) !== 0) {

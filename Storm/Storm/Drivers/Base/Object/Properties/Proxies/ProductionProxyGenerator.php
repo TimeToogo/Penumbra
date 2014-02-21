@@ -16,7 +16,7 @@ class ProductionProxyGenerator extends ProxyGenerator {
             require $ProxyFileName;
         }
         
-        $Proxies = array();
+        $Proxies = [];
         foreach($RevivalDataLoaderFunctions as $Key => $RevivalDataLoaderFunction) {
             $Proxies[] = new $FullProxyName($EntityMap, $AlreadyKnownRevivalDataArray[$Key], $RevivalDataLoaderFunction);
         }

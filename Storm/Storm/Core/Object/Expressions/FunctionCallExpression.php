@@ -8,7 +8,7 @@ namespace Storm\Core\Object\Expressions;
 class FunctionCallExpression extends Expression {
     private $Name;
     private $ArgumentValueExpressions;
-    public function __construct($Name, array $ArgumentValueExpressions = array()) {
+    public function __construct($Name, array $ArgumentValueExpressions = []) {
         $this->Name = $Name;
         $this->ArgumentValueExpressions = $ArgumentValueExpressions;
     }

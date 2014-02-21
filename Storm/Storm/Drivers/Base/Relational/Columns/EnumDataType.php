@@ -7,7 +7,7 @@ use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 
 class EnumDataType extends Columns\DataType {
     private $ValuesMap;
-    public function __construct($DataType, array $ValuesMap, array $Parameters = array(), $Extra = null, $ParameterType = ParameterType::String) {
+    public function __construct($DataType, array $ValuesMap, array $Parameters = [], $Extra = null, $ParameterType = ParameterType::String) {
         parent::__construct($DataType, $Parameters, $Extra, $ParameterType);
         
         $this->ValuesMap = $ValuesMap;

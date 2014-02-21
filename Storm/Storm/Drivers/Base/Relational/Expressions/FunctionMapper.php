@@ -11,7 +11,7 @@ abstract class FunctionMapper implements IFunctionMapper {
     
     protected abstract function MatchingFunctions();
     
-    final public function MapFunctionCallExpression($FunctionName, array $ArgumentExpressions = array()) {
+    final public function MapFunctionCallExpression($FunctionName, array $ArgumentExpressions = []) {
         $FunctionName = strtolower($FunctionName);
         $ArgumentExpressions = array_values($ArgumentExpressions);
         
@@ -32,7 +32,7 @@ abstract class FunctionMapper implements IFunctionMapper {
                 $this->FunctionCall($MappedName, $ArgumentExpressions) : $OverrideExpression;
     }
     
-    final protected function FunctionCall($MappedName, array $ArgumentExpressions = array()) {
+    final protected function FunctionCall($MappedName, array $ArgumentExpressions = []) {
         return new FunctionCallExpression($MappedName, new ValueListExpression($ArgumentExpressions));
     }
     

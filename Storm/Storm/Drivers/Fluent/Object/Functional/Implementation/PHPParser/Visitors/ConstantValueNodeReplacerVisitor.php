@@ -42,7 +42,7 @@ class ConstantValueNodeReplacerVisitor extends \PHPParser_NodeVisitorAbstract {
                 break;
             
             case $Node instanceof \PHPParser_Node_Expr_Array:
-                $Value = array();
+                $Value = [];
                 foreach ($Node->items as $Key => $Item) {
                     $IsKeyConstant = true;
                     $IsValueConstant = true;

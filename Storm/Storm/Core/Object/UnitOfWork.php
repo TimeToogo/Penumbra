@@ -21,32 +21,32 @@ final class UnitOfWork {
     /**
      * @var PersistenceData[] 
      */
-    private $PersistenceData = array();
+    private $PersistenceData = [];
     
     /**
      * @var PersistenceData[][]
      */
-    private $PersistenceDataGroups = array();
+    private $PersistenceDataGroups = [];
     
     /**
      * @var IProcedure[] 
      */
-    private $ProcedureToExecute = array();
+    private $ProcedureToExecute = [];
     
     /**
      * @var DiscardenceData[] 
      */
-    private $DiscardenceData = array();
+    private $DiscardenceData = [];
     
     /**
      * @var Identity[][] 
      */
-    private $DiscardedIdentityGroups = array();
+    private $DiscardedIdentityGroups = [];
     
     /**
      * @var ICriterion[] 
      */
-    private $DiscardedCriteria = array();
+    private $DiscardedCriteria = [];
     
     public function __construct(Domain $Domain) {
         $this->PersistenceDataEntityMap = new \Storm\Core\Containers\Map();
@@ -78,7 +78,7 @@ final class UnitOfWork {
         
         $EntityType = $PersistenceData->GetEntityType();
         if(!isset($this->PersistenceDataGroups[$EntityType])) {
-            $this->PersistenceDataGroups[$EntityType] = array();
+            $this->PersistenceDataGroups[$EntityType] = [];
         }
         $this->PersistenceDataGroups[$EntityType][] = $PersistenceData;
     }
@@ -152,7 +152,7 @@ final class UnitOfWork {
         
         $EntityType = $DiscardenceData->GetEntityType();
         if(!isset($this->DiscardedIdentityGroups[$EntityType])) {
-            $this->DiscardedIdentityGroups[$EntityType] = array();
+            $this->DiscardedIdentityGroups[$EntityType] = [];
         }
         $this->DiscardedIdentityGroups[$EntityType][] = $DiscardenceData;
     }

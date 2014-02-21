@@ -37,14 +37,14 @@ abstract class Expression {
     /**
      * @return NewExpression
      */
-    final public static function Construct($ClassType, array $ArgumentValueExpressions = array()) {
+    final public static function Construct($ClassType, array $ArgumentValueExpressions = []) {
         return new NewExpression($ClassType, $ArgumentValueExpressions);
     }
     
     /**
      * @return MethodCallExpression
      */
-    final public static function MethodCall(Expression $ObjectExpression, $Name, array $ArgumentValueExpressions = array()) {
+    final public static function MethodCall(Expression $ObjectExpression, $Name, array $ArgumentValueExpressions = []) {
         return new MethodCallExpression($ObjectExpression, $Name, $ArgumentValueExpressions);
     }
     
@@ -65,7 +65,7 @@ abstract class Expression {
     /**
      * @return FunctionCallExpression
      */
-    final public static function FunctionCall($Name, array $ArgumentValueExpressions = array()) {
+    final public static function FunctionCall($Name, array $ArgumentValueExpressions = []) {
         return new FunctionCallExpression($Name, $ArgumentValueExpressions);
     }
     

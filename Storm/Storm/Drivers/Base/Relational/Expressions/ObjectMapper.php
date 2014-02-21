@@ -24,7 +24,7 @@ abstract class ObjectMapper implements IObjectMapper {
      * @return ObjectDataType[]
      */
     protected function ObjectDataTypes() {
-        return array();
+        return [];
     }
 
 
@@ -50,7 +50,7 @@ abstract class ObjectMapper implements IObjectMapper {
         //Blah Blah
     }
     
-    final public function MapMethodCallExpression(CoreExpression $ObjectValueExpression = null, $Type, $Name, array $ArgumentValueExpressions = array()) {
+    final public function MapMethodCallExpression(CoreExpression $ObjectValueExpression = null, $Type, $Name, array $ArgumentValueExpressions = []) {
         if(isset($this->ObjectDataTypes[$Type])) {
             $ObjectDataType = $this->ObjectDataTypes[$Type];
             return $ObjectDataType->MapMethodCallExpression($ObjectValueExpression, $Name, $ArgumentValueExpressions);

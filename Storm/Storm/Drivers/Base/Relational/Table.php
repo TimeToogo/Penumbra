@@ -11,9 +11,9 @@ use \Storm\Drivers\Base\Relational\PrimaryKeys\IKeyGeneratorSet;
 
 abstract class Table extends Relational\Table {
     private $KeyGenerator;
-    private $Traits = array();
-    private $StructuralTraits = array();
-    private $RelationalTraits = array();
+    private $Traits = [];
+    private $StructuralTraits = [];
+    private $RelationalTraits = [];
     
     final protected function RegisterColumns(Containers\Registrar $Registrar, Relational\Database $Context) {
         $this->RegisterColumnStructure($Registrar, $Context->GetPlatform()->GetColumnSet());

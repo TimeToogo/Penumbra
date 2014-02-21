@@ -6,7 +6,7 @@ use \Storm\Core\Object;
 
 class InvocationBase extends MethodBase {
     
-    public function __construct(array $ConstantArguments = array()) {
+    public function __construct(array $ConstantArguments = []) {
         parent::__construct('__invoke', $ConstantArguments);
     }
 }

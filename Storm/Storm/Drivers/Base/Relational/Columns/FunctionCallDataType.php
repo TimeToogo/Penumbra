@@ -14,7 +14,7 @@ class FunctionCallDataType extends DataType {
             $ReviveFunctionName,
             $PersistFunctionName,
             $DataType, 
-            array $Parameters = array(), 
+            array $Parameters = [], 
             $Extra = null, 
             $ParameterType = ParameterType::String) {
         parent::__construct($DataType, $Parameters, $Extra, $ParameterType);

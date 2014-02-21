@@ -14,14 +14,14 @@ class Request {
      * 
      * @var ITable[]
      */
-    private $Tables = array();
+    private $Tables = [];
     
     /**
      * The columns to load from.
      * 
      * @var IColumn[]
      */
-    private $Columns = array();
+    private $Columns = [];
     
     /**
      * @var Criterion

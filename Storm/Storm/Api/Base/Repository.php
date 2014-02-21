@@ -60,28 +60,28 @@ class Repository {
      * 
      * @var array 
      */
-    private $PersistedQueue = array();
+    private $PersistedQueue = [];
     
     /**
      * Procedures that are awaiting execution
      * 
      * @var array 
      */
-    private $ExecutionQueue = array();
+    private $ExecutionQueue = [];
     
     /**
      * Entities that are awaiting to be discarded
      * 
      * @var array 
      */
-    private $DiscardedQueue = array();
+    private $DiscardedQueue = [];
     
     /**
      * Criteria of entities to discard
      * 
      * @var array 
      */
-    private $DiscardedCriterionQueue = array();    
+    private $DiscardedCriterionQueue = [];    
     
     /**
      * The cache to use as the identity map for the repository
@@ -392,10 +392,10 @@ class Repository {
      * @return void
      */
     final public function ClearChanges() {
-        $this->PersistedQueue = array();
-        $this->ExecutionQueue = array();
-        $this->DiscardedQueue = array();
-        $this->DiscardedCriterionQueue = array();
+        $this->PersistedQueue = [];
+        $this->ExecutionQueue = [];
+        $this->DiscardedQueue = [];
+        $this->DiscardedCriterionQueue = [];
     }
 }
 

@@ -8,7 +8,7 @@ namespace Storm\Core\Object\Expressions;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class NewExpression extends MethodCallExpression {
-    public function __construct($ClassType, array $ArgumentValueExpressions = array()) {
+    public function __construct($ClassType, array $ArgumentValueExpressions = []) {
         parent::__construct(new ObjectExpression($ClassType), '__construct', $ArgumentValueExpressions);
     }
 }

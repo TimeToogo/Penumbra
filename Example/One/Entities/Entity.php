@@ -3,7 +3,7 @@
 namespace StormExamples\One\Entities;
 
 abstract class Entity {
-    public static $Instances = array();
+    public static $Instances = [];
     public function __construct() {
         $Type = $this->GetType();
         if(!isset(self::$Instances[$Type]))

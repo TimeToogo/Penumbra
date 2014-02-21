@@ -9,7 +9,7 @@ use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 abstract class ToManyRelationBase extends KeyedRelation implements Relational\IToManyRelation {
     
     final public function MapParentKeysToRelatedRows(array $ParentRows, array $RelatedRows) {
-        $MappedRelatedRows = array();
+        $MappedRelatedRows = [];
         if(count($ParentRows) === 1) {
             $MappedRelatedRows[key($ParentRows)] = $RelatedRows;
         } 
@@ -22,12 +22,12 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
     protected abstract function GroupRelatedRowsByParentKeys(array &$MappedRelatedRows, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows);
         
     final protected function GroupRowsByColumnValues(array $ResultRows, array $Columns) {
-        $GroupedRelatedRows = array();
+        $GroupedRelatedRows = [];
         $GroupByKeys = Relational\ResultRow::GetAllDataFromColumns($ResultRows, $Columns);
         foreach($ResultRows as $Key => $ResultRow) {
             $Hash = $GroupByKeys[$Key]->HashData();
             if(!isset($GroupedRelatedRows[$Hash])) {
-                $GroupedRelatedRows[$Hash] = array();
+                $GroupedRelatedRows[$Hash] = [];
             }
             $GroupedRelatedRows[$Hash][] = $ResultRow;
         }
@@ -42,14 +42,14 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
                 $MappedRelatedRows[$ParentKey] = $GroupedRelatedRows[$HashedData];
             }
             else {
-                $MappedRelatedRows[$ParentKey] = array();
+                $MappedRelatedRows[$ParentKey] = [];
             }
         }
     }
     
     public function Persist(Relational\Transaction $Transaction, 
             Relational\ResultRow $ParentData, array $RelationshipChanges) {
-        $IdentifyingChildRows = array();
+        $IdentifyingChildRows = [];
         $Table = $this->GetTable();
         $ForeignKey = $this->GetForeignKey();
         foreach($RelationshipChanges as $RelationshipChange) {

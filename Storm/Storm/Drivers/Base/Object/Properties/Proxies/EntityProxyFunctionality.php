@@ -12,16 +12,16 @@ trait EntityProxyFunctionality {
     private $__IsLoading = false;
     private $__IsLoaded = false;
     private $__OriginalEntity = null;
-    private $__UnsetQueue = array();
+    private $__UnsetQueue = [];
     private $__LoadRevivalDataFunction;
     
     protected static $__Reflection;
     protected static $__ProxyClassName;
     protected static $__EntityClassName;
     protected static $__EntityReflection;
-    protected static $__EntityProperties = array();
-    protected static $__PropertiesToUnset = array();
-    protected static $__EntityMethods = array();
+    protected static $__EntityProperties = [];
+    protected static $__PropertiesToUnset = [];
+    protected static $__EntityMethods = [];
     protected static $__IsInitialized = false;
     
     private function __ConstructProxy(Domain $Domain, RevivalData $AlreadyKnownRevivalData, callable $LoadRevivalDataFunction) {
@@ -56,7 +56,7 @@ trait EntityProxyFunctionality {
             if($DeclaringClassName !== static::$__ProxyClassName
                     && !$Property->isStatic()) {
                 if(!isset(static::$__PropertiesToUnset[$DeclaringClassName])) {
-                    static::$__PropertiesToUnset[$DeclaringClassName] = array();
+                    static::$__PropertiesToUnset[$DeclaringClassName] = [];
                 }
                 static::$__PropertiesToUnset[$DeclaringClassName][] = $Name;
             }

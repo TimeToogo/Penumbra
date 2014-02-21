@@ -23,8 +23,8 @@ abstract class Persister {
             Table $Table, 
             array $RowsToPersist) {
         
-        $KeyedRows = array();
-        $UnkeyedRows = array();
+        $KeyedRows = [];
+        $UnkeyedRows = [];
         array_walk($RowsToPersist, 
                 function (Relational\Row $Row) use (&$KeyedRows, &$UnkeyedRows) {
                     if($Row->HasPrimaryKey()) {

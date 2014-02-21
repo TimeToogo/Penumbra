@@ -60,7 +60,7 @@ class JoinTableRelation extends ToManyRelationBase {
     
     protected function ParentTable(ForeignKey $ForeignKey) { }
     protected function RelatedColumns(ForeignKey $ForeignKey) {
-        return array();
+        return [];
     }
     public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows) {
         if(count($ParentRows) > 1) {
@@ -91,7 +91,7 @@ class JoinTableRelation extends ToManyRelationBase {
     
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges) {
          /* @var $RelationshipChanges Relational\RelationshipChange[] */
-        $JoinRowsWithoutPrimaryKeys = array();
+        $JoinRowsWithoutPrimaryKeys = [];
         foreach($RelationshipChanges as $RelationshipChange) {
             if($RelationshipChange->HasPersistedRelationship()) {
                 $JoinRow = $this->MapPersistedRelationshipToJoinRow($RelationshipChange->GetPersistedRelationship());

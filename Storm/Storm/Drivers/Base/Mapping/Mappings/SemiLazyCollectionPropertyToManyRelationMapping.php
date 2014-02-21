@@ -8,8 +8,8 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 class SemiLazyCollectionPropertyToManyRelationMapping extends CollectionPropertyToManyRelationMapping {
-    private $ParentRowArrays = array();
-    private $RelatedRows = array();
+    private $ParentRowArrays = [];
+    private $RelatedRows = [];
     
     public function __construct(
             Object\ICollectionProperty $CollectionProperty,
@@ -18,12 +18,12 @@ class SemiLazyCollectionPropertyToManyRelationMapping extends CollectionProperty
     }
     
     public function __sleep() {
-        return array();
+        return [];
     }
     
     public function __wakeup() {
-        $this->ParentRowArrays = array();
-        $this->RelatedRows = array();
+        $this->ParentRowArrays = [];
+        $this->RelatedRows = [];
     }
     
     public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
@@ -58,7 +58,7 @@ class SemiLazyCollectionPropertyToManyRelationMapping extends CollectionProperty
             
             $this->RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $AllParentRows);
             
-            $this->ParentRowArrays = array();
+            $this->ParentRowArrays = [];
         }
         
         return $this->MapParentRowKeysToRelatedRevivalDataArray($DomainDatabaseMap, $ParentRows, $this->RelatedRows);

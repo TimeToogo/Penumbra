@@ -8,15 +8,15 @@ class Traversing extends Accessor {
     /**
      * @var Accessor[] 
      */
-    private $NestedAccessors = array();
+    private $NestedAccessors = [];
     /**
      * @var Accessor[] 
      */
-    private $TraversingAccessors = array();
+    private $TraversingAccessors = [];
     /**
      * @var Accessor
      */
-    private $FinalAccessor = array();
+    private $FinalAccessor = [];
     
     public function __construct(array $NestedAccessors) {
         if(count($NestedAccessors) === 0) {
@@ -31,7 +31,7 @@ class Traversing extends Accessor {
     }
     
     final protected function GetterIdentifier(&$Identifier) {
-        $Identifiers = array();
+        $Identifiers = [];
         foreach($this->NestedAccessors as $NestedAccessor) {
             $Identifiers[] = $NestedAccessor->GetGetterIdentifier();
         }
@@ -40,7 +40,7 @@ class Traversing extends Accessor {
     }
     
     final protected function SetterIdentifier(&$Identifier) {
-        $Identifiers = array();
+        $Identifiers = [];
         foreach($this->NestedAccessors as $NestedAccessor) {
             $Identifiers[] = $NestedAccessor->GetSetterIdentifier();
         }

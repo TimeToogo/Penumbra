@@ -15,7 +15,7 @@ abstract class EntityData extends PropertyData {
      */
     protected $EntityType;
     
-    public function __construct(EntityMap $EntityMap, array $EntityProperties, array $EntityData = array()) {
+    public function __construct(EntityMap $EntityMap, array $EntityProperties, array $EntityData = []) {
         parent::__construct($EntityProperties, $EntityData);
         
         $this->EntityMap = $EntityMap;

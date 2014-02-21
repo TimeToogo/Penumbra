@@ -27,8 +27,8 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
         if($this->ProxyGenerator !== null) {
             $EntityType = $this->GetEntityType();
             
-            $AlreadyKnownRevivalData = array();
-            $LoaderFunctions = array();
+            $AlreadyKnownRevivalData = [];
+            $LoaderFunctions = [];
             array_walk($LazyRevivalDataArray,
                     function (LazyRevivalData $I, $Key) use (&$AlreadyKnownRevivalData, &$LoaderFunctions) { 
                         $AlreadyKnownRevivalData[$Key] = $I->GetAlreadyKnownRevivalData();

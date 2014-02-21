@@ -8,7 +8,7 @@ interface IFunctionMapper {
     /**
      * @return Expression
      */
-    public function MapFunctionCallExpression($FunctionName, array $ArgumentValueExpression = array());
+    public function MapFunctionCallExpression($FunctionName, array $ArgumentValueExpression = []);
 }
 
 ?>

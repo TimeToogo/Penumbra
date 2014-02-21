@@ -9,7 +9,7 @@ namespace Storm\Core\Object;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class PersistenceData extends EntityPropertyData {
-    public function __construct(EntityMap $EntityMap, array $EntityData = array()) {
+    public function __construct(EntityMap $EntityMap, array $EntityData = []) {
         parent::__construct($EntityMap, $EntityMap->GetProperties(), $EntityData);
     }
 }

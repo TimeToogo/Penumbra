@@ -6,7 +6,7 @@ use \Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser\AST;
 
 class VariableExpanderVisitor extends \PHPParser_NodeVisitorAbstract {
     private $Traverser;
-    private $VariableExpressionMap = array();
+    private $VariableExpressionMap = [];
     
     function __construct(\PHPParser_NodeTraverserInterface $Traverser) {
         $this->Traverser = $Traverser;

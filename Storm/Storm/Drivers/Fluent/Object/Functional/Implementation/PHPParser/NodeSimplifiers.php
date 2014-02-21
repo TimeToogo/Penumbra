@@ -168,7 +168,7 @@ class BinaryOperationSimplifier extends NodeSimplifier {
     }
     
     public static function All() {
-        $Simplifiers = array();
+        $Simplifiers = [];
         foreach(array_keys(self::BinaryOperations()) as $BinaryOperationType) {
             $Simplifiers[] = new self($BinaryOperationType);
         }

@@ -11,12 +11,12 @@ final class Criterion {
     /**
      * @var ITable[] 
      */
-    private $Tables = array();
+    private $Tables = [];
     
     /**
      * @var Expressions\Expression[] 
      */
-    private $PredicateExpressions = array();
+    private $PredicateExpressions = [];
     
     /**
      * The order by expressions mapped to a boolean representing whether
@@ -29,7 +29,7 @@ final class Criterion {
     /**
      * @var Expressions\Expression[]
      */
-    private $GroupByExpressions = array();
+    private $GroupByExpressions = [];
     
     /**
      * @var int

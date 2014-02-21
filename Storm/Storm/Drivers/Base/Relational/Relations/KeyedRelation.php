@@ -50,7 +50,7 @@ abstract class KeyedRelation extends Relation {
         }
         $Request->AddColumns($this->GetReferencedColumns());
         
-        $MatchExpressions = array();
+        $MatchExpressions = [];
         foreach($ParentRows as $ParentRow) {
             $ReferencedKey = $this->MapParentRowToRelatedKey($this->ForeignKey, $ParentRow);
             
@@ -112,7 +112,7 @@ abstract class KeyedRelation extends Relation {
     }
 
     final protected function IndexRowsByHashedColumnValues(array $ResultRows, array $Columns) {
-        $KeyedRows = array();
+        $KeyedRows = [];
         $ColumnDataArray = Relational\ResultRow::GetAllDataFromColumns($ResultRows, $Columns);
         foreach($ResultRows as $Key => $Row) {
             $Hash = $ColumnDataArray[$Key]->HashData();

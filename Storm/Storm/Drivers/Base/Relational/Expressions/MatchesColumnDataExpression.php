@@ -9,7 +9,7 @@ class MatchesColumnDataExpression extends CompoundBooleanExpression {
     
     public function __construct(ColumnData $ColumnData) {
         
-        $ConstraintExpressions = array();
+        $ConstraintExpressions = [];
         
         foreach($ColumnData as $ColumnIdentifier => $Value) {
             $Column = $ColumnData->GetColumn($ColumnIdentifier);

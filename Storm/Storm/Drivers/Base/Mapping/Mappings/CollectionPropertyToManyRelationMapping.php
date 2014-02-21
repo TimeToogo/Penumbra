@@ -42,7 +42,7 @@ abstract class CollectionPropertyToManyRelationMapping extends RelationshipPrope
         
         $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $RelatedRows);
         
-        $MappedRelatedRevivalData = array();
+        $MappedRelatedRevivalData = [];
         foreach($ParentRows as $Key => $ParentRow) {            
             $MappedRelatedRevivalData[$Key] = array_intersect_key($RelatedRevivalData, $ParentKeyRelatedRowsMap[$Key]);
         }

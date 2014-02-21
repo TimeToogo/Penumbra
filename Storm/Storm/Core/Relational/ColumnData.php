@@ -19,7 +19,7 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     protected $Data;
     
     protected function __construct(array $Columns, array $Data) {
-        $IndexedColumns = array();
+        $IndexedColumns = [];
         foreach ($Columns as $Column) {
             $IndexedColumns[$Column->GetIdentifier()] = $Column;
         }

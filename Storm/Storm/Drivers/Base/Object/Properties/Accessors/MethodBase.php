@@ -10,7 +10,7 @@ abstract class MethodBase extends ReflectionBase {
      */
     protected $Reflection;
     
-    public function __construct($MethodName, array $ConstantArguments = array()) {
+    public function __construct($MethodName, array $ConstantArguments = []) {
         $this->MethodName = $MethodName;
         $this->ConstantArguments = $ConstantArguments;
     }

@@ -185,7 +185,7 @@ class QueryBuilder {
 
 
     final public function AppendAllEscaped($QueryStringFormat, array $Values, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
-        $EscapedValues = array();
+        $EscapedValues = [];
         foreach ($Values as $Value) {
             $ParameterType = null;
             $this->Bindings->DefaultParameterType($ParameterType, $Value);

@@ -13,7 +13,7 @@ abstract class TableColumnData extends ColumnData {
      */
     private $Table;
     
-    protected function __construct(ITable $Table, array $ColumnData = array()) {
+    protected function __construct(ITable $Table, array $ColumnData = []) {
         $this->Table = $Table;
         parent::__construct($Table->GetColumns(), $ColumnData);
     }

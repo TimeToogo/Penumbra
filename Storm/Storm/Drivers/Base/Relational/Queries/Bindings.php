@@ -3,7 +3,7 @@
 namespace Storm\Drivers\Base\Relational\Queries;
 
 final class Bindings implements \ArrayAccess {
-    private $Bindings = array();
+    private $Bindings = [];
     
     public function offsetExists($ParameterKey) {
         return isset($this->Bindings[$ParameterKey]);

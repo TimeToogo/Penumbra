@@ -20,7 +20,7 @@ abstract class Domain {
      * 
      * @var IEntityMap[] 
      */
-    private $EntityMaps = array();
+    private $EntityMaps = [];
     
     public function __construct() {
         $Registrar = new Registrar(IEntityMap::IEntityMapType);
@@ -244,7 +244,7 @@ abstract class Domain {
      */
     final public function ReviveEntities($EntityType, array $RevivalData) {
         if(count($RevivalData) === 0) {
-            return array();
+            return [];
         }
         $EntityMap = $this->GetEntityMap($EntityType);
         
@@ -289,10 +289,10 @@ abstract class Domain {
      * @return UnitOfWork The constructed unit of work
      */
     final public function BuildUnitOfWork(
-            array $EntitiesToPersist = array(),
-            array $ProceduresToExecute = array(),
-            array $EntitiesToDiscard = array(), 
-            array $CriterionToDiscard = array()) {
+            array $EntitiesToPersist = [],
+            array $ProceduresToExecute = [],
+            array $EntitiesToDiscard = [], 
+            array $CriterionToDiscard = []) {
         $UnitOfWork = new UnitOfWork($this);
         
         foreach($EntitiesToPersist as $Entity) {

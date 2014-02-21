@@ -26,7 +26,7 @@ abstract class CompositeRelationshipPropertyRelationMapping  {
     /**
      * @var RelationshipPropertyRelationMapping[] 
      */
-    private $ConcreteRelationshipMappings= array();
+    private $ConcreteRelationshipMappings= [];
     
     /**
      * @var RelationshipPropertyRelationMapping

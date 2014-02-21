@@ -11,7 +11,7 @@ class DataType {
     private $Extra;
     private $ParameterType;
     
-    public function __construct($DataType, array $Parameters = array(), $Extra = null, $ParameterType = ParameterType::String) {
+    public function __construct($DataType, array $Parameters = [], $Extra = null, $ParameterType = ParameterType::String) {
         $this->DataType = $DataType;
         $this->Parameters = $Parameters;
         $this->Extra = $Extra;

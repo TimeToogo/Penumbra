@@ -7,7 +7,7 @@ namespace Storm\Core\Object;
  */
 abstract class EntityPropertyData extends EntityData {
     
-    public function __construct(EntityMap $EntityMap, array $EntityProperties, array $EntityData = array()) {
+    public function __construct(EntityMap $EntityMap, array $EntityProperties, array $EntityData = []) {
         parent::__construct($EntityMap, $EntityProperties, $EntityData);
     }
     

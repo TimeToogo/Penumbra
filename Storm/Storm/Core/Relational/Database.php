@@ -16,17 +16,17 @@ abstract class Database {
     /**
      * @var ITable[] 
      */
-    private $Tables = array();
+    private $Tables = [];
     
     /**
      * @var ITable[] 
      */
-    private $TablesOrderedByPersistingDependency = array();
+    private $TablesOrderedByPersistingDependency = [];
     
     /**
      * @var ITable[] 
      */
-    private $TablesOrderedByDiscardingDependency = array();
+    private $TablesOrderedByDiscardingDependency = [];
     
     public function __construct() {
         $Registrar = new Registrar(ITable::ITableType);
@@ -153,14 +153,14 @@ abstract class Database {
      * @return ResultRow[] The loaded result rows
      */
     final public function Load(Request $Request) {
-        $Columns = array();
+        $Columns = [];
         foreach($Request->GetTables() as $Table) {
             $this->VerifyTable(__METHOD__, $Table);
             $Columns += $Table->GetColumnsByIdentifier();
         }
         $ResultRowData = $this->LoadResultRowData($Request);
         
-        $ResultRow = new ResultRow($Columns, array());
+        $ResultRow = new ResultRow($Columns, []);
         
         return array_map([$ResultRow, 'Another'], $ResultRowData);
     }

@@ -7,11 +7,11 @@ use \Storm\Core\Object;
 class Collection extends \ArrayObject implements ICollection {
     private $EntityType;
     private $IsAltered = false;
-    protected $OriginalEntities = array();
-    private $AddedEntities = array();
-    private $RemovedEntities = array();
+    protected $OriginalEntities = [];
+    private $AddedEntities = [];
+    private $RemovedEntities = [];
     
-    public function __construct($EntityType, array $Entities = array()) {        
+    public function __construct($EntityType, array $Entities = []) {        
         parent::__construct($Entities);
         
         $this->EntityType = $EntityType;
