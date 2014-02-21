@@ -10,7 +10,7 @@ class ForeignKeyPredicateExpression extends CompoundBooleanExpression {
     public function __construct(ForeignKey $ForeignKey) {
         $ReferencedColumnMap = $ForeignKey->GetReferencedColumnMap();
         
-        $ConstraintExpressions = array();
+        $ConstraintExpressions = [];
         
         foreach($ReferencedColumnMap as $PrimaryColumn) {
             $ForeignColumn = $ReferencedColumnMap[$PrimaryColumn];

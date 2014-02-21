@@ -15,7 +15,7 @@ trait PropertyReflection {
     }
     
     final protected function GetPublicPropertyValues($LateBound = true) {
-        $Values = array();
+        $Values = [];
         foreach($this->GetPublicProperties($LateBound) as $Property) {
             $Values[] = $Property->getValue($this);
         }

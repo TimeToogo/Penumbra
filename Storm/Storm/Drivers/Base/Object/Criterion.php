@@ -14,9 +14,9 @@ class Criterion implements Object\ICriterion {
     
     public function __construct($EntityType) {
         $this->EntityType = $EntityType;
-        $this->PredicateExpressions = array();
+        $this->PredicateExpressions = [];
         $this->OrderByExpressionsAscendingMap = new \SplObjectStorage();
-        $this->GroupByExpressions = array();
+        $this->GroupByExpressions = [];
         $this->RangeOffset = 0;
         $this->RangeAmount = null;
     }

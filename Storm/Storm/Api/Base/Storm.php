@@ -89,10 +89,10 @@ class Storm {
      * @return void
      */
     final public function SaveChanges() {
-        $PersistedQueues = array();
-        $ExecutionQueues = array();
-        $DiscardedQueues = array();
-        $DiscardedCriterionQueues = array();
+        $PersistedQueues = [];
+        $ExecutionQueues = [];
+        $DiscardedQueues = [];
+        $DiscardedCriterionQueues = [];
         
         foreach($this->Repositories as $Repository) {
             list($PersistedQueue,

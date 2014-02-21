@@ -9,7 +9,7 @@ abstract class ObjectDataType extends DataType {
     
     private $ClassType;
     
-    public function __construct($DataType, array $Parameters = array(), $Extra = null, $ParameterType = ParameterType::String) {
+    public function __construct($DataType, array $Parameters = [], $Extra = null, $ParameterType = ParameterType::String) {
         parent::__construct($DataType, $Parameters, $Extra, $ParameterType);
         
         $this->ClassType = $this->ClassType();
@@ -44,7 +44,7 @@ abstract class ObjectDataType extends DataType {
     }
     protected abstract function PropertyValue($PersistedValue);
     
-    final public function MapMethodCallExpression(Expression $ObjectValueExpression = null, $Name, array $ArgumentValueExpressions = array()) {
+    final public function MapMethodCallExpression(Expression $ObjectValueExpression = null, $Name, array $ArgumentValueExpressions = []) {
         $MapperMethodName = $Name;
         if(strpos($Name, '__') === 0) {
             $MapperMethodName = $this->ClassType . $Name;

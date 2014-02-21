@@ -25,10 +25,10 @@ class CollectionProperty extends MultipleEntityProperty {
     
     protected function PersistRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,
             $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
-        $RelationshipChanges = array();
+        $RelationshipChanges = [];
         
-        $OriginalEntities = array();
-        $CurrentEntities = array();
+        $OriginalEntities = [];
+        $CurrentEntities = [];
         
         if(!($CurrentValue instanceof Collections\ICollection)) {
             if(!($CurrentValue instanceof \Traversable)) {
@@ -44,7 +44,7 @@ class CollectionProperty extends MultipleEntityProperty {
             }
         }
         else if($CurrentValue instanceof Collections\LazyCollection && !$CurrentValue->__IsLoaded()) {
-            return array();
+            return [];
         }
         else if(!$CurrentValue->__IsAltered()) {
             foreach($CurrentValue->ToArray() as $Entity) {
@@ -53,7 +53,7 @@ class CollectionProperty extends MultipleEntityProperty {
                 }
                 $UnitOfWork->PersistRelationships($Entity);
             }
-            return array();
+            return [];
         }
         else {
             $CurrentEntities = $CurrentValue->ToArray();
@@ -85,7 +85,7 @@ class CollectionProperty extends MultipleEntityProperty {
     protected function DiscardRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
             $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
         
-        $DiscardedRelationships = array();
+        $DiscardedRelationships = [];
         if($HasOriginalValue) {
             foreach($OriginalValue->ToArray() as $RemovedEntity) {
                 $DiscardedRelationships[] = new Object\RelationshipChange(
@@ -100,7 +100,7 @@ class CollectionProperty extends MultipleEntityProperty {
     }
     
     private function ComputeDifference(array $Objects, array $OtherObjects) {
-        $Difference = array();
+        $Difference = [];
         foreach($Objects as $Object) {
             if(!in_array($Object, $OtherObjects)) {
                 $Difference[] = $Object;
@@ -118,7 +118,7 @@ class CollectionProperty extends MultipleEntityProperty {
     }
     
     private function IndexEntitiesByIdentity(Object\Domain $Domain, array &$Entities) {
-        $IndexedEntities = array();
+        $IndexedEntities = [];
         foreach($Entities as $Key => $Entity) {
             $IndexedEntities[$Domain->Identity($Entity)->Hash()] = $Entity;
         }

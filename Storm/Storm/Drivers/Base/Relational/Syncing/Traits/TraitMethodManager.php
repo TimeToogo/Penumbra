@@ -3,7 +3,7 @@
 namespace Storm\Drivers\Base\Relational\Syncing\Traits;
 
 final class TraitMethodManager {
-    private $AppenderFunctions = array();
+    private $AppenderFunctions = [];
     
     final public function Register($TraitType, callable $AppendDefinitionFunction) {
         $this->AppenderFunctions[$TraitType] = $AppendDefinitionFunction;

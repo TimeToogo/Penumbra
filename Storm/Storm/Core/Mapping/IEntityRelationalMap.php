@@ -97,7 +97,7 @@ interface IEntityRelationalMap {
      * @param array $ColumnData the column data
      * @return Relational\ResultRow
      */
-    public function ResultRow($ColumnData = array());
+    public function ResultRow($ColumnData = []);
     
     /**
      * Get the criterion that must be included for every request.

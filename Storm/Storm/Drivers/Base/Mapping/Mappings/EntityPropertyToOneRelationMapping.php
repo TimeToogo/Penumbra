@@ -40,7 +40,7 @@ abstract class EntityPropertyToOneRelationMapping extends RelationshipPropertyRe
         
         $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $ParentKeyRelatedRowMap);
         
-        $MappedRelatedRevivalData = array();
+        $MappedRelatedRevivalData = [];
         foreach($ParentRows as $Key => $ParentRow) {            
             $MappedRelatedRevivalData[$Key] = isset($RelatedRevivalDataArray[$Key]) ?
                     $RelatedRevivalDataArray[$Key] : null;

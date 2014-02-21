@@ -18,8 +18,8 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
      */
     private $PropertyData;
     
-    public function __construct(array $Properties, array $PropertyData = array()) {
-        $IndexedProperties = array();
+    public function __construct(array $Properties, array $PropertyData = []) {
+        $IndexedProperties = [];
         foreach ($Properties as $Property) {
             $IndexedProperties[$Property->GetIdentifier()] = $Property;
         }
@@ -47,7 +47,7 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
      * @param array $PropertyData
      * @return PropertyData
      */
-    final public function Another(array $PropertyData = array()) {
+    final public function Another(array $PropertyData = []) {
         $ClonedPropertyData = clone $this;
         $ClonedPropertyData->Properties =& $this->Properties;
         $ClonedPropertyData->PropertyData = array_intersect_key($PropertyData, $this->Properties);

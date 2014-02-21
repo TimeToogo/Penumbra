@@ -52,7 +52,7 @@ abstract class IdentifierEscaper implements Queries\IIdentifierEscaper {
     
     public function AliasAll(array $EscapedIdentifierAliasMap) {
         $EscapedIdentifierEscapedAliasMap = $this->QualifyAll($EscapedIdentifierAliasMap);
-        $AliasedValues = array();
+        $AliasedValues = [];
         foreach($EscapedIdentifierEscapedAliasMap as $EscapedIdentifier => $EscapedAlias) {
             $AliasedValues[] = $EscapedIdentifier . ' ' . $this->AliasKeyword . ' ' . $EscapedAlias;
         }
@@ -62,7 +62,7 @@ abstract class IdentifierEscaper implements Queries\IIdentifierEscaper {
     
     public function EscapeAndAliasAll(array $AliasIdentifierSegmentsMap) {
         $EscapedIdentifiers = array_combine($this->AliasAll(array_keys($AliasIdentifierSegmentsMap)), $this->EscapeAll($AliasIdentifierSegmentsMap));
-        $AliasedValues = array();
+        $AliasedValues = [];
         foreach($EscapedIdentifiers as $EscapedIdentifier => $EscapedAlias) {
             $AliasedValues[] = $EscapedIdentifier . ' ' . $this->AliasKeyword . ' ' . $EscapedAlias;
         }

@@ -3,7 +3,7 @@
 namespace Storm\Utilities\Cache;
 
 class MemoryCache implements ICache {
-    private $Cache = array();
+    private $Cache = [];
     const ValueKey = 'Value';
     const ExpiryKey = 'Expiry';
     
@@ -67,7 +67,7 @@ class MemoryCache implements ICache {
     }
         
     public function Clear() {
-        $this->Cache = array();
+        $this->Cache = [];
     }
 }
 

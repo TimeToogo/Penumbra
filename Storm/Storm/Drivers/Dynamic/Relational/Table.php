@@ -21,10 +21,10 @@ class Table extends \Storm\Drivers\Base\Relational\Table {
             $Name,
             IKeyGenerator $KeyGenerator = null,
             array $Columns, 
-            array $StructuralTraits = array(), 
-            array $RelationalTraits = array(), 
-            array $ToOneRelations = array(), 
-            array $ToManyRelations = array()) {
+            array $StructuralTraits = [], 
+            array $RelationalTraits = [], 
+            array $ToOneRelations = [], 
+            array $ToManyRelations = []) {
         $this->Name = $Name;
         $this->_Columns = $Columns;
         $this->KeyGenerator = $KeyGenerator;
@@ -32,7 +32,7 @@ class Table extends \Storm\Drivers\Base\Relational\Table {
         $this->RelationalTraits = $RelationalTraits;
         $this->ToOneRelations = $ToOneRelations;
         $this->ToManyRelations = $ToManyRelations;
-        $this->InitializeStructure(new Database(new \Storm\Drivers\Platforms\Null\NullPlatform(), array()));
+        $this->InitializeStructure(new Database(new \Storm\Drivers\Platforms\Null\NullPlatform(), []));
         
         parent::__construct();
     }

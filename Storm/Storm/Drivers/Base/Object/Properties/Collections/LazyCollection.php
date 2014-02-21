@@ -22,7 +22,7 @@ class LazyCollection extends Collection {
             Object\RevivalData $AlreadyKnownRevivalData,
             callable $ArrayLoaderFunction,
             IProxyGenerator $ProxyGenerator = null) {
-        parent::__construct($EntityType, array());
+        parent::__construct($EntityType, []);
         $this->AlreadyKnownRevivalData = $AlreadyKnownRevivalData;
         $this->ArrayLoaderFunction = $ArrayLoaderFunction;
         $this->Domain = $Domain;

@@ -10,11 +10,11 @@ use \Storm\Drivers\Base\Relational\PrimaryKeys\IKeyGeneratorSet;
 
 class JoinTable extends \Storm\Drivers\Base\Relational\Relations\JoinTable {
     private $Name;
-    private $_Columns = array();
+    private $_Columns = [];
     private $Table1;
-    private $ForeignKey1Map = array();
+    private $ForeignKey1Map = [];
     private $Table2;
-    private $ForeignKey2Map = array();
+    private $ForeignKey2Map = [];
     
     public function __construct($Name, Relational\ITable $Table1, Relational\ITable $Table2) {
         $this->Name = $Name;

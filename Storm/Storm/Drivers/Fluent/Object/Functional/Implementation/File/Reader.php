@@ -27,7 +27,7 @@ class Reader implements Functional\IReader {
         if(!file_exists($FileName)) {
             throw new Functional\FunctionException('Cannot parse function: Function does not belong to a valid file (cannot be eval\'d code)');
         }
-        $SourceLines = array();
+        $SourceLines = [];
         $File = new \SplFileObject($Reflection->getFileName());
         $StartLine = $Reflection->getStartLine() - 2;
         $File->seek($StartLine);
@@ -46,7 +46,7 @@ class Reader implements Functional\IReader {
     }
     
     private function LoadBodySourceLines(array $SourceLines) {
-        $BodySourceLines = array();
+        $BodySourceLines = [];
         $FoundStart = false;
         foreach($SourceLines as $Line) {
             if($FoundStart) {

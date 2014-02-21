@@ -56,7 +56,7 @@ abstract class Relation implements Relational\IRelation {
      * Relational\Request
      */
     protected function NewRelationRequest() {
-        return new Relational\Request(array());
+        return new Relational\Request([]);
     }
 }
 

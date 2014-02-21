@@ -62,10 +62,10 @@ abstract class Table implements ITable {
         
         $Registrar = new Registrar(IColumn::IColumnType);
         $this->RegisterColumns($Registrar, $Database);
-        $this->Columns = array();
-        $this->ColumnsByIdentifiers = array();
-        $this->PrimaryKeyColumns = array();
-        $this->PrimaryKeyColumnByIdentifiers = array();
+        $this->Columns = [];
+        $this->ColumnsByIdentifiers = [];
+        $this->PrimaryKeyColumns = [];
+        $this->PrimaryKeyColumnByIdentifiers = [];
         foreach($Registrar->GetRegistered() as $Column) {
             $this->AddColumn($Column);
         }
@@ -294,7 +294,7 @@ abstract class Table implements ITable {
     /**
      *{@inheritDoc}
      */
-    final public function Row(array $Data = array()){
+    final public function Row(array $Data = []){
         if($this->Row === null) {
             $this->Row = new Row($this);
         }
@@ -305,7 +305,7 @@ abstract class Table implements ITable {
     /**
      *{@inheritDoc}
      */
-    final public function PrimaryKey(array $Data = array()) {
+    final public function PrimaryKey(array $Data = []) {
         if($this->PrimaryKey === null) {
             $this->PrimaryKey = new PrimaryKey($this);
         }

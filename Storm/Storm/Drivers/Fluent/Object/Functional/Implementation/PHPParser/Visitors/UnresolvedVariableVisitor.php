@@ -8,13 +8,13 @@ class UnresolvedVariableVisitor extends \PHPParser_NodeVisitorAbstract {
     private $UnresolvedVariables;
     private $IgnoreVariables;
     
-    public function __construct(array &$UnresolvedVariables, array $IgnoreVariables = array()) {
+    public function __construct(array &$UnresolvedVariables, array $IgnoreVariables = []) {
         $this->UnresolvedVariables =& $UnresolvedVariables;
         $this->IgnoreVariables = $IgnoreVariables;
     }
     
     public function beforeTraverse(array $Nodes) {
-        $this->UnresolvedVariables = array();
+        $this->UnresolvedVariables = [];
     }
     
     public function leaveNode(\PHPParser_Node $Node) {

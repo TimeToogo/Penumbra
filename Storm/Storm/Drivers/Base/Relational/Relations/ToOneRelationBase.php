@@ -10,7 +10,7 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
     
     final public function MapParentKeysToRelatedRow(array $ParentRows, array $RelatedRows) {
         if(count($RelatedRows) === 0) {
-            return array();
+            return [];
         }
 
         
@@ -18,7 +18,7 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
             return [key($ParentRows) => reset($RelatedRows)];
         }
         else {
-            $MappedRelatedRows = array();
+            $MappedRelatedRows = [];
             
             $ForeignKey = $this->GetForeignKey();
             if($this->IsInversed()) {

@@ -12,9 +12,9 @@ class Column implements Relational\IColumn {
     private $IsPrimaryKey;
     private $Table;
     private $DataType;
-    private $Traits = array();
+    private $Traits = [];
     
-    public function __construct($Name, DataType $DataType, $IsPrimaryKey = false, array $Traits = array()) {
+    public function __construct($Name, DataType $DataType, $IsPrimaryKey = false, array $Traits = []) {
         $this->Name = $Name;
         $this->Identifier = $Name;
         $this->DataType = $DataType;

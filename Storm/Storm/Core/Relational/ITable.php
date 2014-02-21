@@ -135,7 +135,7 @@ interface ITable {
      * @param array $Data The column data
      * @return Row The row
      */
-    public function Row(array $Data = array());
+    public function Row(array $Data = []);
     
     /**
      * Get a primary key of this table
@@ -143,7 +143,7 @@ interface ITable {
      * @param array $Data The column data
      * @return PrimaryKey The row
      */
-    public function PrimaryKey(array $Data = array());
+    public function PrimaryKey(array $Data = []);
    
     
     public function Is(ITable $Table);

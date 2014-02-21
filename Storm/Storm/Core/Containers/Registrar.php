@@ -9,7 +9,7 @@ namespace Storm\Core\Containers;
  */
 final class Registrar {
     private $RegistrableType;
-    private $Instances = array();
+    private $Instances = [];
     
     public function __construct($RegistrableType = null) {
         $this->RegistrableType = $RegistrableType;

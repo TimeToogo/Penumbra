@@ -49,8 +49,8 @@ NOW;
     }
 NOW;
     private static $NullProxyReflection;
-    private static $NullProxyProperties = array();
-    private static $NullProxyMethods = array();
+    private static $NullProxyProperties = [];
+    private static $NullProxyMethods = [];
 
     public function __construct($ProxyNamespace, $ProxyCachePath) {
         if(!isset(self::$NullProxyReflection)) {
@@ -73,7 +73,7 @@ NOW;
         $ProxyClassName = $this->GenerateProxyClassName($EntityReflection->getName());
         $FullProxyName = $this->GetProxyFullName($ProxyClassName);
         
-        $Proxies = array();
+        $Proxies = [];
         foreach($RevivalDataLoaderFunctions as $Key => $RevivalDataLoaderFunction) {
             $Proxies[] = $this->GenerateProxyInstance($Domain, $EntityReflection, $ProxyClassName, $FullProxyName, 
                     $AlreadyKnownRevivalDataArray[$Key],
@@ -145,7 +145,7 @@ NOW;
     }
     
     private function GenerateOverridingMethods(\ReflectionClass $EntityReflection) {
-        $OverridenMethods = array();
+        $OverridenMethods = [];
         foreach($EntityReflection->getMethods() as $Method) {
             if(isset(self::$NullProxyMethods[$Method->getName()])
                     || !$Method->isPublic()
@@ -171,8 +171,8 @@ NOW;
 
         $Name = $EntityMethod->getName();
 
-        $Parameters = array();
-        $ParameterVariables = array();
+        $Parameters = [];
+        $ParameterVariables = [];
         foreach($EntityMethod->getParameters() as $Parameter) {
             $ParameterVariables[] = '$' . $Parameter->getName();
             $Parameters[] = $this->GenerateMethodParameter($Parameter);

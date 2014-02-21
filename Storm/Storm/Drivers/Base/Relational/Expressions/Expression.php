@@ -105,7 +105,7 @@ abstract class Expression extends Expressions\Expression {
     /**
      * @return ValueListExpression
      */
-    public static function ValueList(array $ValueExpressions = array()) {
+    public static function ValueList(array $ValueExpressions = []) {
         return new ValueListExpression($ValueExpressions);
     }
 }

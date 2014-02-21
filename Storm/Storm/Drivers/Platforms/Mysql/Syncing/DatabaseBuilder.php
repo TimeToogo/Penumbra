@@ -23,7 +23,7 @@ class DatabaseBuilder implements IDatabaseBuilder {
     }
     
     // <editor-fold defaultstate="collapsed" desc="Table Builders">
-    private function BuildTables(IConnection $Connection, $DatabaseName, array &$Tables = array()) {
+    private function BuildTables(IConnection $Connection, $DatabaseName, array &$Tables = []) {
         $QueryBuilder = $Connection->QueryBuilder();
         $QueryBuilder->Append('SELECT `TABLE_NAME` FROM ');
         $QueryBuilder->Append('`INFORMATION_SCHEMA`.`TABLES` T ');
@@ -57,8 +57,8 @@ class DatabaseBuilder implements IDatabaseBuilder {
         
         $Columns = $this->BuildColumns($Connection, $DatabaseName, $TableName);
         
-        $StructuralTraits = array();
-        $RelationalTraits = array();
+        $StructuralTraits = [];
+        $RelationalTraits = [];
         
         $StructuralTraits[] = new Tables\Engine($TableInfoRow['ENGINE']);
         $StructuralTraits[] = new Tables\CharacterSet($TableInfoRow['CHARACTER_SET_NAME']);
@@ -73,7 +73,7 @@ class DatabaseBuilder implements IDatabaseBuilder {
         
         $Table = new Relational\Table(
                 $TableName, null, 
-                $Columns, $StructuralTraits, array());
+                $Columns, $StructuralTraits, []);
         $LoadedTables[$TableName] = $Table;
         
         $ForeignKeys = $this->BuildForeignKeys($Connection, $Columns, $DatabaseName, $TableName, $LoadedTables);
@@ -101,7 +101,7 @@ class DatabaseBuilder implements IDatabaseBuilder {
         
         $IndexRowGroups = 
                 $this->GroupColumnsByKey($QueryBuilder->Build()->Execute()->FetchAll(), 'INDEX_NAME');
-        $Indexes = array();
+        $Indexes = [];
         foreach($IndexRowGroups as $IndexRows) {
             $Indexes[] = $this->BuildIndex($Columns, $IndexRows);
         }
@@ -149,7 +149,7 @@ class DatabaseBuilder implements IDatabaseBuilder {
     
     // <editor-fold defaultstate="collapsed" desc="Foreign Key Builders">
     private function BuildForeignKeys(IConnection $Connection, array $Columns, $DatabaseName, $TableName, array &$LoadedTables) {
-        $ForeignKeys = array();
+        $ForeignKeys = [];
         
         $QueryBuilder = $Connection->QueryBuilder();
         $QueryBuilder->Append('SELECT C.*, R.`UPDATE_RULE`, R.`DELETE_RULE`  FROM ');
@@ -213,11 +213,11 @@ class DatabaseBuilder implements IDatabaseBuilder {
     
     // <editor-fold defaultstate="collapsed" desc="Helpers">
     private function GroupColumnsByKey(array $Rows, $Key) {
-        $GroupedRows = array();
+        $GroupedRows = [];
         foreach ($Rows as $Row) {
             $GroupValue = $Row[$Key];
             if (!isset($GroupedRows[$GroupValue]))
-                $GroupedRows[$GroupValue] = array();
+                $GroupedRows[$GroupValue] = [];
 
 
             $GroupedRows[$GroupValue][] = $Row;
@@ -229,7 +229,7 @@ class DatabaseBuilder implements IDatabaseBuilder {
 
 
     private function GetColumnsFromRows(array $Columns, array $InfoRows, $PositionKey, $ColumnNameKey) {
-        $RetrievedColumns = array();
+        $RetrievedColumns = [];
         foreach ($InfoRows as $Row) {
             $RetrievedColumns[$Row[$PositionKey]] = $Columns[$Row[$ColumnNameKey]];
         }
@@ -248,7 +248,7 @@ class DatabaseBuilder implements IDatabaseBuilder {
         $QueryBuilder->AppendValue('AND `TABLE_NAME` = # ', $TableName);
         $QueryBuilder->AppendValue('ORDER BY `ORDINAL_POSITION`', $TableName);
         
-        $Columns = array();
+        $Columns = [];
         foreach($QueryBuilder->Build()->Execute()->FetchAll() as $ColumnRow) {
             $Column = $this->BuildColumn($Connection, $ColumnRow);
             $Columns[$Column->GetName()] = $Column;
@@ -260,7 +260,7 @@ class DatabaseBuilder implements IDatabaseBuilder {
     private function BuildColumn(IConnection $Connection, array $ColumnInfoRow) {
         $Name = $ColumnInfoRow['COLUMN_NAME'];
         $DataType = $this->BuildDataType($ColumnInfoRow);
-        $Traits = array();
+        $Traits = [];
         if ($ColumnInfoRow['IS_NULLABLE'] === 'YES') {
             $Traits[] = new Columns\Traits\DefaultValue($ColumnInfoRow['COLUMN_DEFAULT']);
         }         
@@ -291,7 +291,7 @@ class DatabaseBuilder implements IDatabaseBuilder {
         $DataTypeDefintion = $ColumnInfoRow['COLUMN_TYPE'];
         $DataTypeDefintion = trim(str_replace($DataTypeName, '', $DataTypeDefintion));
         $DataTypeExtra = null;
-        $DataTypeParameters = array();
+        $DataTypeParameters = [];
 
         if (strlen($DataTypeDefintion) > 0) {
             if (strpos($DataTypeDefintion, '(') !== false && strpos($DataTypeDefintion, ')') !== false) {

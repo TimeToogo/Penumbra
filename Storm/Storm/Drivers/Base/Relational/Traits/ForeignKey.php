@@ -18,11 +18,11 @@ class ForeignKey extends RelationalTableTrait {
     private $ParentTable;
     private $ReferencedTable;
     private $ReferencedColumnMap;
-    private $ParentReferencedColumnNameMap = array();
-    private $ParentColumnIdentifierMap = array();
-    private $ReferencedColumnIdentifierMap = array();
-    private $ParentReferencedColumnIdentifierMap = array();
-    private $ReferencedParentColumnIdentifierMap = array();
+    private $ParentReferencedColumnNameMap = [];
+    private $ParentColumnIdentifierMap = [];
+    private $ReferencedColumnIdentifierMap = [];
+    private $ParentReferencedColumnIdentifierMap = [];
+    private $ReferencedParentColumnIdentifierMap = [];
     
     private $UpdateMode;
     private $DeleteMode;
@@ -138,7 +138,7 @@ class ForeignKey extends RelationalTableTrait {
     /**
      * @return Relational\ResultRow
      */
-    final public function ParentKey(array $Data = array()) {
+    final public function ParentKey(array $Data = []) {
         if($this->ParentRow === null) {
             $this->ParentRow = new Relational\ResultRow($this->ParentColumnIdentifierMap);
         }
@@ -149,7 +149,7 @@ class ForeignKey extends RelationalTableTrait {
     /**
      * @return Relational\ResultRow
      */
-    final public function ReferencedKey(array $Data = array()) {
+    final public function ReferencedKey(array $Data = []) {
         if($this->ReferencedRow === null) {
             $this->ReferencedRow = new Relational\ResultRow($this->ReferencedColumnIdentifierMap);
         }

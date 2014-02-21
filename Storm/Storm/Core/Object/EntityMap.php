@@ -22,42 +22,42 @@ abstract class EntityMap implements IEntityMap {
      * 
      * @var IProperty[] 
      */
-    private $Properties = array();
+    private $Properties = [];
     
     /**
      * The properties containing the entity data.
      * 
      * @var IDataProperty[] 
      */
-    private $DataProperties = array();
+    private $DataProperties = [];
     
     /**
      * The properties representing related entities.
      * 
      * @var IRelationshipProperty[] 
      */
-    private $RelationshipProperties = array();
+    private $RelationshipProperties = [];
     
     /**
      * The properties containing a related entity.
      * 
      * @var IEntityProperty[] 
      */
-    private $EntityProperties = array();
+    private $EntityProperties = [];
     
     /**
      * The properties containing the related entity collections.
      * 
      * @var ICollectionProperty[] 
      */
-    private $CollectionProperties = array();
+    private $CollectionProperties = [];
     
     /**
      * The properties containing the entity's identity.
      * 
      * @var IDataProperty[] 
      */
-    private $IdentityProperties = array();
+    private $IdentityProperties = [];
     
     public function __construct() {
         $this->EntityType = $this->EntityType();
@@ -261,7 +261,7 @@ abstract class EntityMap implements IEntityMap {
             $this->Identity = new Identity($this);
         }
         
-        $IdentityData = array();
+        $IdentityData = [];
         if($Entity !== null) {
             $this->VerifyEntity(__METHOD__, $Entity);
             foreach($this->IdentityProperties as $Identifier => $IdentityProperty) {
@@ -279,7 +279,7 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    final public function RevivalData(array $RevivalData = array()) {
+    final public function RevivalData(array $RevivalData = []) {
         if($this->RevialData === null) {
             $this->RevialData = new RevivalData($this);
         }
@@ -293,7 +293,7 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    final public function PersistanceData(array $PersistanceData = array()) {
+    final public function PersistanceData(array $PersistanceData = []) {
         if($this->PersistenceData === null) {
             $this->PersistenceData = new PersistenceData($this);
         }
@@ -307,7 +307,7 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    final public function DiscardenceData(array $DiscardenceData = array()) {
+    final public function DiscardenceData(array $DiscardenceData = []) {
         if($this->DiscardenceData === null) {
             $this->DiscardenceData = new DiscardenceData($this);
         }
@@ -320,7 +320,7 @@ abstract class EntityMap implements IEntityMap {
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity(__METHOD__, $Entity);
         
-        $PersistenceData = array();
+        $PersistenceData = [];
         foreach($this->DataProperties as $Identifier => $DataProperty) {
             $PersistenceData[$Identifier] = $DataProperty->GetValue($Entity);
         }
@@ -340,7 +340,7 @@ abstract class EntityMap implements IEntityMap {
     final public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity(__METHOD__, $Entity);
         
-        $PersistenceData = array();
+        $PersistenceData = [];
         foreach($this->EntityProperties as $Identifier => $EntityProperty) {
             $PersistenceData[$Identifier] = $EntityProperty->Persist($UnitOfWork, $Entity);
         }
@@ -357,7 +357,7 @@ abstract class EntityMap implements IEntityMap {
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
         $this->VerifyEntity(__METHOD__, $Entity);
         
-        $DiscardingData = array();
+        $DiscardingData = [];
         foreach($this->IdentityProperties as $Identifier => $IdentityProperty) {
             $DiscardingData[$Identifier] = $IdentityProperty->GetValue($Entity);
         }
@@ -392,7 +392,7 @@ abstract class EntityMap implements IEntityMap {
      * {@inheritDoc}
      */
     final public function ReviveEntities(Domain $Domain, array $RevivalDatas) {
-        $Entities = array();
+        $Entities = [];
         foreach($RevivalDatas as $Key => $RevivalData) {
             $Entity = $this->ConstructEntity($RevivalData);
             $this->Apply($Domain, $Entity, $RevivalData);

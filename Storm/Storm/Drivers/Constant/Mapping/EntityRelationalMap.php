@@ -10,7 +10,7 @@ use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Mapping\Mappings\LoadingMode;
 
 abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
-    private $PropertyMappings = array();
+    private $PropertyMappings = [];
     private $DefaultLoadingMode;
         
     protected abstract function InitializeMappings(Object\IEntityMap $EntityMap, Relational\Database $Database);
@@ -30,7 +30,7 @@ abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
     
     final protected function RegisterPropertyMappings(Registrar $Registrar, 
             Object\IEntityMap $EntityMap, Relational\Database $Database) {
-        $this->PropertyMappings = array();
+        $this->PropertyMappings = [];
         $this->InitializeMappings($EntityMap, $Database);
         $Registrar->RegisterAll($this->PropertyMappings);
     }

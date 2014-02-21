@@ -31,7 +31,7 @@ class DatabaseModifier extends Syncing\DatabaseModifier {
             
             $this->AppendFullColumn($QueryBuilder, $ColumnTraitManager, $Column, null , false);
         }
-        $TableOptions = array();
+        $TableOptions = [];
         foreach($Table->GetStructuralTraits() as $StructuralTableTrait) {
             if($StructuralTableTrait instanceof Tables\CharacterSet
                     || $StructuralTableTrait instanceof Tables\Collation

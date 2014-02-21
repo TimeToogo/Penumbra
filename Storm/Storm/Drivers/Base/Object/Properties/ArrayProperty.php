@@ -17,10 +17,10 @@ class ArrayProperty extends MultipleEntityProperty {
     
     protected function PersistRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,
             $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
-        $RelationshipChanges = array();
+        $RelationshipChanges = [];
         
-        $OriginalEntities = array();
-        $CurrentEntities = array();
+        $OriginalEntities = [];
+        $CurrentEntities = [];
         
         if($HasOriginalValue) {
             $OriginalEntities =& $OriginalValue;
@@ -63,7 +63,7 @@ class ArrayProperty extends MultipleEntityProperty {
     protected function DiscardRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
             $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
         
-        $DiscarededRelationships = array();
+        $DiscarededRelationships = [];
         if($HasOriginalValue) {
             foreach($OriginalValue as $RemovedEntity) {
                 $DiscarededRelationships[] = new Object\RelationshipChange(

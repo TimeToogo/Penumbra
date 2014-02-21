@@ -13,12 +13,12 @@ final class Transaction {
     /**
      * @var Row[] 
      */
-    private $PersistedRows = array();
+    private $PersistedRows = [];
     
     /**
      * @var Row[] []
      */
-    private $PersistedRowGroups = array();
+    private $PersistedRowGroups = [];
     
     /**
      * @var Map
@@ -33,22 +33,22 @@ final class Transaction {
     /**
      * @var Procedure[]
      */
-    private $Procedures = array();
+    private $Procedures = [];
     
     /**
      * @var PrimaryKey[]
      */
-    private $DiscardedPrimaryKeys = array();
+    private $DiscardedPrimaryKeys = [];
     
     /**
      * @var PrimaryKey[][]
      */
-    private $DiscardedPrimaryKeyGroups = array();
+    private $DiscardedPrimaryKeyGroups = [];
     
     /**
      * @var Criterion[]
      */
-    private $DiscardedCriteria = array();
+    private $DiscardedCriteria = [];
     
     public function __construct() {
         $this->PrePersistRowEventMap = new Map();
@@ -112,7 +112,7 @@ final class Transaction {
         
         $TableName = $Row->GetTable()->GetName();
         if(!isset($this->PersistedRowGroups[$TableName])) {
-            $this->PersistedRowGroups[$TableName] = array();
+            $this->PersistedRowGroups[$TableName] = [];
         }
         $this->PersistedRowGroups[$TableName][] = $Row;
     }
@@ -134,7 +134,7 @@ final class Transaction {
      * @param object $Key The key
      * @return void
      */
-    private function TriggerEvents(Map $EventMap, $Key, array $CustomArguments = array()) {
+    private function TriggerEvents(Map $EventMap, $Key, array $CustomArguments = []) {
         array_unshift($CustomArguments, $this);
         if(isset($EventMap[$Key])) {
             $Events = $EventMap[$Key];
@@ -224,7 +224,7 @@ final class Transaction {
         
         $TableName = $PrimaryKey->GetTable()->GetName();
         if(!isset($this->DiscardedPrimaryKeyGroups[$TableName])) {
-            $this->DiscardedPrimaryKeyGroups[$TableName] = array();
+            $this->DiscardedPrimaryKeyGroups[$TableName] = [];
         }
         $this->DiscardedPrimaryKeyGroups[$TableName][] = $PrimaryKey;
     }

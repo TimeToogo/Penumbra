@@ -6,7 +6,7 @@ use \Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser\PHPParserCo
 use \Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser\AST;
 
 class VariableResolverVisitor extends \PHPParser_NodeVisitorAbstract {
-    private $VariableValueMap = array();
+    private $VariableValueMap = [];
     
     public function SetVariableValueMap(array $VariableValueMap) {
         $this->VariableValueMap = $VariableValueMap;

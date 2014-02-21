@@ -116,17 +116,17 @@ interface IEntityMap {
     /**
      * @return RevivalData
      */
-    public function RevivalData(array $RevivalData = array());
+    public function RevivalData(array $RevivalData = []);
     
     /**
      * @return PersistenceData
      */
-    public function PersistanceData(array $PersistanceData = array());
+    public function PersistanceData(array $PersistanceData = []);
     
     /**
      * @return DiscardenceData
      */
-    public function DiscardenceData(array $DiscardenceData = array());
+    public function DiscardenceData(array $DiscardenceData = []);
     
     /**
      * Persists an entity's relationships to the supplied unit of work and returns the persistence data.

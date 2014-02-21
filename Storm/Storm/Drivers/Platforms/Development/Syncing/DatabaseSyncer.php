@@ -138,12 +138,12 @@ final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
         $Traits = $Table->GetStructuralTraits();
         $CurrentTraits = $CurrentTable->GetStructuralTraits();
         
-        $TraitsToAdd = array();
+        $TraitsToAdd = [];
         foreach($Traits as $Trait) {
             if(count(array_filter($CurrentTraits, [$Trait, 'Is'])) === 0)
                 $TraitsToAdd[] = $Trait;
         }
-        $TraitsToRemove = array();
+        $TraitsToRemove = [];
         foreach($CurrentTraits as $CurrentTrait) {
             if(count(array_filter($Traits, [$CurrentTrait, 'Is'])) === 0)
                 $TraitsToRemove[] = $CurrentTrait;
@@ -158,7 +158,7 @@ final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
 
         $ColumnNamesToModify = array_intersect_key($CurrentColumnNamesMap, $ColumnNamesMap);
         
-        $ColumnsToModify = array();
+        $ColumnsToModify = [];
         foreach($ColumnNamesToModify as $ColumnName => $CurrentPosition) {
             $Position = $ColumnNamesMap[$ColumnName];
             
@@ -170,13 +170,13 @@ final class DatabaseSyncer extends Relational\Syncing\DatabaseSyncer {
         }
         
         $ColumnNamesToAdd = array_diff_key($ColumnNamesMap, $CurrentColumnNamesMap);
-        $ColumnsToAdd = array();
+        $ColumnsToAdd = [];
         foreach($ColumnNamesToAdd as $ColumnName => $Position) {
             $ColumnsToAdd[$Position] = $Columns[$ColumnName];
         }
         
         $ColumnNamesToRemove = array_diff_key($CurrentColumnNamesMap, $ColumnNamesMap);
-        $ColumnsToRemove = array();
+        $ColumnsToRemove = [];
         foreach($ColumnNamesToRemove as $ColumnName => $Position) {
             $ColumnsToRemove[$Position] = $CurrentColumns[$ColumnName];
         }

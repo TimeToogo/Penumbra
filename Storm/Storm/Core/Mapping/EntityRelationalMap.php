@@ -43,42 +43,42 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * @var IProperty[]
      */
-    private $MappedProperties = array();
+    private $MappedProperties = [];
     
     /**
      * @var Relational\IColumn[]
      */
-    private $MappedReviveColumns = array();
+    private $MappedReviveColumns = [];
     
     /**
      * @var Relational\IColumn[]
      */
-    private $MappedPersistColumns = array();
+    private $MappedPersistColumns = [];
     
     /**
      * @var IPropertyMapping
      */
-    private $PropertyMappings = array();
+    private $PropertyMappings = [];
     
     /**
      * @var IDataPropertyColumnMapping[]
      */
-    private $DataPropertyColumnMappings = array();
+    private $DataPropertyColumnMappings = [];
     
     /**
      * @var IDataPropertyColumnMapping[]
      */
-    private $IdentityPropertyPrimaryKeyMappings = array();
+    private $IdentityPropertyPrimaryKeyMappings = [];
     
     /**
      * @var IEntityPropertyToOneRelationMapping[]
      */
-    private $EntityPropertyToOneRelationMappings = array();
+    private $EntityPropertyToOneRelationMappings = [];
     
     /**
      * @var ICollectionPropertyToManyRelationMapping[]
      */
-    private $CollectionPropertyToManyRelationMappings = array();
+    private $CollectionPropertyToManyRelationMappings = [];
     
     /**
      * {@inheritDoc}
@@ -285,7 +285,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * {@inheritDoc}
      */
-    public function ResultRow($ColumnData = array()) {
+    public function ResultRow($ColumnData = []) {
         if($this->ResultRow === null) {
             $AllPersistColumns = call_user_func_array('array_merge', 
                     array_map(function($Table) { return $Table->GetColumns(); }, $this->PersistTables));

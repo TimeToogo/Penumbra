@@ -21,7 +21,7 @@ class Index extends StructuralTableTrait {
     private $Type;
     private $Columns;
     private $ColumnNames;
-    private $Directions = array();
+    private $Directions = [];
     
     public function __construct($Name, array $Columns, $Type = IndexType::Plain) {
         $this->Name = $Name;

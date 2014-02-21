@@ -32,7 +32,7 @@ class Persister extends Queries\StandardPersister {
         $TableName = $Table->GetName();
         $DerivedTableName = $TableName . 'Values';
         
-        $PrimaryKeyIdentifiers = array();
+        $PrimaryKeyIdentifiers = [];
         foreach($PrimaryKeyColumnNames as $ColumnName) {
             $PrimaryKeyIdentifiers[] = [$TableName, $ColumnName];
         }

@@ -11,19 +11,19 @@ class ResultRow extends ColumnData {
     /**
      * @var ITable[] 
      */
-    private $Tables = array();
+    private $Tables = [];
     
     /**
      * @var Row[] 
      */
-    private $Rows = array();
+    private $Rows = [];
     
     /**
      * @var PrimaryKey[] 
      */
-    private $PrimaryKeys = array();
+    private $PrimaryKeys = [];
     
-    public function __construct(array &$Columns, array $ColumnData = array()) {
+    public function __construct(array &$Columns, array $ColumnData = []) {
         foreach($Columns as $Column) {
             $Table = $Column->GetTable();
             $TableName = $Table->GetName();
@@ -39,7 +39,7 @@ class ResultRow extends ColumnData {
     }
     
     public function GetData() {
-        $Data = array();
+        $Data = [];
         foreach($this->Rows as $Row) {
             $Data += $Row->GetData();
         }
@@ -165,7 +165,7 @@ class ResultRow extends ColumnData {
     final public static function GetAllDataFromColumns(array $ResultRows, array $Columns) {
         $NewResultRow = new ResultRow($Columns);
         
-        $NewResultRows = array();
+        $NewResultRows = [];
         foreach($ResultRows as $Key => $ResultRow) {
             $NewResultRows[$Key] = $NewResultRow->Another($ResultRow->GetData());
         }

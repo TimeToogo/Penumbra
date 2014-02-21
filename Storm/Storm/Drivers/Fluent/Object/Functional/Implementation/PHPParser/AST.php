@@ -15,15 +15,15 @@ use \Storm\Drivers\Fluent\Object\Functional\ASTException;
 require_once 'NodeSimplifiers.php';
 
 class AST extends ASTBase {
-    private $OriginalNodes = array();
+    private $OriginalNodes = [];
     private $HasReturnNode;
-    private $ReturnNodes = array();
+    private $ReturnNodes = [];
     
     private $VariableExpander;
     
-    private $NodeSimplifier = array();
+    private $NodeSimplifier = [];
     
-    private $UnresolvedVariables = array();
+    private $UnresolvedVariables = [];
     private $VariableResolverVisiter;
     private $VariableResolver;
     
@@ -35,7 +35,7 @@ class AST extends ASTBase {
             Object\IEntityMap $EntityMap,
             $EntityVariableName) {
         
-        parent::__construct(array(), $EntityMap, $EntityVariableName);
+        parent::__construct([], $EntityMap, $EntityVariableName);
         $this->OriginalNodes = $Nodes;
         $this->LoadNodes();
                 
@@ -63,8 +63,8 @@ class AST extends ASTBase {
     }
     
     private function LoadNodes() {
-        $this->ReturnNodes = array();
-        $WrappedNodes = array();
+        $this->ReturnNodes = [];
+        $WrappedNodes = [];
         
         foreach($this->OriginalNodes as $Node) {
             $WrappedNode = new Node($Node);
@@ -188,7 +188,7 @@ class AST extends ASTBase {
                 return $MappedNode;
                 
             case $Node instanceof \PHPParser_Node_Expr_Array:
-                $ValueExpressions = array();
+                $ValueExpressions = [];
                 foreach ($Node->items as $Key => $Item) {
                     $ValueExpressions[$Key] = $this->ParseNodeInternal($Item->value);
                 }

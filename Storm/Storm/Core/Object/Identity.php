@@ -8,7 +8,7 @@ namespace Storm\Core\Object;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class Identity extends EntityData {
-    public function __construct(EntityMap $EntityMap, array $IdentityData = array()) {
+    public function __construct(EntityMap $EntityMap, array $IdentityData = []) {
         parent::__construct($EntityMap, $EntityMap->GetIdentityProperties(), $IdentityData);
     }
     

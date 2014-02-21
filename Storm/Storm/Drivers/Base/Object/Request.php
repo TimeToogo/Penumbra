@@ -6,7 +6,7 @@ use \Storm\Core\Object;
 
 class Request implements Object\IRequest {
     private $EntityType;
-    private $Properties = array();
+    private $Properties = [];
     private $IsSingleEntity;
     
     /**

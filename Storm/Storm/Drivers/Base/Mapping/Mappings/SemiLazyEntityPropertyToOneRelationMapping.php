@@ -8,8 +8,8 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelationMapping {
-    private $ParentRowArrays = array();
-    private $RelatedRows = array();
+    private $ParentRowArrays = [];
+    private $RelatedRows = [];
     
     public function __construct(
             Object\IEntityProperty $EntityProperty, 
@@ -22,12 +22,12 @@ class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRela
     }
     
     public function __sleep() {
-        return array();
+        return [];
     }
     
     public function __wakeup() {
-        $this->ParentRowArrays = array();
-        $this->RelatedRows = array();
+        $this->ParentRowArrays = [];
+        $this->RelatedRows = [];
     }
     
     public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
@@ -62,7 +62,7 @@ class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRela
             
             $this->RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $AllParentRows);
             
-            $this->ParentRowArrays = array();
+            $this->ParentRowArrays = [];
         }
         
         return $this->MapParentRowKeysToRelatedRevivalData($DomainDatabaseMap, $ParentRows, $this->RelatedRows);

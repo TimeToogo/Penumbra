@@ -14,7 +14,7 @@ interface IObjectMapper {
     /**
      * @return Expression
      */
-    public function MapMethodCallExpression(CoreExpression $ObjectValueExpression = null, $Type, $Name, array $ArgumentValueExpressions = array());
+    public function MapMethodCallExpression(CoreExpression $ObjectValueExpression = null, $Type, $Name, array $ArgumentValueExpressions = []);
  
     /**
      * @return CoreExpression

@@ -18,7 +18,7 @@ final class Row extends TableColumnData {
      */
     private $PrimaryKey;
     
-    public function __construct(ITable $Table, array $RowData = array()) {
+    public function __construct(ITable $Table, array $RowData = []) {
         parent::__construct($Table, $RowData);
         $this->PrimaryKey = $Table->PrimaryKey($RowData);
         $this->PrimaryKeyColumnsAmount = count($Table->GetPrimaryKeyColumns());
