@@ -4,11 +4,11 @@ namespace Storm\Drivers\Base\Object\Properties\Proxies;
 
 use \Storm\Core\Object;
 
-class DevelopmentProxyGenerator extends ProxyFileGenerator {
+class EvalProxyGenerator extends ProxyGenerator {
     private $ConcreteProxyDataGenerator;
     
-    public function __construct($ProxyNamespace, $ProxyCachePath) {
-        parent::__construct($ProxyNamespace, $ProxyCachePath);
+    public function __construct($ProxyNamespace) {
+        parent::__construct($ProxyNamespace);
         $this->ConcreteProxyDataGenerator = new ConcreteProxyDataGenerator();
     }
     
@@ -47,26 +47,10 @@ class DevelopmentProxyGenerator extends ProxyFileGenerator {
             return new $FullProxyName($Domain, $AlreadyKnownRevivalData, $RevivalDataLoaderFunction);
         }
         else {
-            $ProxyFileName = $this->GenerateProxyFileName($ProxyClassName);
+            eval($this->ConcreteProxyDataGenerator->GenerateConcreteProxyData($this->ProxyNamespace, $ProxyClassName, $EntityReflection));
             
-            $this->GenerateProxyClassFile($ProxyFileName, $ProxyClassName, $EntityReflection);
-            
-            require $ProxyFileName;
             return new $FullProxyName($Domain, $AlreadyKnownRevivalData, $RevivalDataLoaderFunction);
         }
-    }
-    
-    private function GenerateProxyClassFile($ProxyFileName, $ProxyClassName, \ReflectionClass $EntityReflection) {
-        $ProxyClassTemplate = $this->ConcreteProxyDataGenerator->GenerateConcreteProxyData($this->ProxyNamespace, $ProxyClassName, $EntityReflection);
-        $this->GenerateProxyFile($ProxyFileName, $ProxyClassTemplate);
-    }
-
-    private function GenerateProxyFile($ProxyFileName, $Template) {
-        $DirectoryPath = pathinfo($ProxyFileName, PATHINFO_DIRNAME);
-        if (!file_exists($DirectoryPath)) {
-            mkdir($DirectoryPath, 0777, true);
-        }
-        file_put_contents($ProxyFileName, $Template);
     }
 }
 

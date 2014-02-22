@@ -5,7 +5,10 @@ namespace Storm\Drivers\Base\Object\Properties\Proxies;
 use \Storm\Core\Object\Domain;
 use \Storm\Core\Object\RevivalData;
 
-class ProductionProxyGenerator extends ProxyGenerator {
+/**
+ * Assumes that all proxy files have been generated.
+ */
+class ProductionProxyGenerator extends ProxyFileGenerator {
     public function GenerateProxies(Domain $Domain, $EntityType, array $AlreadyKnownRevivalDataArray, array $RevivalDataLoaderFunctions) {
         $ProxyClassName = $this->GenerateProxyClassName($EntityType);
         $FullProxyName = $this->GetProxyFullName($ProxyClassName);

@@ -6,14 +6,9 @@ use \Storm\Drivers\Dynamic\Object\Domain;
 
 abstract class ProxyGenerator implements IProxyGenerator {
     protected $ProxyNamespace;
-    protected $ProxyCachePath;
 
-    public function __construct($ProxyNamespace, $ProxyCachePath) {
+    public function __construct($ProxyNamespace) {
         $this->ProxyNamespace = $ProxyNamespace;
-        if($ProxyCachePath[strlen($ProxyCachePath) - 1] !== DIRECTORY_SEPARATOR) {
-            $ProxyCachePath .= DIRECTORY_SEPARATOR;
-        }
-        $this->ProxyCachePath = $ProxyCachePath;
     }
     
     final protected function GenerateProxyClassName($EntityType) {
@@ -22,10 +17,6 @@ abstract class ProxyGenerator implements IProxyGenerator {
     
     final protected function GetProxyFullName($ProxyClassName) {
         return $this->ProxyNamespace . '\\' . $ProxyClassName;
-    }
-
-    final protected function GenerateProxyFileName($ProxyClassName) {
-        return $this->ProxyCachePath . $ProxyClassName . '.php';
     }
 }
 
