@@ -8,6 +8,7 @@ use \Storm\Api\Base\Storm;
 use \Storm\Api\Base\Repository;
 use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
+use \Storm\Drivers\Base\Object\Properties\Proxies;
 
 class One implements \StormExamples\IStormExample {
     const DevelopmentMode = 1;
@@ -17,11 +18,18 @@ class One implements \StormExamples\IStormExample {
         return new Platforms\Mysql\Platform(self::DevelopmentMode > 1);
     }
     
-    public static function GetConnection() {
+    private static function GetConnection() {
         $PDOConnection = Platforms\PDO\Connection::Connect('mysql:host=localhost;dbname=StormTest', 'root', 'admin');
               
         return new Logging\Connection(self::DevelopmentMode > 0 ? new Logging\DumpLogger() : new Logging\NullLogger(), 
                 $PDOConnection);
+    }
+    
+    
+    private static function GetProxyGenerator() {
+        return new Proxies\DevelopmentProxyGenerator(
+                __NAMESPACE__ . '\\' . 'Proxies', 
+                __DIR__ . DIRECTORY_SEPARATOR . 'Proxies');
     }
     
     public function GetStorm() {
@@ -29,7 +37,8 @@ class One implements \StormExamples\IStormExample {
         
         $Configuration = new Api\DefaultConfiguration(
                 Mapping\BloggingDomainDatabaseMap::Factory(), 
-                self::GetConnection(), 
+                self::GetConnection(),
+                self::GetProxyGenerator(),
                 $Cache);
         
         return $Configuration->Storm();
@@ -49,7 +58,7 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::RetreiveComplex;
+        $Action = self::Retreive;
         
         $Amount = 1;        
         $Last;

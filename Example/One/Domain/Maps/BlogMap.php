@@ -26,10 +26,6 @@ class BlogMap extends EntityMap {
     public $Posts;
     
     protected function CreateProperties(Domain $Domain) {
-        $ProxyGenerator = new Properties\Proxies\DevelopmentProxyGenerator(
-                __NAMESPACE__ . '\\' . 'Proxies', 
-                str_replace('\\', DIRECTORY_SEPARATOR, __DIR__) . DIRECTORY_SEPARATOR . 'Proxies');
-        
         $this->Id = new Properties\DataProperty(new Accessors\Field('Id'), true);
         $this->Name = new Properties\DataProperty(new Accessors\MethodPair('GetName', 'SetName'));
         $this->Description = new Properties\DataProperty(new Accessors\Field('Description'));
@@ -38,8 +34,7 @@ class BlogMap extends EntityMap {
         $this->Posts = new Properties\CollectionProperty(new Accessors\Field('Posts'), 
                 \StormExamples\One\Entities\Post::GetType(), 
                 new Properties\Relationships\Identifying(), 
-                $Domain->PostMap->Blog,
-                $ProxyGenerator);
+                $Domain->PostMap->Blog);
     }
 
 }

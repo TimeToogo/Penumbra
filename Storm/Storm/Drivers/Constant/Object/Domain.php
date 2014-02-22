@@ -14,7 +14,7 @@ abstract class Domain extends Object\Domain {
     }
     protected abstract function CreateEntityMaps();
     
-    protected function RegisterEntityMaps(Registrar $Registrar) {
+    protected function RegisterAllEntityMaps(Registrar $Registrar) {
         $this->LoadRegistrarFromProperties($Registrar);
     }
 }

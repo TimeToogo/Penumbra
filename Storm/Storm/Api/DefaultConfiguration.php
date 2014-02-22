@@ -3,6 +3,7 @@
 namespace Storm\Api;
 
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
+use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 use \Storm\Drivers\Fluent\Object\Functional;
 use \Storm\Utilities\Cache\ICache;
 
@@ -16,10 +17,12 @@ class DefaultConfiguration extends Configuration {
     public function __construct(
             callable $DomainDatabaseMapFactory,
             IConnection $Connection, 
+            IProxyGenerator $ProxyGenerator,
             ICache $Cache = null) {
         parent::__construct(
                 $DomainDatabaseMapFactory, 
-                $Connection, 
+                $Connection,
+                $ProxyGenerator,
                 new Functional\Implementation\File\Reader(), 
                 new Functional\Implementation\PHPParser\Parser(), 
                 $Cache);

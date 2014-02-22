@@ -5,7 +5,7 @@
  *                  --DO NOT MODIFY--
  */
 
-namespace StormExamples\One\Domain\Maps\Proxies;
+namespace StormExamples\One\Proxies;
 
 use Storm\Drivers\Base\Object\Properties\Proxies\IProxy as IProxy;
 use Storm\Drivers\Base\Object\Properties\Proxies\EntityProxyFunctionality as ProxyFunctionality;

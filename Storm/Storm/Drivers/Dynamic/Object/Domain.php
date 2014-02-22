@@ -13,7 +13,7 @@ class Domain extends Object\Domain {
         parent::__construct();
     }
     
-    final protected function RegisterEntityMaps(Registrar $Registrar) {
+    final protected function RegisterAllEntityMaps(Registrar $Registrar) {
         $Registrar->RegisterAll($this->EntityMaps);
     }
 }

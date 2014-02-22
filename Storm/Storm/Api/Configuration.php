@@ -4,6 +4,7 @@ namespace Storm\Api;
 
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
+use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 use \Storm\Drivers\Fluent\Object\Functional;
 use \Storm\Utilities\Cache\ICache;
 
@@ -26,6 +27,11 @@ class Configuration implements IConfiguration {
     private $Connection;
     
     /**
+     * @var IConnection 
+     */
+    private $ProxyGenerator;
+    
+    /**
      * @var Closure\IReader
      */
     private $ClosureReader;
@@ -43,10 +49,12 @@ class Configuration implements IConfiguration {
     public function __construct(
             callable $DomainDatabaseMapFactory, 
             IConnection $Connection,
+            IProxyGenerator $ProxyGenerator,
             Functional\IReader $ClosureReader, 
             Functional\IParser $ClosureParser, 
             ICache $Cache = null) {
         $this->DomainDatabaseMapFactory = $DomainDatabaseMapFactory;
+        $this->ProxyGenerator = $ProxyGenerator;
         $this->Connection = $Connection;
         $this->ClosureReader = $ClosureReader;
         $this->ClosureParser = $ClosureParser;
@@ -59,6 +67,7 @@ class Configuration implements IConfiguration {
             return new Base\Storm(
                     $Factory(), 
                     $this->Connection, 
+                    $this->ProxyGenerator,
                     $this->ClosureReader, 
                     $this->ClosureParser);
         }
@@ -66,15 +75,13 @@ class Configuration implements IConfiguration {
             return new Caching\Storm(
                     $this->DomainDatabaseMapFactory,
                     $this->Connection, 
+                    $this->ProxyGenerator,
                     $this->ClosureReader, 
                     $this->ClosureParser,
                     $this->Cache);
         }
     }
     
-    /**
-     * @return static
-     */
     final public function SetDomainDatabaseMapFactory(callable $DomainDatabaseMapFactory) {
         $this->DomainDatabaseMapFactory = $DomainDatabaseMapFactory;
         return $this;
@@ -85,25 +92,21 @@ class Configuration implements IConfiguration {
         return $this;
     }
     
-    /**
-     * @return static
-     */
+    public function SetProxyGenerator(IProxyGenerator $ProxyGenerator) {
+        $this->ProxyGenerator = $ProxyGenerator;
+        return $this;
+    }
+    
     final public function SetFunctionReader(Functional\IReader $ClosureReader) {
         $this->ClosureReader = $ClosureReader;
         return $this;
     }
 
-    /**
-     * @return static
-     */
     final public function SetFunctionParser(Functional\IParser $ClosureParser) {
         $this->ClosureParser = $ClosureParser;
         return $this;
     }
     
-    /**
-     * @return static
-     */
     final public function SetCache(ICache $Cache = null) {
         $this->Cache = $Cache;
         return $this;

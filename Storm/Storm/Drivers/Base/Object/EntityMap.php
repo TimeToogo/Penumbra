@@ -2,9 +2,18 @@
 
 namespace Storm\Drivers\Base\Object;
 
-use Storm\Core\Object;
+use \Storm\Core\Object;
+use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 
 abstract class EntityMap extends Object\EntityMap {
+    /**
+     * @var IProxyGenerator 
+     */
+    private $ProxyGenerator;
+    
+    /**
+     * @var Construction\IEntityConstructor 
+     */
     private $EntityConstructor;
     
     public function __construct() {
@@ -23,6 +32,23 @@ abstract class EntityMap extends Object\EntityMap {
                     $this->EntityConstructor->GetEntityType());
         }
         $this->EntityConstructor->SetEntityType($this->GetEntityType());
+    }
+    
+    final public function SetProxyGenerator(IProxyGenerator $ProxyGenerator) {
+        $this->ProxyGenerator = $ProxyGenerator;
+        $this->UpdateProxyGenerator();
+    }
+    
+    final public function UpdateProxyGenerator() {
+        foreach($this->GetProperties() as $Property) {
+            if($Property instanceof Properties\RelationshipProperty) {
+                $Property->SetProxyGenerator($this->ProxyGenerator);
+            }
+        }
+    }
+    
+    final protected function GetProxyGenerator() {
+        return $this->ProxyGenerator;
     }
     
     /**

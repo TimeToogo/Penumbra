@@ -5,9 +5,9 @@ namespace Storm\Api\Caching;
 use \Storm\Api\Base;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
+use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 use \Storm\Drivers\Fluent\Object\Functional;
 use \Storm\Utilities\Cache;
-use \Storm\Drivers\Base\Relational\IPlatform;
 
 /**
  * This class provides a caching to an instance of DomainDatabaseMap, which can be very
@@ -28,6 +28,7 @@ class Storm extends Base\Storm {
     public function __construct(
             callable $DomainDatabaseMapFactory,
             IConnection $Connection,
+            IProxyGenerator $ProxyGenerator,
             Functional\IReader $FunctionReader, 
             Functional\IParser $FunctionParser,
             Cache\ICache $Cache) {
@@ -40,7 +41,12 @@ class Storm extends Base\Storm {
             $this->Cache->Save(self::DomainDatabaseMapInstanceKey, $DomainDatabaseMap);
         }
         
-        parent::__construct($DomainDatabaseMap, $Connection, $FunctionReader, $FunctionParser);
+        parent::__construct(
+                $DomainDatabaseMap,
+                $Connection,
+                $ProxyGenerator,
+                $FunctionReader,
+                $FunctionParser);
     }
     
     protected function GetClosureToASTConverter(Functional\IReader $FunctionReader, Functional\IParser $FunctionParser) {

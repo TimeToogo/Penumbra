@@ -4,6 +4,7 @@ namespace Storm\Api;
 
 use \Storm\Drivers\Fluent\Object\Functional;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
+use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 use \Storm\Utilities\Cache\ICache;
 
 /**
@@ -26,6 +27,11 @@ interface IConfiguration {
      * @return static
      */
     public function SetConnection(IConnection $Connection);
+    
+    /**
+     * @return static
+     */
+    public function SetProxyGenerator(IProxyGenerator $ProxyGenerator);
     
     /**
      * @return static

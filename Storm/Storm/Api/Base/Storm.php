@@ -4,6 +4,7 @@ namespace Storm\Api\Base;
 
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
+use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 use \Storm\Drivers\Fluent\Object\Functional;
 
 /**
@@ -34,10 +35,12 @@ class Storm {
     public function __construct(
             DomainDatabaseMap $DomainDatabaseMap,
             IConnection $Connection,
+            IProxyGenerator $ProxyGenerator,
             Functional\IReader $FunctionReader, 
             Functional\IParser $FunctionParser) {
         $this->DomainDatabaseMap = $DomainDatabaseMap;
         $this->DomainDatabaseMap->GetDatabase()->SetConnection($Connection);
+        $this->DomainDatabaseMap->GetDomain()->SetProxyGenerator($ProxyGenerator);
         $this->ClosureToASTConverter = $this->GetClosureToASTConverter($FunctionReader, $FunctionParser);
     }
     
