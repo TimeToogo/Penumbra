@@ -12,62 +12,25 @@ class DevelopmentProxyGenerator extends ProxyFileGenerator {
         $this->ConcreteProxyDataGenerator = new ConcreteProxyDataGenerator();
     }
     
-    public function GenerateProxies(Object\Domain $Domain, $EntityType, 
-            array $AlreadyKnownRevivalDataArray,
-            array $RevivalDataLoaderFunctions) {
-        $EntityReflection = new \ReflectionClass($EntityType);
-        $ProxyClassName = $this->GenerateProxyClassName($EntityReflection->getName());
-        $FullProxyName = $this->GetProxyFullName($ProxyClassName);
-        
-        $Proxies = [];
-        foreach($RevivalDataLoaderFunctions as $Key => $RevivalDataLoaderFunction) {
-            $Proxies[] = $this->GenerateProxyInstance($Domain, $EntityReflection, $ProxyClassName, $FullProxyName, 
-                    $AlreadyKnownRevivalDataArray[$Key],
-                    $RevivalDataLoaderFunction);
-        }
-        
-        return $Proxies;
-    }
+    protected function LoadProxyClassFile(\ReflectionClass $EntityReflection, $ProxyClassName, $FullProxyName, $ProxyFileName) {
+        $this->GenerateProxyClassFile($ProxyFileName, $ProxyClassName, $EntityReflection);
 
-    public function GenerateProxy(Object\Domain $Domain, $EntityType, 
-            Object\RevivalData $AlreadyKnownRevivalData,
-            callable $RevivalDataLoaderFunction) {
-        $EntityReflection = new \ReflectionClass($EntityType);
-        $ProxyClassName = $this->GenerateProxyClassName($EntityReflection->getName());
-        $FullProxyName = $this->GetProxyFullName($ProxyClassName);
-        
-        return $this->GenerateProxyInstance($Domain, $EntityReflection, $ProxyClassName, $FullProxyName, 
-                $AlreadyKnownRevivalData, $RevivalDataLoaderFunction);
-    }
-    
-    private function GenerateProxyInstance(Object\Domain $Domain, $EntityReflection, $ProxyClassName, $FullProxyName, 
-            Object\RevivalData $AlreadyKnownRevivalData,
-            callable $RevivalDataLoaderFunction) {
-        if(class_exists($FullProxyName, false)) {
-            return new $FullProxyName($Domain, $AlreadyKnownRevivalData, $RevivalDataLoaderFunction);
-        }
-        else {
-            $ProxyFileName = $this->GenerateProxyFileName($ProxyClassName);
-            
-            $this->GenerateProxyClassFile($ProxyFileName, $ProxyClassName, $EntityReflection);
-            
-            require $ProxyFileName;
-            return new $FullProxyName($Domain, $AlreadyKnownRevivalData, $RevivalDataLoaderFunction);
-        }
+        require $ProxyFileName;
     }
     
     private function GenerateProxyClassFile($ProxyFileName, $ProxyClassName, \ReflectionClass $EntityReflection) {
         $ProxyClassTemplate = $this->ConcreteProxyDataGenerator->GenerateConcreteProxyData($this->ProxyNamespace, $ProxyClassName, $EntityReflection);
-        $this->GenerateProxyFile($ProxyFileName, $ProxyClassTemplate);
+        $this->SaveProxyFile($ProxyFileName, $ProxyClassTemplate);
     }
 
-    private function GenerateProxyFile($ProxyFileName, $Template) {
+    private function SaveProxyFile($ProxyFileName, $Template) {
         $DirectoryPath = pathinfo($ProxyFileName, PATHINFO_DIRNAME);
         if (!file_exists($DirectoryPath)) {
             mkdir($DirectoryPath, 0777, true);
         }
         file_put_contents($ProxyFileName, $Template);
     }
+
 }
 
 ?>

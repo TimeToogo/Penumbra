@@ -18,6 +18,17 @@ abstract class ProxyFileGenerator extends ProxyGenerator {
     final protected function GenerateProxyFileName($ProxyClassName) {
         return $this->ProxyCachePath . $ProxyClassName . '.php';
     }
+    
+    final protected function LoadProxyClass(\ReflectionClass $EntityReflection, $ProxyClassName, $FullProxyName) {
+        $ProxyFileName = $this->GenerateProxyFileName($ProxyClassName);
+        
+        return $this->LoadProxyClassFile($EntityReflection, $ProxyClassName, $FullProxyName, $ProxyFileName);
+    }
+    protected abstract function LoadProxyClassFile(
+            \ReflectionClass $EntityReflection, 
+            $ProxyClassName, 
+            $FullProxyName,
+            $ProxyFileName);
 }
 
 ?>
