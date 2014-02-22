@@ -158,11 +158,10 @@ final class FunctionMapper extends E\FunctionMapper {
             
             $Md5FunctionCall = $this->FunctionCall($MappedName, $ArgumentExpressions);
             
-            return Expression::FunctionCall('IF', Expression::ValueList([
-                $RawOutputExpression,
-                $this->MapFunctionCallExpression('hex2bin', [$Md5FunctionCall]),
-                $Md5FunctionCall
-            ]));
+            return Expression::Conditional(
+                    $RawOutputExpression,
+                    $this->MapFunctionCallExpression('hex2bin', [$Md5FunctionCall]),
+                    $Md5FunctionCall);
         }
     }
     
@@ -178,10 +177,10 @@ final class FunctionMapper extends E\FunctionMapper {
         
         switch ($HashName) {
             case 'md5':
-                return $this->MapFunctionCallExpression('md5', [$ArgumentExpressions]);
+                return $this->MapFunctionCallExpression('md5', $ArgumentExpressions);
                 
             case 'sha1':
-                return $this->MapFunctionCallExpression('sha1', [$ArgumentExpressions]);
+                return $this->MapFunctionCallExpression('sha1', $ArgumentExpressions);
                 
             case 'sha224':
             case 'sha256':
@@ -191,7 +190,8 @@ final class FunctionMapper extends E\FunctionMapper {
                 $ShaLength = (int)substr($HashName, 3);
                 $ArgumentExpressions[0] = $DataExpression;
                 $ArgumentExpressions[1] = Expression::Constant($ShaLength);
-
+                break;
+            
             default:
                 throw new PlatformException('Unsupported hash algorithm: must be one of md5, sha1, sha224, sha256, sha384 or sha512, %s given ', $HashName);
         }

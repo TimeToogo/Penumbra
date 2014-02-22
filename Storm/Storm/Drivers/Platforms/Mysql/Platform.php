@@ -7,7 +7,7 @@ use \Storm\Drivers\Base\Relational;
 use \Storm\Drivers\Platforms\Base;
 
 final class Platform extends Base\Platform {
-    public function __construct($DevelopmentMode) {
+    public function __construct($DevelopmentMode = false) {
         parent::__construct(
                 $DevelopmentMode, 
                 new ExpressionMapper(new FunctionMapper(), new ObjectMapper()),

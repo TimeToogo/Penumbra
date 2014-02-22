@@ -8,7 +8,7 @@ use \Storm\Drivers\Base\Relational;
 abstract class Platform extends Relational\Platform {
     private $DevelopmentMode;
     public function __construct(
-            $DevelopmentMode,
+            $DevelopmentMode = false,
             Relational\Expressions\IExpressionMapper $ExpressionMapper, 
             Relational\Columns\IColumnSet $ColumnSet, 
             Relational\PrimaryKeys\IKeyGeneratorSet $KeyGeneratorSet, 
