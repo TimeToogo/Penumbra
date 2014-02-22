@@ -30,7 +30,7 @@ class Storm {
     /**
      * @var FunctionToASTConverter 
      */
-    protected $ClosureToASTConverter;
+    protected $FunctionToASTConverter;
     
     public function __construct(
             DomainDatabaseMap $DomainDatabaseMap,
@@ -41,7 +41,7 @@ class Storm {
         $this->DomainDatabaseMap = $DomainDatabaseMap;
         $this->DomainDatabaseMap->GetDatabase()->SetConnection($Connection);
         $this->DomainDatabaseMap->GetDomain()->SetProxyGenerator($ProxyGenerator);
-        $this->ClosureToASTConverter = $this->GetClosureToASTConverter($FunctionReader, $FunctionParser);
+        $this->FunctionToASTConverter = $this->GetClosureToASTConverter($FunctionReader, $FunctionParser);
     }
     
     protected function GetClosureToASTConverter(
@@ -82,7 +82,7 @@ class Storm {
      * @return Repository The instantiated repository
      */
     protected function ConstructRepository($EntityType) {
-        return new Repository($this->DomainDatabaseMap, $this->ClosureToASTConverter, $EntityType);
+        return new Repository($this->DomainDatabaseMap, $this->FunctionToASTConverter, $EntityType);
     }
     
     /**
