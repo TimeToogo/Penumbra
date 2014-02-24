@@ -1,8 +1,8 @@
 <?php 
 
-namespace StormExamples\One;
+namespace Storm\Tests\Integration\ObjectRelationalModels\Blog;
 
-use \StormExamples\One\Entities;
+use \Storm\Tests\Integration\ObjectRelationalModels\Blog\Entities;
 use \Storm\Api;
 use \Storm\Api\Base\Storm;
 use \Storm\Api\Base\Repository;
@@ -10,39 +10,9 @@ use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 use \Storm\Drivers\Base\Object\Properties\Proxies;
 
-class One implements \StormExamples\IStormExample {
+class One implements \Storm\Tests\Integration\ObjectRelationalModels\Blog\IStormExample {
     const DevelopmentMode = 1;
     const UseCache = false;
-    
-    public static function GetPlatform() {
-        return new Platforms\Mysql\Platform(self::DevelopmentMode > 1);
-    }
-    
-    private static function GetConnection() {
-        $PDOConnection = Platforms\PDO\Connection::Connect('mysql:host=localhost;dbname=StormTest', 'root', 'admin');
-              
-        return new Logging\Connection(self::DevelopmentMode > 0 ? new Logging\DumpLogger() : new Logging\NullLogger(), 
-                $PDOConnection);
-    }
-    
-    
-    private static function GetProxyGenerator() {
-        return new Proxies\DevelopmentProxyGenerator(
-                __NAMESPACE__ . '\\' . 'Proxies', 
-                __DIR__ . DIRECTORY_SEPARATOR . 'Proxies');
-    }
-    
-    public function GetStorm() {
-        $Cache = self::UseCache && class_exists('Memcache', false) ? new \Storm\Utilities\Cache\MemcacheCache('localhost') : null;
-        
-        $Configuration = new Api\DefaultConfiguration(
-                Mapping\BloggingDomainDatabaseMap::Factory(), 
-                self::GetConnection(),
-                self::GetProxyGenerator(),
-                $Cache);
-        
-        return $Configuration->Storm();
-    }
     
     const Id = 500;
     
@@ -58,7 +28,7 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::PersistExisting;
+        $Action = self::Retreive;
         
         $Amount = 1;        
         $Last;
