@@ -33,7 +33,7 @@ class Reader implements Functional\IReader {
         $File->seek($StartLine);
         $EndLine = $Reflection->getEndLine() - 2;
         while($File->key() <= $EndLine) {
-            $SourceLines[] = trim($File->fgets());
+            $SourceLines[] = $File->fgets();
         }
         unset($File);
         

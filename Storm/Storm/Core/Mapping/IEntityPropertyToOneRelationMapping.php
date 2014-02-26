@@ -3,6 +3,7 @@
 namespace Storm\Core\Mapping;
 
 use \Storm\Core\Containers\Map;
+use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 /**
@@ -10,7 +11,7 @@ use \Storm\Core\Relational;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-interface IEntityPropertyToOneRelationMapping extends IPropertyMapping {
+interface IEntityPropertyToOneRelationMapping extends IRelationshipPropertyRelationMapping {
     const IEntityPropertyToOneRelationMappingType = __CLASS__;
     
     /**
@@ -26,15 +27,6 @@ interface IEntityPropertyToOneRelationMapping extends IPropertyMapping {
      * @return Relational\IToOneRelation
      */
     public function GetToOneRelation();
-    
-    /**
-     * Adds any constraints and/or properties to the reqeuest required for loading the relation.
-     * 
-     * @param DomainDatabaseMap $DomainDatabaseMap The parent domain database map
-     * @param Relational\Request $RelationalRequest The request to map to
-     * @return void
-     */
-    public function AddToRelationalRequest(DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest);
     
     /**
      * This method should be implemented such that it sets the revival data of the mapped property
@@ -57,6 +49,11 @@ interface IEntityPropertyToOneRelationMapping extends IPropertyMapping {
      * @return void
      */
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, Relational\RelationshipChange $RelationshipChange);
+    
+    /**
+     * @return Relational\Expressions\Expression[]
+     */
+    public function MapObjectOperationExpression(Object\Expressions\ObjectOperationExpression $AssignmentExpression); 
 }
 
 ?>

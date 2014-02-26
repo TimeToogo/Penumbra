@@ -20,6 +20,11 @@ interface IPropertyMapping {
      * @return Object\IProperty
      */
     public function GetProperty();
+    
+    /**
+     * @return Relational\Expressions\SetExpression[]
+     */
+    public function MapAssignmentExpression(Object\Expressions\AssignmentExpression $AssignmentExpression);    
 }
 
 ?>

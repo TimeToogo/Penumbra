@@ -10,7 +10,7 @@ use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Object\LazyRevivalData;
 use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 
-abstract class RelationshipPropertyRelationMapping extends PropertyMapping {
+abstract class RelationshipPropertyRelationMapping extends PropertyMapping implements IRelationshipPropertyRelationMapping {
     private $EntityType;
     private $RelationshipProperty;
     private $Relation;

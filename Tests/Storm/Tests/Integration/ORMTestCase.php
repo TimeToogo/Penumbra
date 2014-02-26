@@ -14,6 +14,10 @@ abstract class ORMTestCase extends StormTestCase {
      * @var IConnection 
      */
     private static $Connection = null;
+    /**
+     * @var IConnection 
+     */
+    private static $DBName = null;
     
     /**
      * @var IPlatform 
@@ -25,12 +29,24 @@ abstract class ORMTestCase extends StormTestCase {
      */
     private static $ProxyGenerator = null;
     
-    private static function GetConnection() {
+    /**
+     * @return IConnection
+     */
+    protected static function GetConnection() {
         if (self::$Connection === null) {
             self::$Connection = \Storm\Drivers\Platforms\PDO\Connection::Connect($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
+            self::$DBName = $GLOBALS['DB_DBNAME'];
         }
         
         return self::$Connection;
+    }
+    
+    /**
+     * @return IConnection
+     */
+    protected static function GetDBName() {
+        self::GetConnection();        
+        return self::$DBName;
     }
     
     private static function GetPlatform() {
@@ -74,6 +90,13 @@ abstract class ORMTestCase extends StormTestCase {
         }
         
         return $this->Storm;
+    }
+    
+    /**
+     * @return Api\Base\Repository
+     */
+    final protected function GetRepository($EntityType) {
+        return $this->GetStorm()->GetRepository($EntityType);
     }
 }
 

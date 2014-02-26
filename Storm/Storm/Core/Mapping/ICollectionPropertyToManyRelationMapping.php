@@ -3,6 +3,7 @@
 namespace Storm\Core\Mapping;
 
 use \Storm\Core\Containers\Map;
+use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 /**
@@ -10,7 +11,7 @@ use \Storm\Core\Relational;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-interface ICollectionPropertyToManyRelationMapping extends IPropertyMapping {
+interface ICollectionPropertyToManyRelationMapping extends IRelationshipPropertyRelationMapping {
     const ICollectionPropertyToManyRelationMappingType = __CLASS__;
     
     /**
@@ -26,16 +27,7 @@ interface ICollectionPropertyToManyRelationMapping extends IPropertyMapping {
      * @return Relational\IToManyRelation
      */
     public function GetToManyRelation(); 
-    
-    /**
-     * Adds any constraints and/or properties to the reqeuest required for loading the relation.
-     * 
-     * @param DomainDatabaseMap $DomainDatabaseMap The parent domain database map
-     * @param Relational\Request $RelationalRequest The request to map to
-     * @return void
-     */
-    public function AddToRelationalRequest(DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest);
-    
+        
     /**
      * This method should be implemented such that it sets the revival data of the mapped property
      * with the appropriate data to revive the related entity.
