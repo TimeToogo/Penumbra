@@ -58,12 +58,20 @@ interface IEntityRelationalMap {
     public function GetMappedReviveTables();
     
     /**
-     * Intialize the property mapping in the context of the parent domain database map.
+     * Intialize the entity map and tables in the context of the parent domain database map.
      * 
      * @param DomainDatabaseMap $DomainDatabaseMap The parent domain database map
      * @return void
      */
     public function Initialize(DomainDatabaseMap $DomainDatabaseMap);
+    
+    /**
+     * Intialize the relationship property mapping in the context of the parent domain database map.
+     * 
+     * @param DomainDatabaseMap $DomainDatabaseMap The parent domain database map
+     * @return void
+     */
+    public function InitializeRelationshipMappings(DomainDatabaseMap $DomainDatabaseMap);
     
     /**
      * @return IPropertyMapping[]
@@ -100,7 +108,7 @@ interface IEntityRelationalMap {
     public function ResultRow($ColumnData = []);
     
     /**
-     * Get the criterion that must be included for every request.
+     * Get the criterion that must be included for every request/procedure.
      * 
      * @return Relational\Criterion
      */
@@ -162,7 +170,40 @@ interface IEntityRelationalMap {
      * @param Relational\PrimaryKey[] The primary keys to map
      * @return Object\Identity[] $Identity The mapped identities
      */
-    public function MapPrimaryKeysToIdentities(array $PrimaryKeys);
+    public function MapPrimaryKeysToIdentities(array $PrimaryKeys); 
+    
+    /**
+     * @access private
+     * 
+     * Maps an entity such that its all its properties will be loaded in the given relational request.
+     * 
+     * @param Relational\Request $RelationalRequest The request to add to
+     * @return void
+     */
+    public function MapEntityToRelationalRequest(Relational\Request $RelationalRequest, array $AlreadyKnownProperties = []);
+    
+    /**
+     * @access private
+     * 
+     * Maps the supplied properties such that they will be loaded in the given relational request.
+     * 
+     * @param \Storm\Core\Mapping\IEntityRelationalMap $EntityRelationalMap The relational map of the entity
+     * @param \Storm\Core\Relational\Request $RelationalRequest The request to add to
+     * @param array|null $Properties The array of properties to map or null if all properties should be mapped
+     * @return void
+     */
+    public function MapPropetiesToRelationalRequest(Relational\Request $RelationalRequest, array $Properties = null);
+    
+    /**
+     * @access private
+     * 
+     * Maps the supplied result rows to an array of revival data.
+     * NOTE: Array keys are preserved.
+     * 
+     * @param Relational\Database $Database The database to load the relations from
+     * @param Relational\ResultRows[] $ResultRows The result row to map
+     */
+    public function MapResultRowsToRevivalData(Relational\Database $Database, array $ResultRowArray);
 }
 
 ?>

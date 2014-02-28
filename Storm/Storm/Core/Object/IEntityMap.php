@@ -175,6 +175,13 @@ interface IEntityMap {
     public function ReviveEntities(Domain $Domain, array $RevivalDataArray);
     
     /**
+     * Constructs an new instance of the entity
+     * 
+     * @return object
+     */
+    public function ConstructEntity();
+    
+    /**
      * Loads an entity instance with the supplied revival data.
      * 
      * @param RevivalData $RevivalData The revival data to load the entity with

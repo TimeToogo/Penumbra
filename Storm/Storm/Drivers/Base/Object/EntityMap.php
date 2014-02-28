@@ -2,6 +2,7 @@
 
 namespace Storm\Drivers\Base\Object;
 
+use \Storm\Core\Containers\Registrar;
 use \Storm\Core\Object;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 
@@ -56,9 +57,25 @@ abstract class EntityMap extends Object\EntityMap {
      */
     protected abstract function EntityConstructor();
     
-    final protected function ConstructEntity(Object\RevivalData $RevivalData) {
+    final public function ConstructEntity(Object\RevivalData $RevivalData) {
         return $this->EntityConstructor->Construct();
     }
+    
+    final protected function RegisterProperties(Object\Domain $Domain, Registrar $Registrar) {
+        $ValueObjectRegistrar = new Registrar(Object\IEntityMap::IEntityMapType);
+        $this->RegisterValueObjects($Domain, $ValueObjectRegistrar);
+        foreach($ValueObjectRegistrar as $ValueObjectMap) {
+            $ValueObjectMap->InitializeProperties($Domain);
+            //TODO: traverse parent property
+            //TODO: On ConstructEntity set parent property to the ConstructEntity of the value object map
+            $Registrar->Register($ValueObjectMap->GetProperties());
+        }
+        
+        $this->Properties($Domain, $Registrar);
+    }
+    protected abstract function Properties(Object\Domain $Domain, Registrar $Registrar);
+    
+    protected function RegisterValueObjects(Object\Domain $Domain, Registrar $Registrar) {}
 }
 
 ?>

@@ -30,14 +30,14 @@ interface ICollectionPropertyToManyRelationMapping extends IRelationshipProperty
         
     /**
      * This method should be implemented such that it sets the revival data of the mapped property
-     * with the appropriate data to revive the related entity.
+     * with the appropriate data to revive the related entities.
      * 
-     * @param DomainDatabaseMap $DomainDatabaseMap The parent domain database map
+     * @param Relational\Database $Database The database to load the related rows from
      * @param Map $ResultRowRevivalDataMap The map containing the parent loaded result rows and 
      * respective revival data
      * @return void
      */
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray);
+    public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray);
     
     /**
      * This method should be implemented such that it saves the relationships between
@@ -49,6 +49,11 @@ interface ICollectionPropertyToManyRelationMapping extends IRelationshipProperty
      * @return void
      */
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges);
+    
+    /**
+     * @return Relational\Expressions\Expression[]
+     */
+    public function MapFunctionCall(Relational\Criterion $Criterion, Expressions\FunctionCallExpression $FunctionCallExpression);
 }
 
 ?>

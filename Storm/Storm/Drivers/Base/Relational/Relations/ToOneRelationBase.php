@@ -8,6 +8,10 @@ use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
 abstract class ToOneRelationBase extends KeyedRelation implements Relational\IToOneRelation {
     
+    protected function JoinType() {
+        return Relational\JoinType::Left;
+    }
+    
     final public function MapParentKeysToRelatedRow(array $ParentRows, array $RelatedRows) {
         if(count($RelatedRows) === 0) {
             return [];

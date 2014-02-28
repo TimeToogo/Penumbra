@@ -14,10 +14,10 @@ final class EagerCollectionPropertyToManyRelationMapping extends CollectionPrope
         parent::__construct($CollectionProperty, $ToManyRelation);
     }
     
-    public function Revive(Mapping\DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
-        $RelatedRowArray = $this->LoadRelatedRows($DomainDatabaseMap, $ResultRowArray);
+    public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
+        $RelatedRowArray = $this->LoadRelatedRows($Database, $ResultRowArray);
         
-        $ParentKeyRelatedRevivalDataArrayMap = $this->MapParentRowKeysToRelatedRevivalDataArray($DomainDatabaseMap, $ResultRowArray, $RelatedRowArray);
+        $ParentKeyRelatedRevivalDataArrayMap = $this->MapParentRowKeysToRelatedRevivalDataArray($Database, $ResultRowArray, $RelatedRowArray);
         
         foreach($RevivalDataArray as $Key => $RevivalData) {            
             $RevivalData[$this->Property] = $ParentKeyRelatedRevivalDataArrayMap[$Key];

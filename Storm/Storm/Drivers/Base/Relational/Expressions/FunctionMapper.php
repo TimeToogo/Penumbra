@@ -18,7 +18,11 @@ abstract class FunctionMapper implements IFunctionMapper {
         if(isset($this->MatchingFunctions[$FunctionName])) {
             return $this->FunctionCall($this->MatchingFunctions[$FunctionName], $ArgumentExpressions);
         }
-        
+        /*
+        if(strpos($FunctionName, '__') === 0) {
+            return $this->FunctionCall(substr($FunctionName, 2), $ArgumentExpressions);
+        }
+        */
         if(!method_exists($this, $FunctionName)) {
             throw new \Storm\Core\NotSupportedException(
                     '%s does not support mapping function: %s',

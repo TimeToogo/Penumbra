@@ -51,37 +51,45 @@ class JoinTableRelation extends ToManyRelationBase {
     public function GetRelationalParentColumns() {
         return $this->ParentForeignKey->GetReferencedColumns();
     }
-
-    public function AddConstraintToRequest(Relational\Request $Request) {
-        $Request->AddTable($this->JoinTable);
-        parent::AddConstraintToRequest($Request);
+    
+    protected function NewRelationRequest() {
+        $Request = new Relational\Request(new Relational\Criterion($this->JoinTable));
+        $Request->GetCriterion()->AddJoins(parent::GetRelationJoins($this->GetTable()));
+        
+        return $Request;
     }
     
+    protected function JoinType() {
+        return Relational\JoinType::Inner;
+    }
+    
+    protected function GetRelationJoins(Relational\ITable $Table) {
+        $Joins = [new Relational\Join(Relational\JoinType::Left, $this->JoinTable, $this->ParentForeignKey->GetConstraintPredicate())];
+        return array_merge($Joins, parent::GetRelationJoins($Table));
+    }
+    
+    protected function AddParentColumnsToRequest(Relational\Request $Request) {
+        parent::AddParentColumnsToRequest($Request);
+        $Request->AddColumns($this->ParentForeignKey->GetParentColumns());
+    }
+    
+    protected function MapParentRowToRelatedKey(ForeignKey $ForeignKey, Relational\ResultRow $ParentRow) {
+        $JoinTableKey = $this->ParentForeignKey->ParentKey();
+        $this->ParentForeignKey->MapReferencedToParentKey($ParentRow, $JoinTableKey);
+        
+        return $JoinTableKey;
+    }    
     
     protected function ParentTable(ForeignKey $ForeignKey) { }
     protected function RelatedColumns(ForeignKey $ForeignKey) {
         return [];
     }
-    public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows) {
-        if(count($ParentRows) > 1) {
-            $Request->AddColumns($this->ParentForeignKey->GetParentColumns());
-        }
-        parent::AddParentPredicateToRequest($Request, $ParentRows);
-    }
-    
     protected function GroupRelatedRowsByParentKeys(array &$MappedRelatedRows, ForeignKey $ForeignKey, array $ParentRows, array $RelatedRows) {
         $ParentJoinTableKeys = $this->ParentForeignKey->GetParentColumns();
         $ParentReferencedKeys = $this->ParentForeignKey->GetReferencedColumns();
         
         $GroupedRelatedRows = $this->GroupRowsByColumnValues($RelatedRows, $ParentJoinTableKeys);
         $this->MapParentRowKeysToGroupedRelatedRows($MappedRelatedRows, $ParentRows, $ParentReferencedKeys, $GroupedRelatedRows);
-    }
-
-    protected function MapParentRowToRelatedKey(ForeignKey $ForeignKey, Relational\ResultRow $ParentRow) {
-        $JoinTableKey = $this->ParentForeignKey->ParentKey();
-        $this->ParentForeignKey->MapReferencedToParentKey($ParentRow, $JoinTableKey);
-        
-        return $JoinTableKey;
     }
     
     public function MapRelationalParentDataToRelatedData

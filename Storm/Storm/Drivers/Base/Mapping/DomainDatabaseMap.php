@@ -116,7 +116,7 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
             
             default:
                 throw new Mapping\MappingException(
-                        'Unsupported object expression type %s given',
+                        'Unsupported object expression type: %s given',
                         get_class($Expression));
         }
     }

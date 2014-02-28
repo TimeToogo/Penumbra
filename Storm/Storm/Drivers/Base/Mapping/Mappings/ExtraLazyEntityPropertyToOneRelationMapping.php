@@ -18,21 +18,21 @@ class ExtraLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRel
         parent::__construct($EntityProperty, $ToOneRelation);
     }
     
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
+    public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
         $EntityType = $this->GetEntityType();
         
         foreach($ResultRowArray as $Key => $ParentRow) {
             
-            $RelatedRevivalDataLoader = function () use (&$DomainDatabaseMap, $EntityType, $ParentRow) {
-                $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, [$ParentRow]);
-                $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($EntityType, $RelatedRows);
+            $RelatedRevivalDataLoader = function () use (&$Database, $EntityType, $ParentRow) {
+                $RelatedRows = $this->LoadRelatedRows($Database, [$ParentRow]);
+                $RelatedRevivalData = $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $RelatedRows);
                 
                 return reset($RelatedRevivalData);
             };
             
             $RevivalDataArray[$Key][$this->Property] = 
                     $this->MakeLazyRevivalData(
-                            $DomainDatabaseMap, 
+                            $Database, 
                             $ParentRow, 
                             $RelatedRevivalDataLoader);
         }

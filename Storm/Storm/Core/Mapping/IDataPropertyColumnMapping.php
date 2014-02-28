@@ -40,7 +40,7 @@ interface IDataPropertyColumnMapping extends IPropertyMapping {
      * 
      * @return Relational\IColumn[]
      */
-    public function GetPersistColumns();    
+    public function GetPersistColumns();
     
     /**
      * Maps the column data to property data.

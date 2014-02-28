@@ -282,7 +282,7 @@ final class FunctionMapper extends E\FunctionMapper {
         return Expression::BinaryOperation(
                 $this->FunctionCall('PI'), 
                 O\Binary::Addition,
-                Expression::Keyword('0.0000000000000'));
+                Expression::Literal('0.0000000000000'));
     }
     
     public function round(&$MappedName, array &$ArgumentExpressions) {

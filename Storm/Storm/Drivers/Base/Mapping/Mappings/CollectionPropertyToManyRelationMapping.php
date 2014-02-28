@@ -9,6 +9,7 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Object\LazyRevivalData;
 use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
+use \Storm\Core\Mapping\Expressions;
 
 abstract class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelationMapping implements ICollectionPropertyToManyRelationMapping {
     private $CollectionProperty;
@@ -37,10 +38,10 @@ abstract class CollectionPropertyToManyRelationMapping extends RelationshipPrope
         return $this->ToManyRelation;
     }
     
-    final protected function MapParentRowKeysToRelatedRevivalDataArray(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows, array $RelatedRows) {
+    final protected function MapParentRowKeysToRelatedRevivalDataArray(Relational\Database $Database, array $ParentRows, array $RelatedRows) {
         $ParentKeyRelatedRowsMap = $this->ToManyRelation->MapParentKeysToRelatedRows($ParentRows, $RelatedRows);
         
-        $RelatedRevivalData = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $RelatedRows);
+        $RelatedRevivalData = $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $RelatedRows);
         
         $MappedRelatedRevivalData = [];
         foreach($ParentRows as $Key => $ParentRow) {            
@@ -51,13 +52,13 @@ abstract class CollectionPropertyToManyRelationMapping extends RelationshipPrope
     }
     
     final protected function MakeMultipleLazyRevivalData(
-            DomainDatabaseMap $DomainDatabaseMap,
+            Relational\Database $Database, 
             Relational\ResultRow $ParentData,
             callable $RevivalDataLoader) {
-        $RelatedData = $DomainDatabaseMap->GetEntityRelationalMap($this->GetEntityType())->ResultRow();
+        $RelatedData = $this->EntityRelationalMap->ResultRow();
         $this->ToManyRelation->MapRelationalParentDataToRelatedData($ParentData, $RelatedData);
         $AlreadyKnownRelatedRevivalData = 
-                $DomainDatabaseMap->MapResultRowDataToRevivalData($this->GetEntityType(), $RelatedData);
+            $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $RelatedData);
         
         return new MultipleLazyRevivalData($AlreadyKnownRelatedRevivalData, $RevivalDataLoader);
     }
@@ -66,6 +67,10 @@ abstract class CollectionPropertyToManyRelationMapping extends RelationshipPrope
         if(count($RelationshipChanges) > 0) {
             $this->ToManyRelation->Persist($Transaction, $ParentData, $RelationshipChanges);
         }
+    }
+
+    public function MapFunctionCall(Relational\Criterion $Criterion, Expressions\FunctionCallExpression $FunctionCallExpression) {
+        $this->ToManyRelation->AddRelationToCriterion($Criterion);
     }
 }
 

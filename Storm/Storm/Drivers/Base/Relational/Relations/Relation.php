@@ -25,18 +25,34 @@ abstract class Relation implements Relational\IRelation {
     }
     
     final public function AddRelationToRequest(Relational\Request $Request, array $ParentRows = null) {
-        $Request->AddTable($this->Table);
-        $this->AddConstraintToRequest($Request);
+        $this->AddRelationToCriterion($Request->GetCriterion(), $ParentRows);
+        
         if($ParentRows !== null && count($ParentRows) > 0) {
-            $this->AddParentPredicateToRequest($Request, $ParentRows);
+            $this->AddParentColumnsToRequest($Request);
         }
     }
-    /**
-     * Relational\Request
-     */
-    protected abstract function AddConstraintToRequest(Relational\Request $Request);
     
-    protected abstract function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows);
+    final public function AddRelationToCriterion(Relational\Criterion $Criterion, array $ParentRows = null) {
+        $Criterion->AddJoins($this->RelationJoins());
+        $this->AddParentPredicate($Criterion, $ParentRows);
+    }
+    
+    final protected function RelationJoins() {
+        return $this->GetRelationJoins($this->Table);
+    }
+    
+    /**
+     * Relational\Join[]
+     */
+    protected abstract function GetRelationJoins(Relational\ITable $Table);
+    private function AddParentPredicate(Relational\Criterion $Criterion, array $ParentRows = null) {
+        if($ParentRows !== null && count($ParentRows) > 0) {
+            $this->AddParentPredicateToCriterion($Criterion, $ParentRows);
+        }
+    }
+    protected abstract function AddParentPredicateToCriterion(Relational\Criterion $Criterion, array $ParentRows);
+    
+    protected abstract function AddParentColumnsToRequest(Relational\Request $Request);
     
     final public function GetPersistingDependencyOrder() {
         return $this->PersistingOrder;
@@ -48,7 +64,7 @@ abstract class Relation implements Relational\IRelation {
     
     final public function RelationRequest(array $ParentRows = null) {
         $Request = $this->NewRelationRequest();
-        $this->AddRelationToRequest($Request, $ParentRows);
+        $this->AddParentPredicate($Criterion, $ParentRows);
         
         return $Request;
     }
@@ -56,7 +72,7 @@ abstract class Relation implements Relational\IRelation {
      * Relational\Request
      */
     protected function NewRelationRequest() {
-        return new Relational\Request([]);
+        return new Relational\Request(new Relational\Criterion($this->Table));
     }
 }
 

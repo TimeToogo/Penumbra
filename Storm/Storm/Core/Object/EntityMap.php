@@ -67,12 +67,16 @@ abstract class EntityMap implements IEntityMap {
      * {@inheritDoc}
      */
     final public function InititalizeProperties(Domain $Domain) {
+        $this->OnInitialize($Domain);
         $Registrar = new Registrar(IProperty::IPropertyType);
         $this->RegisterProperties($Domain, $Registrar);
         foreach($Registrar->GetRegistered() as $Property) {
             $this->AddProperty($Property);
         }
+        $this->OnInitialized($Domain);
     }
+    protected function OnInitialize(Domain $Domain) { }
+    protected function OnInitialized(Domain $Domain) { }
     
     /**
      * This method should be implemented such that it returns the type of entity

@@ -66,6 +66,16 @@ interface IRelation {
     public function AddRelationToRequest(Request $Request, array $ParentRows = null);
     
     /**
+     * Adds the relation constraint to the supplied criterion.
+     * If parent rows are specified the request will be constrained such
+     * that it only loads the related rows of the parents.
+     * 
+     * @param ResultRows[]|null $ParentRows The parent rows
+     * @return void
+     */
+    public function AddRelationToCriterion(Criterion $Criterion, array $ParentRows = null);
+    
+    /**
      * Map the relational data (foreign key data) from the parent row to the related row.
      * 
      * @param ResultRow $ParentRow The parent row

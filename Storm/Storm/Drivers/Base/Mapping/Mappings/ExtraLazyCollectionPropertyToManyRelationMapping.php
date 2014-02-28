@@ -15,23 +15,23 @@ class ExtraLazyCollectionPropertyToManyRelationMapping extends CollectionPropert
         parent::__construct($CollectionProperty, $ToManyRelation);
     }
     
-    public function Revive(Mapping\DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
+    public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
         $EntityType = $this->GetEntityType();
         
         foreach($ResultRowArray as $Key => $ParentRow) {
             
             $RelatedRevivalDataArrayLoader = 
-                    function () use (&$DomainDatabaseMap, $EntityType, $ParentRow) {
-                        $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, [$ParentRow]);
+                    function () use (&$Database, $EntityType, $ParentRow) {
+                        $RelatedRows = $this->LoadRelatedRows($Database, [$ParentRow]);
                         
-                        $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($EntityType, $RelatedRows);
+                        $RelatedRevivalDataArray = $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $RelatedRows);
 
                         return $RelatedRevivalDataArray;
                     };
             
             $RevivalDataArray[$Key][$this->Property] = 
                     $this->MakeMultipleLazyRevivalData(
-                            $DomainDatabaseMap, 
+                            $Database, 
                             $ParentRow, 
                             $RelatedRevivalDataArrayLoader);
         }

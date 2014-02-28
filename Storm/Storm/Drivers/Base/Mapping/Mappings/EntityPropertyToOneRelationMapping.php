@@ -35,10 +35,10 @@ abstract class EntityPropertyToOneRelationMapping extends RelationshipPropertyRe
         return $this->ToOneRelation;
     }    
     
-    final protected function MapParentRowKeysToRelatedRevivalData(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows, array $RelatedRows) {
+    final protected function MapParentRowKeysToRelatedRevivalData(Relational\Database $Database, array $ParentRows, array $RelatedRows) {
         $ParentKeyRelatedRowMap = $this->ToOneRelation->MapParentKeysToRelatedRow($ParentRows, $RelatedRows);
         
-        $RelatedRevivalDataArray = $DomainDatabaseMap->MapRowsToRevivalData($this->GetEntityType(), $ParentKeyRelatedRowMap);
+        $RelatedRevivalDataArray = $this->EntityRelationalMap->MapRowsToRevivalData($Database, $ParentKeyRelatedRowMap);
         
         $MappedRelatedRevivalData = [];
         foreach($ParentRows as $Key => $ParentRow) {            
@@ -50,13 +50,12 @@ abstract class EntityPropertyToOneRelationMapping extends RelationshipPropertyRe
     }
     
     final protected function MakeLazyRevivalData(
-            DomainDatabaseMap $DomainDatabaseMap,
+            Relational\Database $Database, 
             Relational\ResultRow $ParentData,
             callable $RevivalDataLoader) {
-        $RelatedData = $DomainDatabaseMap->GetEntityRelationalMap($this->GetEntityType())->ResultRow();
+        $RelatedData = $this->EntityRelationalMap->ResultRow();
         $this->ToOneRelation->MapRelationalParentDataToRelatedData($ParentData, $RelatedData);
-        $AlreadyKnownRelatedRevivalData = 
-                $DomainDatabaseMap->MapResultRowDataToRevivalData($this->GetEntityType(), $RelatedData);
+        $AlreadyKnownRelatedRevivalData = $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $RelatedData);
         
         return new LazyRevivalData($AlreadyKnownRelatedRevivalData, $RevivalDataLoader);
     }
@@ -65,6 +64,21 @@ abstract class EntityPropertyToOneRelationMapping extends RelationshipPropertyRe
         if($RelationshipChange->HasDiscardedRelationship() || $RelationshipChange->HasPersistedRelationship()) {
             $this->ToOneRelation->Persist($Transaction, $ParentData, $RelationshipChange);
         }
+    }
+
+    public function MapAssignment(Relational\Criterion $Criterion, Object\Expressions\Expression $AssignmentValueExpression) {
+        $this->ToOneRelation->AddRelationToCriterion($Criterion);
+        
+    }
+
+    public function MapBinary(Relational\Criterion $Criterion, Object\Expressions\Expression $OperandValueExpression) {
+        $this->ToOneRelation->AddRelationToCriterion($Criterion);
+        
+    }
+
+    public function MapObjectOperation(Relational\Criterion $Criterion, Object\Expressions\ObjectOperationExpression $ObjectOperationExpression) {
+        $this->ToOneRelation->AddRelationToCriterion($Criterion);
+        
     }
 }
 

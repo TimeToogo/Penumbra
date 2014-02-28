@@ -31,8 +31,8 @@ class CompositeEntityPropertyToOneRelationMapping extends CompositeRelationshipP
         }
     }
 
-    public function AddToRelationalRequest(DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest) {
-        return $this->ConcreteRelationshipMapping->AddToRelationalRequest($DomainDatabaseMap, $RelationalRequest);
+    public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
+        return $this->ConcreteRelationshipMapping->AddToRelationalRequest($RelationalRequest);
     }
 
     public function GetProperty() {
@@ -53,6 +53,18 @@ class CompositeEntityPropertyToOneRelationMapping extends CompositeRelationshipP
 
     public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
         return $this->ConcreteRelationshipMapping->Revive($DomainDatabaseMap, $ResultRowArray, $RevivalDataArray);
+    }
+
+    public function MapAssignment(Relational\Criterion $Criterion, Object\Expressions\Expression $AssignmentValueExpression) {
+        return $this->ConcreteRelationshipMapping->MapAssignment($Criterion, $AssignmentValueExpression);
+    }
+
+    public function MapBinary(Relational\Criterion $Criterion, Object\Expressions\Expression $OperandValueExpression) {
+        return $this->ConcreteRelationshipMapping->MapBinary($Criterion, $OperandValueExpression);
+    }
+
+    public function MapObjectOperation(Relational\Criterion $Criterion, Object\Expressions\ObjectOperationExpression $ObjectOperationExpression) {
+        return $this->ConcreteRelationshipMapping->MapObjectOperation($Criterion, $ObjectOperationExpression);
     }
 
 }

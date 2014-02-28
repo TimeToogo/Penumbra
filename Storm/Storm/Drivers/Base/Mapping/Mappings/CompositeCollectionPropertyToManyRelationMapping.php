@@ -31,8 +31,8 @@ class CompositeCollectionPropertyToManyRelationMapping extends CompositeRelation
         }
     }
 
-    public function AddToRelationalRequest(DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest) {
-        return $this->ConcreteRelationshipMapping->AddToRelationalRequest($DomainDatabaseMap, $RelationalRequest);
+    public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
+        return $this->ConcreteRelationshipMapping->AddToRelationalRequest($RelationalRequest);
     }
 
     public function GetCollectionProperty() {
@@ -51,10 +51,9 @@ class CompositeCollectionPropertyToManyRelationMapping extends CompositeRelation
         return $this->ConcreteRelationshipMapping->Persist($Transaction, $ParentData, $RelationshipChanges);
     }
 
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
-        return $this->ConcreteRelationshipMapping->Revive($DomainDatabaseMap, $ResultRowArray, $RevivalDataArray);
+    public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
+        return $this->ConcreteRelationshipMapping->Revive($Database, $ResultRowArray, $RevivalDataArray);
     }
-
 }
 
 ?>

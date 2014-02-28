@@ -5,6 +5,7 @@ namespace Storm\Core\Mapping;
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
+use \Storm\Core\Object\Expressions;
 
 /**
  * The interface representing an entity property mapped to a to one relation.
@@ -32,12 +33,12 @@ interface IEntityPropertyToOneRelationMapping extends IRelationshipPropertyRelat
      * This method should be implemented such that it sets the revival data of the mapped property
      * with the appropriate data to revive the related entity.
      * 
-     * @param \StDomainDatabaseMap $DomainDatabaseMap The parent domain database map
+     * @param Relational\Database $Database The database to load the related rows from
      * @param Map $ResultRowRevivalDataMap The map containing the parent loaded result rows and 
      * respective revival data
      * @return void
      */
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray);
+    public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray);
     
     /**
      * This method should be implemented such that it saves the relationship between
@@ -53,7 +54,17 @@ interface IEntityPropertyToOneRelationMapping extends IRelationshipPropertyRelat
     /**
      * @return Relational\Expressions\Expression[]
      */
-    public function MapObjectOperationExpression(Object\Expressions\ObjectOperationExpression $AssignmentExpression); 
+    public function MapObjectOperation(Relational\Criterion $Criterion, Expressions\ObjectOperationExpression $ObjectOperationExpression);
+    
+    /**
+     * @return Relational\Expressions\Expression[]
+     */
+    public function MapAssignment(Relational\Criterion $Criterion, Expressions\Expression $AssignmentValueExpression);
+    
+    /**
+     * @return Relational\Expressions\Expression[]
+     */
+    public function MapBinary(Relational\Criterion $Criterion, Expressions\Expression $OperandValueExpression);
 }
 
 ?>

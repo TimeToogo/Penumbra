@@ -15,6 +15,28 @@ interface IRelationshipPropertyRelationMapping extends IPropertyMapping {
     const IRelationshipPropertyRelationMapping = __CLASS__;
     
     /**
+     * Gets the related entity type. 
+     * 
+     * @return string
+     */
+    public function GetEntityType();
+    
+    /**
+     * Gets the entity relational map of the related entity. 
+     * 
+     * @return IEntityRelationalMap
+     */
+    public function GetEntityRelationalMap();
+    
+    /**
+     * Sets the entity relational map of the related entity. 
+     * 
+     * @param IEntityRelationalMap
+     * @return void
+     */
+    public function SetEntityRelationalMap(IEntityRelationalMap $EntityRelationalMap);
+    
+    /**
      * The mapped relationship property.
      * 
      * @return Object\IRelationshipProperty
@@ -31,14 +53,10 @@ interface IRelationshipPropertyRelationMapping extends IPropertyMapping {
     /**
      * Adds any constraints and/or properties to the reqeuest required for loading the relation.
      * 
-     * @param DomainDatabaseMap $DomainDatabaseMap The parent domain database map
      * @param Relational\Request $RelationalRequest The request to map to
      * @return void
      */
-    public function AddToRelationalRequest(DomainDatabaseMap $DomainDatabaseMap, Relational\Request $RelationalRequest);
-    
-    
-    
+    public function AddToRelationalRequest(Relational\Request $RelationalRequest);
 }
 
 ?>

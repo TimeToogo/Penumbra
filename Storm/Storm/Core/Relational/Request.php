@@ -4,7 +4,7 @@ namespace Storm\Core\Relational;
 
 /**
  * The request represents a range of rows to load specified by the criterion.
- * This can be though of as a SELECT 
+ * This can be thought of as a SELECT 
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
@@ -28,9 +28,8 @@ class Request {
      */
     private $Criterion;
     
-    public function __construct(array $Columns, Criterion $Criterion = null) {
-        $this->Criterion = $Criterion ?: new Criterion();
-        $this->AddColumns($Columns);
+    public function __construct(Criterion $Criterion) {
+        $this->Criterion = $Criterion;
     }
     
     final public function HasColumn(IColumn $Column) {
@@ -44,8 +43,13 @@ class Request {
      * @return void
      */
     final public function AddColumn(IColumn $Column) {
+        if(!$this->Criterion->HasTable($Column->GetTable()->GetName())) {
+            throw new RelationalException(
+                    'Cannot add column \'%s\' to relational request the parent table table \'%s\' has not part of the request',
+                    $Column->GetName(),
+                    $Column->GetTable()->GetName());
+        }
         $this->Columns[$Column->GetIdentifier()] = $Column;
-        $this->AddTable($Column->GetTable());
     }
         
     /**
@@ -67,36 +71,6 @@ class Request {
     }
     
     /**
-     * Add a table to the request.
-     * 
-     * @param ITable $Table The table to add
-     * @return void
-     */
-    final public function AddTable(ITable $Table) {
-        $this->Tables[$Table->GetName()] = $Table;
-        $this->Criterion->AddTable($Table);
-    }
-    
-    /**
-     * Add an array of tables to the request.
-     * 
-     * @param ITable[] $Tables The tables to add
-     * @return void
-     */
-    final public function AddTables(array $Tables) {
-        array_walk($Tables, [$this, 'AddTable']);
-    }
-    
-    final public function RemoveTable(ITable $Table) {
-        unset($this->Tables[$Table->GetName()]);
-        array_walk($Table->GetColumns(), [$this, 'RemoveColumn']);
-    }
-    
-    final public function RemoveTables(array $Tables) {
-        array_walk($Tables, [$this, 'RemoveTable']);
-    }
-    
-    /**
      * @return IColumn[]
      */
     final public function GetColumns() {
@@ -107,7 +81,7 @@ class Request {
      * @return ITable[]
      */
     final public function GetTables() {
-        return $this->Tables;
+        return $this->Criterion->GetAllTables();
     }
     
     /**

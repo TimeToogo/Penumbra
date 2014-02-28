@@ -9,14 +9,30 @@ namespace Storm\Core\Relational;
  */
 final class Criterion {
     /**
+     * @var ITable 
+     */
+    private $Table;
+    
+    /**
+     * @var Join[] 
+     */
+    private $Joins = [];
+    
+    /**
      * @var ITable[] 
      */
-    private $Tables = [];
+    private $AllTables = [];
     
     /**
      * @var Expressions\Expression[] 
      */
     private $PredicateExpressions = [];
+    
+    
+    /**
+     * @var Expressions\Expression[] 
+     */
+    private $PostGroupingPredicateExpressions = [];
     
     /**
      * The order by expressions mapped to a boolean representing whether
@@ -41,38 +57,76 @@ final class Criterion {
      */
     private $RangeAmount;
     
-    public function __construct() {
+    public function __construct(ITable $Table) {
+        $this->Table = $Table;
+        $this->AllTables[$Table->GetName()] = $Table;
         $this->OrderByExpressionsAscendingMap = new \SplObjectStorage();
         $this->RangeOffset = 0;
         $this->RangeAmount = null;
     }
     
-    /**
-     * @return ITable[]
-     */
-    final public function GetTables() {
-        return $this->Tables;
-    }    
     
     /**
-     * Add a table to the criterion.
-     * 
-     * @param ITable $Table The table to add
-     * @return void
+     * @return ITable
      */
-    final public function AddTable(ITable $Table) {
-        $this->Tables[$Table->GetName()] = $Table;
+    final public function GetTable() {
+        return $this->Table;
     }
     
     /**
-     * Add an array of tables to the criterion
+     * @return ITable
+     */
+    final public function GetAllTables() {
+        return $this->AllTables;
+    }
+    
+    /**
+     * @return ITable
+     */
+    final public function HasTable($TableName) {
+        return isset($this->AllTables[$TableName]);
+    }
+    
+    // <editor-fold defaultstate="collapsed" desc="Joins">
+    
+    /**
+     * @return Join[]
+     */
+    final public function GetJoins() {
+        return $this->Joins;
+    }
+    
+    /**
+     * Add a joined table to the criterion.
      * 
-     * @param ITable[] $Tables The tables to add
+     * @param Join $Join The join to add
      * @return void
      */
-    final public function AddTables(array $Tables) {
-        array_walk($Tables, [$this, 'AddTable']);
+    final public function AddJoin(Join $Join) {
+        $this->Joins[] = $Join;
+        $Table = $Join->GetTable();
+        $this->AllTables[$Table->GetName()] = $Table->GetName();
     }
+    
+    /**
+     * Add multiple joined tables to the criterion.
+     * 
+     * @param array $Joins The joins to add
+     * @return void
+     */
+    final public function AddJoins(array $Joins) {
+        array_walk($Joins, [$this, 'AddJoin']);
+    }
+
+
+    /**
+     * @return boolean
+     */
+    final public function IsJoined() {
+        return count($this->Joins) > 0;
+    }
+
+    // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Constraints">
     
@@ -139,6 +193,28 @@ final class Criterion {
         $this->GroupByExpressions[] = $Expression;
     }
 
+
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="Post Grouping Constraints">
+    
+    /**
+     * @return boolean
+     */
+    final public function IsPostGroupingConstrained() {
+        return count($this->PostGroupingPredicateExpressions) > 0;
+    }
+
+    /**
+     * @return Expressions\Expression[]
+     */
+    final public function GetPostGroupingPredicateExpressions() {
+        return $this->PostGroupingPredicateExpressions;
+    }
+
+    final public function AddPostGroupingPredicateExpression(Expressions\Expression $PredicateExpression) {
+        $this->PostGroupingPredicateExpressions[] = $PredicateExpression;
+    }
 
     // </editor-fold>
         

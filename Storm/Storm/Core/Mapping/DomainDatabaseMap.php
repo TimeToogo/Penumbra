@@ -38,14 +38,14 @@ abstract class DomainDatabaseMap {
      * 
      * @var IEntityRelationalMap[] 
      */
-    private $EntityRelationMaps = [];
+    private $EntityRelationalMaps = [];
     
     /**
      * The entity relational maps, indexed by their primary key table name.
      * 
      * @var IEntityRelationalMap[] 
      */
-    private $EntityRelationMapsByPrimaryKeyTable = [];
+    private $EntityRelationalMapsByPrimaryKeyTable = [];
     
     public function __construct() {
         $this->Domain = $this->Domain();
@@ -53,8 +53,11 @@ abstract class DomainDatabaseMap {
 
         $Registrar = new Registrar(IEntityRelationalMap::IEntityRelationalMapType);
         $this->RegisterEntityRelationalMaps($Registrar);
-        foreach($Registrar->GetRegistered() as $EntityRelationalMap) {
+        foreach ($Registrar->GetRegistered() as $EntityRelationalMap) {
             $this->AddEntityRelationMap($EntityRelationalMap);
+        }
+        foreach ($this->EntityRelationalMaps as $EntityRelationalMap) {
+            $EntityRelationalMap->InitializeRelationshipMappings($this);
         }
     }
     
@@ -121,8 +124,8 @@ abstract class DomainDatabaseMap {
             throw new MappingException('The supplied entity relational map for %s is not part of the given domain.', $EntityType);
         }
         
-        $this->EntityRelationMaps[$EntityType] = $EntityRelationalMap;
-        $this->EntityRelationMapsByPrimaryKeyTable[$EntityRelationalMap->GetPrimaryKeyTable()->GetName()] = $EntityRelationalMap;
+        $this->EntityRelationalMaps[$EntityType] = $EntityRelationalMap;
+        $this->EntityRelationalMapsByPrimaryKeyTable[$EntityRelationalMap->GetPrimaryKeyTable()->GetName()] = $EntityRelationalMap;
     }
     
     /**
@@ -132,7 +135,7 @@ abstract class DomainDatabaseMap {
      * @return boolean
      */
     final public function HasEntityRelationalMap($EntityType) {
-        return isset($this->EntityRelationMaps[$EntityType]);
+        return isset($this->EntityRelationalMaps[$EntityType]);
     }
     
     /**
@@ -143,7 +146,7 @@ abstract class DomainDatabaseMap {
      */
     final public function GetEntityRelationalMap($EntityType) {
         if($this->HasEntityRelationalMap($EntityType))
-            return $this->EntityRelationMaps[$EntityType];
+            return $this->EntityRelationalMaps[$EntityType];
         else {
             $ParentType = get_parent_class($EntityType);
             if($ParentType === false) {
@@ -162,8 +165,8 @@ abstract class DomainDatabaseMap {
      * @return IEntityRelationalMap:null The relational map or null if not found
      */
     final public function GetEntityRelationalMapByPrimaryKeyTable($TableName) {
-        return isset($this->EntityRelationMapsByPrimaryKeyTable[$TableName]) ?
-                $this->EntityRelationMapsByPrimaryKeyTable[$TableName] : null;
+        return isset($this->EntityRelationalMapsByPrimaryKeyTable[$TableName]) ?
+                $this->EntityRelationalMapsByPrimaryKeyTable[$TableName] : null;
     }
     
     /**
@@ -191,13 +194,13 @@ abstract class DomainDatabaseMap {
      */
     final public function Load(Object\IRequest $ObjectRequest) {
         $EntityType = $ObjectRequest->GetEntityType();
-        $this->VerifyEntityTypeIsMapped($EntityType);
+        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
         
         $RelationalRequest = $this->MapRequest($ObjectRequest);
         
         $ResultRows = $this->Database->Load($RelationalRequest);
         
-        $RevivalDataArray = $this->MapRowsToRevivalData($EntityType, $ResultRows);
+        $RevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($this->Database, $ResultRows);
         
         $RevivedEntities = $this->Domain->ReviveEntities($EntityType, $RevivalDataArray);
         
@@ -234,7 +237,6 @@ abstract class DomainDatabaseMap {
         $this->MapUnitOfWorkToTransaction($UnitOfWork, $Transaction);
         
         $this->Database->Commit($Transaction);
-        
     }
     
     // <editor-fold defaultstate="collapsed" desc="Request  mappers">
@@ -250,64 +252,12 @@ abstract class DomainDatabaseMap {
     final public function MapRequest(Object\IRequest $ObjectRequest) {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($ObjectRequest->GetEntityType());
         
-        $RelationalRequest = new Relational\Request([], $EntityRelationalMap->GetCriterion());
-        $this->MapPropetiesToRelationalRequest($EntityRelationalMap, $RelationalRequest, $ObjectRequest->GetProperties());
+        $RelationalRequest = new Relational\Request($EntityRelationalMap->GetCriterion());
+        $EntityRelationalMap->MapPropetiesToRelationalRequest($RelationalRequest, $ObjectRequest->GetProperties());
         
         $this->MapCriterion($EntityRelationalMap, $ObjectRequest->GetCriterion(), $RelationalRequest->GetCriterion());
         
         return $RelationalRequest;
-    }
-    
-    /**
-     * @access private
-     * 
-     * Maps an entity such that its all its properties will be loaded in the given relational request.
-     * 
-     * @param string $EntityType The type of entity
-     * @param Relational\Request $RelationalRequest The request to add to
-     * @return void
-     */
-    final public function MapEntityToRelationalRequest($EntityType, Relational\Request $RelationalRequest, array $AlreadyKnownProperties = []) {
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-        $Properties = $EntityRelationalMap->GetMappedProperties();
-        if(count($AlreadyKnownProperties) > 0) {
-            foreach($AlreadyKnownProperties as $AlreadyKnownProperty) {
-                unset($Properties[$AlreadyKnownProperty->GetIdentifier()]);
-            } 
-        }
-        $this->MapPropetiesToRelationalRequest($this->VerifyEntityTypeIsMapped($EntityType), $RelationalRequest, $Properties);
-    }
-    
-    /**
-     * @access private
-     * 
-     * Maps the supplied properties such that they will be loaded in the given relational request.
-     * 
-     * @param \Storm\Core\Mapping\IEntityRelationalMap $EntityRelationalMap The relational map of the entity
-     * @param \Storm\Core\Relational\Request $RelationalRequest The request to add to
-     * @param array|null $Properties The array of properties to map or null if all properties should be mapped
-     * @return void
-     */
-    private function MapPropetiesToRelationalRequest(IEntityRelationalMap $EntityRelationalMap, Relational\Request $RelationalRequest, array $Properties = null) {
-        if($Properties === null) {
-            $Properties = $EntityRelationalMap->GetMappedProperties();
-        }
-        
-        $DataPropertyColumnMappings = $EntityRelationalMap->GetDataPropertyColumnMappings();
-        $EntityPropertyToOneRelationMappings = $EntityRelationalMap->GetEntityPropertyToOneRelationMappings();
-        $CollectionPropertyToManyRelationMappings = $EntityRelationalMap->GetCollectionPropertyToManyRelationMappings();
-        
-        foreach($Properties as $PropertyIdentifier => $Property) {
-            if(isset($DataPropertyColumnMappings[$PropertyIdentifier])) {
-                $RelationalRequest->AddColumns($DataPropertyColumnMappings[$PropertyIdentifier]->GetReviveColumns());
-            }
-            else if(isset($EntityPropertyToOneRelationMappings[$PropertyIdentifier])) {
-                $EntityPropertyToOneRelationMappings[$PropertyIdentifier]->AddToRelationalRequest($this, $RelationalRequest);
-            }
-            else if(isset($CollectionPropertyToManyRelationMappings[$PropertyIdentifier])) {
-                $CollectionPropertyToManyRelationMappings[$PropertyIdentifier]->AddToRelationalRequest($this, $RelationalRequest);
-            }
-        }
     }
     
     // </editor-fold>
@@ -433,73 +383,6 @@ abstract class DomainDatabaseMap {
 
     // </editor-fold>
     
-    // <editor-fold defaultstate="collapsed" desc="Entity Revival mapping">    
-    
-    /**
-     * @access private
-     * 
-     * Maps the supplied result rows to an array of revival data.
-     * NOTE: Array keys are preserved.
-     * 
-     * @param string $EntityType The type of entity to revive as
-     * @param Relational\ResultRows[] $ResultRows The result row to ma
-     * @return Object\RevivalData[] The mapped revival data
-     */
-    final public function MapRowsToRevivalData($EntityType, array $ResultRows) {
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-        $EntityMap = $EntityRelationalMap->GetEntityMap();
-
-        $RevivalDataArray = [];
-        foreach ($ResultRows as $Key => $ResultRow) {
-            $RevivalData = $EntityMap->RevivalData();
-            $RevivalDataArray[$Key] = $RevivalData;
-        }
-        
-        $this->MapResultRowsToRevivalData($EntityRelationalMap, $ResultRows, $RevivalDataArray);
-        
-        return $RevivalDataArray;
-    }
-    
-    /**
-     * @access private
-     * 
-     * Maps the result rows to the revival data using the mappings within the supplied 
-     * entity relational map.
-     * 
-     * @param IEntityRelationalMap $EntityRelationalMap The entity relational map
-     * @param Map $ResultRowRevivalDataMap The map containing a map between the result 
-     * rows and revival data
-     */
-    final public function MapResultRowsToRevivalData(IEntityRelationalMap $EntityRelationalMap, array $ResultRowArray, array $RevivalDataArray) {
-        foreach($EntityRelationalMap->GetDataPropertyColumnMappings() as $PropertyColumnMapping) {
-            $PropertyColumnMapping->Revive($ResultRowArray, $RevivalDataArray);
-        }
-        foreach($EntityRelationalMap->GetEntityPropertyToOneRelationMappings() as $EntityPropertyToOneRelationMapping) {
-            $EntityPropertyToOneRelationMapping->Revive($this, $ResultRowArray, $RevivalDataArray);
-        }
-        foreach($EntityRelationalMap->GetCollectionPropertyToManyRelationMappings() as $CollectionPropertyToManyRelationMapping) {
-            $CollectionPropertyToManyRelationMapping->Revive($this, $ResultRowArray, $RevivalDataArray);
-        }
-    }
-    
-    /**
-     * @access private
-     */
-    final public function MapResultRowDataToRevivalData(
-            $EntityType, 
-            Relational\ResultRow $ResultRow) {
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-        $RevivalData = $EntityRelationalMap->GetEntityMap()->RevivalData();
-        
-        foreach($EntityRelationalMap->GetDataPropertyColumnMappings() as $PropertyColumnMapping) {
-            $PropertyColumnMapping->Revive([$ResultRow], [$RevivalData]);
-        }
-        
-        return $RevivalData;
-    }
-    
-    // </editor-fold>
-    
     // <editor-fold defaultstate="collapsed" desc="Entity Persistence mapping">
     
     /**
@@ -524,7 +407,7 @@ abstract class DomainDatabaseMap {
         }
         
         foreach($UnitOfWork->GetDiscardenceDataGroups() as $EntityType => $DiscardedIdentityGroup) {
-            $EntityRelationalMap = $this->EntityRelationMaps[$EntityType];
+            $EntityRelationalMap = $this->EntityRelationalMaps[$EntityType];
             $ResultRows = $this->MapEntityDataToTransaction($UnitOfWork, $Transaction, $EntityRelationalMap, $DiscardedIdentityGroup);
             foreach($ResultRows as $ResultRow) {
                 $Transaction->DiscardAll($ResultRow->GetPrimaryKeys());
@@ -555,7 +438,7 @@ abstract class DomainDatabaseMap {
             return;
         }
         
-        $EntityRelationalMap = $this->EntityRelationMaps[reset($PersistenceDataArray)->GetEntityType()];
+        $EntityRelationalMap = $this->EntityRelationalMaps[reset($PersistenceDataArray)->GetEntityType()];
         $PrimaryKeyTable = $EntityRelationalMap->GetPrimaryKeyTable();
         $ResultRows = $this->MapEntityDataToTransaction($UnitOfWork, $Transaction, $EntityRelationalMap, $PersistenceDataArray);
         
@@ -655,7 +538,7 @@ abstract class DomainDatabaseMap {
             }
             $ParentPrimaryKey = $EntityRelationalMap->MapIdentityToPrimaryKey($DiscardedRelationship->GetParentIdentity());
             $RelatedIdentity = $DiscardedRelationship->GetRelatedIdentity();
-            $ChildPrimaryKey = $this->EntityRelationMaps[$RelatedIdentity->GetEntityType()]->MapIdentityToPrimaryKey($DiscardedRelationship->GetRelatedIdentity());
+            $ChildPrimaryKey = $this->EntityRelationalMaps[$RelatedIdentity->GetEntityType()]->MapIdentityToPrimaryKey($DiscardedRelationship->GetRelatedIdentity());
             
             $RelationalDiscardedRelationships[$Key] = new Relational\DiscardedRelationship(
                     $DiscardedRelationship->IsIdentifying(),
@@ -707,7 +590,7 @@ abstract class DomainDatabaseMap {
             }
             else {
                 $RelatedIdentity = $ObjectPersistedRelationship->GetRelatedIdentity();
-                $RelatedEntityRelationalMap = $this->EntityRelationMaps[$RelatedIdentity->GetEntityType()];
+                $RelatedEntityRelationalMap = $this->EntityRelationalMaps[$RelatedIdentity->GetEntityType()];
                 $RelatedPrimaryKey = $RelatedEntityRelationalMap->MapIdentityToPrimaryKey($RelatedIdentity);
                 $RelationalPersistedRelationships[$Key] = 
                         new Relational\PersistedRelationship($ParentPrimaryKey, $RelatedPrimaryKey, null);

@@ -18,13 +18,13 @@ class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IData
         parent::__construct($DataProperty);
         if($DataProperty->IsIdentity() && !$Column->IsPrimaryKey()) {
             throw new MappingException(
-                    'Cannot map an identity property to a non primary key column %s.%s',
+                    'Cannot map an identity property to a non primary key column: %s.%s',
                     $Column->GetTable()->GetName(),
                     $Column->GetName());
         }
         else if($Column->IsPrimaryKey() && !$DataProperty->IsIdentity()) {
             throw new MappingException(
-                    'Cannot map an non identity property to a primary key column %s.%s',
+                    'Cannot map an non identity property to a primary key column: %s.%s',
                     $Column->GetTable()->GetName(),
                     $Column->GetName());
         }

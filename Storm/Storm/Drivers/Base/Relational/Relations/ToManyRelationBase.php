@@ -7,6 +7,10 @@ use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 
 abstract class ToManyRelationBase extends KeyedRelation implements Relational\IToManyRelation {
+        
+    protected function JoinType() {
+        return Relational\JoinType::Left;
+    }
     
     final public function MapParentKeysToRelatedRows(array $ParentRows, array $RelatedRows) {
         $MappedRelatedRows = [];

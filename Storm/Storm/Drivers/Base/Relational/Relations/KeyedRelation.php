@@ -38,18 +38,18 @@ abstract class KeyedRelation extends Relation {
     public function GetRelationalParentColumns() {
         return $this->GetParentColumns();
     }
-
-    public function AddConstraintToRequest(Relational\Request $Request) {
-        $Request->GetCriterion()->AddPredicateExpression($this->ForeignKey->GetConstraintPredicate());
+    
+    protected function GetRelationJoins(Relational\ITable $Table) {
+        return [new Relational\Join($this->JoinType(), $Table, $this->ForeignKey->GetConstraintPredicate())];
     }
     
-    public function AddParentPredicateToRequest(Relational\Request $Request, array $ParentRows) {
-        $ParentTable = $this->GetParentTable();
-        if($ParentTable) {
-            $Request->AddTable($ParentTable);
-        }
+    protected abstract function JoinType();
+    
+    protected function AddParentColumnsToRequest(Relational\Request $Request) {
         $Request->AddColumns($this->GetReferencedColumns());
-        
+    }
+    
+    protected function AddParentPredicateToCriterion(Relational\Criterion $Criterion, array $ParentRows) {
         $MatchExpressions = [];
         foreach($ParentRows as $ParentRow) {
             $ReferencedKey = $this->MapParentRowToRelatedKey($this->ForeignKey, $ParentRow);
@@ -57,10 +57,9 @@ abstract class KeyedRelation extends Relation {
             $MatchExpressions[] = new Expressions\MatchesColumnDataExpression($ReferencedKey);
         }
         
-        $Request->GetCriterion()->AddPredicateExpression(
+        $Criterion->AddPredicateExpression(
                 Expressions\Expression::CompoundBoolean($MatchExpressions, Expressions\Operators\Binary::LogicalOr));
     }
-    
     /**
      * @return Relational\Table
      */
