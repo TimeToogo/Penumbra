@@ -37,7 +37,7 @@ final class NullPlatform implements Relational\IPlatform {
         
     }
 
-    public function GetExpressionMapper() {
+    public function GetExpressionConverter() {
         
     }
 

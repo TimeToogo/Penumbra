@@ -1,8 +1,8 @@
 <?php
 
-namespace Storm\Drivers\Base\Relational\Expressions;
+namespace Storm\Drivers\Base\Relational\Expressions\Converters;
 
-abstract class FunctionMapper implements IFunctionMapper {
+abstract class FunctionConverter implements IFunctionConverter {
     private $MatchingFunctions;
     
     public function __construct() {
@@ -12,20 +12,20 @@ abstract class FunctionMapper implements IFunctionMapper {
     protected abstract function MatchingFunctions();
     
     final public function MapFunctionCallExpression($FunctionName, array $ArgumentExpressions = []) {
-        $FunctionName = strtolower($FunctionName);
         $ArgumentExpressions = array_values($ArgumentExpressions);
+        if(strpos($FunctionName, '__') === 0) {
+            return $this->FunctionCall(substr($FunctionName, 2), $ArgumentExpressions);
+        }
+        
+        $FunctionName = strtolower($FunctionName);
         
         if(isset($this->MatchingFunctions[$FunctionName])) {
             return $this->FunctionCall($this->MatchingFunctions[$FunctionName], $ArgumentExpressions);
         }
-        /*
-        if(strpos($FunctionName, '__') === 0) {
-            return $this->FunctionCall(substr($FunctionName, 2), $ArgumentExpressions);
-        }
-        */
+        
         if(!method_exists($this, $FunctionName)) {
             throw new \Storm\Core\NotSupportedException(
-                    '%s does not support mapping function: %s',
+                    '%s does not support function: %s',
                     get_class($this),
                     $FunctionName);
         }

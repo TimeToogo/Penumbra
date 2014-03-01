@@ -34,9 +34,9 @@ interface IPlatform {
     public function __sleep();
     
     /**
-     * @return Expressions\IExpressionMapper
+     * @return Expressions\IExpressionConverter
      */
-    public function GetExpressionMapper();
+    public function GetExpressionConverter();
     
     /**
      * @return Columns\IColumnSet

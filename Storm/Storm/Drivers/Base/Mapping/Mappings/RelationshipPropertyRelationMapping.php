@@ -34,7 +34,7 @@ abstract class RelationshipPropertyRelationMapping extends PropertyMapping imple
         parent::__construct($RelationshipProperty);
         
         $this->RelationshipProperty = $RelationshipProperty;
-        $this->EntityType = $RelationshipProperty->GetEntityType();
+        $this->EntityType = $RelationshipProperty->GetRelatedEntityType();
         $this->Relation = $Relation;
     }
 

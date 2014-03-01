@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Base\Relational\Expressions;
 
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 
 class UnaryOperationExpression extends Expression {
     private $Operator;
@@ -21,6 +21,18 @@ class UnaryOperationExpression extends Expression {
      */
     public function GetOperandExpression() {
         return $this->OperandExpression;
+    }
+    
+    /**
+     * @return self
+     */
+    public function Update($UnaryOperator, CoreExpression $OperandExpression) {
+        if($this->Operator === $UnaryOperator
+                && $this->OperandExpression === $OperandExpression) {
+            return $this;
+        }
+        
+        return new self($UnaryOperator, $OperandExpression);
     }
 }
 

@@ -42,7 +42,7 @@ interface IEntityPropertyToOneRelationMapping extends IRelationshipPropertyRelat
     
     /**
      * This method should be implemented such that it saves the relationship between
-     * the parent data and related data in the supplied transaction.
+     * the parent data and related data to the supplied transaction.
      * 
      * @param Relational\Transaction $Transaction The transaction context
      * @param Relational\ColumnData $ParentData The column data of the parent
@@ -52,17 +52,17 @@ interface IEntityPropertyToOneRelationMapping extends IRelationshipPropertyRelat
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, Relational\RelationshipChange $RelationshipChange);
     
     /**
-     * @return Relational\Expressions\Expression[]
+     * @return Relational\Expression[]
      */
     public function MapObjectOperation(Relational\Criterion $Criterion, Expressions\ObjectOperationExpression $ObjectOperationExpression);
     
     /**
-     * @return Relational\Expressions\Expression[]
+     * @return Relational\Expression[]
      */
     public function MapAssignment(Relational\Criterion $Criterion, Expressions\Expression $AssignmentValueExpression);
     
     /**
-     * @return Relational\Expressions\Expression[]
+     * @return Relational\Expression[]
      */
     public function MapBinary(Relational\Criterion $Criterion, Expressions\Expression $OperandValueExpression);
 }

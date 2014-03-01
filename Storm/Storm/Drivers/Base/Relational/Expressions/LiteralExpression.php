@@ -11,6 +11,17 @@ class LiteralExpression extends Expression {
     public function GetString() {
         return $this->String;
     }
+    
+    /**
+     * @return self
+     */
+    public function Update($String) {
+        if($this->String === $String) {
+            return $this;
+        }
+        
+        return new self($String);
+    }
 }
 
 ?>

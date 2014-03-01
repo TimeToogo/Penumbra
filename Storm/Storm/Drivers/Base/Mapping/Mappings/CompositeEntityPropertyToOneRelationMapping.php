@@ -30,15 +30,7 @@ class CompositeEntityPropertyToOneRelationMapping extends CompositeRelationshipP
                 return new ExtraLazyEntityPropertyToOneRelationMapping($RelationshipProperty, $Relation);
         }
     }
-
-    public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
-        return $this->ConcreteRelationshipMapping->AddToRelationalRequest($RelationalRequest);
-    }
-
-    public function GetProperty() {
-        return $this->ConcreteRelationshipMapping->GetProperty();
-    }
-
+    
     public function GetEntityProperty() {
         return $this->ConcreteRelationshipMapping->GetEntityProperty();
     }
@@ -51,8 +43,8 @@ class CompositeEntityPropertyToOneRelationMapping extends CompositeRelationshipP
         return $this->ConcreteRelationshipMapping->Persist($Transaction, $ParentData, $RelationshipChange);
     }
 
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
-        return $this->ConcreteRelationshipMapping->Revive($DomainDatabaseMap, $ResultRowArray, $RevivalDataArray);
+    public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
+        return $this->ConcreteRelationshipMapping->Revive($Database, $ResultRowArray, $RevivalDataArray);
     }
 
     public function MapAssignment(Relational\Criterion $Criterion, Object\Expressions\Expression $AssignmentValueExpression) {

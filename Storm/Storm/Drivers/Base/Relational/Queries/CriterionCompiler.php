@@ -13,17 +13,21 @@ abstract class CriterionCompiler implements ICriterionCompiler {
     
     final public function AppendCriterion(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
         $this->AppendTable($QueryBuilder, $Criterion->GetTable());
-        
+                
         if($Criterion->IsJoined()) {
             $this->AppendJoins($QueryBuilder, $Criterion->GetJoins());
+        }
+        
+        if($Criterion->IsConstrained()) {
+            $this->AppendPredicateExpressions($QueryBuilder, $Criterion->GetPredicateExpressions());
         }
         
         if($Criterion->IsGrouped()) {
             $this->AppendGroupByExpressions($QueryBuilder, $Criterion->GetGroupByExpressions());
         }
         
-        if($Criterion->IsPostGroupingConstrained()) {
-            $this->AppendPostGroupingPredicateExpressions($QueryBuilder, $Criterion->GetPostGroupingPredicateExpressions());
+        if($Criterion->IsAggregateConstrained()) {
+            $this->AppendAggregatePredicateExpressions($QueryBuilder, $Criterion->GetAggregatePredicateExpressions());
         }
         
         if($Criterion->IsOrdered()) {
@@ -43,7 +47,7 @@ abstract class CriterionCompiler implements ICriterionCompiler {
     
     protected abstract function AppendGroupByExpressions(QueryBuilder $QueryBuilder, array $Expressions);
     
-    protected abstract function AppendPostGroupingPredicateExpressions(QueryBuilder $QueryBuilder, array $Expressions);
+    protected abstract function AppendAggregatePredicateExpressions(QueryBuilder $QueryBuilder, array $Expressions);
     
     protected abstract function AppendOrderByExpressions(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap);
     

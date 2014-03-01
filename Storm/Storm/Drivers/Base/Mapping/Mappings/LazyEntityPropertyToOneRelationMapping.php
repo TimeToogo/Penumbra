@@ -18,13 +18,13 @@ class LazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelation
         parent::__construct($EntityProperty, $ToOneRelation);
     }
     
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
-        $RelatedRevivalDataLoader = function ($ParentRowKey) use (&$DomainDatabaseMap, &$ResultRowArray) {
+    public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
+        $RelatedRevivalDataLoader = function ($ParentRowKey) use (&$Database, &$ResultRowArray) {
             static $ParentKeyRelatedRevivalDataMap = null;
             
             if($ParentKeyRelatedRevivalDataMap === null) {
-                $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ResultRowArray);
-                $ParentKeyRelatedRevivalDataMap = $this->MapParentRowKeysToRelatedRevivalData($DomainDatabaseMap, $ResultRowArray, $RelatedRows);
+                $RelatedRows = $this->LoadRelatedRows($Database, $ResultRowArray);
+                $ParentKeyRelatedRevivalDataMap = $this->MapParentRowKeysToRelatedRevivalData($Database, $ResultRowArray, $RelatedRows);
             }
             
             return $ParentKeyRelatedRevivalDataMap[$ParentRowKey];
@@ -37,7 +37,6 @@ class LazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelation
             
             $RevivalData[$this->Property] = 
                     $this->MakeLazyRevivalData(
-                            $DomainDatabaseMap, 
                             $ResultRowArray[$Key], 
                             $Loader);
         }

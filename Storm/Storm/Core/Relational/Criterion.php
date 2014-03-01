@@ -24,15 +24,15 @@ final class Criterion {
     private $AllTables = [];
     
     /**
-     * @var Expressions\Expression[] 
+     * @var Expression[] 
      */
     private $PredicateExpressions = [];
     
     
     /**
-     * @var Expressions\Expression[] 
+     * @var Expression[] 
      */
-    private $PostGroupingPredicateExpressions = [];
+    private $AggregatePredicateExpressions = [];
     
     /**
      * The order by expressions mapped to a boolean representing whether
@@ -43,7 +43,7 @@ final class Criterion {
     private $OrderByExpressionsAscendingMap;
     
     /**
-     * @var Expressions\Expression[]
+     * @var Expression[]
      */
     private $GroupByExpressions = [];
     
@@ -105,7 +105,7 @@ final class Criterion {
     final public function AddJoin(Join $Join) {
         $this->Joins[] = $Join;
         $Table = $Join->GetTable();
-        $this->AllTables[$Table->GetName()] = $Table->GetName();
+        $this->AllTables[$Table->GetName()] = $Table;
     }
     
     /**
@@ -138,13 +138,13 @@ final class Criterion {
     }
 
     /**
-     * @return Expressions\Expression[]
+     * @return Expression[]
      */
     final public function GetPredicateExpressions() {
         return $this->PredicateExpressions;
     }
 
-    final public function AddPredicateExpression(Expressions\Expression $PredicateExpression) {
+    final public function AddPredicateExpression(Expression $PredicateExpression) {
         $this->PredicateExpressions[] = $PredicateExpression;
     }
 
@@ -166,7 +166,7 @@ final class Criterion {
         return $this->OrderByExpressionsAscendingMap;
     }
 
-    final public function AddOrderByExpression(Expressions\Expression $Expression, $Ascending) {
+    final public function AddOrderByExpression(Expression $Expression, $Ascending) {
         $this->OrderByExpressionsAscendingMap[$Expression] = $Ascending;
     }
 
@@ -183,37 +183,37 @@ final class Criterion {
     }
 
     /**
-     * @return Expressions\Expression[]
+     * @return Expression[]
      */
     final public function GetGroupByExpressions() {
         return $this->GroupByExpressions;
     }
 
-    final public function AddGroupByExpression(Expressions\Expression $Expression) {
+    final public function AddGroupByExpression(Expression $Expression) {
         $this->GroupByExpressions[] = $Expression;
     }
 
 
     // </editor-fold>
     
-    // <editor-fold defaultstate="collapsed" desc="Post Grouping Constraints">
+    // <editor-fold defaultstate="collapsed" desc="Aggregate Constraints">
     
     /**
      * @return boolean
      */
-    final public function IsPostGroupingConstrained() {
-        return count($this->PostGroupingPredicateExpressions) > 0;
+    final public function IsAggregateConstrained() {
+        return count($this->AggregatePredicateExpressions) > 0;
     }
 
     /**
-     * @return Expressions\Expression[]
+     * @return Expression[]
      */
-    final public function GetPostGroupingPredicateExpressions() {
-        return $this->PostGroupingPredicateExpressions;
+    final public function GetAggregatePredicateExpressions() {
+        return $this->AggregatePredicateExpressions;
     }
 
-    final public function AddPostGroupingPredicateExpression(Expressions\Expression $PredicateExpression) {
-        $this->PostGroupingPredicateExpressions[] = $PredicateExpression;
+    final public function AddAggregatePredicateExpression(Expression $PredicateExpression) {
+        $this->AggregatePredicateExpressions[] = $PredicateExpression;
     }
 
     // </editor-fold>

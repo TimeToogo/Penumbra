@@ -10,7 +10,7 @@ final class Platform extends Base\Platform {
     public function __construct($DevelopmentMode = false) {
         parent::__construct(
                 $DevelopmentMode, 
-                new ExpressionMapper(new FunctionMapper(), new ObjectMapper()),
+                new Converters\ExpressionConverter(new Converters\FunctionConverter(), new Converters\ObjectConverter()),
                 new Columns\ColumnSet(),
                 new PrimaryKeys\KeyGeneratorSet(),
                 new Queries\ExpressionCompiler(new Queries\ExpressionOptimizer()),

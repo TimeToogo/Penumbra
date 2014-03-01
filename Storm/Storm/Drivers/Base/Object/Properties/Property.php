@@ -34,10 +34,6 @@ abstract class Property implements IProperty {
         return $this->Accessor;
     }
     
-    final public function GetEntityMap() {
-        return $this->EntityMap;
-    }
-    
     final public function GetEntityType() {
         return $this->EntityType;
     }

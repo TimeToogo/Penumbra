@@ -12,7 +12,7 @@ abstract class CriterionCompiler extends Queries\CriterionCompiler {
     }
     
     protected function AppendTable(QueryBuilder $QueryBuilder, Relational\ITable $Table) {
-        $QueryBuilder->AppendIdentifier('#', [$Table->GetName()]);
+        $QueryBuilder->AppendIdentifier(' FROM #', [$Table->GetName()]);
     }
     
     protected function AppendJoins(QueryBuilder $QueryBuilder, array $Joins) {
@@ -47,7 +47,7 @@ abstract class CriterionCompiler extends Queries\CriterionCompiler {
     }
     
     protected function AppendPredicateExpressions(QueryBuilder $QueryBuilder, array $PredicateExpressions) {
-        $QueryBuilder->Append('(');
+        $QueryBuilder->Append(' WHERE (');
         foreach($QueryBuilder->Delimit($PredicateExpressions, ' AND ') as $PredicateExpression) {
             $QueryBuilder->AppendExpression($PredicateExpression);
         }
@@ -61,7 +61,7 @@ abstract class CriterionCompiler extends Queries\CriterionCompiler {
         }
     }
     
-    protected function AppendPostGroupingPredicateExpressions(QueryBuilder $QueryBuilder, array $Expressions) {
+    protected function AppendAggregatePredicateExpressions(QueryBuilder $QueryBuilder, array $Expressions) {
         $QueryBuilder->Append(' HAVING ');
         foreach($QueryBuilder->Delimit($Expressions, ' AND ') as $Expression) {            
             $QueryBuilder->AppendExpression($Expression);

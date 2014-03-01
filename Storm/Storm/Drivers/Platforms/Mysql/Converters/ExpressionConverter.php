@@ -1,15 +1,16 @@
 <?php
 
-namespace Storm\Drivers\Platforms\Mysql;
+namespace Storm\Drivers\Platforms\Mysql\Converters;
 
 use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Relational\Expressions\Converters;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Expressions as E;
 use \Storm\Core\Relational\Expressions as EE;
 use \Storm\Drivers\Base\Relational\Expressions\Operators as O;
 
-final class ExpressionMapper extends E\ExpressionMapper {
+final class ExpressionConverter extends Converters\ExpressionConverter {
     
     private static $AssignmentBinaryOperatorMap = [
         O\Assignment::Addition => O\Binary::Addition,

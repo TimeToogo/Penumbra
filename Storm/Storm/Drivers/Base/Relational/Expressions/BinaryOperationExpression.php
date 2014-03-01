@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Base\Relational\Expressions;
 
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 
 class BinaryOperationExpression extends Expression {
     private $LeftOperandExpression;
@@ -22,17 +22,33 @@ class BinaryOperationExpression extends Expression {
     }
         
     /**
-     * @return Expression
+     * @return CoreExpression
      */
     public function GetLeftOperandExpression() {
         return $this->LeftOperandExpression;
     }
         
     /**
-     * @return Expression
+     * @return CoreExpression
      */
     public function GetRightOperandExpression() {
         return $this->RightOperandExpression;
+    }
+    
+    /**
+     * @return self
+     */
+    public function Update(
+            CoreExpression $LeftOperandExpression, 
+            $Operator, 
+            CoreExpression $RightOperandExpression) {
+        if($this->LeftOperandExpression === $LeftOperandExpression
+                && $this->Operator === $Operator
+                && $this->RightOperandExpression = $RightOperandExpression) {
+            return $this;
+        }
+        
+        return new self($LeftOperandExpression, $Operator, $RightOperandExpression);
     }
 }
 

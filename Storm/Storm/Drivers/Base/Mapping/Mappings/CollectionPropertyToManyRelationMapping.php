@@ -52,13 +52,12 @@ abstract class CollectionPropertyToManyRelationMapping extends RelationshipPrope
     }
     
     final protected function MakeMultipleLazyRevivalData(
-            Relational\Database $Database, 
             Relational\ResultRow $ParentData,
             callable $RevivalDataLoader) {
         $RelatedData = $this->EntityRelationalMap->ResultRow();
         $this->ToManyRelation->MapRelationalParentDataToRelatedData($ParentData, $RelatedData);
         $AlreadyKnownRelatedRevivalData = 
-            $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $RelatedData);
+            $this->EntityRelationalMap->MapResultRowDataToRevivalData([$RelatedData])[0];
         
         return new MultipleLazyRevivalData($AlreadyKnownRelatedRevivalData, $RevivalDataLoader);
     }

@@ -38,7 +38,7 @@ abstract class EntityPropertyToOneRelationMapping extends RelationshipPropertyRe
     final protected function MapParentRowKeysToRelatedRevivalData(Relational\Database $Database, array $ParentRows, array $RelatedRows) {
         $ParentKeyRelatedRowMap = $this->ToOneRelation->MapParentKeysToRelatedRow($ParentRows, $RelatedRows);
         
-        $RelatedRevivalDataArray = $this->EntityRelationalMap->MapRowsToRevivalData($Database, $ParentKeyRelatedRowMap);
+        $RelatedRevivalDataArray = $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $ParentKeyRelatedRowMap);
         
         $MappedRelatedRevivalData = [];
         foreach($ParentRows as $Key => $ParentRow) {            
@@ -50,12 +50,12 @@ abstract class EntityPropertyToOneRelationMapping extends RelationshipPropertyRe
     }
     
     final protected function MakeLazyRevivalData(
-            Relational\Database $Database, 
             Relational\ResultRow $ParentData,
             callable $RevivalDataLoader) {
         $RelatedData = $this->EntityRelationalMap->ResultRow();
         $this->ToOneRelation->MapRelationalParentDataToRelatedData($ParentData, $RelatedData);
-        $AlreadyKnownRelatedRevivalData = $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $RelatedData);
+        $AlreadyKnownRelatedRevivalData = 
+                $this->EntityRelationalMap->MapResultRowDataToRevivalData([$RelatedData])[0];
         
         return new LazyRevivalData($AlreadyKnownRelatedRevivalData, $RevivalDataLoader);
     }

@@ -2,10 +2,28 @@
 
 namespace Storm\Drivers\Base\Relational\Expressions;
 
-use \Storm\Core\Relational\Expressions;
+use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Columns\Column;
 
-abstract class Expression extends Expressions\Expression {
+abstract class Expression extends Relational\Expression {
+    
+    public abstract function Traverse(Converters\ExpressionVisitor $Visitor);
+
+
+    /**
+     * @return ColumnExpression
+     */
+    public static function Column(Relational\IColumn $Column, $Alias = null) {
+        return new ColumnExpression($Column, $Alias);
+    }
+
+
+    /**
+     * @return ConstantExpression
+     */
+    public static function Constant($Value) {
+        return new ConstantExpression($Value);
+    }
     
     /**
      * @return IdentifierExpression
@@ -15,24 +33,28 @@ abstract class Expression extends Expressions\Expression {
     }
     
     /**
-     * @return ReviveColumnExpression
-     */
-    public static function ReviveColumn(Column $Column) {
-        return new ReviveColumnExpression($Column);
-    }
-    
-    /**
-     * @return ReviveColumnExpression
+     * @return MultipleExpression
      */
     public static function Multiple(array $Expressions) {
         return new MultipleExpression($Expressions);
     }
     
     /**
-     * @return PersistDataExpression
+     * @return Expression
+     */
+    public static function ReviveColumn(Column $Column) {
+        return $Column instanceof Column ?
+                $Column->GetDataType()->GetReviveExpression(Expression::Column($Column)) : 
+                Expression::Column($Column);
+    }
+    
+    /**
+     * @return Expression
      */
     public static function PersistData(Column $Column, parent $ValueExpression) {
-        return new PersistDataExpression($Column, $ValueExpression);
+        return $Column instanceof Column ?
+                $Column->GetDataType()->GetPersistExpression($ValueExpression) : 
+                $ValueExpression;
     }
     
     /**

@@ -2,7 +2,7 @@
 
  namespace Storm\Drivers\Base\Relational\Expressions;
 
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 
 class FunctionCallExpression extends Expression {
     private $Name;
@@ -21,6 +21,17 @@ class FunctionCallExpression extends Expression {
      */
     public function GetArgumentValueListExpression() {
         return $this->ArgumentValueListExpression;
+    }
+    
+    /**
+     * @return self
+     */
+    public function Update($Name, ValueListExpression $ArgumentValueListExpression) {
+        if($this->Name === $Name && $this->ArgumentValueListExpression === $ArgumentValueListExpression) {
+            return $this;
+        }
+        
+        return new self($Name, $ArgumentValueListExpression);
     }
 }
 

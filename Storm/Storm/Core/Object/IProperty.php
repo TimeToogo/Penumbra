@@ -18,6 +18,20 @@ interface IProperty {
     public function GetIdentifier();
     
     /**
+     * The expression tree for the property getter.
+     * 
+     * @return Expressions\Expression
+     */
+    public function GetGetterExpression();
+    
+    /**
+     * The expression tree for the property setter (without setting value).
+     * 
+     * @return Expressions\Expression
+     */
+    public function GetSetterExpression();
+    
+    /**
      * The parent entity type.
      * 
      * @return IEntityMap|null

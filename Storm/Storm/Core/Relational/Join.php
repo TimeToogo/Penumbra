@@ -16,11 +16,11 @@ final class Join {
     private $Table = [];
     
     /**
-     * @var Expressions\Expression 
+     * @var Expression 
      */
     private $JoinPredicateExpression;
     
-    public function __construct($JoinType, ITable $Table, Expressions\Expression $JoinPredicateExpression) {
+    public function __construct($JoinType, ITable $Table, Expression $JoinPredicateExpression) {
         if(!JoinType::IsValid($JoinType)) {
             throw new RelationalException('The supplied join type is not valid: %s given', $JoinType);
         }
@@ -41,7 +41,7 @@ final class Join {
     }
 
     /**
-     * @return Expressions\Expression] 
+     * @return Expression[] 
      */
     public function GetJoinPredicateExpression() {
         return $this->JoinPredicateExpression;

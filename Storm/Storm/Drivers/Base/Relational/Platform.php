@@ -6,7 +6,7 @@ use \Storm\Core;
 
 class Platform implements IPlatform {
     private $Connection;
-    private $ExpressionMapper;
+    private $ExpressionConverter;
     private $ColumnSet;
     private $KeyGeneratorSet;
     private $ExpressionCompiler;
@@ -16,7 +16,7 @@ class Platform implements IPlatform {
     private $QueryExecutor;
     
     public function __construct(
-            Expressions\IExpressionMapper $ExpressionMapper,
+            Expressions\Converters\IExpressionConverter $ExpressionConverter,
             Columns\IColumnSet $ColumnSet,
             PrimaryKeys\IKeyGeneratorSet $KeyGeneratorSet,
             Queries\IExpressionCompiler $ExpressionCompiler, 
@@ -24,7 +24,7 @@ class Platform implements IPlatform {
             Queries\IIdentifierEscaper $IdentifierEscaper,
             Syncing\IDatabaseSyncer $DatabaseSyncer, 
             Queries\IQueryExecutor $QueryExecutor) {
-        $this->ExpressionMapper = $ExpressionMapper;
+        $this->ExpressionConverter = $ExpressionConverter;
         $this->ColumnSet = $ColumnSet;
         $this->KeyGeneratorSet = $KeyGeneratorSet;
         $this->ExpressionCompiler = $ExpressionCompiler;
@@ -64,8 +64,8 @@ class Platform implements IPlatform {
         return array_diff(array_keys((array)$this), ['Connection']);
     }
     
-    final public function GetExpressionMapper() {
-        return $this->ExpressionMapper;
+    final public function GetExpressionConverter() {
+        return $this->ExpressionConverter;
     }
     
     final public function GetColumnSet() {

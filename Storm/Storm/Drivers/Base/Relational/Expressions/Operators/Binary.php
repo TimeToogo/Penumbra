@@ -31,11 +31,11 @@ final class Binary {
     const GreaterThanOrEqualTo = 209;
     
     //String
-    const Concatenation = 208;
+    const Concatenation = 300;
     
     //Other
-    const In = 300;
-    const MatchesRegularExpression = 301;
+    const In = 400;
+    const MatchesRegularExpression = 401;
 }
 
 ?>

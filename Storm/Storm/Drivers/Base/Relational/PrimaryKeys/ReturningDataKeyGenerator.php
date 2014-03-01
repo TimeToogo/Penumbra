@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Base\Relational\PrimaryKeys;
 
-use \Storm\Core\Relational\Expressions\Expression;
+use \Storm\Core\Relational\Expression;
 use \Storm\Core\Relational\IColumn;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 

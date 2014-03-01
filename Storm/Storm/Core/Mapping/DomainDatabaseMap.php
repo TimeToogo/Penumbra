@@ -11,7 +11,7 @@ use \Storm\Core\Containers\Map;
  * The DomainDatabaseMap class provides the nessecary data and api to map between a
  * entity instances and a relational database.
  * 
- * @internal Currently this has become a minor God-Object and should be broken up into more 
+ * Currently this has become a minor God-Object and should be broken up into more 
  * consice and well-defined classes. This could be a bit of a refactoring job as it relied heavily upon.
  * Currently I have organized the groups of behavor into editor fold tags. 
  * These should become individual classes.
@@ -162,7 +162,7 @@ abstract class DomainDatabaseMap {
      * Gets the registered relational map for the given primary key table name.
      * 
      * @param string $TableName The name of primary key table.
-     * @return IEntityRelationalMap:null The relational map or null if not found
+     * @return IEntityRelationalMap|null The relational map or null if not found
      */
     final public function GetEntityRelationalMapByPrimaryKeyTable($TableName) {
         return isset($this->EntityRelationalMapsByPrimaryKeyTable[$TableName]) ?
@@ -361,10 +361,10 @@ abstract class DomainDatabaseMap {
      * 
      * @param IEntityRelationalMap $EntityRelationalMap
      * @param Object\Expressions\Expression $Expressions
-     * @return Relational\Expressions\Expression[] The equivalent expressions
+     * @return Relational\Expression[] The equivalent expressions
      */
     private function MapExpressions(IEntityRelationalMap $EntityRelationalMap, array $Expressions) {
-        return call_user_func_array('array_merge',                 array_map(
+        return call_user_func_array('array_merge', array_map(
                 function ($Expression) use (&$EntityRelationalMap) {
                     return $this->MapExpression($EntityRelationalMap, $Expression);
                 }, $Expressions));
@@ -377,7 +377,7 @@ abstract class DomainDatabaseMap {
      * Maps the given object expression to the relational equivalent.
      * This will return an array as it is not a one-to-one mapping.
      * 
-     * @return Relational\Expressions\Expression[] The equivalent expressions
+     * @return Relational\Expression[] The equivalent expressions
      */
     protected abstract function MapExpression(IEntityRelationalMap $EntityRelationalMap, Object\Expressions\Expression $Expression);
 

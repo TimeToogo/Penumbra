@@ -133,7 +133,8 @@ class AST extends ASTBase {
         
             case $Node instanceof \PHPParser_Node_Expr:
                 return $this->ParseExpressionNode($Node);
-        
+                
+            //Irrelavent node, no call time pass by ref anymore :)
             case $Node instanceof \PHPParser_Node_Arg:
                 return $this->ParseNodeInternal($Node->value);
                 
@@ -195,9 +196,16 @@ class AST extends ASTBase {
                 return Expression::NewArray($ValueExpressions);
                 
             case $Node instanceof \PHPParser_Node_Expr_FuncCall:
-                return Expression::FunctionCall(
-                        $this->VerifyNameNode($Node->name),
-                        $this->ParseNodesInternal($Node->args));
+                if($Node->name instanceof PHPParser_Node_Expr) {
+                    return Expression::Invocation(
+                            $this->ParseNodeInternal($Node->name),
+                            $this->ParseNodesInternal($Node->args));
+                }
+                else {
+                    return Expression::FunctionCall(
+                            $this->VerifyNameNode($Node->name),
+                            $this->ParseNodesInternal($Node->args));
+                }
                 
             case ($Node instanceof \PHPParser_Node_Expr_New):
                 return Expression::Construct(
@@ -214,6 +222,11 @@ class AST extends ASTBase {
                 return Expression::PropertyFetch(
                         $this->ParseNodeInternal($Node->var),
                         $this->VerifyNameNode($Node->name));
+            
+            case $Node instanceof \PHPParser_Node_Expr_ArrayDimFetch:
+                return Expression::Index(
+                        $this->ParseNodeInternal($Node->var),
+                        $this->ParseNodeInternal($Node->dim));
             
             case $Node instanceof \PHPParser_Node_Expr_StaticCall:
                 return Expression::MethodCall(
@@ -232,7 +245,7 @@ class AST extends ASTBase {
                 $Name = $this->VerifyNameNode($Node->name);
                 if($Name !== $this->EntityVariableName) {
                     throw new ASTException(
-                            'Cannot parse AST with unresolvable variable $%s',
+                            'Cannot parse AST with unresolvable variable: $%s',
                             $Name);
                 }
                 else {
@@ -267,20 +280,22 @@ class AST extends ASTBase {
     
     // <editor-fold defaultstate="collapsed" desc="Property node parsers">
     
-    //Property detection: (does not support invocation yet)
     private function ActsUponEntityVariable(\PHPParser_Node_Expr $Node) {
         switch (true) {
             case $Node instanceof \PHPParser_Node_Expr_PropertyFetch:
             case $Node instanceof \PHPParser_Node_Expr_MethodCall:
             case $Node instanceof \PHPParser_Node_Expr_ArrayDimFetch:
+            case $Node instanceof \PHPParser_Node_Expr_FuncCall:
                 $NestedNode = $Node;
-                while(isset($NestedNode->var)) {
-                    if($NestedNode->var instanceof \PHPParser_Node_Expr_Variable 
-                            && $NestedNode->var->name === $this->EntityVariableName) {
+                $ParentNode =& $Node instanceof PHPParser_Node_Expr_FuncCall ?
+                        $Node->name : $NestedNode->var;
+                while($ParentNode instanceof PHPParser_Node_Expr) {
+                    if($ParentNode instanceof \PHPParser_Node_Expr_Variable 
+                            && $$ParentNode->name === $this->EntityVariableName) {
                         
                         return true;
                     }
-                    $NestedNode = $NestedNode->var;
+                    $NestedNode = $ParentNode;
                 }
         }
         

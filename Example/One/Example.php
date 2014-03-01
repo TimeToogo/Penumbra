@@ -58,7 +58,7 @@ class One implements \StormExamples\IStormExample {
         $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
         $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
         
-        $Action = self::PersistExisting;
+        $Action = self::RetreiveComplex;
         
         $Amount = 1;        
         $Last;

@@ -15,6 +15,17 @@ class MultipleExpression extends Expression {
     public function GetExpressions() {
         return $this->Expressions;
     }
+    
+    /**
+     * @return self
+     */
+    public function Update(array $Expressions) {
+        if($this->Expressions === $Expressions) {
+            return $this;
+        }
+        
+        return new self($Expressions);
+    }
 }
 
 ?>

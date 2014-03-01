@@ -6,19 +6,19 @@ namespace Storm\Core\Object\Expressions;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class InvocationExpression extends ObjectOperationExpression {
-    private $Arguments;
+    private $ArgumentExpressions;
     
-    public function __construct(Expression $ObjectOrNewExpression, array $Arguments) {
-        parent::__construct($ObjectOrNewExpression);
+    public function __construct(Expression $ObjectExpression, array $ArgumentExpressions) {
+        parent::__construct($ObjectExpression);
         
-        $this->Arguments = $Arguments;
+        $this->ArgumentExpressions = $ArgumentExpressions;
     }
     
     /**
-     * @return array
+     * @return Expression[]
      */
     public function GetArguments() {
-        return $this->Arguments;
+        return $this->ArgumentExpressions;
     }
 }
 

@@ -5,20 +5,20 @@ namespace Storm\Core\Object\Expressions;
 /**
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-abstract class IndexExpression extends ObjectOperationExpression {
-    private $Index;
+class IndexExpression extends ObjectOperationExpression {
+    private $IndexExpression;
     
-    public function __construct(Expression $ObjectOrNewExpression, $Index) {
+    public function __construct(Expression $ObjectOrNewExpression, Expression $IndexExpression) {
         parent::__construct($ObjectOrNewExpression);
         
-        $this->Index = $Index;
+        $this->IndexExpression = $IndexExpression;
     }
     
     /**
-     * @return string
+     * @return Expression
      */
-    public function GetIndex() {
-        return $this->Index;
+    public function GetIndexExpression() {
+        return $this->IndexExpression;
     }
 }
 

@@ -26,7 +26,7 @@ class EntityMap extends Object\EntityMap {
         return $this->EntityType;
     }
     
-   final protected function RegisterProperties(Registrar $Registrar) {
+   final protected function Properties(Registrar $Registrar) {
         $Registrar->RegisterAll($this->EntityProperties);
     }
 }

@@ -156,7 +156,7 @@ abstract class Database {
         $Columns = [];
         foreach($Request->GetTables() as $Table) {
             $this->VerifyTable(__METHOD__, $Table);
-            $Columns += $Table->GetColumnsByIdentifier();
+            $Columns += $Table->GetColumnsIndexedByIdentifier();
         }
         $ResultRowData = $this->LoadResultRowData($Request);
         

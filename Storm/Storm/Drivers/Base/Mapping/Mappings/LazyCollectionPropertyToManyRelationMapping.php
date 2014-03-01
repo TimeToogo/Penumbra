@@ -14,13 +14,13 @@ class LazyCollectionPropertyToManyRelationMapping extends CollectionPropertyToMa
         parent::__construct($CollectionProperty, $ToManyRelation);
     }
     
-    public function Revive(Mapping\DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
-        $RelatedRevivalDataArrayLoader = function ($ParentRowKey) use (&$DomainDatabaseMap, &$ResultRowArray) {
+    public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
+        $RelatedRevivalDataArrayLoader = function ($ParentRowKey) use (&$Database, &$ResultRowArray) {
             static $ParentKeyRevivalDataArraysMap = null;
             
             if($ParentKeyRevivalDataArraysMap === null) {
-                $RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $ResultRowArray);
-                $ParentKeyRevivalDataArraysMap = $this->MapParentRowKeysToRelatedRevivalDataArray($DomainDatabaseMap, $ResultRowArray, $RelatedRows);
+                $RelatedRows = $this->LoadRelatedRows($Database, $ResultRowArray);
+                $ParentKeyRevivalDataArraysMap = $this->MapParentRowKeysToRelatedRevivalDataArray($Database, $ResultRowArray, $RelatedRows);
             }
             
             return $ParentKeyRevivalDataArraysMap[$ParentRowKey];
@@ -33,7 +33,6 @@ class LazyCollectionPropertyToManyRelationMapping extends CollectionPropertyToMa
             
             $RevivalData[$this->Property] = 
                     $this->MakeMultipleLazyRevivalData(
-                            $DomainDatabaseMap, 
                             $ResultRowArray[$Key], 
                             $Loader);
         }

@@ -1,17 +1,20 @@
 <?php
 
-namespace Storm\Drivers\Base\Relational\Expressions;
+namespace Storm\Drivers\Base\Relational\Expressions\Converters;
 
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 use \Storm\Core\Relational\Expressions\ColumnExpression;
+use \Storm\Core\Object\Expressions as O;
+use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Relational\Expressions as RR;
 
 abstract class ExpressionMapper implements IExpressionMapper {
-    private $FunctionMapper;
-    private $ObjectMapper;
+    private $FunctionConverter;
+    private $ObjectConverter;
     
-    public function __construct(IFunctionMapper $FunctionMapper, IObjectMapper $ObjectMapper) {
-        $this->FunctionMapper = $FunctionMapper;
-        $this->ObjectMapper = $ObjectMapper;
+    public function __construct(IFunctionConverter $FunctionConverter, IObjectConveter $ObjectConverter) {
+        $this->FunctionConverter = $FunctionConverter;
+        $this->ObjectConverter = $ObjectConverter;
     }
     
     public function MapConstantExpression($Value) {
@@ -67,7 +70,7 @@ abstract class ExpressionMapper implements IExpressionMapper {
     }
     
     final public function MapObjectExpression($Type, $Value) {
-        return $this->ObjectMapper->MapObjectExpression($Type, $Value);
+        return $this->ObjectConverter->MapObjectExpression($Type, $Value);
     }
     
     final public function MapPropertyFetchExpression(
@@ -75,7 +78,7 @@ abstract class ExpressionMapper implements IExpressionMapper {
             $Type, 
             $Name) {
         
-        return $this->ObjectMapper->MapPropertyFetchExpression(
+        return $this->ObjectConverter->MapPropertyFetchExpression(
                 $ObjectExpression, 
                 $Type, 
                 $Name);
@@ -87,7 +90,7 @@ abstract class ExpressionMapper implements IExpressionMapper {
             $Name, 
             array $ArgumentValueExpressions) {
         
-        return $this->ObjectMapper->MapMethodCallExpression(
+        return $this->ObjectConverter->MapMethodCallExpression(
                 $ObjectValueExpression, 
                 $Type, 
                 $Name, 
@@ -98,7 +101,7 @@ abstract class ExpressionMapper implements IExpressionMapper {
             $FunctionName, 
             array $ArgumentValueExpression) {
         
-        return $this->FunctionMapper->MapFunctionCallExpression(
+        return $this->FunctionConverter->MapFunctionCallExpression(
                 $FunctionName, 
                 $ArgumentValueExpression);
     }

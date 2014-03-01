@@ -4,7 +4,7 @@ namespace Storm\Drivers\Base\Relational\Queries;
 
 use \Storm\Drivers\Base\Relational;
 use \Storm\Core\Relational\Criterion;
-use \Storm\Core\Relational\Expressions\Expression;
+use \Storm\Core\Relational\Expression;
 
 class QueryBuilder {
     const DefaultPlaceholder = '#';

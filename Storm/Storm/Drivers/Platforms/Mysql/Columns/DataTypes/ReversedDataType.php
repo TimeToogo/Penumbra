@@ -3,7 +3,7 @@
 namespace Storm\Drivers\Platforms\Mysql\Columns\DataTypes;
 
 use \Storm\Drivers\Base\Relational\Columns;
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 
 class ReversedDataType extends Columns\FunctionCallDataType {
     private $DataType;

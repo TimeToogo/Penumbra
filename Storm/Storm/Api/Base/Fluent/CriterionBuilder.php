@@ -43,7 +43,7 @@ class CriterionBuilder {
     }
     
     /**
-     * Specifies a closure to parse as predicate for this criterion.
+     * Specifies a function to parse as predicate for this criterion.
      * 
      * Example predicate closure:
      * <code>
@@ -61,7 +61,7 @@ class CriterionBuilder {
     }
     
     /**
-     * Specifies the closure to use as an ascending ordering for the criterion.
+     * Specifies the function to use as an ascending ordering for the criterion.
      * 
      * Example expression closure:
      * <code>

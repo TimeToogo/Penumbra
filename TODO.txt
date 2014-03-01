@@ -3,25 +3,25 @@ The near future:
  - Begin to document existing functionality ~
  - Redo all exceptions with meaningful exception classes and intuitive error messages ~
  - Refactor property expression mapping into the IPropertyMapping.
- - Release to the public
+ - Release to the public ~
  - Break apart the DomainDatabaseMap into more concise classes
  - 
 
 The future:
- - Extend fluent request functionality (multiple types of joins, maybe the having clause + others)
+ - Extend fluent request functionality (multiple types of joins, maybe the having clause + others) ~
  - Implement CodeFirst driver
  - Finalize the API
  - Begin writing a test suite for the major parts of the application
- - Implement an active record flavour of Storm (This could be quite sexy coupled with fluent requests)
+ - Implement an active record flavour of Storm (This could be quite sexy coupled with integrated query)
  - Implement other platforms for SQL Server, PostgreSQL, SQLite, Oracle
- - Restructure UnitOfWork / Transaction such that the order of operations is preserved
+ - Restructure UnitOfWork / Transaction such that the order of operations is preserved ?
  - Built-in support for optimistic / pessimistic locking ?
  - 
 
 The far future:
  - Introduce migrations and advanced database syncing
  - Extend fluent request functionality via relationship properties (maps to subqueries and joins)
- - Begin a peformance lockdown, make sure Storm is peformant as possible. (milliseconds matter)
+ - Begin performance tuning, with much benchmarking/profiling. (XDebug skews the results far too much)
  - Begin to investigate possible edge cases and tie up any loose ends
  - Extend the test suite to cover >80% of code
  - 
@@ -30,5 +30,5 @@ The very far future:
  - Build a wiki with the complete API and many tutorials.
  - Build a website for the community
  - Cli? Gui?
- - Rewrite the Closure AST parsing with specialized parser (remove dependency of Nikic's PHPParser)
+ - Rewrite the Closure AST parsing with specialized parser (remove dependency of Nikic's PHPParser) ?
  - 

@@ -22,7 +22,7 @@ class Procedure {
     /**
      * The set expressions.
      * 
-     * @var Expressions\Expression[] 
+     * @var Expression[] 
      */
     private $Expressions;
     
@@ -44,12 +44,12 @@ class Procedure {
     }
 
     /**
-     * @return Expressions\Expression[]
+     * @return Expression[]
      */
     final public function GetExpressions() {
         return $this->Expressions;
     }
-    final public function AddExpression(Expressions\Expression $Expression) {
+    final public function AddExpression(Expression $Expression) {
         $this->Expressions[] = $Expression;
     }
     

@@ -9,7 +9,7 @@ abstract class Platform extends Relational\Platform {
     private $DevelopmentMode;
     public function __construct(
             $DevelopmentMode = false,
-            Relational\Expressions\IExpressionMapper $ExpressionMapper, 
+            Relational\Expressions\Converters\IExpressionConverter $ExpressionConverter, 
             Relational\Columns\IColumnSet $ColumnSet, 
             Relational\PrimaryKeys\IKeyGeneratorSet $KeyGeneratorSet, 
             Relational\Queries\IExpressionCompiler $ExpressionCompiler, 
@@ -21,7 +21,7 @@ abstract class Platform extends Relational\Platform {
         $this->DevelopmentMode = $DevelopmentMode;
         
         parent::__construct(
-                $ExpressionMapper, 
+                $ExpressionConverter, 
                 $ColumnSet, 
                 $KeyGeneratorSet, 
                 $ExpressionCompiler, 

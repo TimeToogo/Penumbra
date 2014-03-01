@@ -13,7 +13,7 @@ abstract class EntityMap extends Object\EntityMap {
         parent::__construct();
     }
     
-    protected function RegisterProperties(CoreDomain $Domain, Registrar $Registrar) {
+    protected function Properties(CoreDomain $Domain, Registrar $Registrar) {
         $this->CreateProperties($Domain);
         $this->LoadRegistrarFromProperties($Registrar);
     }

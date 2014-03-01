@@ -30,14 +30,14 @@ class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRela
         $this->RelatedRows = [];
     }
     
-    public function Revive(DomainDatabaseMap $DomainDatabaseMap, array $ResultRowArray, array $RevivalDataArray) {
+    public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
         $this->ParentRowArrays[] = $ResultRowArray;
         
-        $RelatedRevivalDataLoader = function ($ParentRow) use (&$DomainDatabaseMap, &$ResultRowArray) {  
+        $RelatedRevivalDataLoader = function ($ParentRow) use (&$Database, &$ResultRowArray) {  
             static $ParentRowRelatedRevivalDataMap = null;
             
             if($ParentRowRelatedRevivalDataMap === null) {
-                $ParentRowRelatedRevivalDataMap = $this->LoadAllRelatedRows($DomainDatabaseMap, $ResultRowArray);
+                $ParentRowRelatedRevivalDataMap = $this->LoadAllRelatedRows($Database, $ResultRowArray);
             }
             
             return $ParentRowRelatedRevivalDataMap[$ParentRow];
@@ -50,22 +50,21 @@ class SemiLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRela
             
             $RevivalData[$this->Property] = 
                     $this->MakeLazyRevivalData(
-                            $DomainDatabaseMap, 
                             $ResultRowArray[$Key], 
                             $Loader);
         }
     }
     
-    private function LoadAllRelatedRows(DomainDatabaseMap $DomainDatabaseMap, array $ParentRows) {
+    private function LoadAllRelatedRows(Relational\Database $Database, array $ParentRows) {
         if(count($this->ParentRowArrays) > 0) {
             $AllParentRows = call_user_func_array('array_merge', $this->ParentRowArrays);
             
-            $this->RelatedRows = $this->LoadRelatedRows($DomainDatabaseMap, $AllParentRows);
+            $this->RelatedRows = $this->LoadRelatedRows($Database, $AllParentRows);
             
             $this->ParentRowArrays = [];
         }
         
-        return $this->MapParentRowKeysToRelatedRevivalData($DomainDatabaseMap, $ParentRows, $this->RelatedRows);
+        return $this->MapParentRowKeysToRelatedRevivalData($Database, $ParentRows, $this->RelatedRows);
     }
 }
 

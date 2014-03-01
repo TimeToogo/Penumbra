@@ -133,17 +133,6 @@ abstract class Domain {
     }
     
     /**
-     * Applies the supplied property data to the supplied entity instance.
-     * 
-     * @param object $Entity The entity to apply the property data
-     * @param PropertyData $PropertyData The property data apply
-     * @return void
-     */
-    final public function Apply($Entity, PropertyData $PropertyData) {
-        return $this->VerifyEntity(__METHOD__, $Entity)->Apply($this, $Entity, $PropertyData);
-    }
-    
-    /**
      * Constructs a discarded non-identifying relationship between the two supplied entities.
      * 
      * @param object $Entity 
@@ -239,6 +228,17 @@ abstract class Domain {
     }
     
     /**
+     * Applies the supplied property data to the supplied entity instance.
+     * 
+     * @param object $Entity The entity to apply the property data
+     * @param PropertyData $PropertyData The property data apply
+     * @return void
+     */
+    final public function Apply($Entity, PropertyData $PropertyData) {
+        return $this->VerifyEntity(__METHOD__, $Entity)->Apply($Entity, $PropertyData);
+    }
+    
+    /**
      * Revives an array of entities from the supplied array of revival data.
      * 
      * @param string $EntityType The type of entities to revive
@@ -251,7 +251,7 @@ abstract class Domain {
         }
         $EntityMap = $this->GetEntityMap($EntityType);
         
-        return $EntityMap->ReviveEntities($this, $RevivalData);
+        return $EntityMap->ReviveEntities($RevivalData);
     }
     
     /**

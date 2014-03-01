@@ -83,21 +83,24 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
         $ForeignKey = $this->GetForeignKey();
         
         /**
-         * In case the foreign key is part of the primary key and the row has
-         * not been persisted yet.
+         * In case the foreign key is part of the parent primary key and the row has
+         * not been persisted yet, defer mapping to before persistence
          */
+        $MapForeignKey = function () use (&$ParentData, &$ChildData) {
+            $this->MapRelationalParentDataToRelatedData($ParentData, $ChildData);
+        };
+        
         $HasForeignKey = $this->IsInversed() ?
             $ForeignKey->HasReferencedKey($ParentData) :
             $ForeignKey->HasParentKey($ParentData);
         
         if($HasForeignKey) {
-            $this->MapRelationalParentDataToRelatedData($ParentData, $ChildData);
+            $MapForeignKey();
         }
         else {
-            $Transaction->SubscribeToPrePersistEvent($ChildData, 
-                    function () use (&$ParentData, &$ChildData) {
-                        $this->MapRelationalParentDataToRelatedData($ParentRow, $ChildRow);
-                    });
+            $Transaction->SubscribeToPrePersistEvent(
+                    $this->GetTable(), 
+                    $MapForeignKey);
         }
     }
     

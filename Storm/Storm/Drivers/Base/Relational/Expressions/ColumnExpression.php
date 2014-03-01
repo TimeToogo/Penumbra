@@ -1,9 +1,9 @@
 <?php
 
-namespace Storm\Core\Relational\Expressions;
+namespace Storm\Drivers\Base\Relational\Expressions;
 
 use \Storm\Core\Relational\ITable;
-use Storm\Core\Relational\IColumn;
+use \Storm\Core\Relational\IColumn;
 
 /**
  * Expression representing a column in a table.

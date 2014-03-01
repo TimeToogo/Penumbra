@@ -4,7 +4,7 @@ namespace Storm\Drivers\Base\Relational\Queries;
 
 use \Storm\Core\Relational\Expressions as CoreE;
 use \Storm\Drivers\Base\Relational\Expressions as E;
-use \Storm\Core\Relational\Expressions\Expression;
+use \Storm\Core\Relational\Expression;
 
 abstract class ExpressionCompiler implements IExpressionCompiler {
     private $ExpressionOptimizer;
@@ -16,12 +16,6 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
         $Expression = $this->ExpressionOptimizer->Optimize($Expression);
         
         switch (true) {
-            case $Expression instanceof E\ReviveColumnExpression:
-                return $this->Append($QueryBuilder, $Expression->GetReviveExpression());
-                
-            case $Expression instanceof E\PersistDataExpression:
-                return $this->Append($QueryBuilder, $Expression->GetPersistExpression());
-                
             case $Expression instanceof E\MultipleExpression:
                 foreach($Expression->GetExpressions() as $Expression) {
                     $this->Append($QueryBuilder, $Expression);
@@ -125,9 +119,9 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
     protected abstract function AppendIf(QueryBuilder $QueryBuilder, E\IfExpression $Expression);
 
     protected function AppendSet(QueryBuilder $QueryBuilder, E\SetExpression $Expression) {
-        $this->Append($QueryBuilder, $Expression->GetLeftOperandExpression());
+        $this->AppendColumn($QueryBuilder, $Expression->GetAssignToColumnExpression());
         $QueryBuilder->Append($this->GetSetOperatorString($Expression->GetOperator()));
-        $this->Append($QueryBuilder, $Expression->GetRightOperandExpression());
+        $this->Append($QueryBuilder, $Expression->GetAssignmentValueExpression());
     }
     protected abstract function GetSetOperatorString($Operator);
 }

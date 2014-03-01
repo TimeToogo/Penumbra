@@ -56,6 +56,20 @@ abstract class Expression {
     }
     
     /**
+     * @return IndexExpression
+     */
+    final public static function Index(Expression $ObjectExpression, $Index) {
+        return new IndexExpression($ObjectExpression, $Index);
+    }
+    
+    /**
+     * @return InvocationExpression
+     */
+    final public static function Invocation(Expression $ObjectExpression, $Index) {
+        return new InvocationExpression($ObjectExpression, $Index);
+    }
+    
+    /**
      * @return CastExpression
      */
     final public static function Cast($CastType, Expression $CastValueExpression) {

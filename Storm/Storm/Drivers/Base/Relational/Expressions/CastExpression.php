@@ -1,8 +1,8 @@
 <?php
 
- namespace Storm\Drivers\Base\Relational\Expressions;
+namespace Storm\Drivers\Base\Relational\Expressions;
 
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 
 class CastExpression extends Expression {
     private $CastType;
@@ -18,10 +18,21 @@ class CastExpression extends Expression {
     }
     
     /**
-     * @return Expression
+     * @return CoreExpression
      */
     public function GetCastValueExpression() {
         return $this->CastValueExpression;
+    }
+    
+    /**
+     * @return self
+     */
+    public function Update($CastType, CoreExpression $CastValueExpression) {
+        if($this->CastType === $CastType && $this->CastValueExpression === $CastValueExpression) {
+            return $this;
+        }
+        
+        return new self($CastType, $CastValueExpression);
     }
 }
 

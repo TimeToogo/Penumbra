@@ -1,11 +1,11 @@
 <?php
 
-namespace Storm\Drivers\Base\Relational\Expressions;
+namespace Storm\Drivers\Base\Relational\Expressions\Converters;
 
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Columns\ObjectDataType;
 
-abstract class ObjectMapper implements IObjectMapper {
+abstract class ObjectConverter implements IObjectConveter {
     /**
      * @var ObjectDataType[] 
      */

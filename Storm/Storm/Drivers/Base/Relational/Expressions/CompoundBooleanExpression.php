@@ -26,6 +26,17 @@ class CompoundBooleanExpression extends Expression {
     public function GetBooleanExpressions() {
         return $this->BooleanExpressions;
     }
+    
+    /**
+     * @return self
+     */
+    public function Update(array $BooleanExpressions, $LogicalOperator = Binary::LogicalAnd) {
+        if($this->BooleanExpressions === $BooleanExpressions && $this->LogicalOperator === $LogicalOperator) {
+            return $this;
+        }
+        
+        return new self($BooleanExpressions, $LogicalOperator);
+    }
 }
 
 ?>

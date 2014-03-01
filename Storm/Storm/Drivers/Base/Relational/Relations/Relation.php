@@ -64,7 +64,7 @@ abstract class Relation implements Relational\IRelation {
     
     final public function RelationRequest(array $ParentRows = null) {
         $Request = $this->NewRelationRequest();
-        $this->AddParentPredicate($Criterion, $ParentRows);
+        $this->AddParentPredicate($Request->GetCriterion(), $ParentRows);
         
         return $Request;
     }

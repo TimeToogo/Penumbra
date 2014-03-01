@@ -201,7 +201,7 @@ abstract class Table implements ITable {
     /**
      *{@inheritDoc}
      */
-    final public function GetColumnsByIdentifier() {
+    final public function GetColumnsIndexedByIdentifier() {
         return $this->ColumnsByIdentifiers;
     }
     

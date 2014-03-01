@@ -1,19 +1,21 @@
 <?php
 
-namespace Storm\Drivers\Platforms\Mysql;
+namespace Storm\Drivers\Platforms\Mysql\Converters;
 
 use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Relational\Expressions\Converters;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Expressions as E;
 use \Storm\Core\Relational\Expressions as EE;
 use \Storm\Drivers\Base\Relational\Expressions\Operators as O;
 use \Storm\Drivers\Base\Relational\PlatformException;
+use \Storm\Drivers\Platforms\Mysql\Columns\DataTypes;
 
-final class ObjectMapper extends E\ObjectMapper {
+final class ObjectConverter extends Converters\ObjectConverter {
     protected function ObjectDataTypes() {
         return [
-            new Columns\DataTypes\DateTimeDataType(),
+            new DataTypes\DateTimeDataType(),
         ];
     }
     

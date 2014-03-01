@@ -25,8 +25,6 @@ abstract class StandardQueryExecutor extends QueryExecutor {
             $QueryBuilder->AppendExpression(Expression::ReviveColumn($Column));
             $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetIdentifier()]);
         }
-        
-        $QueryBuilder->AppendIdentifiers(' FROM # ', array_keys($Request->GetTables()), ', ');
         $this->AppendCriterion($QueryBuilder, $Request->GetCriterion());
     }
     
@@ -47,7 +45,7 @@ abstract class StandardQueryExecutor extends QueryExecutor {
     }
     
     protected function DeleteQuery(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
-        $QueryBuilder->AppendIdentifiers('DELETE # FROM # ', array_keys($Criterion->GetTables()), ',');
+        $QueryBuilder->AppendIdentifiers('DELETE # ', array_keys($Criterion->GetAllTables()), ',');
         
         $this->AppendCriterion($QueryBuilder, $Criterion);
     }
@@ -78,9 +76,6 @@ abstract class StandardQueryExecutor extends QueryExecutor {
     }
     
     protected function AppendCriterion(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
-        if($Criterion->IsConstrained()) {
-            $QueryBuilder->Append('WHERE ');
-        }
         $QueryBuilder->AppendCriterion($Criterion);
     }
 }

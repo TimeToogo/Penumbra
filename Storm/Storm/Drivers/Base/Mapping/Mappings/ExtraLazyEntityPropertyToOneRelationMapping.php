@@ -32,7 +32,6 @@ class ExtraLazyEntityPropertyToOneRelationMapping extends EntityPropertyToOneRel
             
             $RevivalDataArray[$Key][$this->Property] = 
                     $this->MakeLazyRevivalData(
-                            $Database, 
                             $ParentRow, 
                             $RelatedRevivalDataLoader);
         }

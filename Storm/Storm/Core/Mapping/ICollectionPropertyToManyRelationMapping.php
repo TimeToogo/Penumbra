@@ -51,7 +51,7 @@ interface ICollectionPropertyToManyRelationMapping extends IRelationshipProperty
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges);
     
     /**
-     * @return Relational\Expressions\Expression[]
+     * @return Relational\Expression[]
      */
     public function MapFunctionCall(Relational\Criterion $Criterion, Expressions\FunctionCallExpression $FunctionCallExpression);
 }

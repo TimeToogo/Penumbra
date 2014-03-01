@@ -202,8 +202,20 @@ interface IEntityRelationalMap {
      * 
      * @param Relational\Database $Database The database to load the relations from
      * @param Relational\ResultRows[] $ResultRows The result row to map
+     * @return void
      */
     public function MapResultRowsToRevivalData(Relational\Database $Database, array $ResultRowArray);
+    
+    /**
+     * @access private
+     * 
+     * Maps the supplied result rows data (no relationships) to an array of revival data.
+     * NOTE: Array keys are preserved.
+     * 
+     * @param Relational\ResultRows[] $ResultRows The result row to map
+     * @return void
+     */
+    public function MapResultRowDataToRevivalData(array $ResultRowArray);
 }
 
 ?>

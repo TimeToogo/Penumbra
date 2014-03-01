@@ -63,6 +63,22 @@ interface IEntityMap {
     public function GetProperty($Identifier);
     
     /**
+     * Gets a property by its getter expression
+     * 
+     * @param Expression $Expression The property getter expression tree
+     * @return IProperty|null The matched property
+     */
+    public function GetPropertyByGetter(Expressions\Expression $Expression);
+    
+    /**
+     * Gets a property by its setter expression
+     * 
+     * @param Expression $Expression The property setter expression tree
+     * @return IProperty|null The matched property
+     */
+    public function GetPropertyBySetter(Expressions\Expression $Expression);
+    
+    /**
      * @return IProperty[]
      */
     public function GetIdentityProperties();
@@ -183,9 +199,10 @@ interface IEntityMap {
     /**
      * Constructs an new instance of the entity
      * 
+     * @param RevivalData $RevivalData
      * @return object
      */
-    public function ConstructEntity();
+    public function ConstructEntity(RevivalData $RevivalData);
     
     /**
      * Loads an entity instance with the supplied revival data.

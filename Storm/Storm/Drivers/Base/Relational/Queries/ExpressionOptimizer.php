@@ -2,7 +2,7 @@
 
  namespace Storm\Drivers\Base\Relational\Queries;
 
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 use \Storm\Core\Relational\Expressions\ConstantExpression;
 use \Storm\Core\Relational\Expressions\ColumnExpression;
@@ -11,8 +11,6 @@ use \Storm\Drivers\Base\Relational\Expressions\UnaryOperationExpression;
 use \Storm\Drivers\Base\Relational\Expressions\BinaryOperationExpression;
 use \Storm\Drivers\Base\Relational\Expressions\ValueListExpression;
 use \Storm\Drivers\Base\Relational\Expressions\FunctionCallExpression;
-use \Storm\Drivers\Base\Relational\Expressions\ReviveColumnExpression;
-use \Storm\Drivers\Base\Relational\Expressions\PersistDataExpression;
 use \Storm\Drivers\Base\Relational\Expressions\CompoundBooleanExpression;
  
 abstract class ExpressionOptimizer implements IExpressionOptimizer {

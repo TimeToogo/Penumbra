@@ -26,7 +26,7 @@ interface ICriterion {
     public function IsConstrained();
     
     /**
-     * @return Expressions\Expression[]
+     * @return Expression[]
      */
     public function GetPredicateExpressions();
     
@@ -53,7 +53,7 @@ interface ICriterion {
     public function IsGrouped();
     
     /**
-     * @return Expressions\Expression[]
+     * @return Expression[]
      */
     public function GetGroupByExpressions();
     

@@ -76,7 +76,7 @@ interface ITable {
     /**
      * @return IColumn[]
      */
-    public function GetColumnsByIdentifier();
+    public function GetColumnsIndexedByIdentifier();
     
     /**
      * @return string[]

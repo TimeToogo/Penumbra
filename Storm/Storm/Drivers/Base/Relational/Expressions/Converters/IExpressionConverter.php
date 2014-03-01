@@ -1,11 +1,14 @@
 <?php
 
-namespace Storm\Drivers\Base\Relational\Expressions;
+namespace Storm\Drivers\Base\Relational\Expressions\Converters;
 
 use \Storm\Core\Relational;
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 
-interface IExpressionMapper {
+/**
+ * Converts relational expressions to an equivalent platform-specific expressions 
+ */
+interface IExpressionConverter {
     
     /**
      * @return CoreExpression

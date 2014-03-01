@@ -11,8 +11,11 @@ use \Storm\Core\Object\IProperty;
  */
 class PropertyExpression extends Expression {
     private $Property;
-    public function __construct(IProperty $Property) {
+    private $ParentPropertyExpression;
+    
+    public function __construct(IProperty $Property, PropertyExpression $ParentPropertyExpression = null) {
         $this->Property = $Property;
+        $this->ParentPropertyExpression = $ParentPropertyExpression;
     }
     
     /**
@@ -20,6 +23,20 @@ class PropertyExpression extends Expression {
      */
     public function GetProperty() {
         return $this->Property;
+    }
+    
+    /**
+     * @return boolean
+     */
+    public function HasParentPropertyExpression() {
+        return $this->ParentPropertyExpression !== null;
+    }
+    
+    /**
+     * @return PropertyExpression|null
+     */
+    public function GetParentPropertyExpression() {
+        return $this->ParentPropertyExpression;
     }
 }
 

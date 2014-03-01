@@ -122,8 +122,8 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     
     public function InitializeRelationshipMappings(DomainDatabaseMap $DomainDatabaseMap) {
         foreach($this->EntityPropertyToOneRelationMappings + $this->CollectionPropertyToManyRelationMappings as $RelationshipMapping) {
-            $RelationshipMapping->SetEntityRelationalMap(
-                    $DomainDatabaseMap->GetEntityRelationalMap($RelationshipMapping->GetEntityType()));
+            $RelatedEntityRelationalMap = $DomainDatabaseMap->GetEntityRelationalMap($RelationshipMapping->GetEntityType());
+            $RelationshipMapping->SetEntityRelationalMap($RelatedEntityRelationalMap);
         }
     }
     
@@ -165,7 +165,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * @param IDataPropertyColumnMapping|IEntityPropertyToOneRelationMapping|ICollectionPropertyToManyRelationMapping $PropertyMapping
      * @throws MappingException If the property mapping is not
      */
-    private function AddPropertyMapping(IPropertyMapping $PropertyMapping, DomainDatabaseMap $DomainDatabaseMap) {
+    private function AddPropertyMapping(IPropertyMapping $PropertyMapping) {
         $ProperyIdentifier = $PropertyMapping->GetProperty()->GetIdentifier();
         if($PropertyMapping instanceof IDataPropertyColumnMapping) {
             $this->DataPropertyColumnMappings[$ProperyIdentifier] = $PropertyMapping;
@@ -458,22 +458,30 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * {@inheritDoc}
      */
-    final public function MapResultRowsToRevivalData(Relational\Database $Database, array $ResultRowArray) {        
+    final public function MapResultRowsToRevivalData(Relational\Database $Database, array $ResultRowArray) {
+        return $this->MapResultRowsToRevivalDataByMappings($Database, $ResultRowArray, $this->PropertyMappings);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    final public function MapResultRowDataToRevivalData(array $ResultRowArray) {
+        return $this->MapResultRowsToRevivalDataByMappings(null, $ResultRowArray, $this->DataPropertyColumnMappings);
+    }
+    
+    private function MapResultRowsToRevivalDataByMappings(Relational\Database $Database = null, array $ResultRowArray, array $PropertyMappings) {
         $RevivalDataArray = [];
         foreach ($ResultRowArray as $Key => $ResultRow) {
             $RevivalData = $this->EntityMap->RevivalData();
             $RevivalDataArray[$Key] = $RevivalData;
         }
         
-        foreach($this->MappedProperties as $PropertyIdentifier => $Property) {
-            if(isset($this->DataPropertyColumnMappings[$PropertyIdentifier])) {
-                $this->DataPropertyColumnMappings[$PropertyIdentifier]->Revive($ResultRowArray, $RevivalDataArray);
+        foreach($PropertyMappings as $PropertyIdentifier => $PropertyMapping) {
+            if($PropertyMapping instanceof IRelationshipPropertyRelationMapping) {
+                $PropertyMapping->Revive($Database, $ResultRowArray, $RevivalDataArray);
             }
-            else if(isset($this->EntityPropertyToOneRelationMappings[$PropertyIdentifier])) {
-                $this->EntityPropertyToOneRelationMappings[$PropertyIdentifier]->Revive($Database, $ResultRowArray, $RevivalDataArray);
-            }
-            else if(isset($this->CollectionPropertyToManyRelationMappings[$PropertyIdentifier])) {
-                $this->CollectionPropertyToManyRelationMappings[$PropertyIdentifier]->Revive($Database, $ResultRowArray, $RevivalDataArray);
+            else {
+                $PropertyMapping->Revive($ResultRowArray, $RevivalDataArray);
             }
         }
         

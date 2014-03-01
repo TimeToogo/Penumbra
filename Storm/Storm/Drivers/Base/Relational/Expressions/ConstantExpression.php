@@ -1,6 +1,6 @@
 <?php
 
-namespace Storm\Core\Relational\Expressions;
+namespace Storm\Drivers\Base\Relational\Expressions;
 
 /**
  * Expression representing a constant value.

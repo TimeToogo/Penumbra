@@ -31,16 +31,8 @@ class CompositeCollectionPropertyToManyRelationMapping extends CompositeRelation
         }
     }
 
-    public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
-        return $this->ConcreteRelationshipMapping->AddToRelationalRequest($RelationalRequest);
-    }
-
     public function GetCollectionProperty() {
         return $this->ConcreteRelationshipMapping->GetCollectionProperty();
-    }
-
-    public function GetProperty() {
-        return $this->ConcreteRelationshipMapping->GetProperty();
     }
 
     public function GetToManyRelation() {
@@ -54,6 +46,11 @@ class CompositeCollectionPropertyToManyRelationMapping extends CompositeRelation
     public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
         return $this->ConcreteRelationshipMapping->Revive($Database, $ResultRowArray, $RevivalDataArray);
     }
+
+    public function MapFunctionCall(Relational\Criterion $Criterion, \Storm\Core\Mapping\Expressions\FunctionCallExpression $FunctionCallExpression) {
+        
+    }
+
 }
 
 ?>

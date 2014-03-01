@@ -3,7 +3,7 @@
 namespace Storm\Drivers\Base\Relational\Columns;
 
 use \Storm\Drivers\Base\Relational\Queries\ParameterType;
-use \Storm\Core\Relational\Expressions\Expression;
+use \Storm\Core\Relational\Expression;
 
 abstract class ObjectDataType extends DataType {
     

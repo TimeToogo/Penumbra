@@ -6,7 +6,7 @@ use \Storm\Drivers\Base\Relational\Columns;
 use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 use \Storm\Core\Relational\Expressions as E;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
-use \Storm\Core\Relational\Expressions\Expression as CoreExpression;
+use \Storm\Core\Relational\Expression as CoreExpression;
 use \Storm\Drivers\Base\Relational\Expressions\Operators;
 
 class DateTimeDataType extends Columns\ObjectDataType {

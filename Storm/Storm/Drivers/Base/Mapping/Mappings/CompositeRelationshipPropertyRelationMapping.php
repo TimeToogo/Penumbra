@@ -47,31 +47,35 @@ abstract class CompositeRelationshipPropertyRelationMapping implements IRelation
         $this->Relation = $Relation;
         $this->SetLoadingMode($LoadingMode);
     }
-
+    
     final public function GetEntityRelationalMap() {
-        return $this->EntityRelationalMap;
+        return $this->ConcreteRelationshipMapping->GetEntityRelationalMap();
     }
 
     final public function GetEntityType() {
-        return $this->RelationshipProperty->GetEntityType();
+        return $this->ConcreteRelationshipMapping->GetEntityType();
     }
 
     final public function GetProperty() {
-        return $this->RelationshipProperty;
+        return $this->ConcreteRelationshipMapping->GetRelationshipProperty();
     }
 
     final public function GetRelation() {
-        return $this->Relation;
+        return $this->ConcreteRelationshipMapping->GetRelation();
     }
 
     final public function GetRelationshipProperty() {
-        return $this->RelationshipProperty;
+        return $this->ConcreteRelationshipMapping->GetRelationshipProperty();
     }
 
     final public function SetEntityRelationalMap(IEntityRelationalMap $EntityRelationalMap) {
         foreach ($this->ConcreteRelationshipMappings as $ConcreteRelationshipMappings) {
             $ConcreteRelationshipMappings->SetEntityRelationalMap($EntityRelationalMap);
         }
+    }
+    
+    public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
+        $this->ConcreteRelationshipMapping->AddToRelationalRequest($RelationalRequest);
     }
     
     private function UnsupportedLoadingMode($LoadingMode) {

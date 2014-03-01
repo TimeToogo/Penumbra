@@ -1,10 +1,10 @@
 <?php
 
-namespace Storm\Drivers\Base\Relational\Expressions;
+namespace Storm\Drivers\Base\Relational\Expressions\Converters;
 
 use \Storm\Core\Relational;
 
-interface IFunctionMapper {
+interface IFunctionConverter {
     /**
      * @return Expression
      */
