@@ -7,20 +7,19 @@ use \Storm\Drivers\Base\Object\LazyRevivalData;
 use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 
 class CollectionProperty extends MultipleEntityProperty {
-    protected function ReviveProxies(Object\Domain $Domain, $Entity, array $Proxies) {
+    protected function ReviveProxies(array $Proxies) {
         return new Collections\Collection($this->GetEntityType(), $Proxies);
     }
     
-    protected function ReviveMultipleLazyRevivalData(Object\Domain $Domain, $Entity, MultipleLazyRevivalData $LazyRevivalData) {
-        return new Collections\LazyCollection($Domain, $this->GetEntityType(), 
+    protected function ReviveMultipleLazyRevivalData(MultipleLazyRevivalData $LazyRevivalData) {
+        return new Collections\LazyCollection($this->RelatedEntityMap,
                 $LazyRevivalData->GetAlreadyKnownRevivalData(), 
                 $LazyRevivalData->GetMultipleRevivalDataLoader(),
                 $this->ProxyGenerator);
     }
     
-    protected function ReviveArrayOfRevivalData(Object\Domain $Domain, $Entity, array $RevivalDataArray) {
-        $EntityType = $this->GetEntityType();
-        return new Collections\Collection($EntityType, $Domain->ReviveEntities($EntityType, $RevivalDataArray));
+    protected function ReviveArrayOfRevivalData(array $RevivalDataArray) {
+        return new Collections\Collection($this->GetEntityType(), $this->RelatedEntityMap->ReviveEntities($RevivalDataArray));
     }
     
     protected function PersistRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,
@@ -34,7 +33,7 @@ class CollectionProperty extends MultipleEntityProperty {
             if(!($CurrentValue instanceof \Traversable)) {
             throw new Object\ObjectException(
                     'Invalid value for collection property on entity %s, Traversable expected, %s given',
-                    $this->GetEntityMap()->GetEntityType(),
+                    $this->GetEntityType(),
                     \Storm\Core\Utilities::GetTypeOrClass($CurrentValue));
             }
             foreach($CurrentValue as $Entity) {

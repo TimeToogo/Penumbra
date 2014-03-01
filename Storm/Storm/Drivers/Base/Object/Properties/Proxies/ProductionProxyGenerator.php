@@ -10,7 +10,7 @@ use \Storm\Core\Object\RevivalData;
  */
 class ProductionProxyGenerator extends ProxyFileGenerator {
     protected function LoadProxyClassFile(\ReflectionClass $EntityReflection, $ProxyClassName, $FullProxyName, $ProxyFileName) {
-        require_once $ProxyClassName;
+        require_once $ProxyFileName;
     }
 }
 

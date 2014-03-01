@@ -23,10 +23,8 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
         $this->RelationshipType = $RelationshipType;
     }
     
-    final protected function ReviveArrayOfLazyRevivalData(Object\Domain $Domain, $Entity, array $LazyRevivalDataArray, Object\IProperty $BackReferenceProperty = null) {
+    final protected function ReviveArrayOfLazyRevivalData(array $LazyRevivalDataArray, Object\IProperty $BackReferenceProperty = null) {
         if($this->ProxyGenerator !== null) {
-            $EntityType = $this->GetEntityType();
-            
             $AlreadyKnownRevivalData = [];
             $LoaderFunctions = [];
             array_walk($LazyRevivalDataArray,
@@ -35,15 +33,15 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
                         $LoaderFunctions[$Key] = $I->GetRevivalDataLoader(); 
                     });
                     
-            $Proxies = $this->ProxyGenerator->GenerateProxies($Domain, $EntityType, $AlreadyKnownRevivalData, $LoaderFunctions);
-            return $this->ReviveProxies($Domain, $Proxies, $Entity);
+            $Proxies = $this->ProxyGenerator->GenerateProxies($this->RelatedEntityMap, $AlreadyKnownRevivalData, $LoaderFunctions);
+            return $this->ReviveProxies($Proxies);
         }
         else {
             throw $this->ProxyGeneratorIsRequired();
         }
     }
     
-    protected function ReviveProxies(Object\Domain $Domain, $Entity, array $Proxies) {
+    protected function ReviveProxies(array $Proxies) {
         throw new \Storm\Core\NotSupportedException(
                 '%s cannot revive proxies, please override %s',
                 get_class($this),

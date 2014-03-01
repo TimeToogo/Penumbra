@@ -25,7 +25,7 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
         return $this->IsOptional;
     }
         
-    protected function ReviveNull(Object\Domain $Domain, $Entity) {
+    protected function ReviveNull() {
         if($this->IsOptional) {
             return null;
         }
@@ -37,22 +37,22 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
         }
     }
     
-    protected function ReviveRevivalData(Object\Domain $Domain, $Entity, Object\RevivalData $RevivalData) {
+    protected function ReviveRevivalData(Object\RevivalData $RevivalData) {
         if ($this->ProxyGenerator !== null) {
             $LoadFunction = static function () use (&$RevivalData) {
                 return $RevivalData;
             };
             
-            return $this->ProxyGenerator->GenerateProxy($Domain, $this->GetEntityType(), $LoadFunction);
+            return $this->ProxyGenerator->GenerateProxy($this->RelatedEntityMap, $LoadFunction);
         }
         else {
-            $RevivedEntities = $Domain->ReviveEntities($this->GetEntityType(), [$RevivalData]);
+            $RevivedEntities = $this->RelatedEntityMap->ReviveEntities([$RevivalData]);
             return reset($RevivedEntities);
         }
     }
-    protected function ReviveLazyRevivalData(Object\Domain $Domain, $Entity, LazyRevivalData $LazyRevivalData) {
+    protected function ReviveLazyRevivalData(LazyRevivalData $LazyRevivalData) {
         if ($this->ProxyGenerator !== null) {
-            return $this->ProxyGenerator->GenerateProxy($Domain, $this->GetEntityType(), 
+            return $this->ProxyGenerator->GenerateProxy($this->RelatedEntityMap,
                     $LazyRevivalData->GetAlreadyKnownRevivalData(),
                     $LazyRevivalData->GetRevivalDataLoader());
         }

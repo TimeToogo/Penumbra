@@ -20,7 +20,16 @@ class EagerEntityPropertyToOneRelationMapping extends EntityPropertyToOneRelatio
     }
     
     public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
-        $ParentKeyRelatedRevivalDataMap = $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $ResultRowArray);
+        $ParentKeyRelatedRevivalDataMap = array();
+        $ReviveColumns = $this->EntityRelationalMap->GetAllMappedReviveColumns();
+        foreach($ResultRowArray as $Key => $ResultRow) {
+            $Data = array_intersect_key($ResultRow->GetData(), $ReviveColumns);
+            if(array_filter($Data, 'is_null') === count($Data)) {
+                unset($ResultRowArray[$Key]);
+                $ParentKeyRelatedRevivalDataMap[$Key] = null;
+            }
+        }
+        $ParentKeyRelatedRevivalDataMap += $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $ResultRowArray);
         
         foreach($RevivalDataArray as $Key => $RevivalData) {            
             $RevivalData[$this->Property] = $ParentKeyRelatedRevivalDataMap[$Key];

@@ -3,6 +3,7 @@
 namespace Storm\Drivers\Base\Object\Properties\Proxies;
 
 use \Storm\Core\Object\Domain;
+use \Storm\Core\Object\IEntityMap;
 use \Storm\Core\Object\RevivalData;
 
 abstract class ProxyGenerator implements IProxyGenerator {
@@ -12,8 +13,8 @@ abstract class ProxyGenerator implements IProxyGenerator {
         $this->ProxyNamespace = $ProxyNamespace;
     }
     
-    final public function GenerateProxies(Domain $Domain, $EntityType, array $AlreadyKnownRevivalDataArray, array $RevivalDataLoaderFunctions) {
-        $EntityReflection = new \ReflectionClass($EntityType);
+    final public function GenerateProxies(IEntityMap $EntityMap, array $AlreadyKnownRevivalDataArray, array $RevivalDataLoaderFunctions) {
+        $EntityReflection = new \ReflectionClass($EntityMap->GetEntityType());
         $ProxyClassName = $this->GenerateProxyClassName($EntityReflection->getName());
         $FullProxyClassName = $this->GetProxyFullName($ProxyClassName);
         
@@ -25,7 +26,7 @@ abstract class ProxyGenerator implements IProxyGenerator {
         foreach($RevivalDataLoaderFunctions as $Key => $RevivalDataLoaderFunction) {
             $Proxies[] = $this->InstantiateProxy(
                     $FullProxyClassName, 
-                    $Domain, 
+                    $EntityMap, 
                     $AlreadyKnownRevivalDataArray[$Key],
                     $RevivalDataLoaderFunction);
         }
@@ -33,16 +34,16 @@ abstract class ProxyGenerator implements IProxyGenerator {
         return $Proxies;
     }
     
-    final public function GenerateProxy(Domain $Domain, $EntityType, RevivalData $AlreadyKnownRevivalData, callable $RevivalDataLoaderFunction) {
-        return $this->GenerateProxies($Domain, $EntityType, [$AlreadyKnownRevivalData], [$RevivalDataLoaderFunction])[0];
+    final public function GenerateProxy(IEntityMap $EntityMap, RevivalData $AlreadyKnownRevivalData, callable $RevivalDataLoaderFunction) {
+        return $this->GenerateProxies($EntityMap, [$AlreadyKnownRevivalData], [$RevivalDataLoaderFunction])[0];
     }
     
     final private function InstantiateProxy(
             $FullProxyName, 
-            Domain $Domain,
+            IEntityMap $EntityMap, 
             RevivalData $AlreadyKnownRevivalData, 
             callable $RevivalDataLoaderFunction) {
-        return new $FullProxyName($Domain, $AlreadyKnownRevivalData, $RevivalDataLoaderFunction);
+        return new $FullProxyName($EntityMap, $AlreadyKnownRevivalData, $RevivalDataLoaderFunction);
     }
     
     protected abstract function LoadProxyClass(

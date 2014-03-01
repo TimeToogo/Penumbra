@@ -54,6 +54,12 @@ abstract class RelationshipPropertyRelationMapping extends PropertyMapping imple
     }
     
     public function SetEntityRelationalMap(IEntityRelationalMap $EntityRelationalMap) {
+        if($EntityRelationalMap->GetEntityType() !== $this->EntityType) {
+            throw new MappingException(
+                    'Expecting entity relational map for entity %s: %s given',
+                    $this->EntityType,
+                    $EntityRelationalMap->GetEntityType());
+        }
         $this->EntityRelationalMap = $EntityRelationalMap;
     }
     

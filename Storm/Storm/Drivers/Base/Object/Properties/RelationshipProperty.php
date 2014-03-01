@@ -3,16 +3,23 @@
 namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
-use \Storm\Core\Object\Domain;
+use \Storm\Core\Object\IEntityMap;
 use \Storm\Drivers\Base\Object\LazyRevivalData;
 use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 
 abstract class RelationshipProperty extends Property implements Object\IRelationshipProperty {
-    private $EntityType;
+    /**
+     * @var string
+     */
+    protected $RelatedEntityType;
     private $IsIdentifying;
     private $OriginalValueStorageKey;
     private $BackReferenceProperty;
+    /**
+     * @var IEntityMap
+     */
+    protected $RelatedEntityMap;
     /**
      * @var Proxies\IProxyGenerator|null
      */
@@ -25,7 +32,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
             Object\IProperty $BackReferenceProperty = null,
             IProxyGenerator $ProxyGenerator = null) {
         parent::__construct($Accessor);
-        $this->EntityType = $EntityType;
+        $this->RelatedEntityType = $EntityType;
         $this->IsIdentifying = $IsIdentifying;
         $this->BackReferenceProperty = $BackReferenceProperty;
         $this->OriginalValueStorageKey = $EntityType . $this->GetIdentifier();
@@ -44,12 +51,26 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         $this->ProxyGenerator = $ProxyGenerator;
     }
         
-    final public function GetEntityType() {
-        return $this->EntityType;
+    final public function GetRelatedEntityType() {
+        return $this->RelatedEntityType;
     }
     
     final public function IsIdentifying() {
         return $this->IsIdentifying;
+    }
+    
+    public function GetRelatedEntityMap() {
+        return $this->RelatedEntityMap;
+    }
+    
+    public function SetRelatedEntityMap(IEntityMap $EntityMap) {
+        if($EntityMap->GetEntityType() !== $this->RelatedEntityType) {
+            throw new Object\ObjectException(
+                    'Expecting entity map for entity %s: %s given',
+                    $this->RelatedEntityType,
+                    $EntityMap->GetEntityType());
+        }
+        $this->RelatedEntityMap = $EntityMap;
     }
     
     /**
@@ -61,15 +82,15 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
     
     final protected function ProxyGeneratorIsRequired() {
         return new \Storm\Core\NotSupportedException(
-                'Cannot revive %s property for %s, related entity %s in lazy context: proxy generator is required',
+                'Cannot revive %s property for %s, related entity %s in lazy context: no proxy generator has been set',
                 get_class($this),
                 $this->GetEntityMap()->GetEntityType(),
                 $this->GetEntityType());
     }
 
 
-    final public function Revive(Domain $Domain, $PropertyValue, $Entity) {
-        $RevivedPropertyValue = $this->ReviveValue($Domain, $Entity, $PropertyValue);
+    final public function Revive($PropertyValue, $Entity) {
+        $RevivedPropertyValue = $this->ReviveValue($Entity, $PropertyValue);
         if($RevivedPropertyValue instanceof Proxies\IProxy) {
             $Entity->{$this->OriginalValueStorageKey} = $RevivedPropertyValue->__CloneProxyInstance();
         }
@@ -80,32 +101,32 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         $this->GetAccessor()->SetValue($Entity, $RevivedPropertyValue);
     }
     
-    final public function ReviveValue(Domain $Domain, $Entity, $PropertyRevivalValue) {
+    final public function ReviveValue($Entity, $PropertyRevivalValue) {
         if($PropertyRevivalValue === null) {
-            return $this->ReviveNull($Domain, $Entity);
+            return $this->ReviveNull();
         }
         if($PropertyRevivalValue instanceof Object\RevivalData) {
             $this->AddBackReference($PropertyRevivalValue, $Entity);
-            return $this->ReviveRevivalData($Domain, $Entity, $PropertyRevivalValue);
+            return $this->ReviveRevivalData($PropertyRevivalValue);
         }
         if($PropertyRevivalValue instanceof LazyRevivalData) {
             $this->AddBackReference($PropertyRevivalValue->GetAlreadyKnownRevivalData(), $Entity);
-            return $this->ReviveLazyRevivalData($Domain, $Entity, $PropertyRevivalValue);
+            return $this->ReviveLazyRevivalData($PropertyRevivalValue);
         }
         if($PropertyRevivalValue instanceof MultipleLazyRevivalData) {
             $this->AddBackReference($PropertyRevivalValue->GetAlreadyKnownRevivalData(), $Entity);
-            return $this->ReviveMultipleLazyRevivalData($Domain, $Entity, $PropertyRevivalValue);
+            return $this->ReviveMultipleLazyRevivalData($PropertyRevivalValue);
         }
         else if(is_array($PropertyRevivalValue)) {
             if($this->IsAll($PropertyRevivalValue, function ($I) { return $I instanceof Object\RevivalData; })) {
                 $this->AddBackReferences($PropertyRevivalValue, $Entity);
-                return $this->ReviveArrayOfRevivalData($Domain, $Entity, $PropertyRevivalValue);
+                return $this->ReviveArrayOfRevivalData($PropertyRevivalValue);
             }
             if($this->IsAll($PropertyRevivalValue, function ($I) { return $I instanceof LazyRevivalData; })) {
                 foreach($PropertyRevivalValue as $LazyRevivalData) {
                     $this->AddBackReference($LazyRevivalData->GetAlreadyKnownRevivalData(), $Entity);
                 }
-                return $this->ReviveArrayOfLazyRevivalData($Domain, $Entity, $PropertyRevivalValue);
+                return $this->ReviveArrayOfLazyRevivalData($PropertyRevivalValue);
             }
         }
         
@@ -134,34 +155,34 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
     
     private function Unimplemented($Method) {
         return new \Storm\Core\NotSupportedException(
-                'Cannot revive %s property for %s, related type %s: %s must be overriden',
+                'Cannot revive %s property for %s, related type %s: %s must be implemented',
                 get_class($this),
                 $this->GetEntityMap()->GetEntityType(),
                 $this->GetEntityType(),
                 $Method);
     }
     
-    protected function ReviveNull(Domain $Domain, $Entity) {
+    protected function ReviveNull() {
         throw $this->Unimplemented(__METHOD__);
     }
     
-    protected function ReviveRevivalData(Domain $Domain, $Entity, Object\RevivalData $RevivalData) {
+    protected function ReviveRevivalData(Object\RevivalData $RevivalData) {
         throw $this->Unimplemented(__METHOD__);
     }
     
-    protected function ReviveLazyRevivalData(Domain $Domain, $Entity, LazyRevivalData $LazyRevivalData) {
+    protected function ReviveLazyRevivalData(LazyRevivalData $LazyRevivalData) {
         throw $this->Unimplemented(__METHOD__);
     }
     
-    protected function ReviveMultipleLazyRevivalData(Domain $Domain, $Entity, MultipleLazyRevivalData $MultipleLazyRevivalData) {
+    protected function ReviveMultipleLazyRevivalData(MultipleLazyRevivalData $MultipleLazyRevivalData) {
         throw $this->Unimplemented(__METHOD__);
     }
     
-    protected function ReviveArrayOfRevivalData(Domain $Domain, $Entity, array $RevivalDataArray) {
+    protected function ReviveArrayOfRevivalData(array $RevivalDataArray) {
         throw $this->Unimplemented(__METHOD__);
     }
     
-    protected function ReviveArrayOfLazyRevivalData(Domain $Domain, $Entity, array $LazyRevivalDataArray) {
+    protected function ReviveArrayOfLazyRevivalData(array $LazyRevivalDataArray) {
         throw $this->Unimplemented(__METHOD__);
     }
     
@@ -175,7 +196,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
     }
     
     final protected function IsValidEntity($Entity) {
-        return $Entity instanceof $this->EntityType;
+        return $Entity instanceof $this->RelatedEntityType;
     }
     
     final protected function GetOriginalValue($Entity) {

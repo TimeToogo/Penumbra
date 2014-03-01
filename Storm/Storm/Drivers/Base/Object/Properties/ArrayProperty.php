@@ -7,12 +7,12 @@ use \Storm\Drivers\Base\Object\LazyRevivalData;
 use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 
 class ArrayProperty extends MultipleEntityProperty {
-    protected function ReviveProxies(Object\Domain $Domain, $Entity, array $Proxies) {
+    protected function ReviveProxies(array $Proxies) {
         return $Proxies;
     }
     
-    protected function ReviveArrayOfRevivalData(Object\Domain $Domain, $Entity, array $RevivalDataArray) {
-        return $Domain->ReviveEntities($this->GetEntityType(), $RevivalDataArray);
+    protected function ReviveArrayOfRevivalData(array $RevivalDataArray) {
+        return $this->RelatedEntityMap->ReviveEntities($RevivalDataArray);
     }
     
     protected function PersistRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,

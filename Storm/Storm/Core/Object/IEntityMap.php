@@ -7,7 +7,7 @@ use \Storm\Core\Containers\Map;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 
 /**
- * The entity map represents the properties of a type of entity.
+ * The entity map represents the properties and relationships of a type of entity.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
@@ -21,6 +21,14 @@ interface IEntityMap {
      * @return void
      */
     public function InititalizeProperties(Domain $Domain);
+    
+    /**
+     * Intialize the relationship properties in the context of the parent domain.
+     * 
+     * @param Domain $Domain The parent domain
+     * @return void
+     */
+    public function InitializeRelationshipProperties(Domain $Domain);
     
     /**
      * Whether or not this map contains a property withthe supplied identifier
@@ -158,21 +166,19 @@ interface IEntityMap {
     /**
      * Applies the supplied property data to the supplied entity instance.
      * 
-     * @param Domain $Domain The object domain to revive in entity in.
      * @param object $Entity The entity to apply the property data
      * @param PropertyData $PropertyData The property data apply
      * @return void
      */
-    public function Apply(Domain $Domain, $Entity, PropertyData $PropertyData);
+    public function Apply($Entity, PropertyData $PropertyData);
     
     /**
      * Revives an array of entities from the supplied array of revival data.
      * 
-     * @param string $EntityType The type of entities to revive
      * @param RevivalData[] $RevivalDataArray The array of revival data
      * @return object[] The revived entities
      */
-    public function ReviveEntities(Domain $Domain, array $RevivalDataArray);
+    public function ReviveEntities(array $RevivalDataArray);
     
     /**
      * Constructs an new instance of the entity
@@ -188,7 +194,7 @@ interface IEntityMap {
      * @param object $Entity The entity to load
      * @return void
      */
-    public function LoadEntity(Domain $Domain, RevivalData $RevivalData, $Entity);
+    public function LoadEntity(RevivalData $RevivalData, $Entity);
 }
 
 ?>

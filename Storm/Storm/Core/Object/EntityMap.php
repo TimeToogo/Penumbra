@@ -102,14 +102,7 @@ abstract class EntityMap implements IEntityMap {
      * @throws InvalidPropertyException
      */
     private function AddProperty(IProperty $Property) {
-        if($Property->HasEntityMap()) {
-            if(!$Property->GetEntityMap()->Is($this)) {
-                throw new InvalidPropertyException(
-                        'The supplied property is registered with another entity map %s.',
-                        get_class($Property->GetEntityMap()));
-            }
-        }
-        $Property->SetEntityMap($this);
+        $Property->SetEntityType($this->EntityType);
         $Identifier = $Property->GetIdentifier();
         
         if($Property instanceof IDataProperty) {
@@ -137,6 +130,13 @@ abstract class EntityMap implements IEntityMap {
         }
         
         $this->Properties[$Identifier] = $Property;
+    }
+    
+    final public function InitializeRelationshipProperties(Domain $Domain) {
+        foreach($this->RelationshipProperties as $RelationshipProperty) {
+            $RelatedEntityMap = $Domain->GetEntityMap($RelationshipProperty->GetRelatedEntityType());
+            $RelationshipProperty->SetRelatedEntityMap($RelatedEntityMap);
+        }
     }
     
     /**
@@ -378,16 +378,16 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    final public function Apply(Domain $Domain, $Entity, PropertyData $PropertyData) {
+    final public function Apply($Entity, PropertyData $PropertyData) {
         foreach($PropertyData as $PropertyIdentifier => $Value) {
             if(isset($this->DataProperties[$PropertyIdentifier])) {
                 $this->DataProperties[$PropertyIdentifier]->ReviveValue($Value, $Entity);
             }
             else if(isset($this->EntityProperties[$PropertyIdentifier])) {
-                $this->EntityProperties[$PropertyIdentifier]->Revive($Domain, $Value, $Entity);
+                $this->EntityProperties[$PropertyIdentifier]->Revive($Value, $Entity);
             }
             else if(isset($this->CollectionProperties[$PropertyIdentifier])) {
-                $this->CollectionProperties[$PropertyIdentifier]->Revive($Domain, $Value, $Entity);
+                $this->CollectionProperties[$PropertyIdentifier]->Revive($Value, $Entity);
             }
         }
     }
@@ -395,11 +395,11 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    final public function ReviveEntities(Domain $Domain, array $RevivalDatas) {
+    final public function ReviveEntities(array $RevivalDatas) {
         $Entities = [];
         foreach($RevivalDatas as $Key => $RevivalData) {
             $Entity = $this->ConstructEntity($RevivalData);
-            $this->Apply($Domain, $Entity, $RevivalData);
+            $this->Apply($Entity, $RevivalData);
             $Entities[$Key] = $Entity;
         }
         
@@ -409,8 +409,8 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    final public function LoadEntity(Domain $Domain, RevivalData $RevivalData, $Entity) {
-        $this->Apply($Domain, $Entity, $RevivalData);
+    final public function LoadEntity(RevivalData $RevivalData, $Entity) {
+        $this->Apply($Entity, $RevivalData);
     }
 }
 

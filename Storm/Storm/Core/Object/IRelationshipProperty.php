@@ -12,16 +12,27 @@ interface IRelationshipProperty extends IProperty {
     const IRelationshipPropertyType = __CLASS__;
     
     /**
+     * return boolean
+     */
+    public function IsIdentifying();
+    
+    /**
      * The related entity type.
      * 
      * return string
      */
-    public function GetEntityType();
+    public function GetRelatedEntityType();
     
     /**
-     * return boolean
+     * @return IEntityMap|null
      */
-    public function IsIdentifying();
+    public function GetRelatedEntityMap();
+    
+    /**
+     * @param IEntityMap
+     * @return void
+     */
+    public function SetRelatedEntityMap(IEntityMap $EntityMap);
     
     /**
      * This method should be implemented such that it sets the property
@@ -31,7 +42,7 @@ interface IRelationshipProperty extends IProperty {
      * @param type $PropertyValue The mapped revival value
      * @param type $Entity The entity to set the value to
      */
-    public function Revive(Domain $Domain, $PropertyValue, $Entity);
+    public function Revive($PropertyValue, $Entity);
 }
 
 ?>

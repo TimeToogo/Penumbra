@@ -4,10 +4,11 @@ namespace Storm\Drivers\Base\Object\Properties\Collections;
 
 use \Storm\Core\Object;
 use \Storm\Core\Object\Domain;
+use \Storm\Core\Object\IEntityMap;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 
 class LazyCollection extends Collection {
-    private $Domain;
+    private $EntityMap;
     /**
      * @var IProxyGenerator|null
      */
@@ -17,15 +18,14 @@ class LazyCollection extends Collection {
     private $IsLoaded = false;
     
     public function __construct(
-            Domain $Domain, 
-            $EntityType, 
+            IEntityMap $EntityMap, 
             Object\RevivalData $AlreadyKnownRevivalData,
             callable $ArrayLoaderFunction,
             IProxyGenerator $ProxyGenerator = null) {
-        parent::__construct($EntityType, []);
+        parent::__construct($EntityMap->GetEntityType(), []);
         $this->AlreadyKnownRevivalData = $AlreadyKnownRevivalData;
         $this->ArrayLoaderFunction = $ArrayLoaderFunction;
-        $this->Domain = $Domain;
+        $this->EntityMap = $EntityMap;
         $this->ProxyGenerator = $ProxyGenerator;
     }
     private function Load() {
@@ -53,13 +53,12 @@ class LazyCollection extends Collection {
                     $RevivalData);
             
             return $this->ProxyGenerator->GenerateProxies(
-                    $this->Domain, 
-                    $this->GetEntityType(),
+                    $this->EntityMap,
                     array_fill_keys(array_keys($LoaderFunctions), $this->AlreadyKnownRevivalData),
                     $LoaderFunctions);
         }
         else {
-            return $this->Domain->ReviveEntities($this->GetEntityType(), $RevivalData);
+            return $this->EntityMap->ReviveEntities($RevivalData);
         }
     }
     

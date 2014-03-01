@@ -2,11 +2,11 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Proxies;
 
-use \Storm\Core\Object\Domain;
+use \Storm\Core\Object\IEntityMap;
 use \Storm\Core\Object\RevivalData;
 
 trait EntityProxyFunctionality {
-    private $__Domain;
+    private $__EntityMap;
     private $__IsConstructed = false;
     private $__IsCloning = false;
     private $__IsLoading = false;
@@ -24,9 +24,9 @@ trait EntityProxyFunctionality {
     protected static $__EntityMethods = [];
     protected static $__IsInitialized = false;
     
-    private function __ConstructProxy(Domain $Domain, RevivalData $AlreadyKnownRevivalData, callable $LoadRevivalDataFunction) {
+    private function __ConstructProxy(IEntityMap $EntityMap, RevivalData $AlreadyKnownRevivalData, callable $LoadRevivalDataFunction) {
         $this->Initialize();
-        $this->__Domain = $Domain;
+        $this->__EntityMap = $EntityMap;
         $this->__LoadRevivalDataFunction = $LoadRevivalDataFunction;
         
         $Unsetter = function ($PropertyName) {
@@ -36,7 +36,7 @@ trait EntityProxyFunctionality {
             \Closure::bind($Unsetter, $this, $DeclaringClass);
             array_walk($PropertyNames, $Unsetter);
         }
-        $Domain->LoadEntity($AlreadyKnownRevivalData, $this);
+        $EntityMap->LoadEntity($AlreadyKnownRevivalData, $this);
         $this->__IsConstructed = true;
     }
     private function Initialize() {
@@ -99,7 +99,7 @@ trait EntityProxyFunctionality {
         $this->__OriginalEntity = clone $this;
         
         unset($this->__LoadEntityFunction);
-        unset($this->__Domain);
+        unset($this->__EntityMap);
         foreach($this->__UnsetQueue as $Variable) {
             if(property_exists($this, $Variable)) {
                 unset($this->$Variable);
@@ -111,7 +111,7 @@ trait EntityProxyFunctionality {
     }
     
     private function __Revive(RevivalData $RevivalData) {
-        $this->__Domain->LoadEntity($RevivalData, $this);
+        $this->__EntityMap->LoadEntity($RevivalData, $this);
     }
     
     private function HasParentMethod($Method) {

@@ -12,7 +12,11 @@ abstract class Property implements IProperty {
      * @var Accessors\Accessor 
      */
     protected $Accessor;
-    private $EntityMap;
+    
+    /**
+     * @var string 
+     */
+    private $EntityType;
     
     public function __construct(Accessors\Accessor $Accessor) {
         $this->Identifier = $Accessor->GetIdentifier();
@@ -34,16 +38,13 @@ abstract class Property implements IProperty {
         return $this->EntityMap;
     }
     
-    final public function HasEntityMap() {
-        return $this->EntityMap !== null;
+    final public function GetEntityType() {
+        return $this->EntityType;
     }
     
-    final public function SetEntityMap(IEntityMap $EntityMap = null) {
-        $this->EntityMap = $EntityMap;
-        if($EntityMap !== null) {
-            $this->Accessor->SetEntityType($EntityMap->GetEntityType());
-            $this->Identifier = $this->Accessor->GetIdentifier();
-        }
+    final public function SetEntityType($EntityType) {
+        $this->EntityType = $EntityType;
+        $this->Accessor->SetEntityType($EntityType);
     }
 }
 

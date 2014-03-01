@@ -9,9 +9,9 @@ class GetterSetter extends Accessor {
     public function __construct(
             IPropertyGetter $PropertyGetter, 
             IPropertySetter $PropertySetter) {
-        
         $this->PropertyGetter = $PropertyGetter;
         $this->PropertySetter = $PropertySetter;
+        parent::__construct();
     }
     
     protected function GetterIdentifier(&$Identifier) {

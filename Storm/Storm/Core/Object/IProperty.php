@@ -18,24 +18,19 @@ interface IProperty {
     public function GetIdentifier();
     
     /**
-     * The parent entity map.
+     * The parent entity type.
      * 
      * @return IEntityMap|null
      */
-    public function GetEntityMap();
+    public function GetEntityType();
     
     /**
-     * @return boolean
-     */
-    public function HasEntityMap();
-    
-    /**
-     * Sets the parent entity map.
+     * Sets the parent entity type.
      * 
-     * @param IEntityMap|null $EntityMap
+     * @param string $EntityType
      * @return void
      */
-    public function SetEntityMap(IEntityMap $EntityMap = null);
+    public function SetEntityType($EntityType);
 }
 
 ?>

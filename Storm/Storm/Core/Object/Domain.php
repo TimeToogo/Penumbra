@@ -28,6 +28,9 @@ abstract class Domain {
         foreach($Registrar->GetRegistered() as $EntityMap) {
             $this->AddEntityMap($EntityMap);
         }
+        foreach ($this->EntityMaps as $EntityMap) {
+            $EntityMap->InitializeRelationshipProperties($this);
+        }
     }
     
     /**
@@ -261,7 +264,7 @@ abstract class Domain {
     final public function LoadEntity(RevivalData $RevivalData, $Entity) {
         $EntityMap = $this->EntityMaps[$RevivalData->GetEntityType()];
         
-        $EntityMap->LoadEntity($this, $RevivalData, $Entity);
+        $EntityMap->LoadEntity($RevivalData, $Entity);
     }
     
     /**
@@ -275,7 +278,7 @@ abstract class Domain {
         $EntityMap = $this->EntityMaps[$RevivalData->GetEntityType()];
         
         foreach($Entities as $Entity) {
-            $EntityMap->LoadEntity($this, $RevivalData, $Entity);
+            $EntityMap->LoadEntity($RevivalData, $Entity);
         }
     }
     
