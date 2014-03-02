@@ -258,19 +258,13 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    final public function GetPropertyByGetter(Expressions\Expression $Expression) {
-        $Identifier = array_search($Expression, $this->GetterExpressionProperties);
-        
-        return $Identifier === false ? null : $this->Properties[$Identifier];
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    final public function GetPropertyBySetter(Expressions\Expression $Expression) {
-        $Identifier = array_search($Expression, $this->SetterExpressionProperties);
-        
-        return $Identifier === false ? null : $this->Properties[$Identifier];
+    public function ParseTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null) {
+        foreach ($this->Properties as $Property) {
+            $ResolvedPropertyExpression = $Property->ParseTraversalExpression($Expression, $ParentPropertyExpression);
+            if($ResolvedPropertyExpression !== null) {
+                return $ResolvedPropertyExpression;
+            }
+        }
     }
     
     /**

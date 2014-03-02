@@ -9,8 +9,8 @@ class MethodCallExpression extends ObjectOperationExpression {
     private $Name;
     private $ArgumentValueExpressions;
     
-    public function __construct(Expression $ObjectOrNewExpression, $Name, array $ArgumentValueExpressions = []) {
-        parent::__construct($ObjectOrNewExpression);
+    public function __construct(Expression $ObjectValueExpression, $Name, array $ArgumentValueExpressions = []) {
+        parent::__construct($ObjectValueExpression);
         
         $this->Name = $Name;
         $this->ArgumentValueExpressions = $ArgumentValueExpressions;

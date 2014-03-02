@@ -2,6 +2,8 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
+use \Storm\Core\Object\Expressions;
+
 abstract class MethodBase extends ReflectionBase {
     protected $MethodName;
     protected $ConstantArguments;
@@ -19,8 +21,26 @@ abstract class MethodBase extends ReflectionBase {
         return $this->MethodName;
     }
     
-    final public function Identifier(&$Identifier) {
-        $Identifier .= $this->Format($this->MethodName, $this->ConstantArguments);
+    public function Identifier(&$Identifier) {
+        $Identifier .= sprintf('->%s(%s)',
+                $this->MethodName,
+                implode(', ', array_map(function ($I) { return var_export($I, true); }, $this->ConstantArguments)));
+    }
+    
+    final protected function MatchesContantArguments(array $Expressions) {
+        if(count($Expressions) !== count($this->ConstantArguments) || !$this->AreConstants($Expressions)) {
+            return false;
+        }
+        
+        return $this->Values($Expressions) === $this->ConstantArguments;
+    }
+    
+    final protected function AreConstants(array $Expressions) {
+        return count(array_filter($Expressions, function ($I) { return !($I instanceof Expressions\ConstantExpression); })) > 0;
+    }
+    
+    final protected function Values(array $Constants) {
+        return array_map(function ($I) { return $I->GetValue(); }, $Constants);
     }
     
     final protected function Format($FunctionName, array $Arguments) {

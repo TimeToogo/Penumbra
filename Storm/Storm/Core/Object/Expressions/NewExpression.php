@@ -7,9 +7,24 @@ namespace Storm\Core\Object\Expressions;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class NewExpression extends MethodCallExpression {
+class NewExpression extends Expression {
+    private $ClassType;
+    private $ArgumentValueExpressions;
+    
     public function __construct($ClassType, array $ArgumentValueExpressions = []) {
-        parent::__construct(new ObjectExpression($ClassType), '__construct', $ArgumentValueExpressions);
+        $this->ClassType = $ClassType;
+        $this->ArgumentValueExpressions = $ArgumentValueExpressions;
+    }
+    
+    public function GetClassType() {
+        return $this->ClassType;
+    }
+    
+    /**
+     * @return Expression[]
+     */
+    public function GetArgumentValueExpressions() {
+        return $this->ArgumentValueExpressions;
     }
 }
 

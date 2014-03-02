@@ -11,25 +11,18 @@ interface IProperty {
     const IPropertyType = __CLASS__;
     
     /**
-     * The value identifier for the property.
+     * This should return an unique identifier representing the property (human readable).
      * 
      * @return string
      */
     public function GetIdentifier();
-    
+        
     /**
-     * The expression tree for the property getter.
+     * Parses an entity traversal expression tree to the resolved property expression tree
      * 
-     * @return Expressions\Expression
+     * @return Expression
      */
-    public function GetGetterExpression();
-    
-    /**
-     * The expression tree for the property setter (without setting value).
-     * 
-     * @return Expressions\Expression
-     */
-    public function GetSetterExpression();
+    public function ParseTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null);
     
     /**
      * The parent entity type.

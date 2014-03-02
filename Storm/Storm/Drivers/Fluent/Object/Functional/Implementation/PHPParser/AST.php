@@ -8,8 +8,7 @@ use \Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser\PHPParserCo
 use \Storm\Core\Object;
 use \Storm\Core\Object\Expressions\Expression;
 use \Storm\Core\Object\Expressions\Operators;
-use \Storm\Drivers\Base\Object\Properties\Property;
-use \Storm\Drivers\Base\Object\Properties\Accessors\Accessor;
+use \Storm\Core\Object\IProperty;
 use \Storm\Drivers\Fluent\Object\Functional\ASTException;
 
 require_once 'NodeSimplifiers.php';
@@ -163,12 +162,24 @@ class AST extends ASTBase {
     }
     
     final public static function VerifyNameNode($Node) {
-        if(!($Node instanceof \PHPParser_Node_Name) && !is_string($Node)) {
-            throw new ASTException(
-                    'Dynamic function calls, method calls, property accessing are not supported');
+        if(!($Node instanceof \PHPParser_Node_) && !is_string($Node)) {
+            throw $this->DynamicTraversalsAreDisallowed();
         }
         
         return is_string($Node) ? $Node : $Node->toString();
+    }
+    
+    final public static function VerifyIndexNode($Node) {
+        if(!($Node instanceof PHPParserConstantValueNode) && $Node !== null) {
+            throw $this->DynamicTraversalsAreDisallowed();
+        }
+        
+        return $Node === null ? null : $Node->Value;
+    }
+    
+    private function DynamicTraversalsAreDisallowed() {
+        return new ASTException(
+                    'Dynamic function calls, method calls, indexers, property accessing are not supported');
     }
     
     // <editor-fold defaultstate="collapsed" desc="Expression node parsers">
@@ -219,14 +230,14 @@ class AST extends ASTBase {
                         $this->ParseNodesInternal($Node->args));
             
             case $Node instanceof \PHPParser_Node_Expr_PropertyFetch:
-                return Expression::PropertyFetch(
+                return Expression::Field(
                         $this->ParseNodeInternal($Node->var),
                         $this->VerifyNameNode($Node->name));
             
             case $Node instanceof \PHPParser_Node_Expr_ArrayDimFetch:
                 return Expression::Index(
                         $this->ParseNodeInternal($Node->var),
-                        $this->ParseNodeInternal($Node->dim));
+                        $this->VerifyIndexNode($Node->dim));
             
             case $Node instanceof \PHPParser_Node_Expr_StaticCall:
                 return Expression::MethodCall(
@@ -243,14 +254,13 @@ class AST extends ASTBase {
                      
             case $Node instanceof \PHPParser_Node_Expr_Variable:
                 $Name = $this->VerifyNameNode($Node->name);
-                if($Name !== $this->EntityVariableName) {
-                    throw new ASTException(
-                            'Cannot parse AST with unresolvable variable: $%s',
-                            $Name);
+                if($Name === $this->EntityVariableName) {
+                    return Expression::Entity();
                 }
                 else {
                     throw new ASTException(
-                            'Cannot parse AST with unresolvable entity property');
+                            'Cannot parse AST with unresolvable variable: $%s',
+                            $Name);
                 }
                 
             default:
@@ -286,21 +296,22 @@ class AST extends ASTBase {
             case $Node instanceof \PHPParser_Node_Expr_MethodCall:
             case $Node instanceof \PHPParser_Node_Expr_ArrayDimFetch:
             case $Node instanceof \PHPParser_Node_Expr_FuncCall:
-                $NestedNode = $Node;
-                $ParentNode =& $Node instanceof PHPParser_Node_Expr_FuncCall ?
-                        $Node->name : $NestedNode->var;
+                $ParentNode = $Node;
+                
                 while($ParentNode instanceof PHPParser_Node_Expr) {
                     if($ParentNode instanceof \PHPParser_Node_Expr_Variable 
-                            && $$ParentNode->name === $this->EntityVariableName) {
+                            && $ParentNode->name === $this->EntityVariableName) {
                         
                         return true;
                     }
-                    $NestedNode = $ParentNode;
+                    $ParentNode = $ParentNode instanceof PHPParser_Node_Expr_FuncCall ?
+                        $ParentNode->name : $ParentNode->var;
                 }
         }
         
         return false;
     }
+    
     
     private function ParsePropertyNode(\PHPParser_Node_Expr $Node) {
         if($this->EntityMap === null) {
@@ -308,34 +319,22 @@ class AST extends ASTBase {
                     'Cannot parse property node without setting the entity map',
                     get_class($Node));
         }
-        $Properties = $this->EntityMap->GetProperties();
         
-        $this->AccessorBuilder->traverse([$Node]);
-        $Accessor = $this->AccessorBuilderVisitor->GetAccessor();
+        $TraversalExpression = $this->ParseNodeInternal($Node);
         
-        foreach($Properties as $Property) {
-            if($Property instanceof Property) {
-                $OtherAccessor = $Property->GetAccessor();
-                
-                $MatchedAccessorType = null;
-                if($this->AccessorsMatch($Accessor, $OtherAccessor, $MatchedAccessorType)) {
-                    return $this->ParseNodeAsProperty($Node, $Property, $MatchedAccessorType);
-                }
-            }
+        $AssignmentValueExpression = null;
+        $Property = $this->GetPropertyByExpression($TraversalExpression, $AssignmentValueExpression);
+        if($Property !== null) {
+            return $this->ParsePropertyExpression($Property, $AssignmentValueExpression);
         }
     }
     
-    private function ParseNodeAsProperty(\PHPParser_Node_Expr $Node, Property $Property, $MatchedAccessorType) {
-        if($MatchedAccessorType === self::PropertiesAreSetters && $Node instanceof \PHPParser_Node_Expr_MethodCall) {
-            if(count($Node->args) === 0) {
-                throw new ASTException(
-                        'Cannot method setter property node: expecting 1 argument, 0 given',
-                        get_class($Node));
-            }
+    private function ParsePropertyExpression(IProperty $Property, Expression $AssignmentValueExpression = null) {
+        if($AssignmentValueExpression !== null) {
             return Expression::Assign(
                     Expression::Property($Property), 
                     Operators\Assignment::Equal, 
-                    $this->ParseNodeInternal($Node->args[0]));
+                    $AssignmentValueExpression);
         }
         else {
             return Expression::Property($Property);

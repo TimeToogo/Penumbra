@@ -2,6 +2,10 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
+use \Storm\Core\Object\Expressions;
+use \Storm\Core\Object\Expressions\TraversalExpression;
+use \Storm\Core\Object\Expressions\PropertyExpression;
+
 abstract class FieldBase extends ReflectionBase {
     protected $FieldName;
     /**
@@ -18,9 +22,16 @@ abstract class FieldBase extends ReflectionBase {
     }
     
     public function Identifier(&$Identifier) {
-        $Identifier .= $this->FieldName;
+        $Identifier .= '->' . $this->FieldName;
     }
     
+    public function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+        if($Expression instanceof Expressions\FieldExpression 
+                && $Expression->GetName() === $this->FieldName) {
+            return $PropertyExpression;
+        }
+    }
+        
     public function __sleep() {
         return array_merge(parent::__sleep(), ['FieldName']);
     }

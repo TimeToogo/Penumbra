@@ -3,6 +3,9 @@
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
 use \Storm\Core\Object;
+use \Storm\Core\Object\Expressions\Expression;
+use \Storm\Core\Object\Expressions\TraversalExpression;
+use \Storm\Core\Object\Expressions\PropertyExpression;
 
 class Traversing extends Accessor {
     /**
@@ -28,24 +31,29 @@ class Traversing extends Accessor {
         }
         $this->TraversingAccessors = $this->NestedAccessors;
         $this->FinalAccessor = array_pop($this->TraversingAccessors);
+        parent::__construct();
     }
     
-    final protected function GetterIdentifier(&$Identifier) {
-        $Identifiers = [];
+    protected function Identifier(&$Identifier) {
         foreach($this->NestedAccessors as $NestedAccessor) {
-            $Identifiers[] = $NestedAccessor->GetGetterIdentifier();
+            $NestedAccessor->Identifier($Identifier);
         }
-        
-        $Identifier .= implode('->', $Identifiers);
     }
-    
-    final protected function SetterIdentifier(&$Identifier) {
-        $Identifiers = [];
-        foreach($this->NestedAccessors as $NestedAccessor) {
-            $Identifiers[] = $NestedAccessor->GetSetterIdentifier();
+    public function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+        $ReturnExpression = $this->FinalAccessor->ParseTraversalExpression($Expression, $PropertyExpression);
+        if(!$ReturnExpression) {
+            return null;
         }
         
-        $Identifier .= implode('->', $Identifiers);
+        $Expression = $Expression->GetValueExpression();
+        foreach(array_reverse($this->TraversingAccessors) as $NestedAccessor) {
+            if(!$NestedAccessor->ParseTraversalExpression($Expression, $PropertyExpression)) {
+                return null;
+            }
+            $Expression = $Expression->GetValueExpression();
+        }
+        
+        return $ReturnExpression;
     }
     
     public function __clone() {

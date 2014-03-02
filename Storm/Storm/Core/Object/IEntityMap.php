@@ -2,10 +2,6 @@
 
 namespace Storm\Core\Object;
 
-use \Storm\Core\Containers\Registrar;
-use \Storm\Core\Containers\Map;
-use \Storm\Core\Mapping\DomainDatabaseMap;
-
 /**
  * The entity map represents the properties and relationships of a type of entity.
  * 
@@ -61,22 +57,15 @@ interface IEntityMap {
      * @return IProperty|null The matched property
      */
     public function GetProperty($Identifier);
-    
+        
     /**
-     * Gets a property by its getter expression
+     * Parses the entity traversal tree to the resolved property expression tree
      * 
-     * @param Expression $Expression The property getter expression tree
-     * @return IProperty|null The matched property
+     * @param Expressions\TraversalExpression $Expression The entity traversal expression tree
+     * @param Expressions\PropertyExpression $ParentPropertyExpression The parent property
+     * @return Expression The property expression
      */
-    public function GetPropertyByGetter(Expressions\Expression $Expression);
-    
-    /**
-     * Gets a property by its setter expression
-     * 
-     * @param Expression $Expression The property setter expression tree
-     * @return IProperty|null The matched property
-     */
-    public function GetPropertyBySetter(Expressions\Expression $Expression);
+    public function ParseTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null);
     
     /**
      * @return IProperty[]

@@ -55,7 +55,7 @@ final class ExpressionMapper {
             case $Expression instanceof O\ObjectExpression:
                 return $this->MapObject($EntityRelationalMap, $Expression);
             
-            case $Expression instanceof O\PropertyFetchExpression:
+            case $Expression instanceof O\FieldExpression:
                 return $this->MapPropertyFetch($EntityRelationalMap, $Expression);
             
             case $Expression instanceof O\MethodCallExpression:
@@ -103,7 +103,7 @@ final class ExpressionMapper {
                 $Expression->GetInstance());
     }
         
-    private function MapPropertyFetch(IEntityRelationalMap $EntityRelationalMap, O\PropertyFetchExpression $Expression) {
+    private function MapPropertyFetch(IEntityRelationalMap $EntityRelationalMap, O\FieldExpression $Expression) {
         $ObjectExpression = $Expression->GetObjectExpression();
         return $this->ExpressionConverter->MapPropertyFetchExpression(
                 $Expression->IsStatic() ? 
@@ -135,7 +135,7 @@ final class ExpressionMapper {
         $ColumnExpressions = array_map([Expression::GetType(), 'Column'], 
                         $EntityRelationalMap->GetMappedPersistColumns($Expression->GetProperty()));
         $Operator = $this->OperatorMapper->MapAssignmentOperator($Expression->GetOperator());
-        $SetValueExpression = $this->MapExpression($EntityRelationalMap, $Expression->GetRightOperandExpression()),
+        $SetValueExpression = $this->MapExpression($EntityRelationalMap, $Expression->GetRightOperandExpression());
 
         return array_map(
                 function ($ColumnExpression) use (&$ExpressionConverter, &$Operator, &$SetValueExpression) {

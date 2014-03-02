@@ -5,11 +5,11 @@ namespace Storm\Core\Object\Expressions;
 /**
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class InvocationExpression extends ObjectOperationExpression {
+class InvocationExpression extends TraversalExpression {
     private $ArgumentExpressions;
     
-    public function __construct(Expression $ObjectExpression, array $ArgumentExpressions) {
-        parent::__construct($ObjectExpression);
+    public function __construct(Expression $ValueExpression, array $ArgumentExpressions) {
+        parent::__construct($ValueExpression);
         
         $this->ArgumentExpressions = $ArgumentExpressions;
     }
@@ -17,7 +17,7 @@ class InvocationExpression extends ObjectOperationExpression {
     /**
      * @return Expression[]
      */
-    public function GetArguments() {
+    public function GetArgumentExpressions() {
         return $this->ArgumentExpressions;
     }
 }

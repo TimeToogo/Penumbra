@@ -2,33 +2,28 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
+use \Storm\Core\Object\Expressions\TraversalExpression;
+use \Storm\Core\Object\Expressions\PropertyExpression;
+
 abstract class Accessor {
     private $Identifier;
-    private $GetterIdentifier;
-    private $SetterIdentifier;
+    private $GetterExpression;
     private $EntityType = null;
     
     public function __construct() {
-        $this->GetterIdentifier = '';
-        $this->GetterIdentifier($this->GetterIdentifier);
-        $this->SetterIdentifier = '';
-        $this->SetterIdentifier($this->SetterIdentifier);
+        $this->Identifier = '$Entity';
+        $this->Identifier($this->Identifier);
         
-        $this->Identifier = md5($this->GetterIdentifier . $this->SetterIdentifier);
+        $this->GetterExpression = $this->GetterExpression(Expression::Entity());
     }
     
     final public function GetIdentifier() {
         return $this->Identifier;
     }
-    final public function GetGetterIdentifier() {
-        return $this->GetterIdentifier;
-    }
-    final public function GetSetterIdentifier() {
-        return $this->SetterIdentifier;
-    }
     
-    protected abstract function GetterIdentifier(&$Identifier);
-    protected abstract function SetterIdentifier(&$Identifier);
+    public abstract function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression);
+    
+    protected abstract function Identifier(&$Identifier);
         
     public function SetEntityType($EntityType) {
         $this->EntityType = $EntityType;     

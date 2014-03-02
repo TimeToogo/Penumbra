@@ -12,7 +12,8 @@ use Storm\Core\Object\IProperty;
 abstract class Expression {
     use \Storm\Core\Helpers\Type;
     
-    // <editor-fold defaultstate="collapsed" desc="Factory Methods">    
+    // <editor-fold defaultstate="collapsed" desc="Factory Methods">
+    
     /**
      * @return BinaryOperationExpression
      */
@@ -25,6 +26,13 @@ abstract class Expression {
      */
     final public static function UnaryOperation($UnaryOperator, Expression $OperandExpression) {
         return new UnaryOperationExpression($UnaryOperator, $OperandExpression);
+    }
+    
+    /**
+     * @return EntityExpression
+     */
+    final public static function Entity() {
+        return new EntityExpression();
     }
     
     /**
@@ -44,29 +52,29 @@ abstract class Expression {
     /**
      * @return MethodCallExpression
      */
-    final public static function MethodCall(Expression $ObjectExpression, $Name, array $ArgumentValueExpressions = []) {
-        return new MethodCallExpression($ObjectExpression, $Name, $ArgumentValueExpressions);
+    final public static function MethodCall(Expression $ValueExpression, $Name, array $ArgumentValueExpressions = []) {
+        return new MethodCallExpression($ValueExpression, $Name, $ArgumentValueExpressions);
     }
     
     /**
-     * @return PropertyFetchExpression
+     * @return FieldExpression
      */
-    final public static function PropertyFetch(Expression $ObjectExpression, $Name) {
-        return new PropertyFetchExpression($ObjectExpression, $Name);
+    final public static function Field(Expression $ValueExpression, $Name) {
+        return new FieldExpression($ValueExpression, $Name);
     }
     
     /**
      * @return IndexExpression
      */
-    final public static function Index(Expression $ObjectExpression, $Index) {
-        return new IndexExpression($ObjectExpression, $Index);
+    final public static function Index(Expression $ValueExpression, $Index) {
+        return new IndexExpression($ValueExpression, $Index);
     }
     
     /**
      * @return InvocationExpression
      */
-    final public static function Invocation(Expression $ObjectExpression, $Index) {
-        return new InvocationExpression($ObjectExpression, $Index);
+    final public static function Invocation(Expression $ValueExpression, array $ArgumentExpressions) {
+        return new InvocationExpression($ValueExpression, $ArgumentExpressions);
     }
     
     /**

@@ -2,6 +2,10 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
+use \Storm\Core\Object\Expressions\Expression;
+use \Storm\Core\Object\Expressions\TraversalExpression;
+use \Storm\Core\Object\Expressions\PropertyExpression;
+
 class GetterSetter extends Accessor {
     private $PropertyGetter;
     private $PropertySetter;
@@ -13,13 +17,29 @@ class GetterSetter extends Accessor {
         $this->PropertySetter = $PropertySetter;
         parent::__construct();
     }
-    
-    protected function GetterIdentifier(&$Identifier) {
-        $this->PropertyGetter->Identifier($Identifier);
+
+    protected function Identifier(&$Identifier) {
+        $GetterIdentifier = '';
+        $SetterIdentifier = '';
+        $this->PropertyGetter->Identifier($GetterIdentifier);
+        $this->PropertySetter->Identifier($SetterIdentifier);
+        
+        if($GetterIdentifier === $SetterIdentifier) {
+            $Identifier .= $GetterIdentifier;
+        }
+        else {
+            $Identifier .= '{' . $GetterIdentifier . '|' . $SetterIdentifier . '}';
+        }
     }
     
-    protected function SetterIdentifier(&$Identifier) {
-        $this->PropertySetter->Identifier($Identifier);
+    public function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+        $GetterExpression = $this->PropertyGetter->ParseTraversalExpression($Expression, $PropertyExpression);
+        if($GetterExpression !== null) {
+            return $GetterExpression;
+        } 
+        else {
+            return $this->PropertySetter->ParseTraversalExpression($Expression, $PropertyExpression);
+        }
     }
     
     /**
@@ -49,6 +69,7 @@ class GetterSetter extends Accessor {
     final public function SetValue($Entity, $Value) {
         $this->PropertySetter->SetValueTo($Entity, $Value);
     }
+
 }
 
 ?>

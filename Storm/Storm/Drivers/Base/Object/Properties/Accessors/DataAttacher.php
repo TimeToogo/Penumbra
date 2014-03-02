@@ -2,19 +2,26 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
+use \Storm\Core\Object\Expressions\TraversalExpression;
+use \Storm\Core\Object\Expressions\PropertyExpression;
+
 class DataAttacher extends Accessor {
     private $PropertyKey;
     
-    public function __construct($FieldName) {        
+    public function __construct($FieldName) {
+        parent::__construct();
         $this->PropertyKey = '__' . $FieldName;
     }
 
-    protected function GetterIdentifier(&$Identifier) {
-        $Identifier .= $this->PropertyKey;
+    protected function Identifier(&$Identifier) {
+        $Identifier .= '->' . $this->PropertyKey;
     }
-
-    protected function SetterIdentifier(&$Identifier) {
-        $Identifier .= $this->PropertyKey;
+    
+    public function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+        if($Expression instanceof \Storm\Core\Object\Expressions\FieldExpression
+                && $Expression->GetName() === $this->PropertyKey) {
+            return $PropertyExpression;
+        }
     }
     
     final public function GetValue($Entity) {

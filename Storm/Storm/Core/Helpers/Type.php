@@ -3,7 +3,7 @@
 namespace Storm\Core\Helpers;
 
 /**
- * This trait allows simple resolving of a class's or instance's type to a string.
+ * This trait allows simple resolving of a class' or instance's type to a string.
  * 
  * NOTE: This will be replace by ...::class contant for PHP 5.5, although that does not support instances.
  * 

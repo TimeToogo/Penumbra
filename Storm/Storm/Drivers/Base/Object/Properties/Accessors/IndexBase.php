@@ -2,6 +2,10 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
+use \Storm\Core\Object\Expressions;
+use \Storm\Core\Object\Expressions\TraversalExpression;
+use \Storm\Core\Object\Expressions\PropertyExpression;
+
 abstract class IndexBase {
     /**
      * @var mixed
@@ -19,12 +23,19 @@ abstract class IndexBase {
         return $this->Index;
     }
     
-    public function SetEntityType($EntityType) { }
-    
-        
     public function Identifier(&$Identifier) {
-        $Identifier .= $this->Index;
+        $Identifier .= sprintf('[%s]',
+                var_export($this->Index, true) );
     }
+    
+    public function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+        if($Expression instanceof Expressions\IndexExpression 
+                && $Expression->GetIndex() === $this->FieldName) {
+            return $PropertyExpression;
+        }
+    }
+    
+    public function SetEntityType($EntityType) { }
 }
 
 ?>

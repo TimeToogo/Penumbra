@@ -4,6 +4,7 @@ namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
 use \Storm\Core\Object\IEntityMap;
+use \Storm\Core\Object\Expressions;
 use \Storm\Drivers\Base\Object\LazyRevivalData;
 use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
@@ -46,7 +47,6 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
     final public function GetProxyGenerator() {
         return $this->ProxyGenerator;
     }
-
     final public function SetProxyGenerator(IProxyGenerator $ProxyGenerator) {
         $this->ProxyGenerator = $ProxyGenerator;
     }
@@ -71,6 +71,16 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
                     $EntityMap->GetEntityType());
         }
         $this->RelatedEntityMap = $EntityMap;
+    }
+    
+    public function ParseTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null) {
+        while (!($Expression instanceof Expressions\EntityExpression)) {
+            $PropertyExpression = parent::ParseTraversalExpression($Expression, $ParentPropertyExpression);
+            if($PropertyExpression !== null) {
+                return $this->RelatedEntityMap->ParseTraversalExpression($Expression, $PropertyExpression);
+            }
+            $Expression = $Expression->GetValueExpression();
+        }
     }
     
     /**

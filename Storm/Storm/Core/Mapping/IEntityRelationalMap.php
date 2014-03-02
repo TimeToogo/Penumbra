@@ -202,7 +202,7 @@ interface IEntityRelationalMap {
      * 
      * @param Relational\Database $Database The database to load the relations from
      * @param Relational\ResultRows[] $ResultRows The result row to map
-     * @return void
+     * @return Object\RevivalData[]
      */
     public function MapResultRowsToRevivalData(Relational\Database $Database, array $ResultRowArray);
     
@@ -213,7 +213,7 @@ interface IEntityRelationalMap {
      * NOTE: Array keys are preserved.
      * 
      * @param Relational\ResultRows[] $ResultRows The result row to map
-     * @return void
+     * @return Object\RevivalData[]
      */
     public function MapResultRowDataToRevivalData(array $ResultRowArray);
 }

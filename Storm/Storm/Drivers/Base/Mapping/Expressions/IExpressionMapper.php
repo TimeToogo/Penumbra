@@ -14,7 +14,7 @@ interface IExpressionMapper {
         
     public function MapObject(O\ObjectExpression $Expression);
         
-    public function MapPropertyFetch(O\PropertyFetchExpression $Expression);
+    public function MapPropertyFetch(O\FieldExpression $Expression);
             
     public function MapMethodCall(O\MethodCallExpression $Expression);
         
