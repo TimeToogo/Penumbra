@@ -20,6 +20,22 @@ class IndexExpression extends TraversalExpression {
     public function GetIndex() {
         return $this->Index;
     }
+    
+    /**
+     * @return self
+     */
+    public function Update(Expression $ObjectValueExpression, $Index) {
+        if($this->GetValueExpression() === $ObjectValueExpression
+                && $this->Index === $Index) {
+            return $this;
+        }
+        
+        return new self($ObjectValueExpression, $Index);
+    }
+    
+    protected function UpdateValueExpression(Expression $ValueExpression) {
+        return new self($ValueExpression, $this->Index);
+    }
 }
 
 ?>

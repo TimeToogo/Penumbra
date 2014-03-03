@@ -40,8 +40,6 @@ class Criterion extends Object\Criterion {
                     'The supplied closure must contain a single return statement');
         }
         
-        $AST->SetPropertyMode(Functional\IAST::PropertiesAreGetters);
-        
         return $AST->ParseNode($ReturnNodes[0]);
     }
 }

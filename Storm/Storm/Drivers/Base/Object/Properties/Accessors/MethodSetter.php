@@ -9,7 +9,7 @@ use \Storm\Core\Object\Expressions\PropertyExpression;
 
 class MethodSetter extends MethodBase implements IPropertySetter {
     
-    public function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+    public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
         if($Expression instanceof Expressions\MethodCallExpression
                 && $Expression->GetName() === $this->MethodName) {
             $ArgumentExpressions = $Expression->GetArgumentExpressions();

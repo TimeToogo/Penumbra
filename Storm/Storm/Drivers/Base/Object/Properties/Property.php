@@ -4,6 +4,7 @@ namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
 use \Storm\Core\Object\IProperty;
+use \Storm\Core\Object\Expressions\Expression;
 use \Storm\Core\Object\Expressions\PropertyExpression;
 use \Storm\Core\Object\Expressions\TraversalExpression;
 
@@ -35,19 +36,42 @@ abstract class Property implements IProperty {
         return $this->Accessor;
     }
     
-    public function ParseTraversalExpression(TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null) {
-        $PropertyExpression = $ParentPropertyExpression ?: Expressions\Expression::Property($this);
-        return $this->Accessor->ParseTraversalExpression($Expression, $PropertyExpression);
+    final public function ResolveTraversalExpression(TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null) {
+        $OriginalTraversalExpression = $Expression;
+        $ResolvedExpression = $ParentPropertyExpression ?: Expressions\Expression::Property($this);
+        $ExcessDepth = 0;
+        while (!($Expression instanceof Expressions\EntityExpression)) {
+            /**
+             * Accessors are allowed to return and type of expression, but if there is still
+             * excess traversal, it must return the property expression.
+             * This is ok as it should only return other than the property expression if it
+             * is a setter (e.g. assignment expression) and no traversal should occur after
+             * a setter.
+             */
+            $ResolvedExpression = $this->Accessor->ResolveTraversalExpression($Expression, $ResolvedExpression);
+            if($ResolvedExpression !== null) {
+                if($ExcessDepth === 0) {
+                    return $ResolvedExpression;
+                }
+                else {
+                    return $this->ResolveExcessTraversal($ResolvedExpression, $ExcessDepth, $OriginalTraversalExpression);
+                }
+            }
+            $ExcessDepth++;
+            $Expression = $Expression->GetValueExpression();
+        }
     }
     
-    final public function MatchesGetterExpression(TraversalExpression $Expression) {
-        return $this->Accessor->MatchesGetterExpression($Expression);
+    protected function ResolveExcessTraversal(PropertyExpression $ResolvedExpression, $ExcessDepth, TraversalExpression $ExcessTraversalExpression) {
+        if($ExcessDepth === 0) {
+            return $ExcessTraversalExpression->UpdateValue($ResolvedExpression);
+        }
+        
+        return $ExcessTraversalExpression->UpdateValue(
+                $this->ResolveExcessTraversal($ResolvedExpression, --$ExcessDepth, $ExcessTraversalExpression->GetValueExpression()));
     }
-    
-    final public function MatchesSetterExpression(TraversalExpression $Expression, &$AssignmentValueExpression = null) {
-        return $this->Accessor->MatchesSetterExpression($Expression, $AssignmentValueExpression);
-    }
-    
+
+
     final public function GetEntityType() {
         return $this->EntityType;
     }

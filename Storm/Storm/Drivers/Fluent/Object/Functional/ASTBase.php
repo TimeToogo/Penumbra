@@ -102,26 +102,6 @@ abstract class ASTBase implements IAST {
         return $this->ParseNodeAsExpression($Node);
     }
     protected abstract function ParseNodeAsExpression(INode $Node);
-    
-    /**
-     * @return IProperty|null
-     */
-    final protected function GetPropertyByExpression(Object\Expressions\TraversalExpression $TraversalExpression, &$AssignmentValueExpression = null) {
-        switch ($this->PropertyMode) {
-            case self::PropertiesAreGetters:
-                return $this->EntityMap->GetPropertyByGetter($TraversalExpression);
-                
-            case self::PropertiesAreSetters:
-                return $this->EntityMap->GetPropertyBySetter($TraversalExpression);
-                
-            case self::PropertiesAreGettersOrSetters:
-                return $this->EntityMap->GetPropertyByGetter($TraversalExpression) ||
-                        $this->EntityMap->GetPropertyBySetter($TraversalExpression, $AssignmentValueExpression);
-                
-            default:
-                throw new FunctionException('No');
-        }
-    }
 }
 
 ?>

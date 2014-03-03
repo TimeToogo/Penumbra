@@ -6,7 +6,7 @@ use \Storm\Core\Object\Expressions;
 
 class InvocationGetter extends InvocationBase implements IPropertyGetter {
     
-     public function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+     public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
         if($Expression instanceof Expressions\InvocationExpression
                 && $this->MatchesContantArguments($Expression->GetArgumentExpressions())) {
             return $PropertyExpression;

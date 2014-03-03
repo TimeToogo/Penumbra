@@ -26,9 +26,6 @@ class AST extends ASTBase {
     private $VariableResolverVisiter;
     private $VariableResolver;
     
-    private $AccessorBuilderVisitor;
-    private $AccessorBuilder;
-    
     public function __construct(
             array $Nodes, 
             Object\IEntityMap $EntityMap,
@@ -54,10 +51,6 @@ class AST extends ASTBase {
         $this->VariableResolver->addVisitor(
                 new Visitors\UnresolvedVariableVisitor(
                         $this->UnresolvedVariables, /* Ignore: */[$EntityVariableName]));
-    
-        $this->AccessorBuilderVisitor = new Visitors\AccessorBuilderVisitor($EntityVariableName);
-        $this->AccessorBuilder = new \PHPParser_NodeTraverser();
-        $this->AccessorBuilder->addVisitor($this->AccessorBuilderVisitor);
         
     }
     
@@ -322,23 +315,8 @@ class AST extends ASTBase {
         
         $TraversalExpression = $this->ParseNodeInternal($Node);
         
-        $AssignmentValueExpression = null;
-        $Property = $this->GetPropertyByExpression($TraversalExpression, $AssignmentValueExpression);
-        if($Property !== null) {
-            return $this->ParsePropertyExpression($Property, $AssignmentValueExpression);
-        }
-    }
-    
-    private function ParsePropertyExpression(IProperty $Property, Expression $AssignmentValueExpression = null) {
-        if($AssignmentValueExpression !== null) {
-            return Expression::Assign(
-                    Expression::Property($Property), 
-                    Operators\Assignment::Equal, 
-                    $AssignmentValueExpression);
-        }
-        else {
-            return Expression::Property($Property);
-        }
+        $ResolvedPropertyExpression = $this->EntityMap->ResolveTraversalExpression($TraversalExpression);
+        return $ResolvedPropertyExpression;
     }
     
     // </editor-fold>

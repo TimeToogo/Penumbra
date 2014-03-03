@@ -38,6 +38,18 @@ class PropertyExpression extends Expression {
     public function GetParentPropertyExpression() {
         return $this->ParentPropertyExpression;
     }
+    
+    /**
+     * @return self
+     */
+    public function Update(IProperty $Property, PropertyExpression $ParentPropertyExpression = null) {
+        if($this->Property === $Property
+                && $this->ParentPropertyExpression === $ParentPropertyExpression) {
+            return $this;
+        }
+        
+        return new self($Property, $ParentPropertyExpression);
+    }
 }
 
 ?>

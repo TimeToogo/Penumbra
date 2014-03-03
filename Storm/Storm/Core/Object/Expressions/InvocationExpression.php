@@ -20,6 +20,22 @@ class InvocationExpression extends TraversalExpression {
     public function GetArgumentExpressions() {
         return $this->ArgumentExpressions;
     }
+    
+    /**
+     * @return self
+     */
+    public function Update(Expression $ObjectValueExpression, array $ArgumentExpressions) {
+        if($this->GetValueExpression() === $ObjectValueExpression
+                && $this->ArgumentExpressions === $ArgumentExpressions) {
+            return $this;
+        }
+        
+        return new self($ObjectValueExpression, $ArgumentExpressions);
+    }
+    
+    protected function UpdateValueExpression(Expression $ValueExpression) {
+        return new self($ValueExpression, $this->ArgumentExpressions);
+    }
 }
 
 ?>

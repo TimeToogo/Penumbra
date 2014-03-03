@@ -29,6 +29,18 @@ class CastExpression extends Expression {
     public function GetCastValueExpression() {
         return $this->CastValueExpression;
     }
+    
+    /**
+     * @return self
+     */
+    public function Update($CastType, Expression $CastValueExpression) {
+        if($this->CastType === $CastType
+                && $this->CastValueExpression === $CastValueExpression) {
+            return $this;
+        }
+        
+        return new self($CastType, $CastValueExpression);
+    }
 }
 
 ?>

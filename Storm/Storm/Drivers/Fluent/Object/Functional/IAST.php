@@ -5,11 +5,7 @@ namespace Storm\Drivers\Fluent\Object\Functional;
 use \Storm\Core\Object;
 use \Storm\Core\Object\Expressions\Expression;
 
-interface IAST {
-    const PropertiesAreGetters = 1;
-    const PropertiesAreSetters = 2;
-    const PropertiesAreGettersOrSetters = 3;
-    
+interface IAST {    
     /**
      * @return Object\IEntityMap
      */
@@ -24,8 +20,6 @@ interface IAST {
      */
     public function SetEntityMap(Object\IEntityMap $EntityMap);
     public function GetEntityVariableName();
-    public function GetPropertyMode();
-    public function SetPropertyMode($PropertyMode);
         
     /**
      * Removes variables from the AST by expanding the node into their original expresions

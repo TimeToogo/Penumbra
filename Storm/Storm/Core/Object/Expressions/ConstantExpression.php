@@ -3,7 +3,7 @@
 namespace Storm\Core\Object\Expressions;
 
 /**
- * Expression representing a constant value.
+ * Expression representing a resolved value.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
@@ -18,6 +18,17 @@ class ConstantExpression extends Expression {
      */
     public function GetValue() {
         return $this->Value;
+    }
+    
+    /**
+     * @return self
+     */
+    public function Update($Value) {
+        if($this->Value === $Value) {
+            return $this;
+        }
+        
+        return new self($Value);
     }
 }
 

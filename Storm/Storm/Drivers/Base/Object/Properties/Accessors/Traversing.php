@@ -39,15 +39,15 @@ class Traversing extends Accessor {
             $NestedAccessor->Identifier($Identifier);
         }
     }
-    public function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
-        $ReturnExpression = $this->FinalAccessor->ParseTraversalExpression($Expression, $PropertyExpression);
+    public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+        $ReturnExpression = $this->FinalAccessor->ResolveTraversalExpression($Expression, $PropertyExpression);
         if(!$ReturnExpression) {
             return null;
         }
         
         $Expression = $Expression->GetValueExpression();
         foreach(array_reverse($this->TraversingAccessors) as $NestedAccessor) {
-            if(!$NestedAccessor->ParseTraversalExpression($Expression, $PropertyExpression)) {
+            if(!$NestedAccessor->ResolveTraversalExpression($Expression, $PropertyExpression)) {
                 return null;
             }
             $Expression = $Expression->GetValueExpression();

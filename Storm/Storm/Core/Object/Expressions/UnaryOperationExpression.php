@@ -8,8 +8,8 @@ namespace Storm\Core\Object\Expressions;
 class UnaryOperationExpression extends Expression {
     private $Operator;
     private $OperandExpression;
-    public function __construct($UnaryOperator, Expression $OperandExpression) {
-        $this->Operator = $UnaryOperator;
+    public function __construct($Operator, Expression $OperandExpression) {
+        $this->Operator = $Operator;
         $this->OperandExpression = $OperandExpression;
     }
     
@@ -25,6 +25,18 @@ class UnaryOperationExpression extends Expression {
      */
     public function GetOperandExpression() {
         return $this->OperandExpression;
+    }
+    
+    /**
+     * @return self
+     */
+    public function Update($Operator, Expression $OperandExpression) {
+        if($this->Operator === $Operator
+                && $this->OperandExpression === $OperandExpression) {
+            return $this;
+        }
+        
+        return new self($Operator, $OperandExpression);
     }
 }
 

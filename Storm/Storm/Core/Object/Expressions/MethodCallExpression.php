@@ -7,13 +7,13 @@ namespace Storm\Core\Object\Expressions;
  */
 class MethodCallExpression extends ObjectOperationExpression {
     private $Name;
-    private $ArgumentValueExpressions;
+    private $ArgumentExpressions;
     
-    public function __construct(Expression $ObjectValueExpression, $Name, array $ArgumentValueExpressions = []) {
+    public function __construct(Expression $ObjectValueExpression, $Name, array $ArgumentExpressions = []) {
         parent::__construct($ObjectValueExpression);
         
         $this->Name = $Name;
-        $this->ArgumentValueExpressions = $ArgumentValueExpressions;
+        $this->ArgumentExpressions = $ArgumentExpressions;
     }
     
     /**
@@ -26,8 +26,25 @@ class MethodCallExpression extends ObjectOperationExpression {
     /**
      * @return Expression[]
      */
-    public function GetArgumentValueExpressions() {
-        return $this->ArgumentValueExpressions;
+    public function GetArgumentExpressions() {
+        return $this->ArgumentExpressions;
+    }
+    
+    /**
+     * @return self
+     */
+    public function Update(Expression $ObjectValueExpression, $Name, array $ArgumentExpressions) {
+        if($this->GetValueExpression() === $ObjectValueExpression
+                && $this->Name === $Name
+                && $this->ArgumentExpressions === $ArgumentExpressions) {
+            return $this;
+        }
+        
+        return new self($ObjectValueExpression, $Name, $ArgumentExpressions);
+    }
+    
+    protected function UpdateValueExpression(Expression $ValueExpression) {
+        return new self($ValueExpression, $this->Name, $this->ArgumentExpressions);
     }
 }
 

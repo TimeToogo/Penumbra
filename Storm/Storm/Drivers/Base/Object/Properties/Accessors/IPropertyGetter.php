@@ -7,7 +7,7 @@ use \Storm\Core\Object\Expressions\PropertyExpression;
 
 interface IPropertyGetter {
     public function Identifier(&$Identifier);
-    public abstract function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression);
+    public abstract function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression);
     
     public function SetEntityType($EntityType);
     public function GetValueFrom($Entity);

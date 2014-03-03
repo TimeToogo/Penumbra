@@ -15,10 +15,26 @@ class FieldExpression extends ObjectOperationExpression {
     }
     
     /**
-     * @return Expression
+     * @return string
      */
-    public function GetNameExpression() {
+    public function GetName() {
         return $this->Name;
+    }
+    
+    /**
+     * @return self
+     */
+    public function Update(Expression $ObjectValueExpression, $Name) {
+        if($this->GetValueExpression() === $ObjectValueExpression
+                && $this->Name === $Name) {
+            return $this;
+        }
+        
+        return new self($ObjectValueExpression, $Name);
+    }
+    
+    protected function UpdateValueExpression(Expression $ValueExpression) {
+        return new self($ValueExpression, $this->Name);
     }
 }
 

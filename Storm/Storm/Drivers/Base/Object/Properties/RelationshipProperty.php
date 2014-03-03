@@ -73,16 +73,9 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         $this->RelatedEntityMap = $EntityMap;
     }
     
-    public function ParseTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null) {
-        while (!($Expression instanceof Expressions\EntityExpression)) {
-            $PropertyExpression = parent::ParseTraversalExpression($Expression, $ParentPropertyExpression);
-            if($PropertyExpression !== null) {
-                return $this->RelatedEntityMap->ParseTraversalExpression($Expression, $PropertyExpression);
-            }
-            $Expression = $Expression->GetValueExpression();
-        }
+    protected function ResolveExcessTraversal(Expressions\PropertyExpression $ResolvedExpression, $ExcessDepth, Expressions\TraversalExpression $ExcessTraversalExpression) {
+        return $this->RelatedEntityMap->ResolveTraversalExpression($ExcessTraversalExpression, $ResolvedExpression);
     }
-    
     /**
      * @return Object\IProperty
      */

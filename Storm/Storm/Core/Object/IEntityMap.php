@@ -65,7 +65,7 @@ interface IEntityMap {
      * @param Expressions\PropertyExpression $ParentPropertyExpression The parent property
      * @return Expression The property expression
      */
-    public function ParseTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null);
+    public function ResolveTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null);
     
     /**
      * @return IProperty[]

@@ -21,7 +21,7 @@ abstract class Accessor {
         return $this->Identifier;
     }
     
-    public abstract function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression);
+    public abstract function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression);
     
     protected abstract function Identifier(&$Identifier);
         

@@ -20,6 +20,17 @@ class ArrayExpression extends Expression {
     public function GetValueExpressions() {
         return $this->ValueExpressions;
     }
+    
+    /**
+     * @return self
+     */
+    public function Update(array $ValueExpressions) {
+        if($this->ValueExpressions === $ValueExpressions) {
+            return $this;
+        }
+        
+        return new self($ValueExpressions);
+    }
 }
 
 ?>

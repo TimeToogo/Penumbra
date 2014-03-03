@@ -32,13 +32,13 @@ class GetterSetter extends Accessor {
         }
     }
     
-    public function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
-        $GetterExpression = $this->PropertyGetter->ParseTraversalExpression($Expression, $PropertyExpression);
+    public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+        $GetterExpression = $this->PropertyGetter->ResolveTraversalExpression($Expression, $PropertyExpression);
         if($GetterExpression !== null) {
             return $GetterExpression;
         } 
         else {
-            return $this->PropertySetter->ParseTraversalExpression($Expression, $PropertyExpression);
+            return $this->PropertySetter->ResolveTraversalExpression($Expression, $PropertyExpression);
         }
     }
     

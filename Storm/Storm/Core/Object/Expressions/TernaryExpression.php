@@ -39,6 +39,22 @@ class TernaryExpression extends Expression {
     public function GetIfFalseExpression() {
         return $this->IfFalseExpression;
     }
+    
+    /**
+     * @return self
+     */
+    public function Update(
+            Expression $ConditionExpression,
+            Expression $IfTrueExpression, 
+            Expression $IfFalseExpression) {
+        if($this->ConditionExpression === $ConditionExpression
+                && $this->IfTrueExpression === $IfTrueExpression
+                && $this->IfFalseExpression === $IfFalseExpression) {
+            return $this;
+        }
+        
+        return new self($ConditionExpression, $IfTrueExpression, $IfFalseExpression);
+    }
 }
 
 ?>

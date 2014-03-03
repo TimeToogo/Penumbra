@@ -9,11 +9,11 @@ namespace Storm\Core\Object\Expressions;
  */
 class NewExpression extends Expression {
     private $ClassType;
-    private $ArgumentValueExpressions;
+    private $ArgumentExpressions;
     
-    public function __construct($ClassType, array $ArgumentValueExpressions = []) {
+    public function __construct($ClassType, array $ArgumentExpressions = []) {
         $this->ClassType = $ClassType;
-        $this->ArgumentValueExpressions = $ArgumentValueExpressions;
+        $this->ArgumentExpressions = $ArgumentExpressions;
     }
     
     public function GetClassType() {
@@ -23,8 +23,20 @@ class NewExpression extends Expression {
     /**
      * @return Expression[]
      */
-    public function GetArgumentValueExpressions() {
-        return $this->ArgumentValueExpressions;
+    public function GetArgumentExpressions() {
+        return $this->ArgumentExpressions;
+    }
+    
+    /**
+     * @return self
+     */
+    public function Update($ClassType, array $ArgumentExpressions = []) {
+        if($this->ClassType === $ClassType
+                && $this->ArgumentExpressions === $ArgumentExpressions) {
+            return $this;
+        }
+        
+        return new self($ClassType, $ArgumentExpressions);
     }
 }
 

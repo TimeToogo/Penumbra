@@ -35,6 +35,19 @@ class BinaryOperationExpression extends Expression {
     public function GetRightOperandExpression() {
         return $this->RightOperandExpression;
     }
+    
+    /**
+     * @return self
+     */
+    public function Update(Expression $LeftOperandExpression, $Operator, Expression $RightOperandExpression) {
+        if($this->LeftOperandExpression === $LeftOperandExpression
+                && $this->Operator === $Operator
+                && $this->RightOperandExpression === $RightOperandExpression) {
+            return $this;
+        }
+        
+        return new self($LeftOperandExpression, $Operator, $RightOperandExpression);
+    }
 }
 
 ?>

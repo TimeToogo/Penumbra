@@ -38,8 +38,8 @@ class IfExpression extends Expression {
             CoreExpression $IfTrueExpression, 
             CoreExpression $IfFalseExpression) {
         if($this->ConditionExpression === $ConditionExpression
-                && $this->IfTrueExpression = $IfTrueExpression
-                && $this->IfFalseExpression = $IfFalseExpression) {
+                && $this->IfTrueExpression === $IfTrueExpression
+                && $this->IfFalseExpression === $IfFalseExpression) {
             return $this;
         }
         

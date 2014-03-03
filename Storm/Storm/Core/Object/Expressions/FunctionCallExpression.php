@@ -7,10 +7,10 @@ namespace Storm\Core\Object\Expressions;
  */
 class FunctionCallExpression extends Expression {
     private $Name;
-    private $ArgumentValueExpressions;
-    public function __construct($Name, array $ArgumentValueExpressions = []) {
+    private $ArgumentExpressions;
+    public function __construct($Name, array $ArgumentExpressions = []) {
         $this->Name = $Name;
-        $this->ArgumentValueExpressions = $ArgumentValueExpressions;
+        $this->ArgumentExpressions = $ArgumentExpressions;
     }
     
     /**
@@ -23,8 +23,20 @@ class FunctionCallExpression extends Expression {
     /**
      * @return Expression[]
      */
-    public function GetArgumentValueExpressions() {
-        return $this->ArgumentValueExpressions;
+    public function GetArgumentExpressions() {
+        return $this->ArgumentExpressions;
+    }
+    
+    /**
+     * @return self
+     */
+    public function Update($Name, array $ArgumentExpressions = []) {
+        if($this->Name === $Name
+                && $this->ArgumentExpressions === $ArgumentExpressions) {
+            return $this;
+        }
+        
+        return new self($Name, $ArgumentExpressions);
     }
 }
 

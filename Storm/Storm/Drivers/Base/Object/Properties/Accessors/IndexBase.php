@@ -28,7 +28,7 @@ abstract class IndexBase {
                 var_export($this->Index, true) );
     }
     
-    public function ParseTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+    public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
         if($Expression instanceof Expressions\IndexExpression 
                 && $Expression->GetIndex() === $this->FieldName) {
             return $PropertyExpression;

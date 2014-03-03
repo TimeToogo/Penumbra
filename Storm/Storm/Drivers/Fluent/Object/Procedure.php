@@ -21,7 +21,6 @@ class Procedure extends Object\Procedure {
     }
     
     private function ParseAssignmentExpressions(Functional\IAST $AST) {
-        $AST->SetPropertyMode(Functional\IAST::PropertiesAreGettersOrSetters);
         $Expressions = $AST->ParseNodes();
         
         foreach ($Expressions as $Key => $Expression) {

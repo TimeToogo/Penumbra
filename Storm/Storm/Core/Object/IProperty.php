@@ -22,7 +22,7 @@ interface IProperty {
      * 
      * @return Expression
      */
-    public function ParseTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null);
+    public function ResolveTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null);
     
     /**
      * The parent entity type.

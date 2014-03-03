@@ -121,7 +121,7 @@ final class ExpressionMapper {
                 $Expression->GetName(),
                 array_map(function($Expression) use (&$EntityRelationalMap) {
                     return $this->MapExpression($EntityRelationalMap, $Expression)[0];
-                }, $Expression->GetArgumentValueExpressions()));
+                }, $Expression->GetArgumentExpressions()));
     }
         
     private function MapArray(IEntityRelationalMap $EntityRelationalMap, O\ArrayExpression $Expression) {
@@ -173,7 +173,7 @@ final class ExpressionMapper {
                 $Expression->GetName(),
                 array_map(function($Expression) use (&$EntityRelationalMap) {
                     return $this->MapExpression($EntityRelationalMap, $Expression);
-                }, $Expression->GetArgumentValueExpressions())
+                }, $Expression->GetArgumentExpressions())
                 );
     }
         

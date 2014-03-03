@@ -44,7 +44,7 @@ class BinaryOperationExpression extends Expression {
             CoreExpression $RightOperandExpression) {
         if($this->LeftOperandExpression === $LeftOperandExpression
                 && $this->Operator === $Operator
-                && $this->RightOperandExpression = $RightOperandExpression) {
+                && $this->RightOperandExpression === $RightOperandExpression) {
             return $this;
         }
         

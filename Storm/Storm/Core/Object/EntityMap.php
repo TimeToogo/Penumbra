@@ -258,9 +258,9 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    public function ParseTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null) {
+    public function ResolveTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null) {
         foreach ($this->Properties as $Property) {
-            $ResolvedPropertyExpression = $Property->ParseTraversalExpression($Expression, $ParentPropertyExpression);
+            $ResolvedPropertyExpression = $Property->ResolveTraversalExpression($Expression, $ParentPropertyExpression);
             if($ResolvedPropertyExpression !== null) {
                 return $ResolvedPropertyExpression;
             }
