@@ -45,7 +45,7 @@ abstract class Expression {
     /**
      * @return NewExpression
      */
-    final public static function Construct($ClassType, array $ArgumentValueExpressions = []) {
+    final public static function Constructor($ClassType, array $ArgumentValueExpressions = []) {
         return new NewExpression($ClassType, $ArgumentValueExpressions);
     }
     
@@ -111,17 +111,17 @@ abstract class Expression {
     
     
     /**
-     * @return ConstantExpression
+     * @return ValueExpression
      */
-    final public static function Constant($Value) {
-        return new ConstantExpression($Value);
+    final public static function Value($Value) {
+        return new ValueExpression($Value);
     }
     
     /**
      * @return ArrayExpression
      */
-    final public static function NewArray(array $ValueExpressions) {
-        return new ArrayExpression($ValueExpressions);
+    final public static function NewArray(array $KeyExpressions, array $ValueExpressions) {
+        return new ArrayExpression($KeyExpressions, $ValueExpressions);
     }
 
     /**

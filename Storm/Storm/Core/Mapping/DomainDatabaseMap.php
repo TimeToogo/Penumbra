@@ -252,7 +252,7 @@ abstract class DomainDatabaseMap {
     final public function MapRequest(Object\IRequest $ObjectRequest) {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($ObjectRequest->GetEntityType());
         
-        $RelationalRequest = new Relational\Request($EntityRelationalMap->GetCriterion());
+        $RelationalRequest = new Relational\Request($EntityRelationalMap->GetCriterion($this->Database));
         $EntityRelationalMap->MapPropetiesToRelationalRequest($RelationalRequest, $ObjectRequest->GetProperties());
         
         $this->MapCriterion($EntityRelationalMap, $ObjectRequest->GetCriterion(), $RelationalRequest->GetCriterion());
@@ -276,7 +276,7 @@ abstract class DomainDatabaseMap {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($ObjectProcedure->GetEntityType());
         
         $RelationalProcedure = new Relational\Procedure(
-                $EntityRelationalMap->GetMappedPersistTables(), $EntityRelationalMap->GetCriterion());
+                $EntityRelationalMap->GetMappedPersistTables(), $EntityRelationalMap->GetCriterion($this->Database));
  
         $this->MapCriterion($EntityRelationalMap, $ObjectProcedure->GetCriterion(), $RelationalProcedure->GetCriterion());
         foreach($this->MapExpressions($EntityRelationalMap, $ObjectProcedure->GetExpressions()) as $MappedExpression) {
@@ -301,7 +301,7 @@ abstract class DomainDatabaseMap {
     private function MapObjectCriterion(Object\ICriterion $ObjectCriterion) {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($ObjectCriterion->GetEntityType());
         
-        $RelationalCriterion = $EntityRelationalMap->GetCriterion();
+        $RelationalCriterion = $EntityRelationalMap->GetCriterion($this->Database);
         $this->MapCriterion(
                 $EntityRelationalMap, 
                 $ObjectCriterion, 

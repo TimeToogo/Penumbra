@@ -36,7 +36,7 @@ abstract class MethodBase extends ReflectionBase {
     }
     
     final protected function AreConstants(array $Expressions) {
-        return count(array_filter($Expressions, function ($I) { return !($I instanceof Expressions\ConstantExpression); })) > 0;
+        return count(array_filter($Expressions, function ($I) { return !($I instanceof Expressions\ValueExpression); })) > 0;
     }
     
     final protected function Values(array $Constants) {

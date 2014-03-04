@@ -6,6 +6,7 @@ use \Storm\Drivers\Constant\Mapping;
 use \StormExamples\One\Entities\Blog;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
 final class BlogRelationalMap extends Mapping\EntityRelationalMap {
     
@@ -24,6 +25,10 @@ final class BlogRelationalMap extends Mapping\EntityRelationalMap {
         $this->Map($EntityMap->CreatedDate)->ToColumn($Table->CreatedDate);
         
         $this->Map($EntityMap->Posts)->ToCollection($Table->Posts);
+    }
+    
+    protected function RelationalCriterion(Relational\Criterion $RelationalCriterion, Relational\Database $Database) {
+        $RelationalCriterion->AddJoin(new Relational\Join(Relational\JoinType::Left, $Database->Authors));
     }
 }
 

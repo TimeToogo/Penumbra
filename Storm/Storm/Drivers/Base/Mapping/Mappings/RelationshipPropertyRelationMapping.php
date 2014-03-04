@@ -70,7 +70,7 @@ abstract class RelationshipPropertyRelationMapping extends PropertyMapping imple
         return $this->Relation;
     }
     
-    final public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
+    public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
         $RelationalRequest->AddColumns($this->Relation->GetRelationalParentColumns());
     }
     
@@ -89,6 +89,10 @@ abstract class RelationshipPropertyRelationMapping extends PropertyMapping imple
         else {
             $this->EntityRelationalMap->MapEntityToRelationalRequest($RelationalRequest);
         }
+    }
+
+    public function MapTraversalExpression(Relational\Criterion $Criterion, Object\Expressions\TraversalExpression $TraversalExpression) {
+        throw MappingException::UnresolvableEntityProperty($this->EntityType, $this->Property);
     }
 }
 

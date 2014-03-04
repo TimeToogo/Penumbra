@@ -7,7 +7,7 @@ use \Storm\Drivers\Base\Mapping;
 use \Storm\Drivers\Base\Mapping\Mappings;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Mapping\Mappings\LoadingMode;
+use \Storm\Drivers\Base\Mapping\Mappings\Loading;
 
 abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
     private $PropertyMappings = [];
@@ -17,7 +17,7 @@ abstract class EntityRelationalMap extends Mapping\EntityRelationalMap {
     
     protected function OnInitialize(\Storm\Core\Mapping\DomainDatabaseMap $DomainDatabaseMap) {
         parent::OnInitialize($DomainDatabaseMap);
-        $this->DefaultLoadingMode = LoadingMode::Lazy;
+        $this->DefaultLoadingMode = Loading\Mode::RequestScopeLazy;
     }
     
     final protected function Map(Object\IProperty $Property) {
@@ -51,9 +51,10 @@ final class FluentPropertyMapping {
     }
     
     private function GetLoadingMode($SuppliedLoadingMode) {
-        if($SuppliedLoadingMode !== LoadingMode::Eager
-                && $SuppliedLoadingMode !== LoadingMode::Lazy
-                && $SuppliedLoadingMode !== LoadingMode::ExtraLazy)
+        if($SuppliedLoadingMode !== Loading\Mode::Eager
+                && $SuppliedLoadingMode !== Loading\Mode::GlobalScopeLazy
+                && $SuppliedLoadingMode !== Loading\Mode::RequestScopeLazy
+                && $SuppliedLoadingMode !== Loading\Mode::ParentScopeLazy)
             return $this->DefaultLoadingMode;
         else
             return $SuppliedLoadingMode;
@@ -69,7 +70,7 @@ final class FluentPropertyMapping {
         $Callback($this->MakeToEntityMapping($ToOneRelation, $this->GetLoadingMode($LoadingMode)));
     }
     private function MakeToEntityMapping(Relational\IToOneRelation  $ToOneRelation, $LoadingMode) {
-        return new Mappings\CompositeEntityPropertyToOneRelationMapping($this->Property, $ToOneRelation, $LoadingMode);
+        return new Mappings\EntityPropertyToOneRelationMapping($this->Property, $ToOneRelation, $this->GetEntityLoading($LoadingMode));
     }
     
     public function ToCollection(Relational\IToManyRelation $ToManyRelation, $LoadingMode = null) {
@@ -77,7 +78,35 @@ final class FluentPropertyMapping {
         $Callback($this->MakeToCollectionMapping($ToManyRelation, $this->GetLoadingMode($LoadingMode)));
     }
     private function MakeToCollectionMapping(Relational\IToManyRelation $ToManyRelation, $LoadingMode) {
-        return new Mappings\CompositeCollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation, $LoadingMode);
+        return new Mappings\CollectionPropertyToManyRelationMapping($this->Property, $ToManyRelation, $this->GetCollectionLoading($LoadingMode));
+    }
+    
+    private static $EntityLoadingModes;
+    private function GetEntityLoading($LoadingMode) {
+        if(self::$EntityLoadingModes === null) {
+            self::$EntityLoadingModes = [
+                Mappings\Loading\Mode::Eager => new Mappings\Loading\EagerEntityLoading(),
+                Mappings\Loading\Mode::GlobalScopeLazy => new Mappings\Loading\GlobalScopeLazyEntityLoading(),
+                Mappings\Loading\Mode::RequestScopeLazy => new Mappings\Loading\RequestScopeEntityLoading(),
+                Mappings\Loading\Mode::ParentScopeLazy => new Mappings\Loading\ParentScopeLazyEntityLoading(),
+            ];
+        }
+        
+        return self::$EntityLoadingModes[$LoadingMode];
+    }
+    
+    private static $CollectionLoadingModes;
+    private function GetCollectionLoading($LoadingMode) {
+        if(self::$CollectionLoadingModes === null) {
+            self::$CollectionLoadingModes = [
+                Mappings\Loading\Mode::Eager => new Mappings\Loading\EagerCollectionLoading(),
+                Mappings\Loading\Mode::GlobalScopeLazy => new Mappings\Loading\GlobalScopeCollectionLoading(),
+                Mappings\Loading\Mode::RequestScopeLazy => new Mappings\Loading\RequestScopeCollectionLoading(),
+                Mappings\Loading\Mode::ParentScopeLazy => new Mappings\Loading\ParentScopeCollectionLoading(),
+            ];
+        }
+        
+        return self::$CollectionLoadingModes[$LoadingMode];
     }
 }
 

@@ -2,10 +2,11 @@
 
 namespace Storm\Drivers\Base\Mapping\Mappings;
 
-use \Storm\Core\Containers\Map;
 use \Storm\Core\Mapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
+use \Storm\Core\Object\Expressions;
+use \Storm\Drivers\Base\Relational\Columns;
 
 class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IDataPropertyColumnMapping {
     private $IsIdentityPrimaryKeyMapping = false;
@@ -55,6 +56,23 @@ class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IData
         return $this->DataProperty;
     }
     
+    public function MapTraversalExpression(Relational\Criterion $Criterion, Expressions\TraversalExpression $TraversalExpression) {
+        if($this->Column instanceof Columns\Column) {
+            $DataType = $this->Column->GetDataType();
+            if($DataType instanceof Columns\ObjectDataType) {
+                
+            }
+        }
+    }
+
+    public function MapAssignment(Relational\Criterion $Criterion, Mapping\Expressions\Expression $AssignmentValueExpression) {
+        return \Storm\Drivers\Base\Relational\Expressions\Expression::PersistData($this->Column, $AssignmentValueExpression);
+    }
+
+    public function MapBinary(Relational\Criterion $Criterion, Mapping\Expressions\Expression $OperandValueExpression) {
+        
+    }
+    
     public function Revive(array $ColumnDataArray, array $PropertyDataArray) {
         foreach($ColumnDataArray as $Key => $ColumnData) {
             if(isset($ColumnData[$this->Column])) {
@@ -70,6 +88,7 @@ class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IData
             }
         }
     }
+
 }
 
 ?>

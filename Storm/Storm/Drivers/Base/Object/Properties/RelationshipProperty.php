@@ -73,7 +73,10 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         $this->RelatedEntityMap = $EntityMap;
     }
     
-    protected function ResolveExcessTraversal(Expressions\PropertyExpression $ResolvedExpression, $ExcessDepth, Expressions\TraversalExpression $ExcessTraversalExpression) {
+    protected function ResolveExcessTraversal(
+            Expressions\PropertyExpression $ResolvedExpression, 
+            $ExcessDepth, 
+            Expressions\TraversalExpression $ExcessTraversalExpression) {
         return $this->RelatedEntityMap->ResolveTraversalExpression($ExcessTraversalExpression, $ResolvedExpression);
     }
     /**

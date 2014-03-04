@@ -54,11 +54,6 @@ interface IEntityPropertyToOneRelationMapping extends IRelationshipPropertyRelat
     /**
      * @return Relational\Expression[]
      */
-    public function MapObjectOperation(Relational\Criterion $Criterion, Expressions\ObjectOperationExpression $ObjectOperationExpression);
-    
-    /**
-     * @return Relational\Expression[]
-     */
     public function MapAssignment(Relational\Criterion $Criterion, Expressions\Expression $AssignmentValueExpression);
     
     /**

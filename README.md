@@ -39,7 +39,9 @@ What Storm is not
      - Required child entity - A `User` has a `Profile`
      - Optional child entity - A `User` may have a `CreditCard`
      - [Array](http://php.net/manual/en/language.types.array.php)/[Traversable](http://au1.php.net/manual/en/class.traversable.php) of many child entities - A `User` has multiple `Posts`, *Traversable must be used for lazy loading*
- 
+ - Value Objects
+ - Polymorphic Types
+
 <a name="phpinq"></a>Storm - PHP integerated query
 ==================================================
  - Code in terms of the domain, not your database (SQL).
@@ -84,9 +86,9 @@ $UserRepository->Execute($InactiveUserProcedure);
  - Storm will use batch inserts/upserts and deletes where possible.
  - Elimination of the dreaded N+1 query scenario introduced by excessive lazy loading. With storm, there are currenlty multiple relationship loading implementations:
      - `Eager` - Relationships are loaded along with the parent and children are joined where appropriate.
-     - `SemiLazy` - Relationships are not loaded with the parent entity but when one is required, globally every unloaded relationship will be loaded .
-     - `Lazy` (Recommended) - Relationships are loaded when required for all entities in the request object graph.
-     - `ExtraLazy` (N+1 likely) - Relationships are loaded when required from for each parent entity.
+     - `Global scope lazy` - Relationships are not loaded with the parent entity but when one is required, globally every unloaded relationship will be loaded .
+     - `Request scope lazy` (Recommended) - Relationships are loaded when required for all entities in the request object graph.
+     - `Parent scope lazy` (N+1 likely) - Relationships are loaded when required from for each parent entity.
 
 
 
@@ -105,8 +107,8 @@ foreach($User->GetPosts() as $Post) {
 ```
 Now here is the number of queries executed for each loading mode (N=Number of Posts);
  - `Eager` - **3** (the user | posts joined with the author | all tags), when the user is loaded.
- - `SemiLazy` - For loading a single request this is equivalent to `Lazy` mode below.
- - `Lazy` - **4** (the user | posts | all authors | all tags), the posts will be loaded when `$User->GetPosts()` is iterated and all the tags will be loaded when the first `$Post->GetTags()` is iterated.
- - `ExtraLazy` - **(N * 2) + 2** - (user | posts | *each post's* author | *each post's* tags).
+ - `Global scope lazy` - For loading a single request this is equivalent to `Request scope lazy` mode below.
+ - `Request scope lazy` - **4** (the user | posts | all authors | all tags), the posts will be loaded when `$User->GetPosts()` is iterated and all the tags will be loaded when the first `$Post->GetTags()` is iterated.
+ - `Parent scope lazy` - **(N * 2) + 2** - (user | posts | *each post's* author | *each post's* tags).
 
 *NOTE: Relationship loading mode is per-relationship, the above example assumes every relationship will have one loading mode for simplicity.*

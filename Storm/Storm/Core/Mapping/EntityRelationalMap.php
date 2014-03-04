@@ -305,13 +305,13 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * {@inheritDoc}
      */
-    final public function GetCriterion() {
+    final public function GetCriterion(Relational\Database $Database) {
         $RelationalCriterion = new Relational\Criterion($this->PrimaryKeyTable);
-        $this->RelationalCriterion($RelationalCriterion);
+        $this->RelationalCriterion($RelationalCriterion, $Database);
         
         return $RelationalCriterion;
     }
-    protected function RelationalCriterion(Relational\Criterion $RelationalCriterion) { }
+    protected function RelationalCriterion(Relational\Criterion $RelationalCriterion, Relational\Database $Database) { }
     
     /**
      * Verifies that the data property column mapping exists for the supplied property.

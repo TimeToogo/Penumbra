@@ -7,14 +7,14 @@ namespace Storm\Core\Object\Expressions;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class ConstantExpression extends Expression {
+class ValueExpression extends Expression {
     private $Value;
     public function __construct($Value) {
         $this->Value = $Value;
     }
     
     /**
-     * @return mixed The constant value
+     * @return mixed The resolved value
      */
     public function GetValue() {
         return $this->Value;

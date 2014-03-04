@@ -41,7 +41,7 @@ final class Join {
     }
 
     /**
-     * @return Expression[] 
+     * @return Expression
      */
     public function GetJoinPredicateExpression() {
         return $this->JoinPredicateExpression;

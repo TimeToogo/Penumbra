@@ -17,7 +17,7 @@ class MatchesCriterion extends Criterion {
                     Expression::BinaryOperation(
                             Expression::Property($Property), 
                             Operators\Binary::Identity, 
-                            Expression::Constant($Value)));
+                            Expression::Value($Value)));
         }        
     }
 }

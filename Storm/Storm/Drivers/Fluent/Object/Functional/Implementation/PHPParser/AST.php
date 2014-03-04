@@ -138,20 +138,7 @@ class AST extends ASTBase {
     }
     
     private function ParseResolvedValue($Value) {
-        if(is_object($Value)) {
-            return Expression::Object($Value);
-        }
-        else if(is_array($Value)) {
-            return Expression::NewArray(
-                    array_map(
-                            function ($Value) { 
-                                return $this->ParseResolvedValue($Value); 
-                            }, 
-                            $Value));
-        }
-        else {
-            return  Expression::Constant($Value);
-        }
+        return Expression::Value($Value);
     }
     
     final public static function VerifyNameNode($Node) {
@@ -193,26 +180,13 @@ class AST extends ASTBase {
                 return $MappedNode;
                 
             case $Node instanceof \PHPParser_Node_Expr_Array:
-                $ValueExpressions = [];
-                foreach ($Node->items as $Key => $Item) {
-                    $ValueExpressions[$Key] = $this->ParseNodeInternal($Item->value);
-                }
-                return Expression::NewArray($ValueExpressions);
+                return $this->ParseArrayNode($Node);
                 
             case $Node instanceof \PHPParser_Node_Expr_FuncCall:
-                if($Node->name instanceof PHPParser_Node_Expr) {
-                    return Expression::Invocation(
-                            $this->ParseNodeInternal($Node->name),
-                            $this->ParseNodesInternal($Node->args));
-                }
-                else {
-                    return Expression::FunctionCall(
-                            $this->VerifyNameNode($Node->name),
-                            $this->ParseNodesInternal($Node->args));
-                }
+                return $this->ParseFunctionCallNode($Node);
                 
             case ($Node instanceof \PHPParser_Node_Expr_New):
-                return Expression::Construct(
+                return Expression::Constructor(
                         $this->VerifyNameNode($Node->class),
                         $this->ParseNodesInternal($Node->args));
             
@@ -239,11 +213,7 @@ class AST extends ASTBase {
                         $this->ParseNodesInternal($Node->args));
              
             case ($Node instanceof \PHPParser_Node_Expr_Ternary):
-                $If = $Node->if ?: $Node->cond;
-                return Expression::Ternary(
-                        $this->ParseNodeInternal($Node->cond),
-                        $this->ParseNodeInternal($If),
-                        $this->ParseNodeInternal($Node->else));
+                return $this->ParseTernaryNode($Node);
                      
             case $Node instanceof \PHPParser_Node_Expr_Variable:
                 $Name = $this->VerifyNameNode($Node->name);
@@ -261,6 +231,39 @@ class AST extends ASTBase {
                         'Cannot parse AST with unknown expression node: %s',
                         get_class($Node));
         }
+    }
+    
+    private function ParseArrayNode(\PHPParser_Node_Expr_FuncCall $Node) {
+        $KeyExpressions = [];
+        $ValueExpressions = [];
+        foreach ($Node->items as $Key => $Item) {
+            //Keys must match
+            $KeyExpressions[$Key] = $this->ParseNodeInternal($Item->key);
+            $ValueExpressions[$Key] = $this->ParseNodeInternal($Item->value);
+        }
+        return Expression::NewArray($KeyExpressions, $ValueExpressions);
+    }
+    
+    private function ParseFunctionCallNode(\PHPParser_Node_Expr_Ternary $Node) {
+        if($Node->name instanceof PHPParser_Node_Expr) {
+            return Expression::Invocation(
+                    $this->ParseNodeInternal($Node->name),
+                    $this->ParseNodesInternal($Node->args));
+        }
+        else {
+            return Expression::FunctionCall(
+                    $this->VerifyNameNode($Node->name),
+                    $this->ParseNodesInternal($Node->args));
+        }
+    }
+    
+    private function ParseTernaryNode(\PHPParser_Node_Expr_Array $Node) {
+        //Imply omitted if value
+        $If = $Node->if ?: $Node->cond;
+        return Expression::Ternary(
+                $this->ParseNodeInternal($Node->cond),
+                $this->ParseNodeInternal($If),
+                $this->ParseNodeInternal($Node->else));
     }
 
     // </editor-fold>

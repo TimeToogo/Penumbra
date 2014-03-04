@@ -5,6 +5,11 @@ namespace Storm\Drivers\Base\Relational\Expressions;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
 use \Storm\Drivers\Base\Relational\Expressions\Operators\Binary;
 
+/**
+ * Used to represent many boolean expressions.
+ * This prevents having to use nested binary operation expression
+ * which result in queries with excessive parentheses.
+ */
 class CompoundBooleanExpression extends Expression {
     private $LogicalOperator;
     private $BooleanExpressions;

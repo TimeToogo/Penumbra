@@ -110,9 +110,10 @@ interface IEntityRelationalMap {
     /**
      * Get the criterion that must be included for every request/procedure.
      * 
+     * @param Relational\Database $Database The database of the criterion
      * @return Relational\Criterion
      */
-    public function GetCriterion();
+    public function GetCriterion(Relational\Database $Database);
     
     /**
      * @param Object\IProperty $Property The mapped property

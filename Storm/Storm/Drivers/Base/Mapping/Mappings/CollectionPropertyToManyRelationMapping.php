@@ -11,17 +11,22 @@ use \Storm\Drivers\Base\Object\LazyRevivalData;
 use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 use \Storm\Core\Mapping\Expressions;
 
-abstract class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelationMapping implements ICollectionPropertyToManyRelationMapping {
+class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelationMapping implements ICollectionPropertyToManyRelationMapping {
     private $CollectionProperty;
     private $ToManyRelation;
+    private $Loading;
     
     public function __construct(
             Object\ICollectionProperty $CollectionProperty, 
-            Relational\IToManyRelation $ToManyRelation) {
+            Relational\IToManyRelation $ToManyRelation,
+            Loading\ICollectionLoading $Loading) {
+        $Loading->VerifyCompatibility($CollectionProperty);
+        
         parent::__construct($CollectionProperty, $ToManyRelation);
         
         $this->CollectionProperty = $CollectionProperty;
         $this->ToManyRelation = $ToManyRelation;
+        $this->Loading = $Loading;
     }
 
     /**
@@ -38,28 +43,33 @@ abstract class CollectionPropertyToManyRelationMapping extends RelationshipPrope
         return $this->ToManyRelation;
     }
     
-    final protected function MapParentRowKeysToRelatedRevivalDataArray(Relational\Database $Database, array $ParentRows, array $RelatedRows) {
-        $ParentKeyRelatedRowsMap = $this->ToManyRelation->MapParentKeysToRelatedRows($ParentRows, $RelatedRows);
-        
-        $RelatedRevivalData = $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $RelatedRows);
-        
-        $MappedRelatedRevivalData = [];
-        foreach($ParentRows as $Key => $ParentRow) {            
-            $MappedRelatedRevivalData[$Key] = array_intersect_key($RelatedRevivalData, $ParentKeyRelatedRowsMap[$Key]);
-        }
-        
-        return $MappedRelatedRevivalData;
+    /**
+     * @return Loading\ICollectionLoading
+     */
+    final public function GetLoading() {
+        return $this->Loading;
     }
     
-    final protected function MakeMultipleLazyRevivalData(
-            Relational\ResultRow $ParentData,
-            callable $RevivalDataLoader) {
-        $RelatedData = $this->EntityRelationalMap->ResultRow();
-        $this->ToManyRelation->MapRelationalParentDataToRelatedData($ParentData, $RelatedData);
-        $AlreadyKnownRelatedRevivalData = 
-            $this->EntityRelationalMap->MapResultRowDataToRevivalData([$RelatedData])[0];
-        
-        return new MultipleLazyRevivalData($AlreadyKnownRelatedRevivalData, $RevivalDataLoader);
+    final public function SetLoading(Loading\ICollectionLoading $Loading) {
+        $this->Loading = $Loading;
+    }
+    
+    final public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
+        return $this->Loading->AddToRelationalRequest(
+                $this->EntityRelationalMap, 
+                $this->ToManyRelation, 
+                $RelationalRequest);
+    }
+    
+    final public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
+        $LoadingValues = $this->Loading->Load(
+                $this->EntityRelationalMap, 
+                $Database, 
+                $this->ToManyRelation, 
+                $ResultRowArray);
+        foreach ($RevivalDataArray as $Key => $RevivalData) {
+            $RevivalData[$this->Property] = $LoadingValues[$Key];
+        }
     }
     
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges) {

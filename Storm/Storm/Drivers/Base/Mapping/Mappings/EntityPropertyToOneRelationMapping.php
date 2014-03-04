@@ -9,17 +9,22 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Object\LazyRevivalData;
 
-abstract class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMapping implements IEntityPropertyToOneRelationMapping {
+class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMapping implements IEntityPropertyToOneRelationMapping {
     private $EntityProperty;
     private $ToOneRelation;
+    private $Loading;
     
     public function __construct(
             Object\IEntityProperty $EntityProperty, 
-            Relational\IToOneRelation $ToOneRelation) {
+            Relational\IToOneRelation $ToOneRelation,
+            Loading\IEntityLoading $Loading) {
+        $Loading->VerifyCompatibility($EntityProperty);
+        
         parent::__construct($EntityProperty, $ToOneRelation);
         
         $this->EntityProperty = $EntityProperty;
         $this->ToOneRelation = $ToOneRelation;
+        $this->Loading = $Loading;
     }
 
     /**
@@ -35,29 +40,33 @@ abstract class EntityPropertyToOneRelationMapping extends RelationshipPropertyRe
         return $this->ToOneRelation;
     }    
     
-    final protected function MapParentRowKeysToRelatedRevivalData(Relational\Database $Database, array $ParentRows, array $RelatedRows) {
-        $ParentKeyRelatedRowMap = $this->ToOneRelation->MapParentKeysToRelatedRow($ParentRows, $RelatedRows);
-        
-        $RelatedRevivalDataArray = $this->EntityRelationalMap->MapResultRowsToRevivalData($Database, $ParentKeyRelatedRowMap);
-        
-        $MappedRelatedRevivalData = [];
-        foreach($ParentRows as $Key => $ParentRow) {            
-            $MappedRelatedRevivalData[$Key] = isset($RelatedRevivalDataArray[$Key]) ?
-                    $RelatedRevivalDataArray[$Key] : null;
-        }
-        
-        return $MappedRelatedRevivalData;
+    /**
+     * @return Loading\IEntityLoading
+     */
+    final public function GetLoading() {
+        return $this->Loading;
     }
     
-    final protected function MakeLazyRevivalData(
-            Relational\ResultRow $ParentData,
-            callable $RevivalDataLoader) {
-        $RelatedData = $this->EntityRelationalMap->ResultRow();
-        $this->ToOneRelation->MapRelationalParentDataToRelatedData($ParentData, $RelatedData);
-        $AlreadyKnownRelatedRevivalData = 
-                $this->EntityRelationalMap->MapResultRowDataToRevivalData([$RelatedData])[0];
-        
-        return new LazyRevivalData($AlreadyKnownRelatedRevivalData, $RevivalDataLoader);
+    final public function SetLoading(Loading\IEntityLoading $Loading) {
+        $this->Loading = $Loading;
+    }
+    
+    final public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
+        return $this->Loading->AddToRelationalRequest(
+                $this->EntityRelationalMap, 
+                $this->ToOneRelation, 
+                $RelationalRequest);
+    }
+    
+    final public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
+        $LoadingValues = $this->Loading->Load(
+                $this->EntityRelationalMap, 
+                $Database, 
+                $this->ToOneRelation, 
+                $ResultRowArray);
+        foreach ($RevivalDataArray as $Key => $RevivalData) {
+            $RevivalData[$this->Property] = $LoadingValues[$Key];
+        }
     }
     
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, Relational\RelationshipChange $RelationshipChange) {
@@ -72,11 +81,6 @@ abstract class EntityPropertyToOneRelationMapping extends RelationshipPropertyRe
     }
 
     public function MapBinary(Relational\Criterion $Criterion, Object\Expressions\Expression $OperandValueExpression) {
-        $this->ToOneRelation->AddRelationToCriterion($Criterion);
-        
-    }
-
-    public function MapObjectOperation(Relational\Criterion $Criterion, Object\Expressions\ObjectOperationExpression $ObjectOperationExpression) {
         $this->ToOneRelation->AddRelationToCriterion($Criterion);
         
     }

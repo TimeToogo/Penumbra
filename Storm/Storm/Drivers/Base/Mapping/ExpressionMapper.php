@@ -46,10 +46,10 @@ final class ExpressionMapper {
      */
     final public function Map(IEntityRelationalMap $EntityRelationalMap, O\Expression $Expression) {
         switch (true) {
-             case $Expression instanceof O\PropertyExpression:
+            case $Expression instanceof O\PropertyExpression:
                 return $this->MapProperty($EntityRelationalMap, $Expression);
             
-            case $Expression instanceof O\ConstantExpression:
+            case $Expression instanceof O\ValueExpression:
                 return $this->MapConstant($EntityRelationalMap, $Expression);
                         
             case $Expression instanceof O\ObjectExpression:
@@ -89,7 +89,7 @@ final class ExpressionMapper {
         }
     }
         
-    private function MapConstant(IEntityRelationalMap $EntityRelationalMap, O\ConstantExpression $Expression) {
+    private function MapConstant(IEntityRelationalMap $EntityRelationalMap, O\ValueExpression $Expression) {
         return $this->ExpressionConverter->MapConstantExpression($Expression->GetValue());
     }
         

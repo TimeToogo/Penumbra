@@ -7,9 +7,6 @@ use \Storm\Drivers\Base\Relational\Columns\Column;
 
 abstract class Expression extends Relational\Expression {
     
-    public abstract function Traverse(Converters\ExpressionVisitor $Visitor);
-
-
     /**
      * @return ColumnExpression
      */
@@ -42,7 +39,7 @@ abstract class Expression extends Relational\Expression {
     /**
      * @return Expression
      */
-    public static function ReviveColumn(Column $Column) {
+    public static function ReviveColumn(Relational\IColumn $Column) {
         return $Column instanceof Column ?
                 $Column->GetDataType()->GetReviveExpression(Expression::Column($Column)) : 
                 Expression::Column($Column);
@@ -51,7 +48,7 @@ abstract class Expression extends Relational\Expression {
     /**
      * @return Expression
      */
-    public static function PersistData(Column $Column, parent $ValueExpression) {
+    public static function PersistData(Relational\IColumn $Column, parent $ValueExpression) {
         return $Column instanceof Column ?
                 $Column->GetDataType()->GetPersistExpression($ValueExpression) : 
                 $ValueExpression;

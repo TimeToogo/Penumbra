@@ -5,6 +5,7 @@ namespace Storm\Core\Mapping;
 use \Storm\Core\Containers\Map;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
+use \Storm\Core\Object\Expressions\TraversalExpression;
 
 /**
  * The interface representing a mapped property
@@ -20,6 +21,11 @@ interface IPropertyMapping {
      * @return Object\IProperty
      */
     public function GetProperty();
+    
+    /**
+     * @return Relational\Expression[]
+     */
+    public function MapTraversalExpression(Relational\Criterion $Criterion, TraversalExpression $TraversalExpression);
 }
 
 ?>
