@@ -12,7 +12,42 @@ use Storm\Core\Object\IProperty;
 abstract class Expression {
     use \Storm\Core\Helpers\Type;
     
+    public abstract function Traverse(ExpressionWalker $Walker);
+    
+    public abstract function Simplify();
+    
+    final protected static function SimplifyAll(array $Expressions) {
+        $ReducedExpressions = [];
+        foreach($Expressions as $Key => $Expression) {
+            $ReducedExpressions[$Key] = $Expression->Simplify();
+        }
+        
+        return $ReducedExpressions;
+    }
+    
+    final protected static function AllOfType(array $Expressions, $Type) {
+        foreach ($Expressions as $Expression) {
+            if(!($Expression instanceof $Type)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+
     // <editor-fold defaultstate="collapsed" desc="Factory Methods">
+    
+
+    /**
+     * @return AssignmentExpression
+     */
+    final public static function Assign(
+            Expression $AssignToValueExpression, 
+            $AssignmentOperator,
+            Expression $AssignmentValueExpression) {
+        return new AssignmentExpression($AssignToValueExpression, $AssignmentOperator, $AssignmentValueExpression);
+    }
     
     /**
      * @return BinaryOperationExpression
@@ -33,13 +68,6 @@ abstract class Expression {
      */
     final public static function Entity() {
         return new EntityExpression();
-    }
-    
-    /**
-     * @return ObjectExpression
-     */
-    final public static function Object($InstanceOrType) {
-        return new ObjectExpression($InstanceOrType);
     }
     
     /**
@@ -103,12 +131,18 @@ abstract class Expression {
     }
     
     /**
+     * @return ReturnExpression
+     */
+    final public static function ReturnExpression(Expression $ValueExpression = null) {
+        return new ReturnExpression($ValueExpression);
+    }
+    
+    /**
      * @return PropertyExpression
      */
     final public static function Property(IProperty $Property) {
         return new PropertyExpression($Property);
     }
-    
     
     /**
      * @return ValueExpression
@@ -118,20 +152,17 @@ abstract class Expression {
     }
     
     /**
+     * @return UnresolvedVariable
+     */
+    final public static function UnresolvedVariable($Name) {
+        return new UnresolvedVariable($Name);
+    }
+    
+    /**
      * @return ArrayExpression
      */
     final public static function NewArray(array $KeyExpressions, array $ValueExpressions) {
         return new ArrayExpression($KeyExpressions, $ValueExpressions);
-    }
-
-    /**
-     * @return AssignmentExpression
-     */
-    final public static function Assign(
-            PropertyExpression $AssignToValueExpression, 
-            $AssignmentOperator,
-            Expression $AssignmentValueExpression) {
-        return new AssignmentExpression($AssignToValueExpression, $AssignmentOperator, $AssignmentValueExpression);
     }
     // </editor-fold>
 }

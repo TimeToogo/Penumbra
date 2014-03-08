@@ -54,7 +54,7 @@ class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelati
         $this->Loading = $Loading;
     }
     
-    final public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
+    final public function AddToRelationalSelect(Relational\Select $RelationalRequest) {
         return $this->Loading->AddToRelationalRequest(
                 $this->EntityRelationalMap, 
                 $this->ToManyRelation, 
@@ -81,6 +81,15 @@ class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelati
     public function MapFunctionCall(Relational\Criterion $Criterion, Expressions\FunctionCallExpression $FunctionCallExpression) {
         $this->ToManyRelation->AddRelationToCriterion($Criterion);
     }
+
+    public function AddToCriterion(Relational\Criterion $Criterion) {
+        
+    }
+
+    public function MapPropertyExpression() {
+        
+    }
+
 }
 
 ?>

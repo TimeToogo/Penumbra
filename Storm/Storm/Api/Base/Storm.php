@@ -6,6 +6,7 @@ use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 use \Storm\Drivers\Fluent\Object\Functional;
+use \Storm\Drivers\Fluent\Object\FunctionToExpressionTreeConverter;
 
 /**
  * The Storm class provides the api surrounding a DomainDatabaseMap.
@@ -30,24 +31,21 @@ class Storm {
     /**
      * @var FunctionToASTConverter 
      */
-    protected $FunctionToASTConverter;
+    protected $FunctionToExpressionTreeConverter;
     
     public function __construct(
             DomainDatabaseMap $DomainDatabaseMap,
             IConnection $Connection,
             IProxyGenerator $ProxyGenerator,
-            Functional\IReader $FunctionReader, 
             Functional\IParser $FunctionParser) {
         $this->DomainDatabaseMap = $DomainDatabaseMap;
         $this->DomainDatabaseMap->GetDatabase()->SetConnection($Connection);
         $this->DomainDatabaseMap->GetDomain()->SetProxyGenerator($ProxyGenerator);
-        $this->FunctionToASTConverter = $this->GetClosureToASTConverter($FunctionReader, $FunctionParser);
+        $this->FunctionToExpressionTreeConverter = $this->GetFunctionToExpressionTreeConverter($FunctionParser);
     }
     
-    protected function GetClosureToASTConverter(
-            Functional\IReader $FunctionReader, 
-            Functional\IParser $FunctionParser) {
-        return new FunctionToASTConverter($FunctionReader, $FunctionParser);
+    protected function GetFunctionToExpressionTreeConverter(Functional\IParser $FunctionParser) {
+        return new FunctionToExpressionTreeConverter($FunctionParser);
     }
     
     /**
@@ -82,7 +80,7 @@ class Storm {
      * @return Repository The instantiated repository
      */
     protected function ConstructRepository($EntityType) {
-        return new Repository($this->DomainDatabaseMap, $this->FunctionToASTConverter, $EntityType);
+        return new Repository($this->DomainDatabaseMap, $this->FunctionToExpressionTreeConverter, $EntityType);
     }
     
     /**

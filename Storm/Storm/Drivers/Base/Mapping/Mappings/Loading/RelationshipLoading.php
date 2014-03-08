@@ -11,7 +11,7 @@ abstract class RelationshipLoading {
     public function AddToRelationalRequest(
             Mapping\IEntityRelationalMap $EntityRelationalMap, 
             Relational\IToOneRelation $ToOneRelation, 
-            Relational\Request $RelationalRequest) {
+            Relational\Select $RelationalRequest) {
         $RelationalRequest->AddColumns($ToOneRelation->GetRelationalParentColumns());
     }    
     
@@ -20,14 +20,14 @@ abstract class RelationshipLoading {
             Relational\Database $Database, 
             array $ParentRows, 
             Object\RevivalData $AlreadyKnownRevivalData = null) {
-        $RelatedRowRequest = $Relation->RelationRequest($ParentRows);
+        $RelatedRowRequest = $Relation->RelationSelect($ParentRows);
         $this->MapEntityToRelationalRequest($RelatedRowRequest, $AlreadyKnownRevivalData);
         return $Database->Load($RelatedRowRequest);
     }
     
     final protected function MapEntityToRelationalRequest(
             Mapping\IEntityRelationalMap $EntityRelationalMap,
-            Relational\Request $RelationalRequest, 
+            Relational\Select $RelationalRequest, 
             Object\RevivalData $AlreadyKnownRevivalData = null) {
         if($AlreadyKnownRevivalData !== null) {
             $AlreadyKnownPropertyIdentifiers = array_keys($AlreadyKnownRevivalData->GetPropertyData());

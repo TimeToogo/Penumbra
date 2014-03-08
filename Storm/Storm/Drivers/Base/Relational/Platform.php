@@ -5,33 +5,37 @@ namespace Storm\Drivers\Base\Relational;
 use \Storm\Core;
 
 class Platform implements IPlatform {
+    /**
+     * @var Queries\IConnection 
+     */
     private $Connection;
-    private $ExpressionConverter;
     private $ColumnSet;
     private $KeyGeneratorSet;
     private $ExpressionCompiler;
     private $CriterionCompiler;
+    private $QueryCompiler;
     private $IdentifierEscaper;
     private $DatabaseSyncer;
-    private $QueryExecutor;
+    private $TransactionCommiter;
     
     public function __construct(
-            Expressions\Converters\IExpressionConverter $ExpressionConverter,
             Columns\IColumnSet $ColumnSet,
             PrimaryKeys\IKeyGeneratorSet $KeyGeneratorSet,
             Queries\IExpressionCompiler $ExpressionCompiler, 
             Queries\ICriterionCompiler $CriterionCompiler, 
+            Queries\IQueryCompiler $QueryCompiler, 
             Queries\IIdentifierEscaper $IdentifierEscaper,
             Syncing\IDatabaseSyncer $DatabaseSyncer, 
-            Queries\IQueryExecutor $QueryExecutor) {
-        $this->ExpressionConverter = $ExpressionConverter;
+            Queries\ITransactionCommiter $TransactionCommiter) {
         $this->ColumnSet = $ColumnSet;
         $this->KeyGeneratorSet = $KeyGeneratorSet;
         $this->ExpressionCompiler = $ExpressionCompiler;
         $this->CriterionCompiler = $CriterionCompiler;
+        $this->QueryCompiler = $QueryCompiler;
+        $this->ProcedureCompiler = $ProcedureCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
         $this->DatabaseSyncer = $DatabaseSyncer;
-        $this->QueryExecutor = $QueryExecutor;
+        $this->TransactionCommiter = $TransactionCommiter;
     }
     
     
@@ -47,6 +51,8 @@ class Platform implements IPlatform {
         $this->Connection = $Connection;
         $this->Connection->SetExpressionCompiler($this->ExpressionCompiler);
         $this->Connection->SetCriterionCompiler($this->CriterionCompiler);
+        $this->Connection->SetRequestCompiler($this->QueryCompiler);
+        $this->Connection->SetProcedureCompiler($this->ProcedureCompiler);
         $this->Connection->SetIdentifierEscaper($this->IdentifierEscaper);
         $this->OnSetConnection($Connection);
     }
@@ -84,6 +90,10 @@ class Platform implements IPlatform {
         return $this->CriterionCompiler;
     }
     
+    final public function GetQueryCompiler() {
+        return $this->QueryCompiler;
+    }
+    
     final public function GetIdentifierEscaper() {
         return $this->IdentifierEscaper;
     }
@@ -92,8 +102,8 @@ class Platform implements IPlatform {
         return $this->DatabaseSyncer;
     }
 
-    final public function GetQueryExecutor() {
-        return $this->QueryExecutor;
+    final public function GetTransactionCommiter() {
+        return $this->TransactionCommiter;
     }
     
     final public function Sync(Database $Database) {
@@ -102,10 +112,13 @@ class Platform implements IPlatform {
         return $this->DatabaseSyncer->Sync($this->Connection, $Database);
     }
     
-    final public function Select(Core\Relational\Request $Request) {
+    final public function Select(Core\Relational\Select $Select) {
         $this->VerifyConnection(__METHOD__);
         
-        return $this->QueryExecutor->Select($this->Connection, $Request);
+        $QueryBuilder = $this->Connection->QueryBuilder();
+        $this->QueryCompiler->AppendSelect($QueryBuilder, $Select);
+        
+        return $QueryBuilder->Build()->Execute()->FetchAll();
     }
 
     final public function Commit(
@@ -114,7 +127,7 @@ class Platform implements IPlatform {
             Core\Relational\Transaction $Transaction) {
         $this->VerifyConnection(__METHOD__);
         
-        return $this->QueryExecutor->Commit(
+        return $this->TransactionCommiter->Commit(
                 $this->Connection, 
                 $TablesOrderedByPersistingDependency, 
                 $TablesOrderedByDiscardingDependency, 

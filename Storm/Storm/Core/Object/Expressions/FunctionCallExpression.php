@@ -27,6 +27,17 @@ class FunctionCallExpression extends Expression {
         return $this->ArgumentExpressions;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkFunctionCall($this);
+    }
+    
+    public function Simplify() {
+        //TODO: Add a whitelist of deteministic and side-effect free function.
+        return $this->Update(
+                $this->Name,
+                self::SimplifyAll($this->ArgumentExpressions));
+    }
+    
     /**
      * @return self
      */

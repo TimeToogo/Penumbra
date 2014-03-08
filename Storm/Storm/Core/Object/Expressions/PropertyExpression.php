@@ -39,6 +39,16 @@ class PropertyExpression extends Expression {
         return $this->ParentPropertyExpression;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkProperty($this);
+    }
+    
+    public function Simplify() {
+        return $this->Update(
+                $this->ParentPropertyExpression, 
+                $this->ParentPropertyExpression !== null ? $this->ParentPropertyExpression->Simplify() : $this->ParentPropertyExpression);
+    }
+    
     /**
      * @return self
      */

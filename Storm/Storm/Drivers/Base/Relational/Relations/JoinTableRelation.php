@@ -53,7 +53,7 @@ class JoinTableRelation extends ToManyRelationBase {
     }
     
     protected function NewRelationRequest() {
-        $Request = new Relational\Request(new Relational\Criterion($this->JoinTable));
+        $Request = new Relational\Select(new Relational\Criterion($this->JoinTable));
         $Request->GetCriterion()->AddJoins(parent::GetRelationJoins($this->GetTable()));
         
         return $Request;
@@ -68,7 +68,7 @@ class JoinTableRelation extends ToManyRelationBase {
         return array_merge($Joins, parent::GetRelationJoins($Table));
     }
     
-    protected function AddParentColumnsToRequest(Relational\Request $Request) {
+    protected function AddParentColumnsToRequest(Relational\Select $Request) {
         parent::AddParentColumnsToRequest($Request);
         $Request->AddColumns($this->ParentForeignKey->GetParentColumns());
     }

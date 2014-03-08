@@ -260,6 +260,15 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         return $this->PropertyMappings;
     }
     
+    final public function HasPropertyMapping($PropertyIdentifier) {
+        return isset($this->PropertyMappings[$PropertyIdentifier]);
+    }
+    
+    final public function GetPropertyMapping($PropertyIdentifier) {
+        return isset($this->PropertyMappings[$PropertyIdentifier]) ?
+                $this->PropertyMappings[$PropertyIdentifier] : null;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -421,7 +430,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * {@inheritDoc}
      */
-    final public function MapEntityToRelationalRequest(Relational\Request $RelationalRequest, array $AlreadyKnownProperties = []) {
+    final public function MapEntityToRelationalRequest(Relational\Select $RelationalRequest, array $AlreadyKnownProperties = []) {
         $Properties = $this->MappedProperties;
         if(count($AlreadyKnownProperties) > 0) {
             foreach($AlreadyKnownProperties as $AlreadyKnownProperty) {
@@ -434,7 +443,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * {@inheritDoc}
      */
-    final public function MapPropetiesToRelationalRequest(Relational\Request $RelationalRequest, array $Properties = null) {
+    final public function MapPropetiesToRelationalRequest(Relational\Select $RelationalRequest, array $Properties = null) {
         if($Properties === null) {
             $Properties = $this->MappedProperties;
         }
@@ -447,10 +456,10 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
                 $RelationalRequest->AddColumns($this->DataPropertyColumnMappings[$PropertyIdentifier]->GetReviveColumns());
             }
             else if(isset($this->EntityPropertyToOneRelationMappings[$PropertyIdentifier])) {
-                $this->EntityPropertyToOneRelationMappings[$PropertyIdentifier]->AddToRelationalRequest($RelationalRequest);
+                $this->EntityPropertyToOneRelationMappings[$PropertyIdentifier]->AddToRelationalSelect($RelationalRequest);
             }
             else if(isset($this->CollectionPropertyToManyRelationMappings[$PropertyIdentifier])) {
-                $this->CollectionPropertyToManyRelationMappings[$PropertyIdentifier]->AddToRelationalRequest($RelationalRequest);
+                $this->CollectionPropertyToManyRelationMappings[$PropertyIdentifier]->AddToRelationalSelect($RelationalRequest);
             }
         }
     }

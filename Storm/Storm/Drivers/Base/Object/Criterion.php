@@ -8,7 +8,6 @@ class Criterion implements Object\ICriterion {
     private $EntityType;
     private $PredicateExpressions;
     private $OrderByExpressionsAscendingMap;
-    private $GroupByExpressions;
     private $RangeOffset;
     private $RangeAmount;
     
@@ -59,26 +58,6 @@ class Criterion implements Object\ICriterion {
 
     final public function AddOrderByExpression(Object\Expressions\Expression $Expression, $Ascending) {
         $this->OrderByExpressionsAscendingMap[$Expression] = $Ascending;
-    }
-
-    // </editor-fold>
-
-    // <editor-fold defaultstate="collapsed" desc="Grouping">
-    
-    final public function IsGrouped() {
-        return count($this->GroupByExpressions) > 0;
-    }
-
-
-    /**
-     * @return Object\Expressions\Expression[]
-     */
-    final public function GetGroupByExpressions() {
-        return $this->GroupByExpressions;
-    }
-
-    final public function AddGroupByExpression(Object\Expressions\Expression $Expression) {
-        $this->GroupByExpressions[] = $Expression;
     }
 
     // </editor-fold>

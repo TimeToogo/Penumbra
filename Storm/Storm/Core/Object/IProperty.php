@@ -2,6 +2,8 @@
 
 namespace Storm\Core\Object;
 
+use \Storm\Core\Object\Expressions as O;
+
 /**
  * The base for a type representing a property of an entity.
  * 
@@ -16,13 +18,6 @@ interface IProperty {
      * @return string
      */
     public function GetIdentifier();
-        
-    /**
-     * Parses an entity traversal expression tree to the resolved property expression tree
-     * 
-     * @return Expression
-     */
-    public function ResolveTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null);
     
     /**
      * The parent entity type.
@@ -38,6 +33,33 @@ interface IProperty {
      * @return void
      */
     public function SetEntityType($EntityType);
+        
+    /**
+     * Parses an entity traversal expression tree to the resolved property expression tree
+     * 
+     * @return Expression
+     */
+    public function ResolveTraversalExpression(O\TraversalExpression $Expression, O\PropertyExpression $ParentPropertyExpression = null);
+    
+    /**
+     * @return O\Expression[]
+     */
+    public function ResolveAssignmentExpression(O\PropertyExpression $PropertyExpression, $Operator, O\Expression $AssignmentValueExpression);
+    
+    /**
+     * @return O\Expression
+     */
+    public function ResolveBinaryOperationExpression(O\PropertyExpression $PropertyExpression, $Operator, O\Expression $OtherOperandExpression);
+    
+    /**
+     * @return O\Expression
+     */
+    public function ResolveUnaryOperationExpression($Operator, O\PropertyExpression $PropertyExpression);
+    
+    /**
+     * @return O\Expression
+     */
+    public function ResolveCastExpression($CastType, O\PropertyExpression $PropertyExpression);
 }
 
 ?>

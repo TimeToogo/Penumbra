@@ -15,6 +15,7 @@ final class Platform extends Base\Platform {
                 new PrimaryKeys\KeyGeneratorSet(),
                 new Queries\ExpressionCompiler(new Queries\ExpressionOptimizer()),
                 new Queries\CriterionCompiler(),
+                new Base\Queries\StandardQueryCompiler(),
                 new Queries\IdentifierEscaper(),
                 null, 
                 null, 

@@ -2,10 +2,9 @@
 
 namespace Storm\Core\Mapping;
 
-use \Storm\Core\Containers\Map;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
-use \Storm\Core\Object\Expressions\TraversalExpression;
+use \Storm\Core\Object\Expressions as O;
 
 /**
  * The interface representing a mapped property
@@ -23,9 +22,16 @@ interface IPropertyMapping {
     public function GetProperty();
     
     /**
-     * @return Relational\Expression[]
+     * Adds the necessary constraints to the criterion.
+     * 
+     * @return void
      */
-    public function MapTraversalExpression(Relational\Criterion $Criterion, TraversalExpression $TraversalExpression);
+    public function AddToCriterion(Relational\Criterion $Criterion);
+    
+    /**
+     * @return Relational\Expression
+     */
+    public function MapPropertyExpression();
 }
 
 ?>

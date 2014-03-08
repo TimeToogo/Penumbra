@@ -45,7 +45,7 @@ abstract class KeyedRelation extends Relation {
     
     protected abstract function JoinType();
     
-    protected function AddParentColumnsToRequest(Relational\Request $Request) {
+    protected function AddParentColumnsToRequest(Relational\Select $Request) {
         $Request->AddColumns($this->GetReferencedColumns());
     }
     

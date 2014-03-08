@@ -8,12 +8,14 @@ use \Storm\Core\Object\Expressions\Expression;
 interface IParser {
     
     /**
+     * @return \ReflectionFunctionAbstract
+     */
+    public function GetReflection(callable $Function);
+    
+    /**
      * @return IAST
      */
-    public function Parse(
-            $BodySource,
-            Object\IEntityMap $EntityMap,
-            $EntityVariableName);
+    public function Parse(\ReflectionFunctionAbstract $Reflection);
 }
 
 ?>

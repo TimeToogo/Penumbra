@@ -32,14 +32,9 @@ class Configuration implements IConfiguration {
     private $ProxyGenerator;
     
     /**
-     * @var Closure\IReader
+     * @var Functional\IParser
      */
-    private $ClosureReader;
-    
-    /**
-     * @var Closure\IParser
-     */
-    private $ClosureParser;
+    private $FunctionParser;
     
     /**
      * @var ICache|null 
@@ -50,14 +45,12 @@ class Configuration implements IConfiguration {
             callable $DomainDatabaseMapFactory, 
             IConnection $Connection,
             IProxyGenerator $ProxyGenerator,
-            Functional\IReader $ClosureReader, 
             Functional\IParser $ClosureParser, 
             ICache $Cache = null) {
         $this->DomainDatabaseMapFactory = $DomainDatabaseMapFactory;
         $this->ProxyGenerator = $ProxyGenerator;
         $this->Connection = $Connection;
-        $this->ClosureReader = $ClosureReader;
-        $this->ClosureParser = $ClosureParser;
+        $this->FunctionParser = $ClosureParser;
         $this->Cache = $Cache;
     }
     
@@ -68,16 +61,14 @@ class Configuration implements IConfiguration {
                     $Factory(), 
                     $this->Connection, 
                     $this->ProxyGenerator,
-                    $this->ClosureReader, 
-                    $this->ClosureParser);
+                    $this->FunctionParser);
         }
         else {
             return new Caching\Storm(
                     $this->DomainDatabaseMapFactory,
                     $this->Connection, 
                     $this->ProxyGenerator,
-                    $this->ClosureReader, 
-                    $this->ClosureParser,
+                    $this->FunctionParser,
                     $this->Cache);
         }
     }
@@ -97,13 +88,8 @@ class Configuration implements IConfiguration {
         return $this;
     }
     
-    final public function SetFunctionReader(Functional\IReader $ClosureReader) {
-        $this->ClosureReader = $ClosureReader;
-        return $this;
-    }
-
     final public function SetFunctionParser(Functional\IParser $ClosureParser) {
-        $this->ClosureParser = $ClosureParser;
+        $this->FunctionParser = $ClosureParser;
         return $this;
     }
     

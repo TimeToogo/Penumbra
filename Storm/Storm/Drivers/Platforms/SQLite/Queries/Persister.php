@@ -10,7 +10,7 @@ use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Drivers\Base\Relational\Requests;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
-class Persister extends Queries\StandardPersister {
+class Persister extends Queries\StandardRowPersister {
     public function __construct($BatchSize = 1000) {
         parent::__construct($BatchSize);
     }

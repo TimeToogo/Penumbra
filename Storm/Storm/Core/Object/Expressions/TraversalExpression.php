@@ -8,10 +8,32 @@ namespace Storm\Core\Object\Expressions;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 abstract class TraversalExpression extends Expression {
-    private $ValueExpression;
+    /**
+     * @var boolean
+     */
+    protected $IsTraversingEntity;
+    
+    /**
+     * @var Expression
+     */
+    protected $ValueExpression;
     
     public function __construct(Expression $ValueExpression) {
+        if($ValueExpression instanceof EntityExpression) {
+            $this->IsTraversingEntity = true;
+        }
+        else if($ValueExpression instanceof self) {
+            $this->IsTraversingEntity = $ValueExpression->IsTraversingEntity;
+        }
+        
         $this->ValueExpression = $ValueExpression;
+    }
+    
+    /**
+     * @return boolean
+     */
+    final public function IsTraversingEntity() {
+        return $this->IsTraversingEntity;
     }
     
     /**
@@ -20,8 +42,7 @@ abstract class TraversalExpression extends Expression {
     final public function GetValueExpression() {
         return $this->ValueExpression;
     }
-    
-    
+        
     /**
      * @return Expression
      */

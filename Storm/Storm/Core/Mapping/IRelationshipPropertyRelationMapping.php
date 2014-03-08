@@ -51,12 +51,12 @@ interface IRelationshipPropertyRelationMapping extends IPropertyMapping {
     public function GetRelation();
     
     /**
-     * Adds any constraints and/or properties to the reqeuest required for loading the relation.
+     * Adds any constraints and/or columns to the select required for loading the relation.
      * 
-     * @param Relational\Request $RelationalRequest The request to map to
+     * @param Relational\Select $Select
      * @return void
      */
-    public function AddToRelationalRequest(Relational\Request $RelationalRequest);
+    public function AddToRelationalSelect(Relational\Select $Select);
 }
 
 ?>

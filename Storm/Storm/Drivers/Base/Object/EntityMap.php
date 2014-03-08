@@ -62,20 +62,20 @@ abstract class EntityMap extends Object\EntityMap {
     }
     
     final protected function RegisterProperties(Object\Domain $Domain, Registrar $Registrar) {
-        $ValueObjectRegistrar = new Registrar(Object\IEntityMap::IEntityMapType);
-        $this->RegisterValueObjects($Domain, $ValueObjectRegistrar);
-        foreach($ValueObjectRegistrar as $ValueObjectMap) {
-            $ValueObjectMap->InitializeProperties($Domain);
+        $EmbeddedObjectRegistrar = new Registrar(Object\IEntityMap::IEntityMapType);
+        $this->RegisterEmbeddedObjects($Domain, $EmbeddedObjectRegistrar);
+        foreach($EmbeddedObjectRegistrar as $EmbeddedObjectMap) {
+            $EmbeddedObjectMap->InitializeProperties($Domain);
             //TODO: traverse parent property
             //TODO: On ConstructEntity set parent property to the ConstructEntity of the value object map
-            $Registrar->Register($ValueObjectMap->GetProperties());
+            $Registrar->Register($EmbeddedObjectMap->GetProperties());
         }
         
         $this->Properties($Domain, $Registrar);
     }
     protected abstract function Properties(Object\Domain $Domain, Registrar $Registrar);
     
-    protected function RegisterValueObjects(Object\Domain $Domain, Registrar $Registrar) {}
+    protected function RegisterEmbeddedObjects(Object\Domain $Domain, Registrar $Registrar) {}
 }
 
 ?>

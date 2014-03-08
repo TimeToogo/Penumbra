@@ -36,6 +36,68 @@ class BinaryOperationExpression extends Expression {
         return $this->RightOperandExpression;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkBinaryOperation($this);
+    }
+    
+    public function Simplify() {
+        $Left = $this->LeftOperandExpression->Simplify();
+        $Right = $this->RightOperandExpression->Simplify();
+        
+        if($Left instanceof ValueExpression && $Right instanceof ValueExpression) {
+            return Expression::Value(self::BinaryOperation($Left->GetValue(), $Right->GetValue()));
+        }
+        else if($Left instanceof ValueExpression || $Right instanceof ValueExpression) {
+            $ValueExpression = $Left instanceof ValueExpression ?
+                    $Left : $Right;
+            
+            $Value = $ValueExpression->GetValue();
+            if($this->Operator === Operators\Binary::LogicalOr && $Value == true) {
+                return Expression::Value(true);
+            }
+            else if($this->Operator === Operators\Binary::LogicalAnd && $Value == false) {
+                return Expression::Value(false);
+            }
+        }
+        
+        return $this->Update(
+                $Left,
+                $this->Operator,
+                $Right);
+    }
+    
+    private static $BinaryOperations;
+    private static function BinaryOperation($Operator) {
+        if(self::$BinaryOperations === null) {
+            self::$BinaryOperations = [
+                Operators\Binary::BitwiseAnd => function ($L, $R) { return $L & $R; },
+                Operators\Binary::BitwiseOr => function ($L, $R) { return $L | $R; },
+                Operators\Binary::BitwiseXor => function ($L, $R) { return $L ^ $R; },
+                Operators\Binary::ShiftLeft => function ($L, $R) { return $L << $R; },
+                Operators\Binary::ShiftRight => function ($L, $R) { return $L >> $R; },
+                Operators\Binary::LogicalAnd => function ($L, $R) { return $L && $R; },
+                Operators\Binary::BooleanOr => function ($L, $R) { return $L || $R; },
+                Operators\Binary::Addition => function ($L, $R) { return $L + $R; },
+                Operators\Binary::Subtraction => function ($L, $R) { return $L - $R; },
+                Operators\Binary::Multiplication => function ($L, $R) { return $L * $R; },
+                Operators\Binary::Division => function ($L, $R) { return $L / $R; },
+                Operators\Binary::Modulus => function ($L, $R) { return $L % $R; },
+                Operators\Binary::Concatenation => function ($L, $R) { return $L . $R; },
+                Operators\Binary::IsInstanceOf => function ($L, $R) { return $L instanceof $R; },
+                Operators\Binary::Equality => function ($L, $R) { return $L == $R; },
+                Operators\Binary::Identity => function ($L, $R) { return $L === $R; },
+                Operators\Binary::Inequality => function ($L, $R) { return $L != $R; },
+                Operators\Binary::NonIdentity => function ($L, $R) { return $L !== $R; },
+                Operators\Binary::LessThan => function ($L, $R) { return $L < $R; },
+                Operators\Binary::LessThanOrEqualTo => function ($L, $R) { return $L <= $R; },
+                Operators\Binary::GreaterThan => function ($L, $R) { return $L > $R; },
+                Operators\Binary::GreaterThanOrEqualTo => function ($L, $R) { return $L >= $R; },
+            ];
+        }
+        
+        return self::$BinaryOperations[$Operator];
+    }
+    
     /**
      * @return self
      */

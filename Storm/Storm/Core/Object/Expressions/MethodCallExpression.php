@@ -30,11 +30,36 @@ class MethodCallExpression extends ObjectOperationExpression {
         return $this->ArgumentExpressions;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkMethodCall($this);
+    }
+    
+    public function Simplify() {
+        $ValueExpression = $this->ValueExpression->Simplify();
+        $ArgumentExpressions = self::SimplifyAll($this->ArgumentExpressions);
+        
+        if($ValueExpression instanceof ValueExpression 
+                && self::AllOfType($ArgumentExpressions, ValueExpression::GetType())) {
+            $ObjectValue = $ValueExpression->GetValue();
+            $ArgumentValues = [];
+            foreach($ArgumentExpressions as $ArgumentExpression) {
+                $ArgumentValues[] = $ArgumentExpression->GetValue();
+            }
+            
+            return Expression::Value(call_user_func_array([$ObjectValue, $this->Name], $ArgumentValues));
+        }
+        
+        return $this->Update(
+                $ValueExpression,
+                $this->Name,
+                $ArgumentExpressions);
+    }
+    
     /**
      * @return self
      */
     public function Update(Expression $ObjectValueExpression, $Name, array $ArgumentExpressions) {
-        if($this->GetValueExpression() === $ObjectValueExpression
+        if($this->ValueExpression === $ObjectValueExpression
                 && $this->Name === $Name
                 && $this->ArgumentExpressions === $ArgumentExpressions) {
             return $this;

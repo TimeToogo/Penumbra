@@ -24,7 +24,7 @@ abstract class Relation implements Relational\IRelation {
         return $this->Table;
     }
     
-    final public function AddRelationToRequest(Relational\Request $Request, array $ParentRows = null) {
+    final public function AddRelationToSelect(Relational\Select $Request, array $ParentRows = null) {
         $this->AddRelationToCriterion($Request->GetCriterion(), $ParentRows);
         
         if($ParentRows !== null && count($ParentRows) > 0) {
@@ -52,7 +52,7 @@ abstract class Relation implements Relational\IRelation {
     }
     protected abstract function AddParentPredicateToCriterion(Relational\Criterion $Criterion, array $ParentRows);
     
-    protected abstract function AddParentColumnsToRequest(Relational\Request $Request);
+    protected abstract function AddParentColumnsToRequest(Relational\Select $Request);
     
     final public function GetPersistingDependencyOrder() {
         return $this->PersistingOrder;
@@ -62,7 +62,7 @@ abstract class Relation implements Relational\IRelation {
         return $this->DiscardingOrder;
     }
     
-    final public function RelationRequest(array $ParentRows = null) {
+    final public function RelationSelect(array $ParentRows = null) {
         $Request = $this->NewRelationRequest();
         $this->AddParentPredicate($Request->GetCriterion(), $ParentRows);
         
@@ -72,7 +72,7 @@ abstract class Relation implements Relational\IRelation {
      * Relational\Request
      */
     protected function NewRelationRequest() {
-        return new Relational\Request(new Relational\Criterion($this->Table));
+        return new Relational\Select(new Relational\Criterion($this->Table));
     }
 }
 

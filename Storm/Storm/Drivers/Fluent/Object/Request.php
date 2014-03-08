@@ -3,21 +3,37 @@
 namespace Storm\Drivers\Fluent\Object;
 
 use \Storm\Drivers\Base\Object;
-use \Storm\Core\Object\EntityMap;
+use \Storm\Core\Object\IEntityMap;
 use \Storm\Drivers\Fluent\Object\Functional;
 
-class Request extends Object\Request {    
+class Request extends Object\Request {
+    
+    use ReturnExpression;
+    
     public function __construct(
-            EntityMap $EntityMap, 
+            IEntityMap $EntityMap, 
             array $Properties = null, 
+            array $GroupByExpressionTrees = array(), 
+            array $AggregatePredicateExpressionTrees = array(), 
             $IsSingleEntity = false,
             \Storm\Core\Object\ICriterion $Criterion = null) {
+        $EntityType = $EntityMap->GetEntityType();
+        
+        $GroupByExpressions = array_map(
+                function ($I) { return $this->ParseReturnExpression($I, 'group by'); }, 
+                $GroupByExpressionTrees);
+                
+        $AggregatePredicateExpressions = array_map(
+                function ($I) { return $this->ParseReturnExpression($I, 'aggregate predicate'); }, 
+                $AggregatePredicateExpressionTrees);
         
         parent::__construct(
-                $EntityMap->GetEntityType(),
+                $EntityType,
                 $Properties ?: $EntityMap->GetProperties(),
+                $GroupByExpressions,
+                $AggregatePredicateExpressions,
                 $IsSingleEntity,
-                $Criterion ?: new Criterion($EntityMap->GetEntityType()));
+                $Criterion ?: new Criterion($EntityType));
     }
 }
 

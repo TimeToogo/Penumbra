@@ -53,7 +53,7 @@ final class NullPlatform implements Relational\IPlatform {
         
     }
 
-    public function Select(\Storm\Core\Relational\Request $Request) {
+    public function Select(\Storm\Core\Relational\Select $Request) {
         
     }
 

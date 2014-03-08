@@ -70,17 +70,17 @@ abstract class RelationshipPropertyRelationMapping extends PropertyMapping imple
         return $this->Relation;
     }
     
-    public function AddToRelationalRequest(Relational\Request $RelationalRequest) {
+    public function AddToRelationalSelect(Relational\Select $RelationalRequest) {
         $RelationalRequest->AddColumns($this->Relation->GetRelationalParentColumns());
     }
     
     final protected function LoadRelatedRows(Relational\Database $Database, array $ParentRows, Object\RevivalData $AlreadyKnownRevivalData = null) {
-        $RelatedRowRequest = $this->Relation->RelationRequest($ParentRows);
+        $RelatedRowRequest = $this->Relation->RelationSelect($ParentRows);
         $this->MapEntityToRelationalRequest($RelatedRowRequest, $AlreadyKnownRevivalData);
         return $Database->Load($RelatedRowRequest);
     }
     
-    final protected function MapEntityToRelationalRequest(Relational\Request $RelationalRequest, Object\RevivalData $AlreadyKnownRevivalData = null) {
+    final protected function MapEntityToRelationalRequest(Relational\Select $RelationalRequest, Object\RevivalData $AlreadyKnownRevivalData = null) {
         if($AlreadyKnownRevivalData !== null) {
             $AlreadyKnownPropertyIdentifiers = array_keys($AlreadyKnownRevivalData->GetPropertyData());
             $AlreadyKnownProperties = $AlreadyKnownRevivalData->GetProperties($AlreadyKnownPropertyIdentifiers);

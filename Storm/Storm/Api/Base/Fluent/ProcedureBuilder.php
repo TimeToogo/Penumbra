@@ -3,9 +3,9 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
-use \Storm\Api\Base\FunctionToASTConverter;
 use \Storm\Drivers\Fluent\Object\Procedure;
-use \Storm\Drivers\Fluent\Object\Functional;
+use \Storm\Core\Object\Expressions\ExpressionTree;
+use \Storm\Drivers\Fluent\Object\IFunctionToExpressionTreeConverter;
 
 /**
  * The ProcedureBuilder provides a fluent interface for building procedures
@@ -17,9 +17,9 @@ class ProcedureBuilder extends CriterionBuilder {
     
     public function __construct(
             Object\IEntityMap $EntityMap, 
-            FunctionToASTConverter $ClosureToASTConverter,
+            IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter,
             callable $ProcedureFunction) {
-        parent::__construct($EntityMap, $ClosureToASTConverter);
+        parent::__construct($EntityMap, $FunctionToExpressionTreeConverter);
         
         $this->ProcedureFunction = $ProcedureFunction;
     }
@@ -31,7 +31,7 @@ class ProcedureBuilder extends CriterionBuilder {
      */
     final public function BuildProcedure() {
         return new Procedure(
-            $this->FunctionToExpandedAST($this->ProcedureFunction), 
+            $this->FunctionToExpressionTree($this->ProcedureFunction), 
             $this->BuildCriterion());
     }
 }

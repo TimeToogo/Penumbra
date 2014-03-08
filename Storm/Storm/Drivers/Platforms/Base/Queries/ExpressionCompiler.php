@@ -15,6 +15,12 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
         $this->CastTypes = $this->CastTypes();
     }
     
+    protected function AppendSubSelect(QueryBuilder $QueryBuilder, E\SubSelectExpression $Expression) {
+        $QueryBuilder->Append('(');
+        $QueryBuilder->AppendSelect($Expression->GetSelect());
+        $QueryBuilder->Append(')');
+    }
+    
     protected function AppendBinaryOperation(QueryBuilder $QueryBuilder, E\BinaryOperationExpression $Expression) {
         $QueryBuilder->Append('(');
         parent::AppendBinaryOperation($QueryBuilder, $Expression);

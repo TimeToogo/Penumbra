@@ -30,6 +30,35 @@ class CastExpression extends Expression {
         return $this->CastValueExpression;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkCast($this);
+    }
+    
+    public function Simplify() {
+        $Value = $this->CastValueExpression->Simplify();
+        if($Value instanceof ValueExpression) {
+            return Expression::Value(self::CastValue($this->CastType, $Value));
+        }
+        
+        return $this->Update(
+                $this->CastType,
+                $Value);
+    }
+    
+    private static $CastTypeMap = [
+        Operators\Cast::ArrayCast => 'array',
+        Operators\Cast::Boolean => 'bool',
+        Operators\Cast::Double => 'double',
+        Operators\Cast::Integer => 'int',
+        Operators\Cast::String => 'string',
+        Operators\Cast::Object => 'object',
+    ];
+    private static function CastValue($CastTypeOperator, $Value) {
+        settype($Value, self::$CastTypeMap[$CastTypeOperator]);
+        
+        return $Value;
+    }
+    
     /**
      * @return self
      */

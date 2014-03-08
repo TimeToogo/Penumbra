@@ -23,7 +23,6 @@ class DefaultConfiguration extends Configuration {
                 $DomainDatabaseMapFactory, 
                 $Connection,
                 $ProxyGenerator,
-                new Functional\Implementation\File\Reader(), 
                 new Functional\Implementation\PHPParser\Parser(), 
                 $Cache);
     }

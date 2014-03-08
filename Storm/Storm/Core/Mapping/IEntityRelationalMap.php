@@ -79,6 +79,16 @@ interface IEntityRelationalMap {
     public function GetPropertyMappings();
     
     /**
+     * @return boolean
+     */
+    public function HasPropertyMapping($PropertyIdentifier);
+    
+    /**
+     * @return IPropertyMapping|null
+     */
+    public function GetPropertyMapping($PropertyIdentifier);
+    
+    /**
      * @return IDataPropertyColumnMapping[]
      */
     public function GetDataPropertyColumnMappings();
@@ -178,10 +188,10 @@ interface IEntityRelationalMap {
      * 
      * Maps an entity such that its all its properties will be loaded in the given relational request.
      * 
-     * @param Relational\Request $RelationalRequest The request to add to
+     * @param Relational\Select $RelationalRequest The request to add to
      * @return void
      */
-    public function MapEntityToRelationalRequest(Relational\Request $RelationalRequest, array $AlreadyKnownProperties = []);
+    public function MapEntityToRelationalRequest(Relational\Select $RelationalRequest, array $AlreadyKnownProperties = []);
     
     /**
      * @access private
@@ -189,11 +199,11 @@ interface IEntityRelationalMap {
      * Maps the supplied properties such that they will be loaded in the given relational request.
      * 
      * @param \Storm\Core\Mapping\IEntityRelationalMap $EntityRelationalMap The relational map of the entity
-     * @param \Storm\Core\Relational\Request $RelationalRequest The request to add to
+     * @param \Storm\Core\Relational\Select $RelationalRequest The request to add to
      * @param array|null $Properties The array of properties to map or null if all properties should be mapped
      * @return void
      */
-    public function MapPropetiesToRelationalRequest(Relational\Request $RelationalRequest, array $Properties = null);
+    public function MapPropetiesToRelationalRequest(Relational\Select $RelationalRequest, array $Properties = null);
     
     /**
      * @access private

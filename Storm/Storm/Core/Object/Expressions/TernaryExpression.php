@@ -40,6 +40,26 @@ class TernaryExpression extends Expression {
         return $this->IfFalseExpression;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkTernary($this);
+    }
+    
+    public function Simplify() {
+        $ConditionExpression = $this->ConditionExpression->Simplify();
+        $IfTrueExpression = $this->IfTrueExpression->Simplify();
+        $IfFalseExpression = $this->IfFalseExpression->Simplify();
+        
+        if($ConditionExpression instanceof ValueExpression) {
+            return $ConditionExpression->GetValue() ?
+                    $IfTrueExpression : $IfFalseExpression;
+        }
+        
+        return $this->Update(
+                $ConditionExpression,
+                $IfTrueExpression,
+                $IfFalseExpression);
+    }
+    
     /**
      * @return self
      */

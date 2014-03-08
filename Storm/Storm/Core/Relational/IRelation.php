@@ -44,9 +44,9 @@ interface IRelation {
      * that it only loads the related rows of the parents.
      * 
      * @param ResultRows[]|null $ParentRows The parent rows
-     * @return Request
+     * @return Select
      */
-    public function RelationRequest(array $ParentRows = null);
+    public function RelationSelect(array $ParentRows = null);
     
     /**
      * Adds the columns required by the relation to the parent request.
@@ -63,7 +63,7 @@ interface IRelation {
      * @param ResultRows[]|null $ParentRows The parent rows
      * @return void
      */
-    public function AddRelationToRequest(Request $Request, array $ParentRows = null);
+    public function AddRelationToSelect(Select $Select, array $ParentRows = null);
     
     /**
      * Adds the relation constraint to the supplied criterion.

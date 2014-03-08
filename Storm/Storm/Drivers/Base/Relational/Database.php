@@ -10,9 +10,7 @@ abstract class Database extends Relational\Database {
      */
     private $Platform;
     
-    public function __construct(IPlatform $Platform) {
-        $this->Platform = $Platform;
-        
+    public function __construct() {
         parent::__construct();
     }
     
@@ -23,10 +21,18 @@ abstract class Database extends Relational\Database {
         return $this->Platform;
     }
     
-    private function VerifyConnection($Method) {
-        if($this->Platform === null) {
+    final public function SetPlatform(IPlatform $Platform) {
+        if($this->Platform !== null) {
             throw new Relational\RelationalException(
-                    'Call to %s requires the connection to be set',
+                    'Cannot set platform: Platform has already been set');
+        }
+        $this->Platform = $Platform;
+    }
+    
+    private function VerifyPlatform($Method) {
+        if(!$this->Platform === null) {
+            throw new Relational\RelationalException(
+                    'Call to %s requires the platform to be set',
                     $Method);
         }
     }
@@ -42,13 +48,13 @@ abstract class Database extends Relational\Database {
         $this->Platform->Sync($this);
     }
     
-    final protected function LoadResultRowData(Relational\Request $Request) {
-        $this->VerifyConnection(__METHOD__);
+    final protected function LoadResultRowData(Relational\Select $Request) {
+        $this->VerifyPlatform(__METHOD__);
         return $this->Platform->Select($Request);
     }
     
     final public function CommitTransaction(Relational\Transaction $Transaction) {
-        $this->VerifyConnection(__METHOD__);
+        $this->VerifyPlatform(__METHOD__);
         return $this->Platform->Commit(
                 $this->GetTablesOrderedByPersistingDependency(), 
                 $this->GetTablesOrderedByDiscardingDependency(), 

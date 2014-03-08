@@ -149,10 +149,10 @@ abstract class Database {
     /**
      * Load the rows specified by the request.
      * 
-     * @param Request $Request The request to load
+     * @param Select $Request The request to load
      * @return ResultRow[] The loaded result rows
      */
-    final public function Load(Request $Request) {
+    final public function Load(Select $Request) {
         $Columns = [];
         foreach($Request->GetTables() as $Table) {
             $this->VerifyTable(__METHOD__, $Table);
@@ -168,10 +168,10 @@ abstract class Database {
      * This method should be implemented such that is returns the rows specified
      * by the request from the underlying database.
      * 
-     * @param Request $Request The request to load
+     * @param Select $Request The request to load
      * @return array[] The loaded result rows data as an associative array indexed by column identifiers
      */
-    protected abstract function LoadResultRowData(Request $Request);
+    protected abstract function LoadResultRowData(Select $Request);
     
     /**
      * Commits the supplied transaction.

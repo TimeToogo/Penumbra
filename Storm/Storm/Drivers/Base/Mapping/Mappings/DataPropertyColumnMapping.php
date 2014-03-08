@@ -55,6 +55,14 @@ class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IData
     public function GetDataProperty() {
         return $this->DataProperty;
     }
+
+    public function AddToCriterion(Relational\Criterion $Criterion) {
+        
+    }
+
+    public function MapPropertyExpression() {
+        return \Storm\Drivers\Base\Relational\Expressions\Expression::ReviveColumn($this->Column);
+    }
     
     public function MapTraversalExpression(Relational\Criterion $Criterion, Expressions\TraversalExpression $TraversalExpression) {
         if($this->Column instanceof Columns\Column) {

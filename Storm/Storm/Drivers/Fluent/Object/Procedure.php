@@ -3,25 +3,23 @@
 namespace Storm\Drivers\Fluent\Object;
 
 use \Storm\Drivers\Base\Object;
+use \Storm\Core\Object\Expressions\ExpressionTree;
 use \Storm\Core\Object\Expressions\AssignmentExpression;
-use \Storm\Drivers\Fluent\Object\Functional;
-
 
 class Procedure extends Object\Procedure {
     public function __construct(
-            Functional\IAST $AST,
+            $EntityType,
+            ExpressionTree $ExpressionTree,
             \Storm\Core\Object\ICriterion $Criterion = null) {
-        
-        $EntityType = $AST->GetEntityMap()->GetEntityType();
         
         parent::__construct(
                 $EntityType, 
-                $this->ParseAssignmentExpressions($AST), 
+                $this->ParseAssignmentExpressions($ExpressionTree), 
                 $Criterion ?: new Criterion($EntityType));
     }
     
-    private function ParseAssignmentExpressions(Functional\IAST $AST) {
-        $Expressions = $AST->ParseNodes();
+    private function ParseAssignmentExpressions(ExpressionTree $ExpressionTree) {
+        $Expressions = $ExpressionTree->GetExpressions();
         
         foreach ($Expressions as $Key => $Expression) {
             if(!($Expression instanceof AssignmentExpression)) {

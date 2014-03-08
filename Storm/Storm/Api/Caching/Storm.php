@@ -8,6 +8,7 @@ use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 use \Storm\Drivers\Fluent\Object\Functional;
 use \Storm\Utilities\Cache;
+use \Storm\Drivers\Fluent\Object\CachingFunctionToExpressionTreeConverter;
 
 /**
  * This class provides a caching to an instance of DomainDatabaseMap, which can be very
@@ -29,7 +30,6 @@ class Storm extends Base\Storm {
             callable $DomainDatabaseMapFactory,
             IConnection $Connection,
             IProxyGenerator $ProxyGenerator,
-            Functional\IReader $FunctionReader, 
             Functional\IParser $FunctionParser,
             Cache\ICache $Cache) {
         $this->Cache = $Cache;
@@ -45,12 +45,11 @@ class Storm extends Base\Storm {
                 $DomainDatabaseMap,
                 $Connection,
                 $ProxyGenerator,
-                $FunctionReader,
                 $FunctionParser);
     }
     
-    protected function GetClosureToASTConverter(Functional\IReader $FunctionReader, Functional\IParser $FunctionParser) {
-        return new FunctionToASTConverter($this->Cache, $FunctionReader, $FunctionParser);
+    protected function GetFunctionToExpressionTreeConverter(Functional\IParser $FunctionParser) {
+        return new CachingFunctionToExpressionTreeConverter($this->Cache, $FunctionParser);
     }
 }
 

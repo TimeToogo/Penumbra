@@ -43,6 +43,9 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
             case $Expression instanceof E\CompoundBooleanExpression:
                 return $this->AppendCompoundBoolean($QueryBuilder, $Expression);
                 
+            case $Expression instanceof E\SubSelectExpression:
+                return $this->AppendSubSelect($QueryBuilder, $Expression);
+                
             case $Expression instanceof E\CastExpression:
                 return $this->AppendCast($QueryBuilder, $Expression);
                 
@@ -109,6 +112,8 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
     protected function AppendLiteral(QueryBuilder $QueryBuilder, E\LiteralExpression $Expression) {
         $QueryBuilder->Append($Expression->GetString());
     }
+
+    protected abstract function AppendSubSelect(QueryBuilder $QueryBuilder, E\SubSelectExpression $Expression);
 
     protected abstract function AppendCast(QueryBuilder $QueryBuilder, E\CastExpression $Expression);
 

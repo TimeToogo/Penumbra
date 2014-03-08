@@ -11,16 +11,16 @@ abstract class CriterionCompiler extends Queries\CriterionCompiler {
         $this->JoinTypes = $this->JoinTypes();
     }
     
-    protected function AppendTable(QueryBuilder $QueryBuilder, Relational\ITable $Table) {
-        $QueryBuilder->AppendIdentifier(' FROM #', [$Table->GetName()]);
-    }
-    
-    protected function AppendJoins(QueryBuilder $QueryBuilder, array $Joins) {
-        foreach($QueryBuilder->Delimit($Joins, ' ') as $Join) {
-            $QueryBuilder->Append($this->GetJoinType($Join->GetJoinType()) . ' ');
-            $QueryBuilder->AppendIdentifier('#', [$Join->GetTable()->GetName()]);
-            $QueryBuilder->Append(' ON ');
-            $QueryBuilder->AppendExpression($Join->GetJoinPredicateExpression());
+    protected function AppendTableDefinitionClause(QueryBuilder $QueryBuilder, Relational\ITable $Table, array $Joins = null) {
+        $QueryBuilder->AppendIdentifier('#', [$Table->GetName()]);
+        
+        if($Joins !== null) {
+            foreach($QueryBuilder->Delimit($Joins, ' ') as $Join) {
+                $QueryBuilder->Append($this->GetJoinType($Join->GetJoinType()) . ' ');
+                $QueryBuilder->AppendIdentifier('#', [$Join->GetTable()->GetName()]);
+                $QueryBuilder->Append(' ON ');
+                $QueryBuilder->AppendExpression($Join->GetJoinPredicateExpression());
+            }
         }
     }
     
@@ -46,7 +46,7 @@ abstract class CriterionCompiler extends Queries\CriterionCompiler {
         }
     }
     
-    protected function AppendPredicateExpressions(QueryBuilder $QueryBuilder, array $PredicateExpressions) {
+    protected function AppendWhereClause(QueryBuilder $QueryBuilder, array $PredicateExpressions) {
         $QueryBuilder->Append(' WHERE (');
         foreach($QueryBuilder->Delimit($PredicateExpressions, ' AND ') as $PredicateExpression) {
             $QueryBuilder->AppendExpression($PredicateExpression);
@@ -54,21 +54,21 @@ abstract class CriterionCompiler extends Queries\CriterionCompiler {
         $QueryBuilder->Append(')');
     }
     
-    protected function AppendGroupByExpressions(QueryBuilder $QueryBuilder, array $Expressions) {
+    protected function AppendGroupByClause(QueryBuilder $QueryBuilder, array $Expressions) {
         $QueryBuilder->Append(' GROUP BY ');
         foreach($QueryBuilder->Delimit($Expressions, ', ') as $Expression) {            
             $QueryBuilder->AppendExpression($Expression);
         }
     }
     
-    protected function AppendAggregatePredicateExpressions(QueryBuilder $QueryBuilder, array $Expressions) {
+    protected function AppendHavingClause(QueryBuilder $QueryBuilder, array $Expressions) {
         $QueryBuilder->Append(' HAVING ');
         foreach($QueryBuilder->Delimit($Expressions, ' AND ') as $Expression) {            
             $QueryBuilder->AppendExpression($Expression);
         }
     }
 
-    protected function AppendOrderByExpressions(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap) {
+    protected function AppendOrderByClause(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap) {
         $QueryBuilder->Append(' ORDER BY ');
         foreach($QueryBuilder->Delimit($ExpressionAscendingMap, ', ') as $Expression) {
             $Ascending = $ExpressionAscendingMap[$Expression];
@@ -79,7 +79,7 @@ abstract class CriterionCompiler extends Queries\CriterionCompiler {
         }
     }
 
-    protected function AppendRange(QueryBuilder $QueryBuilder, $Offset, $Limit) {
+    protected function AppendRangeClause(QueryBuilder $QueryBuilder, $Offset, $Limit) {
         $QueryBuilder->Append(' ');
         if($Limit === null) {
             $QueryBuilder->Append('LIMIT 18446744073709551615');

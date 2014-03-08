@@ -31,9 +31,9 @@ final class Transaction {
     private $PostPersistRowEventMap;
     
     /**
-     * @var Procedure[]
+     * @var Update[]
      */
-    private $Procedures = [];
+    private $Updates = [];
     
     /**
      * @var PrimaryKey[]
@@ -46,9 +46,9 @@ final class Transaction {
     private $DiscardedPrimaryKeyGroups = [];
     
     /**
-     * @var Criterion[]
+     * @var Delete[]
      */
-    private $DiscardedCriteria = [];
+    private $Deletes = [];
     
     public function __construct() {
         $this->PrePersistRowEventMap = new Map();
@@ -70,10 +70,10 @@ final class Transaction {
     }
     
     /**
-     * @return Procedure[]
+     * @return Update[]
      */
-    public function GetProcedures() {
-        return $this->Procedures;
+    public function GetUpdates() {
+        return $this->Updates;
     }
     
     /**
@@ -91,10 +91,10 @@ final class Transaction {
     }
     
     /**
-     * @return Criterion[]
+     * @return Delete[]
      */
-    public function GetDiscardedCriteria() {
-        return $this->DiscardedCriteria;
+    public function GetDeletes() {
+        return $this->Deletes;
     }
     
     /**
@@ -206,11 +206,11 @@ final class Transaction {
     /**
      * Add a procedure to be executed within the transaction.
      * 
-     * @param Procedure $Procedure The procedure to execute
+     * @param Update $Update The procedure to execute
      * @return void
      */
-    public function Execute(Procedure $Procedure) {
-        $this->Procedures[] = $Procedure;
+    public function AddUpdate(Update $Update) {
+        $this->Updates[] = $Update;
     }
     
     /**
@@ -240,13 +240,13 @@ final class Transaction {
     }
     
     /**
-     * Discard rows if they match the supplied criterion.
+     * Added the supplied delete query
      * 
-     * @param Criterion $Criterion The criterion to match
+     * @param Delete $Delete The delete query to execute
      * @return void
      */
-    public function DiscardWhere(Criterion $Criterion) {
-        $this->DiscardedCriteria[] = $Criterion;
+    public function AddDelete(Delete $Delete) {
+        $this->Deletes[] = $Delete;
     }
 }
 

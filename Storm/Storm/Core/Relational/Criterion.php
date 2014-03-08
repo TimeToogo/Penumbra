@@ -28,12 +28,6 @@ final class Criterion {
      */
     private $PredicateExpressions = [];
     
-    
-    /**
-     * @var Expression[] 
-     */
-    private $AggregatePredicateExpressions = [];
-    
     /**
      * The order by expressions mapped to a boolean representing whether
      * or not is is ascending.
@@ -41,11 +35,6 @@ final class Criterion {
      * @var \SplObjectStorage
      */
     private $OrderByExpressionsAscendingMap;
-    
-    /**
-     * @var Expression[]
-     */
-    private $GroupByExpressions = [];
     
     /**
      * @var int
@@ -170,51 +159,6 @@ final class Criterion {
         $this->OrderByExpressionsAscendingMap[$Expression] = $Ascending;
     }
 
-
-    // </editor-fold>
-        
-    // <editor-fold defaultstate="collapsed" desc="Grouping">
-
-    /**
-     * @return boolean
-     */
-    final public function IsGrouped() {
-        return count($this->GroupByExpressions) > 0;
-    }
-
-    /**
-     * @return Expression[]
-     */
-    final public function GetGroupByExpressions() {
-        return $this->GroupByExpressions;
-    }
-
-    final public function AddGroupByExpression(Expression $Expression) {
-        $this->GroupByExpressions[] = $Expression;
-    }
-
-
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Aggregate Constraints">
-    
-    /**
-     * @return boolean
-     */
-    final public function IsAggregateConstrained() {
-        return count($this->AggregatePredicateExpressions) > 0;
-    }
-
-    /**
-     * @return Expression[]
-     */
-    final public function GetAggregatePredicateExpressions() {
-        return $this->AggregatePredicateExpressions;
-    }
-
-    final public function AddAggregatePredicateExpression(Expression $PredicateExpression) {
-        $this->AggregatePredicateExpressions[] = $PredicateExpression;
-    }
 
     // </editor-fold>
         

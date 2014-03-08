@@ -27,6 +27,17 @@ class NewExpression extends Expression {
         return $this->ArgumentExpressions;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkNew($this);
+    }
+    
+    public function Simplify() {
+        //TODO: white list of deterministic classes to instanstiate
+        return $this->Update(
+                $this->ClassType,
+                self::SimplifyAll($this->ArgumentExpressions));
+    }
+    
     /**
      * @return self
      */

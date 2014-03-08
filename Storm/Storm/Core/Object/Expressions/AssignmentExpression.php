@@ -10,13 +10,20 @@ use \Storm\Core\Object\IProperty;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class AssignmentExpression extends Expression {
-    private $PropertyExpression;
+    private $AssignToExpression;
     private $Operator;
     private $AssignmentValueExpression;
-    public function __construct(PropertyExpression $PropertyExpression, $Operator, Expression $AssignmentValueExpression) {
-        $this->PropertyExpression = $PropertyExpression;
+    public function __construct(Expression $AssignToExpression, $Operator, Expression $AssignmentValueExpression) {
+        $this->AssignToExpression = $AssignToExpression;
         $this->Operator = $Operator;
         $this->AssignmentValueExpression = $AssignmentValueExpression;
+    }
+        
+    /**
+     * @return Expression
+     */
+    public function GetAssignToExpression() {
+        return $this->AssignToExpression;
     }
     
     /**
@@ -27,30 +34,34 @@ class AssignmentExpression extends Expression {
     }
         
     /**
-     * @return PropertyExpression
-     */
-    public function GetPropertyExpression() {
-        return $this->PropertyExpression;
-    }
-        
-    /**
      * @return Expression
      */
     public function GetAssignmentValueExpression() {
         return $this->AssignmentValueExpression;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkAssignment($this);
+    }
+    
+    public function Simplify() {
+        return $this->Update(
+                $this->AssignToExpression->Simplify(),
+                $this->Operator,
+                $this->AssignmentValueExpression->Simplify());
+    }
+    
     /**
      * @return self
      */
-    public function Update(PropertyExpression $PropertyExpression, $Operator, Expression $AssignmentValueExpression) {
-        if($this->PropertyExpression === $PropertyExpression
+    public function Update(Expression $AssignToExpression, $Operator, Expression $AssignmentValueExpression) {
+        if($this->AssignToExpression === $AssignToExpression
                 && $this->Operator === $Operator
                 && $this->AssignmentValueExpression === $AssignmentValueExpression) {
             return $this;
         }
         
-        return new self($PropertyExpression, $Operator, $AssignmentValueExpression);
+        return new self($AssignToExpression, $Operator, $AssignmentValueExpression);
     }
 }
 

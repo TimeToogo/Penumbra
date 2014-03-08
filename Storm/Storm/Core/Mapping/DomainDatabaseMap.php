@@ -26,6 +26,7 @@ abstract class DomainDatabaseMap {
      * @var Object\Domain
      */
     private $Domain;
+    
     /**
      * The Database instance representing the database of this map.
      * 
@@ -170,6 +171,26 @@ abstract class DomainDatabaseMap {
     }
     
     /**
+     * Whether or not the property is mapped.
+     * 
+     * @param Object\IProperty $Property The property
+     * @return boolean
+     */
+    final public function HasPropertyMapping(Object\IProperty $Property) {
+        return $this->VerifyEntityTypeIsMapped($Property->GetEntityType())->HasPropertyMapping($Property->GetIdentifier());
+    }
+    
+    /**
+     * Gets the property mapping from the property identifier
+     * 
+     * @param Object\IProperty $Property The property
+     * @return IPropertyMapping|null
+     */
+    final public function GetPropertyMapping(Object\IProperty $Property) {
+        return $this->VerifyEntityTypeIsMapped($Property->GetEntityType())->GetPropertyMapping($Property->GetIdentifier());
+    }
+    
+    /**
      * Verifies that an entity type is mapped and returns the relational map if is found.
      * 
      * @param string $EntityType The entity type
@@ -183,6 +204,17 @@ abstract class DomainDatabaseMap {
         }
         
         return $EntityRelationalMap;
+    }
+    
+    /**
+     * Gets the registered relational map for the given primary key table name.
+     * 
+     * @param string $TableName The name of primary key table.
+     * @return IEntityRelationalMap|null The relational map or null if not found
+     */
+    final protected function GetRelationalCriterion($EntityType) {
+        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
+        $EntityRelationalMap->GetCriterion($this->Database);
     }
     
     /**
@@ -239,149 +271,25 @@ abstract class DomainDatabaseMap {
         $this->Database->Commit($Transaction);
     }
     
-    // <editor-fold defaultstate="collapsed" desc="Request  mappers">
-    
     /**
-     * @access private
-     * 
-     * Maps a given object request to the relational equivalent.
-     * 
-     * @param IRequest $ObjectRequest The object request
-     * @return Relational\Request The equivalent relational request
+     * @return Relational\Select
      */
-    final public function MapRequest(Object\IRequest $ObjectRequest) {
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($ObjectRequest->GetEntityType());
-        
-        $RelationalRequest = new Relational\Request($EntityRelationalMap->GetCriterion($this->Database));
-        $EntityRelationalMap->MapPropetiesToRelationalRequest($RelationalRequest, $ObjectRequest->GetProperties());
-        
-        $this->MapCriterion($EntityRelationalMap, $ObjectRequest->GetCriterion(), $RelationalRequest->GetCriterion());
-        
-        return $RelationalRequest;
-    }
-    
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Procedure mappers">
+    protected abstract function MapRequest(Object\IRequest $Request);
     
     /**
-     * @access private
-     * 
-     * Maps a supplied object procedure to an equivalent relational procedure.
-     * 
-     * @param Object\IProcedure $ObjectProcedure The object procedure
-     * @return Relational\Procedure The equivalent relational procedure
+     * @return Relational\Update
      */
-    final public function MapProcedure(Object\IProcedure $ObjectProcedure) {
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($ObjectProcedure->GetEntityType());
-        
-        $RelationalProcedure = new Relational\Procedure(
-                $EntityRelationalMap->GetMappedPersistTables(), $EntityRelationalMap->GetCriterion($this->Database));
- 
-        $this->MapCriterion($EntityRelationalMap, $ObjectProcedure->GetCriterion(), $RelationalProcedure->GetCriterion());
-        foreach($this->MapExpressions($EntityRelationalMap, $ObjectProcedure->GetExpressions()) as $MappedExpression) {
-            $RelationalProcedure->AddExpression($MappedExpression);
-        }
-        
-        return $RelationalProcedure;
-    }
-    
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Criteria mappers">
+    protected abstract function MapProcedure(Object\IProcedure $Procedure);
     
     /**
      * @access private
      * 
-     * Maps the supplied object criterion the the relational equivalent.
+     * Maps the supplied object criterion the supplied relational equivalent.
      * 
-     * @param Object\ICriterion $ObjectCriterion The object criterion to map
+     * @param Object\ICriterion $Criterion The object criterion to map
      * @return Relational\Criterion The relational equivalent
      */
-    private function MapObjectCriterion(Object\ICriterion $ObjectCriterion) {
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($ObjectCriterion->GetEntityType());
-        
-        $RelationalCriterion = $EntityRelationalMap->GetCriterion($this->Database);
-        $this->MapCriterion(
-                $EntityRelationalMap, 
-                $ObjectCriterion, 
-                $RelationalCriterion);
-        
-        return $RelationalCriterion;
-    }
-    
-    /**
-     * @access private
-     * 
-     * Maps the supplied object criterion the the relational equivalent.
-     * 
-     * @param IEntityRelationalMap $EntityRelationalMap The relational map of the object criterion
-     * @param Object\ICriterion $ObjectCriterion The object criterion to map
-     * @param Relational\Criterion $RelationalCriterion The relational criterion to map to
-     * @return void
-     */
-    private function MapCriterion(IEntityRelationalMap $EntityRelationalMap,
-            Object\ICriterion $ObjectCriterion, Relational\Criterion $RelationalCriterion) {
-        
-        if ($ObjectCriterion->IsConstrained()) {
-            foreach ($this->MapExpressions($EntityRelationalMap, $ObjectCriterion->GetPredicateExpressions()) as $PredicateExpression) {
-                $RelationalCriterion->AddPredicateExpression($PredicateExpression);
-            }
-        }
-        
-        if ($ObjectCriterion->IsOrdered()) {
-            $ExpressionAscendingMap = $ObjectCriterion->GetOrderByExpressionsAscendingMap();
-            
-            foreach ($ExpressionAscendingMap as $Expression) {
-                $IsAscending = $ExpressionAscendingMap[$Expression];
-                $Expressions = $this->MapExpression($EntityRelationalMap, $Expression);
-                foreach($Expressions as $Expression) {
-                    $RelationalCriterion->AddOrderByExpression($Expression, $IsAscending);
-                }
-            }
-        }
-        
-        if ($ObjectCriterion->IsGrouped()) {
-            foreach ($this->MapExpressions($EntityRelationalMap, $ObjectCriterion->GetGroupByExpressions()) as $GroupByExpression) {
-                $RelationalCriterion->AddGroupByExpression($GroupByExpression);
-            }
-        }
-        
-        if ($ObjectCriterion->IsRanged()) {
-            $RelationalCriterion->SetRangeOffset($ObjectCriterion->GetRangeOffset());
-            $RelationalCriterion->SetRangeAmount($ObjectCriterion->GetRangeAmount());
-        }
-    }
-    // </editor-fold>
-        
-    // <editor-fold defaultstate="collapsed" desc="Expression mapping">
-    
-    /**
-     * @access private
-     * 
-     * @param IEntityRelationalMap $EntityRelationalMap
-     * @param Object\Expressions\Expression $Expressions
-     * @return Relational\Expression[] The equivalent expressions
-     */
-    private function MapExpressions(IEntityRelationalMap $EntityRelationalMap, array $Expressions) {
-        return call_user_func_array('array_merge', array_map(
-                function ($Expression) use (&$EntityRelationalMap) {
-                    return $this->MapExpression($EntityRelationalMap, $Expression);
-                }, $Expressions));
-    }
-
-
-    /**
-     * @access private
-     * 
-     * Maps the given object expression to the relational equivalent.
-     * This will return an array as it is not a one-to-one mapping.
-     * 
-     * @return Relational\Expression[] The equivalent expressions
-     */
-    protected abstract function MapExpression(IEntityRelationalMap $EntityRelationalMap, Object\Expressions\Expression $Expression);
-
-    // </editor-fold>
+    protected abstract function MapCriterion(Object\ICriterion $Criterion, Relational\Criterion $RelationalCriterion = null);
     
     // <editor-fold defaultstate="collapsed" desc="Entity Persistence mapping">
     
@@ -403,11 +311,11 @@ abstract class DomainDatabaseMap {
         }
         
         foreach($UnitOfWork->GetExecutedProcedures() as $Procedure) {
-            $Transaction->Execute($this->MapProcedure($Procedure));
+            $Transaction->AddUpdate($this->MapProcedure($Procedure));
         }
         
         foreach($UnitOfWork->GetDiscardenceDataGroups() as $EntityType => $DiscardedIdentityGroup) {
-            $EntityRelationalMap = $this->EntityRelationalMaps[$EntityType];
+            $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
             $ResultRows = $this->MapEntityDataToTransaction($UnitOfWork, $Transaction, $EntityRelationalMap, $DiscardedIdentityGroup);
             foreach($ResultRows as $ResultRow) {
                 $Transaction->DiscardAll($ResultRow->GetPrimaryKeys());
@@ -415,7 +323,9 @@ abstract class DomainDatabaseMap {
         }
         
         foreach($UnitOfWork->GetDiscardedCriteria() as $DiscardedCriterion) {
-            $Transaction->DiscardWhere($this->MapObjectCriterion($DiscardedCriterion));
+            $RelationalCriterion = $this->GetRelationalCriterion($DiscardedCriterion->GetEntityType());
+            $this->MapCriterion($DiscardedCriterion, $RelationalCriterion);
+            $Transaction->AddDelete($RelationalCriterion);
         }
     }
     

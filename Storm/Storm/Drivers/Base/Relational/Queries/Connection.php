@@ -14,6 +14,14 @@ abstract class Connection implements IConnection {
      */
     protected $ExpressionCompiler;
     /**
+     * @var ISelectCompiler 
+     */
+    protected $RequestCompiler;
+    /**
+     * @var IUpdateCompiler 
+     */
+    protected $ProcedureCompiler;
+    /**
      * @var ICriterionCompiler 
      */
     protected $CriterionCompiler;
@@ -28,6 +36,14 @@ abstract class Connection implements IConnection {
     
     final public function SetCriterionCompiler(ICriterionCompiler $CriterionCompiler) {
         $this->CriterionCompiler = $CriterionCompiler;
+    }
+    
+    final public function SetRequestCompiler(ISelectCompiler $RequestCompiler) {
+        $this->RequestCompiler = $RequestCompiler;
+    }
+    
+    final public function SetProcedureCompiler(IUpdateCompiler $ProcedureCompiler) {
+        $this->ProcedureCompiler = $ProcedureCompiler;
     }
 }
 

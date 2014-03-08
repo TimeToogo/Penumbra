@@ -34,11 +34,6 @@ interface IPlatform {
     public function __sleep();
     
     /**
-     * @return Expressions\IExpressionConverter
-     */
-    public function GetExpressionConverter();
-    
-    /**
      * @return Columns\IColumnSet
      */
     public function GetColumnSet();
@@ -59,6 +54,11 @@ interface IPlatform {
     public function GetCriterionCompiler();
     
     /**
+     * @return Queries\IQueryCompiler
+     */
+    public function GetQueryCompiler();
+    
+    /**
      * @return Queries\IIdentifierEscaper
      */
     public function GetIdentifierEscaper();
@@ -69,16 +69,16 @@ interface IPlatform {
     public function GetDatabaseSyncer();
     
     /**
-     * @return Queries\IQueryExecutor
+     * @return Queries\ITransactionCommiter
      */
-    public function GetQueryExecutor();
+    public function GetTransactionCommiter();
         
     public function Sync(Database $Database);
     
     /**
      * @return ResultRow[]
      */
-    public function Select(Core\Relational\Request $Request);
+    public function Select(Core\Relational\Select $Select);
     
     public function Commit(
             array $TablesOrderedByPersistingDependency,

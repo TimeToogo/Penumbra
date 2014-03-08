@@ -21,11 +21,27 @@ class FieldExpression extends ObjectOperationExpression {
         return $this->Name;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkField($this);
+    }
+    
+    public function Simplify() {
+        $ValueExpression = $this->ValueExpression->Simplify();
+        
+        if($ValueExpression instanceof ValueExpression) {
+            $Value = $ValueExpression;
+            return Expression::Value($Value->{$this->Name});
+        }        
+        
+        return $this->Update(
+                $ValueExpression,
+                $this->Name);
+    }
     /**
      * @return self
      */
     public function Update(Expression $ObjectValueExpression, $Name) {
-        if($this->GetValueExpression() === $ObjectValueExpression
+        if($this->ValueExpression === $ObjectValueExpression
                 && $this->Name === $Name) {
             return $this;
         }

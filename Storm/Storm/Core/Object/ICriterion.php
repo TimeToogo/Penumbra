@@ -46,18 +46,6 @@ interface ICriterion {
     public function GetOrderByExpressionsAscendingMap();
     
     /**
-     * Whether or not the criterion contains any group by expressions.
-     * 
-     * return boolean
-     */
-    public function IsGrouped();
-    
-    /**
-     * @return Expression[]
-     */
-    public function GetGroupByExpressions();
-    
-    /**
      * Whether or not the criterion contains an offset other than zero or a limit.
      * 
      * return boolean

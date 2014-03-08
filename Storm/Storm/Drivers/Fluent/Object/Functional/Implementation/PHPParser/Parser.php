@@ -3,32 +3,42 @@
 namespace Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser;
 
 use \Storm\Core\Object;
-use \Storm\Drivers\Fluent\Object\Functional\IParser;
+use \Storm\Drivers\Fluent\Object\Functional\ParserBase;
 
-class Parser implements IParser {
+class Parser extends ParserBase {
     private static $PHPParser;
-    private $ConstantValueNodeReplacer;
 
     public function __construct() {
+        
+    }
+    
+    protected function ParseFunction(\ReflectionFunctionAbstract $Reflection, $FileName, $EntityVariableName) {
         if(self::$PHPParser === null) {
             self::$PHPParser = new \PHPParser_Parser(new \PHPParser_Lexer());
         }
         
-        $this->ConstantValueNodeReplacer = new \PHPParser_NodeTraverser();
-        $this->ConstantValueNodeReplacer->addVisitor(new Visitors\ConstantValueNodeReplacerVisitor());
+        $FileData = file($FileName);
+        
+        $FileNodes = self::$PHPParser->parse($FileData);
+        
+        $FunctionBodyNodes = $this->GetFunctionBodyNodes($FileNodes, $Reflection);
+        
+        return new AST($FunctionBodyNodes, $EntityVariableName);
     }
     
-    public function Parse(
-            $FunctionBodySource,
-            Object\IEntityMap $EntityMap,
-            $EntityVariableName) {
-        $Nodes = self::$PHPParser->parse('<?php ' . $FunctionBodySource . ' ?>');
-        $Nodes = $this->ConstantValueNodeReplacer->traverse($Nodes);
+    private function GetFunctionBodyNodes(array $FileNodes, \ReflectionFunctionAbstract $Reflection) {
+        $FunctionLocatorTraverser = new \PHPParser_NodeTraverser();
+        $FunctionLocator = new Visitors\FunctionLocatorVisitor($Reflection);
+        $FunctionLocatorTraverser->addVisitor($FunctionLocator);
+        $FunctionLocatorTraverser->traverse($FileNodes);
         
-        return new AST(
-                $Nodes, 
-                $EntityMap, 
-                $EntityVariableName);
+        if(!$FunctionLocator->HasLocatedFunction()) {
+            throw new \Storm\Drivers\Fluent\Object\Functional\ASTException(
+                    'Could not parse function %s: The function could not be located',
+                    $Reflection->getName());
+        }
+        
+        return $FunctionLocator->GetBodyNodes();
     }
 }
 

@@ -4,7 +4,6 @@ namespace Storm\Core\Object\Expressions;
 
 /**
  * Expression representing an array declaration.
- * NOTE: Does not have support for array keys.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
@@ -34,6 +33,30 @@ class ArrayExpression extends Expression {
      */
     public function GetValueExpressions() {
         return $this->ValueExpressions;
+    }
+    
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkArray($this);
+    }
+    
+    public function Simplify() {
+        $KeyExpressions = self::SimplifyAll($this->KeyExpressions);
+        $ValueExpressions = self::SimplifyAll($this->ValueExpressions);
+        
+        if(self::AllOfType($KeyExpressions, ValueExpression::GetType())
+                && self::AllOfType($ValueExpressions, ValueExpression::GetType())) {
+            $ResolvedArray = [];
+            
+            foreach($KeyExpressions as $ValueKey => $KeyExpression) {
+                $ResolvedArray[$KeyExpression->GetValue()] = $ValueExpressions[$ValueKey]->GetValue();
+            }
+            
+            return Expression::Value($ResolvedArray);
+        }
+        
+        return $this->Update(
+                $KeyExpressions, 
+                $ValueExpressions);
     }
     
     /**

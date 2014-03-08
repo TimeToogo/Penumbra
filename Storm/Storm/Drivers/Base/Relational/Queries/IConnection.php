@@ -6,8 +6,9 @@ use \Storm\Core\Relational;
 
 interface IConnection {
     public function SetExpressionCompiler(IExpressionCompiler $ExpressionCompiler);
-    public function SetIdentifierEscaper(IIdentifierEscaper $IdentifierEscaper);
     public function SetCriterionCompiler(ICriterionCompiler $CriterionCompiler);
+    public function SetQueryCompiler(IQueryCompiler $QueryCompiler);
+    public function SetIdentifierEscaper(IIdentifierEscaper $IdentifierEscaper);
     
     public function BeginTransaction();
     public function IsInTransaction();

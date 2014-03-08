@@ -36,12 +36,7 @@ interface IConfiguration {
     /**
      * @return static
      */
-    public function SetFunctionReader(Functional\IReader $ClosureReader);
-    
-    /**
-     * @return static
-     */
-    public function SetFunctionParser(Functional\IParser $ClosureParser);
+    public function SetFunctionParser(Functional\IParser $FunctionParser);
         
     /**
      * @return static

@@ -3,8 +3,10 @@
 namespace Storm\Drivers\Base\Relational\Queries;
 
 use \Storm\Drivers\Base\Relational;
-use \Storm\Core\Relational\Criterion;
 use \Storm\Core\Relational\Expression;
+use \Storm\Core\Relational\Criterion;
+use \Storm\Core\Relational\Select;
+use \Storm\Core\Relational\Update;
 
 class QueryBuilder {
     const DefaultPlaceholder = '#';
@@ -14,6 +16,8 @@ class QueryBuilder {
     private $QueryString = '';
     private $ExpressionCompiler;
     private $CriterionCompiler;
+    private $QueryCompiler;
+    private $ProcedureCompiler;
     private $IdentifierEscaper;
     
     public function __construct(
@@ -22,12 +26,16 @@ class QueryBuilder {
             Bindings $Bindings,
             IExpressionCompiler $ExpressionCompiler,
             ICriterionCompiler $CriterionCompiler,
+            IQueryCompiler $QueryCompiler,
+            IUpdateCompiler $ProcedureCompiler,
             IIdentifierEscaper $IdentifierEscaper) {
         $this->Connection = $Connection;
         $this->ParameterPlaceholder = $ParameterPlaceholder;
         $this->Bindings = $Bindings;
         $this->ExpressionCompiler = $ExpressionCompiler;
         $this->CriterionCompiler = $CriterionCompiler;
+        $this->QueryCompiler = $QueryCompiler;
+        $this->ProcedureCompiler = $ProcedureCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
     }
     
@@ -66,35 +74,19 @@ class QueryBuilder {
     final public function GetCriterionCompiler() {
         return $this->CriterionCompiler;
     }
-       
+    
+    /**
+     * @return IQueryCompiler
+     */
+    final public function GetQueryCompiler() {
+        return $this->QueryCompiler;
+    }
+    
     /**
      * @return IQuery
      */
     final public function Build() {
         return $this->Connection->Prepare($this->QueryString, $this->Bindings);
-    }
-    
-    final public function Append($QueryString) {
-        $this->QueryString .= $QueryString;
-    }
-    
-    final public function AppendExpression(Expression $Expression) {
-        $this->ExpressionCompiler->Append($this, $Expression);
-    }
-    
-    final public function AppendExpressions(array $Expressions, $Delimiter) {
-        $First = true;
-        foreach ($Expressions as $Expression) {
-            if($First) $First = false;
-            else
-                $this->QueryString .= $Delimiter;
-            
-            $this->AppendExpression($Expression);
-        }
-    }
-    
-    final public function AppendCriterion(Criterion $Criterion) {
-        $this->CriterionCompiler->AppendCriterion($this, $Criterion);
     }
     
     final public function Delimit($Iteratable, $Delimiter) {
@@ -110,6 +102,61 @@ class QueryBuilder {
                     return true;
                 });
     }
+    
+    final public function Append($QueryString) {
+        $this->QueryString .= $QueryString;
+    }
+    
+    // <editor-fold defaultstate="collapsed" desc="Expresion appenders">
+    
+    final public function AppendExpression(Expression $Expression) {
+        $this->ExpressionCompiler->Append($this, $Expression);
+    }
+
+
+    final public function AppendExpressions(array $Expressions, $Delimiter) {
+        $First = true;
+        foreach ($Expressions as $Expression) {
+            if ($First)
+                $First = false;
+            else
+                $this->QueryString .= $Delimiter;
+
+
+            $this->AppendExpression($Expression);
+        }
+    }
+
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="Query Appenders">
+
+    final public function AppendSelect(Select $Select) {
+        $this->QueryCompiler->AppendSelect($this, $Select);
+    }
+
+    final public function AppendUpdate(Update $Update) {
+        $this->QueryCompiler->AppendUpdate($this, $Update);
+    }
+    
+    final public function AppendTableDefinition(Criterion $Criterion) {
+        $this->CriterionCompiler->AppendTableDefinition($this, $Criterion);
+    }
+
+    final public function AppendWhere(Criterion $Criterion) {
+        $this->CriterionCompiler->AppendWhere($this, $Criterion);
+    }
+
+    final public function AppendOrderBy(Criterion $Criterion) {
+        $this->CriterionCompiler->AppendOrderBy($this, $Criterion);
+        
+    }
+    
+    final public function AppendRange(Criterion $Criterion) {
+        $this->CriterionCompiler->AppendRange($this, $Criterion);
+    }
+
+    // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Placeholders">
     

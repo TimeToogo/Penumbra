@@ -21,16 +21,33 @@ class IndexExpression extends TraversalExpression {
         return $this->Index;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkIndex($this);
+    }
+    
+    public function Simplify() {
+        $ValueExpression = $this->ValueExpression->Simplify();
+        
+        if($ValueExpression instanceof ValueExpression) {
+            $Value = $ValueExpression;
+            return Expression::Value($Value[$this->Index]);
+        }        
+        
+        return $this->Update(
+                $ValueExpression,
+                $this->Index);
+    }
+    
     /**
      * @return self
      */
-    public function Update(Expression $ObjectValueExpression, $Index) {
-        if($this->GetValueExpression() === $ObjectValueExpression
+    public function Update(Expression $ValueExpression, $Index) {
+        if($this->ValueExpression === $ValueExpression
                 && $this->Index === $Index) {
             return $this;
         }
         
-        return new self($ObjectValueExpression, $Index);
+        return new self($ValueExpression, $Index);
     }
     
     protected function UpdateValueExpression(Expression $ValueExpression) {

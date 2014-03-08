@@ -3,121 +3,88 @@
 namespace Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser;
 
 use \Storm\Drivers\Fluent\Object\Functional\ASTBase;
-use \Storm\Drivers\Fluent\Object\Functional\INode;
-use \Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser\PHPParserConstantValueNode;
+use \Storm\Core\Object\Expressions\ExpressionTree;
+use \Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser\PHPParserResolvedValueNode;
 use \Storm\Core\Object;
+use \Storm\Core\Object\Expressions as O;
 use \Storm\Core\Object\Expressions\Expression;
 use \Storm\Core\Object\Expressions\Operators;
-use \Storm\Core\Object\IProperty;
 use \Storm\Drivers\Fluent\Object\Functional\ASTException;
 
 require_once 'NodeSimplifiers.php';
 
 class AST extends ASTBase {
-    private $OriginalNodes = [];
-    private $HasReturnNode;
-    private $ReturnNodes = [];
+    private $Nodes = [];
     
-    private $VariableExpander;
+    private $ConstantValueNodeReplacer;
     
-    private $NodeSimplifier = [];
-    
-    private $UnresolvedVariables = [];
-    private $VariableResolverVisiter;
+    private $AreVariablesResolved = false;
     private $VariableResolver;
     
     public function __construct(
             array $Nodes, 
-            Object\IEntityMap $EntityMap,
             $EntityVariableName) {
         
-        parent::__construct([], $EntityMap, $EntityVariableName);
-        $this->OriginalNodes = $Nodes;
-        $this->LoadNodes();
+        parent::__construct($EntityVariableName);
+        $this->Nodes = $Nodes;
                 
-        $this->InitializeVisitors($EntityVariableName);
+        $this->InitializeVisitors();
+        $this->ResolveConstantValues();
     }
     
-    private function InitializeVisitors($EntityVariableName) {
-        $this->VariableExpander = new \PHPParser_NodeTraverser();
-        $this->VariableExpander->addVisitor(new Visitors\VariableExpanderVisitor($this->VariableExpander));
-        
-        $this->NodeSimplifier = new \PHPParser_NodeTraverser();
-        $this->NodeSimplifier->addVisitor(new Visitors\SimplifierVisitor(GetNodeSimplifiers()));
+    private function InitializeVisitors() {
+        $this->ConstantValueNodeReplacer = new \PHPParser_NodeTraverser();
+        $this->ConstantValueNodeReplacer->addVisitor(new Visitors\ConstantValueNodeReplacerVisitor());
         
         $this->VariableResolver = new \PHPParser_NodeTraverser();
-        $this->VariableResolverVisiter = new Visitors\VariableResolverVisitor();
-        $this->VariableResolver->addVisitor($this->VariableResolverVisiter);
-        $this->VariableResolver->addVisitor(
-                new Visitors\UnresolvedVariableVisitor(
-                        $this->UnresolvedVariables, /* Ignore: */[$EntityVariableName]));
-        
+        $this->VariableResolver->addVisitor(new Visitors\VariableResolverVisitor($this->VariableResolver));
     }
     
-    private function LoadNodes() {
-        $this->ReturnNodes = [];
-        $WrappedNodes = [];
-        
-        foreach($this->OriginalNodes as $Node) {
-            $WrappedNode = new Node($Node);
-            $WrappedNodes[] = $WrappedNode;
-            
-            if($Node instanceof \PHPParser_Node_Stmt_Return) {
-                $this->ReturnNodes[] = $WrappedNode;
-            }
-        }
-        $this->SetNodes($WrappedNodes);
-        
-        $this->HasReturnNode = count($this->ReturnNodes) > 0;
-    }
-
-    public function HasReturnNode() {
-        return $this->HasReturnNode;
+    /**
+     * Replaces all constant value nodes to the PHPParserResolvedValueNode for easy parsing.
+     */
+    private function ResolveConstantValues() {
+        $this->Nodes = $this->ConstantValueNodeReplacer->traverse($this->Nodes);
     }
     
-    public function GetReturnNodes() {
-        return $this->ReturnNodes;
-    }
-
-    private function Traverse(\PHPParser_NodeTraverserInterface $Traverser, $Reload = true) {
-        $this->OriginalNodes = $Traverser->traverse($this->OriginalNodes);
-        if($Reload) {
-            $this->LoadNodes();
+    /**
+     * Removes all variables that can be removed:
+     * 
+     * function() use ($Unresolvable) {
+     *     $Var = 4 + 5 - $Unresolvable;
+     *     return 3 + $Var;
+     * }
+     * === resolves to ===
+     * function() use ($Unresolvable) {
+     *     4 + 5;
+     *     return 3 + (4 + 5 - $Unresolvable)
+     * }
+     */
+    private function ResolveVariables() {
+        if(!$this->AreVariablesResolved) {
+            $this->Traverse($this->VariableResolver);
+            $this->AreVariablesResolved = true;
         }
     }
     
-    public function ExpandVariables() {
-        $this->Traverse($this->VariableExpander);
-    }
-    
-    public function Simplify() {
-        $this->Traverse($this->NodeSimplifier);
-    }
-    
-    public function GetUnresolvedVariables() {
-        return $this->UnresolvedVariables;
+    public function GetExpressionTree() {
+        $this->ResolveVariables();
+        
+        $Expressions = $this->ParseNodes($this->Nodes);
+        return new ExpressionTree($Expressions);
     }
 
-    public function IsResolved() {
-        return count($this->UnresolvedVariables) === 0;
+    private function Traverse(\PHPParser_NodeTraverserInterface $Traverser) {
+        $this->Nodes = $Traverser->traverse($this->Nodes);
+    }
+
+    private function ParseNodes(array $Nodes) {
+        return array_map(function ($Node) { return $this->ParseNode($Node); }, $Nodes);
     }
     
-    public function ResolveVariables(array $VariableValueMap) {
-        $this->VariableResolverVisiter->SetVariableValueMap($VariableValueMap);
-        $this->Traverse($this->VariableResolver);
-    }
-    
-    private function ParseNodesInternal(array $Nodes) {
-        return array_map(function ($Node) { return $this->ParseNodeInternal($Node); }, $Nodes);
-    }
-    
-    protected function ParseNodeAsExpression(INode $Node) {
-        return $this->ParseNodeInternal($Node->GetOriginalNode());
-    }
-    
-    protected function ParseNodeInternal(\PHPParser_Node $Node) {        
+    private function ParseNode(\PHPParser_Node $Node) {        
         switch (true) {
-            case $Node instanceof PHPParserConstantValueNode:
+            case $Node instanceof PHPParserResolvedValueNode:
                 return $this->ParseResolvedValue($Node->Value);
                 
             case $Node instanceof \PHPParser_Node_Stmt:
@@ -128,7 +95,7 @@ class AST extends ASTBase {
                 
             //Irrelavent node, no call time pass by ref anymore :)
             case $Node instanceof \PHPParser_Node_Arg:
-                return $this->ParseNodeInternal($Node->value);
+                return $this->ParseNode($Node->value);
                 
             default:
                 throw new ASTException(
@@ -150,16 +117,17 @@ class AST extends ASTBase {
     }
     
     final public static function VerifyIndexNode($Node) {
-        if(!($Node instanceof PHPParserConstantValueNode) && $Node !== null) {
+        if(!($Node instanceof PHPParserResolvedValueNode) && $Node !== null) {
             throw $this->DynamicTraversalsAreDisallowed();
         }
         
         return $Node === null ? null : $Node->Value;
     }
     
+    //TODO: Remove restriction
     private function DynamicTraversalsAreDisallowed() {
         return new ASTException(
-                    'Dynamic function calls, method calls, indexers, property accessing are not supported');
+                    'Dynamic variable, function calls, method calls, indexers and property accessing is not supported');
     }
     
     // <editor-fold defaultstate="collapsed" desc="Expression node parsers">
@@ -188,29 +156,28 @@ class AST extends ASTBase {
             case ($Node instanceof \PHPParser_Node_Expr_New):
                 return Expression::Constructor(
                         $this->VerifyNameNode($Node->class),
-                        $this->ParseNodesInternal($Node->args));
+                        $this->ParseNodes($Node->args));
             
             case $Node instanceof \PHPParser_Node_Expr_MethodCall:
                 return Expression::MethodCall(
-                        $this->ParseNodeInternal($Node->var),
+                        $this->ParseNode($Node->var),
                         $this->VerifyNameNode($Node->name),
-                        $this->ParseNodesInternal($Node->args));
+                        $this->ParseNodes($Node->args));
             
             case $Node instanceof \PHPParser_Node_Expr_PropertyFetch:
                 return Expression::Field(
-                        $this->ParseNodeInternal($Node->var),
+                        $this->ParseNode($Node->var),
                         $this->VerifyNameNode($Node->name));
             
             case $Node instanceof \PHPParser_Node_Expr_ArrayDimFetch:
                 return Expression::Index(
-                        $this->ParseNodeInternal($Node->var),
+                        $this->ParseNode($Node->var),
                         $this->VerifyIndexNode($Node->dim));
             
             case $Node instanceof \PHPParser_Node_Expr_StaticCall:
-                return Expression::MethodCall(
-                        Expression::Object($this->VerifyNameNode($Node->class)),
-                        $this->VerifyNameNode($Node->name),
-                        $this->ParseNodesInternal($Node->args));
+                return Expression::FunctionCall(
+                        $this->VerifyNameNode($Node->class) . '::' . $this->VerifyNameNode($Node->name),
+                        $this->ParseNodes($Node->args));
              
             case ($Node instanceof \PHPParser_Node_Expr_Ternary):
                 return $this->ParseTernaryNode($Node);
@@ -221,9 +188,7 @@ class AST extends ASTBase {
                     return Expression::Entity();
                 }
                 else {
-                    throw new ASTException(
-                            'Cannot parse AST with unresolvable variable: $%s',
-                            $Name);
+                    return Expression::UnresolvedVariable($Name);
                 }
                 
             default:
@@ -238,8 +203,8 @@ class AST extends ASTBase {
         $ValueExpressions = [];
         foreach ($Node->items as $Key => $Item) {
             //Keys must match
-            $KeyExpressions[$Key] = $this->ParseNodeInternal($Item->key);
-            $ValueExpressions[$Key] = $this->ParseNodeInternal($Item->value);
+            $KeyExpressions[$Key] = $this->ParseNode($Item->key);
+            $ValueExpressions[$Key] = $this->ParseNode($Item->value);
         }
         return Expression::NewArray($KeyExpressions, $ValueExpressions);
     }
@@ -247,13 +212,13 @@ class AST extends ASTBase {
     private function ParseFunctionCallNode(\PHPParser_Node_Expr_Ternary $Node) {
         if($Node->name instanceof PHPParser_Node_Expr) {
             return Expression::Invocation(
-                    $this->ParseNodeInternal($Node->name),
-                    $this->ParseNodesInternal($Node->args));
+                    $this->ParseNode($Node->name),
+                    $this->ParseNodes($Node->args));
         }
         else {
             return Expression::FunctionCall(
                     $this->VerifyNameNode($Node->name),
-                    $this->ParseNodesInternal($Node->args));
+                    $this->ParseNodes($Node->args));
         }
     }
     
@@ -261,9 +226,9 @@ class AST extends ASTBase {
         //Imply omitted if value
         $If = $Node->if ?: $Node->cond;
         return Expression::Ternary(
-                $this->ParseNodeInternal($Node->cond),
-                $this->ParseNodeInternal($If),
-                $this->ParseNodeInternal($Node->else));
+                $this->ParseNode($Node->cond),
+                $this->ParseNode($If),
+                $this->ParseNode($Node->else));
     }
 
     // </editor-fold>
@@ -273,7 +238,8 @@ class AST extends ASTBase {
     private function ParseStatmentNode(\PHPParser_Node_Stmt $Node) {
         switch (true) {
             case $Node instanceof \PHPParser_Node_Stmt_Return:
-                return $this->ParseExpressionNode($Node->expr);
+                return Expression::ReturnExpression(
+                        $Node->expr !== null ? $this->ParseNode($Node->expr) : null);
             
             default:
                 throw new ASTException(
@@ -308,15 +274,17 @@ class AST extends ASTBase {
         return false;
     }
     
-    
+    /**
+     * @param \PHPParser_Node_Expr $Node
+     * @return O\PropertyExpression
+     */
     private function ParsePropertyNode(\PHPParser_Node_Expr $Node) {
         if($this->EntityMap === null) {
             throw new ASTException(
-                    'Cannot parse property node without setting the entity map',
-                    get_class($Node));
+                    'Cannot parse property node without the entity map');
         }
         
-        $TraversalExpression = $this->ParseNodeInternal($Node);
+        $TraversalExpression = $this->ParseNode($Node);
         
         $ResolvedPropertyExpression = $this->EntityMap->ResolveTraversalExpression($TraversalExpression);
         return $ResolvedPropertyExpression;
@@ -330,25 +298,25 @@ class AST extends ASTBase {
         switch (true) {
             case isset(self::$AssignOperatorsMap[$NodeType]):
                 return Expression::Assign(
-                        $this->ParseNodeInternal($Node->var), 
+                        $this->ParsePropertyNode($Node), 
                         self::$AssignOperatorsMap[$NodeType], 
-                        $this->ParseNodeInternal($Node->expr));
+                        $this->ParseNode($Node->expr));
                 
             case isset(self::$BinaryOperatorsMap[$NodeType]):
                 return Expression::BinaryOperation(
-                        $this->ParseNodeInternal($Node->left), 
+                        $this->ParseNode($Node->left), 
                         self::$BinaryOperatorsMap[$NodeType], 
-                        $this->ParseNodeInternal($Node->right));
+                        $this->ParseNode($Node->right));
                 
             case isset(self::$UnaryOperatorsMap[$NodeType]):
                 return Expression::UnaryOperation( 
                         self::$UnaryOperatorsMap[$NodeType], 
-                        $this->ParseNodeInternal($Node->expr));
+                        $this->ParseNode($Node->expr));
                 
             case isset(self::$CastOperatorMap[$NodeType]):
                 return Expression::Cast(
                         self::$CastOperatorMap[$NodeType], 
-                        $this->ParseNodeInternal($Node->expr));
+                        $this->ParseNode($Node->expr));
                 
             default:
                 return null;

@@ -26,6 +26,30 @@ interface IRequest {
      * @return ICriterion
      */
     public function GetCriterion();
+    
+    /**
+     * Whether or not the criterion contains any group by expressions.
+     * 
+     * return boolean
+     */
+    public function IsGrouped();
+    
+    /**
+     * @return Expression[]
+     */
+    public function GetGroupByExpressions();
+    
+    /**
+     * Whether or not the criterion contains any group by expressions.
+     * 
+     * return boolean
+     */
+    public function IsAggregateConstrained();
+    
+    /**
+     * @return Expression[]
+     */
+    public function GetAggregatePredicateExpressions();
 }
 
 ?>

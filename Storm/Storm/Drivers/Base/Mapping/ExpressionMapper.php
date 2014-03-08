@@ -2,85 +2,110 @@
 
 namespace Storm\Drivers\Base\Mapping;
 
-use \Storm\Core\Mapping\IEntityRelationalMap;
+use \Storm\Core\Mapping;
 use \Storm\Core\Object\Expressions as O;
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Relational\Expressions as RR;
-use \Storm\Drivers\Base\Relational\Expressions\Expression;
-use \Storm\Drivers\Base\Relational\Expressions\Converters\IExpressionConverter;
-use \Storm\Drivers\Base\Relational\Queries\IExpressionOptimizer;
+use \Storm\Core\Relational\Expressions as R;
 
 final class ExpressionMapper {
     /**
-     * @var OperatorMapper 
-     */
-    private $OperatorMapper;
-    /**
-     * @var IExpressionConverter 
-     */
-    private $ExpressionConverter;
-    /**
-     * @var IExpressionOptimizer 
-     */
-    private $ExpressionOptimizer;
+    * @var Expressions\PropertyExpressionResolver
+    */
+    private $PropertyExpressionResolver;
     
-    public function __construct(IExpressionConverter $ExpressionConverter, IExpressionOptimizer $ExpressionOptimizer) {
-        $this->OperatorMapper = new OperatorMapper();
-        $this->ExpressionConverter = $ExpressionConverter;
-        $this->ExpressionOptimizer = $ExpressionOptimizer;
-    }
-
     /**
-     * @return Relational\Expression[]
+     * @var Expressions\IValueMapper
      */
-    final public function MapAll(IEntityRelationalMap $EntityRelationalMap, array $Expressions) {
+    private $ValueMapper;
+    
+    /**
+     * @var Expressions\IArrayMapper
+     */
+    private $ArrayMapper;
+    
+    /**
+     * @var Expressions\IOperationMapper
+     */
+    private $OperationMapper;
+    
+    /**
+     * @var Expressions\IFunctionMapper
+     */
+    private $FunctionMapper;
+    
+    /**
+     * @var Expressions\IObjectMapper
+     */
+    private $ObjectMapper;
+    
+    /**
+     * @var Expressions\IResourceMapper
+     */
+    private $ResourceMapper;
+    
+    /**
+     * @var Expressions\IControlFlowMapper
+     */
+    private $ControlFlowMapper;
+    
+    public function __construct(
+            Expressions\PropertyExpressionResolver $PropertyExpressionResolver,
+            Expressions\IValueMapper $ValueMapper, 
+            Expressions\IArrayMapper $ArrayMapper, 
+            Expressions\IOperationMapper $OperationMapper,
+            Expressions\IFunctionMapper $FunctionMapper, 
+            Expressions\IObjectMapper $ObjectMapper, 
+            Expressions\IResourceMapper $ResourceMapper, 
+            Expressions\IControlFlowMapper $ControlFlowMapper) {
+        $this->PropertyExpressionResolver = $PropertyExpressionResolver;
+        $this->ValueMapper = $ValueMapper;
+        $this->ArrayMapper = $ArrayMapper;
+        $this->OperationMapper = $OperationMapper;
+        $this->FunctionMapper = $FunctionMapper;
+        $this->ObjectMapper = $ObjectMapper;
+        $this->ResourceMapper = $ResourceMapper;
+        $this->ControlFlowMapper = $ControlFlowMapper;
+    }
+    
+    final public function MapExpressions(array $Expressions) {
         foreach($Expressions as $Key => $Expression) {
-            $Expressions[$Key] = $this->Map($EntityRelationalMap, $Expression);
+            $Expressions[$Key] = $this->MapExpression($Expression);
         }
         
         return $Expressions;
     }
     
-    /**
-     * @return Relational\Expression
-     */
-    final public function Map(IEntityRelationalMap $EntityRelationalMap, O\Expression $Expression) {
+    final public function MapExpression(O\Expression $Expression) {
         switch (true) {
-            case $Expression instanceof O\PropertyExpression:
-                return $this->MapProperty($EntityRelationalMap, $Expression);
-            
             case $Expression instanceof O\ValueExpression:
-                return $this->MapConstant($EntityRelationalMap, $Expression);
-                        
-            case $Expression instanceof O\ObjectExpression:
-                return $this->MapObject($EntityRelationalMap, $Expression);
-            
-            case $Expression instanceof O\FieldExpression:
-                return $this->MapPropertyFetch($EntityRelationalMap, $Expression);
-            
-            case $Expression instanceof O\MethodCallExpression:
-                return $this->MapMethodCall($EntityRelationalMap, $Expression);
+                return $this->MapValue($Expression);
+           
+            case $Expression instanceof O\NewExpression:
+                return $this->MapNew($Expression);
             
             case $Expression instanceof O\ArrayExpression:
-                return $this->MapArray($EntityRelationalMap, $Expression);
-            
-            case $Expression instanceof O\AssignmentExpression:
-                return $this->MapAssignment($EntityRelationalMap, $Expression);
-                        
-            case $Expression instanceof O\BinaryOperationExpression:
-                return $this->MapBinaryOperation($EntityRelationalMap, $Expression);
-            
-            case $Expression instanceof O\UnaryOperationExpression:
-                return $this->MapUnaryOperation($EntityRelationalMap, $Expression);
-            
-            case $Expression instanceof O\CastExpression:
-                return $this->MapCast($EntityRelationalMap, $Expression);
+                return $this->MapArray($Expression);
             
             case $Expression instanceof O\FunctionCallExpression:
-                return $this->MapFunctionCall($EntityRelationalMap, $Expression);
+                return $this->MapFunctionCall($Expression);
             
+            case $Expression instanceof O\TraversalExpression:
+                return $this->MapTraversal($Expression);
+            
+            case $Expression instanceof O\BinaryOperationExpression:
+                return $this->MapBinaryOperation($Expression);
+            
+            case $Expression instanceof O\UnaryOperationExpression:
+                return $this->MapUnaryOperation($Expression);
+            
+            case $Expression instanceof O\CastExpression:
+                return $this->MapCast($Expression);
+                
             case $Expression instanceof O\TernaryExpression:
-                return $this->MapTernary($EntityRelationalMap, $Expression);
+                return $this->MapTernary($Expression);
+                
+            case $Expression instanceof O\PropertyExpression:
+                return $this->MapProperty($Expression);
             
             default:
                 throw new Mapping\MappingException(
@@ -88,107 +113,130 @@ final class ExpressionMapper {
                         get_class($Expression));
         }
     }
-        
-    private function MapConstant(IEntityRelationalMap $EntityRelationalMap, O\ValueExpression $Expression) {
-        return $this->ExpressionConverter->MapConstantExpression($Expression->GetValue());
+    
+    private function MapProperty(O\PropertyExpression $Expression) {
+        return $this->PropertyExpressionResolver->MapProperty($Expression);
     }
+    
+    private function MapValue(O\ValueExpression $Expression, O\TraversalExpression $TraversalExpression = null) {
+        $Value = $Expression->GetValue();
         
-    private function MapObject(IEntityRelationalMap $EntityRelationalMap, O\ObjectExpression $Expression) {
-        if(!$Expression->HasInstance()) {
-            throw new Mapping\MappingException(
-                    'Cannot map object expression without a valid object instance.');
-        }
-        return $this->ExpressionConverter->MapObjectExpression(
-                $Expression->GetClassType(), 
-                $Expression->GetInstance());
-    }
-        
-    private function MapPropertyFetch(IEntityRelationalMap $EntityRelationalMap, O\FieldExpression $Expression) {
-        $ObjectExpression = $Expression->GetObjectExpression();
-        return $this->ExpressionConverter->MapPropertyFetchExpression(
-                $Expression->IsStatic() ? 
-                        null : $this->MapExpression($EntityRelationalMap, $ObjectExpression),
-                $Expression->GetClassType(),
-                $Expression->GetName());
-    }
-        
-    private function MapMethodCall(IEntityRelationalMap $EntityRelationalMap, O\MethodCallExpression $Expression) {
-        $ObjectExpression = $Expression->GetObjectExpression();
-        return $this->ExpressionConverter->MapMethodCallExpression(
-                $Expression->IsStatic() ? 
-                        null : $this->MapExpression($EntityRelationalMap, $ObjectExpression)[0],
-                $Expression->GetClassType(),
-                $Expression->GetName(),
-                array_map(function($Expression) use (&$EntityRelationalMap) {
-                    return $this->MapExpression($EntityRelationalMap, $Expression)[0];
-                }, $Expression->GetArgumentExpressions()));
-    }
-        
-    private function MapArray(IEntityRelationalMap $EntityRelationalMap, O\ArrayExpression $Expression) {
-        return Expression::ValueList(array_map(
-                function($Expression) use (&$EntityRelationalMap) {
-                    return $this->MapExpression($EntityRelationalMap, $Expression)[0];
-                }, $Expression->GetValueExpressions()));
-    }
-        
-    private function MapAssignment(IEntityRelationalMap $EntityRelationalMap, O\AssignmentExpression $Expression) {
-        $ColumnExpressions = array_map([Expression::GetType(), 'Column'], 
-                        $EntityRelationalMap->GetMappedPersistColumns($Expression->GetProperty()));
-        $Operator = $this->OperatorMapper->MapAssignmentOperator($Expression->GetOperator());
-        $SetValueExpression = $this->MapExpression($EntityRelationalMap, $Expression->GetRightOperandExpression());
+        switch (true) {
+            case $Value === null:
+                return $this->ValueMapper->MapNull();
+                
+            case is_scalar($Value):
+                return $this->ValueMapper->MapScalar($Value);
+                
+            case is_array($Value):
+                return $this->ArrayMapper->MapArray($Value);
+            
+            case is_object($Value):
+                return $this->ObjectMapper->MapInstance($Value, $TraversalExpression);
+                
+            case is_resource($Value):
+                return $this->ResourceMapper->MapResource($Value);
 
-        return array_map(
-                function ($ColumnExpression) use (&$ExpressionConverter, &$Operator, &$SetValueExpression) {
-                    return $ExpressionMapper->MapAssignmentExpression(
-                            $ColumnExpression, 
-                            $Operator, 
-                            $SetValueExpression);
-                }, $ColumnExpressions); 
+            default:
+                throw new \Storm\Core\Mapping\MappingException('What?! (%s)', var_export($Value, true));
+        }
     }
         
-    private function MapBinaryOperation(IEntityRelationalMap $EntityRelationalMap, O\BinaryOperationExpression $Expression) {
-        return $ExpressionConverter->MapBinaryOperationExpression(
-                $this->MapExpression($EntityRelationalMap, $Expression->GetLeftOperandExpression()), 
-                $this->OperatorMapper->MapBinaryOperator($Expression->GetOperator()), 
-                $this->MapExpression($EntityRelationalMap, $Expression->GetRightOperandExpression())
-                );
+    private function MapTraversal(O\TraversalExpression $TraversalExpression) {
+        $TraversalOriginExpression = $this->GetTraversalOriginExpression($TraversalExpression);
+        
+        switch (true) {
+            case $TraversalOriginExpression instanceof O\ValueExpression:
+                return $this->MapValue($TraversalOriginExpression, $TraversalExpression);
+                
+            case $TraversalOriginExpression instanceof O\NewExpression:
+                return $this->MapNew($TraversalOriginExpression, $TraversalExpression);
+                
+            case $TraversalOriginExpression instanceof O\ArrayExpression:
+                return $this->MapArray($TraversalOriginExpression, $TraversalExpression);
+                
+            case $TraversalOriginExpression instanceof O\FunctionCallExpression:
+                return $this->MapFunctionCall($TraversalOriginExpression, $TraversalExpression);
+             
+            default:
+                throw new Mapping\MappingException(
+                        'Unsupported object traversal origin expression type: %s given',
+                        get_class($TraversalExpression));
+        }
+    }
+    
+    /**
+     * @return O\Expression
+     */
+    private function GetTraversalOriginExpression(O\TraversalExpression $Expression) {
+        while ($Expression instanceof O\TraversalExpression) {
+            $Expression = $Expression->GetValueExpression();
+        }
+        
+        return $Expression;
+    }
+    
+    private function MapNew(O\NewExpression $Expression, O\TraversalExpression $TraversalExpression = null) {
+        $ClassType = $Expression->GetClassType();
+        $MappedArgumentExpressions = $this->MapExpressions($Expression->GetArgumentExpressions());
+        
+        return $this->ObjectMapper->MapNew($ClassType, $MappedArgumentExpressions, $TraversalExpression);
+    }
+    
+    private function MapArray(O\ArrayExpression $Expression, O\TraversalExpression $TraversalExpression = null) {
+        $MappedKeyExpressions = $this->MapExpressions($Expression->GetKeyExpressions());
+        $MappedValueExpressions = $this->MapExpressions($Expression->GetValueExpressions());
+        
+        return $this->ArrayMapper->MapArrayExpression($MappedKeyExpressions, $MappedValueExpressions, $TraversalExpression);
     }
         
-    private function MapUnaryOperation(IEntityRelationalMap $EntityRelationalMap, O\UnaryOperation $Expression) {
-        return $ExpressionConverter->MapUnaryOperationExpression(
-                $this->OperatorMapper->MapUnaryOperator($Expression->GetOperator()), 
-                $this->MapExpression($EntityRelationalMap, $Expression->GetOperandExpression())
-                );
+    private function MapFunctionCall(O\FunctionCallExpression $Expression, O\TraversalExpression $TraversalExpression = null) {
+        $FunctionName = $Expression->GetName();
+        $MappedArgumentExpressions = $this->MapExpressions($Expression->GetArgumentExpressions());
+        
+        return $this->FunctionMapper->MapFunctionCall($FunctionName, $MappedArgumentExpressions, $TraversalExpression);
     }
         
-    private function MapCast(IEntityRelationalMap $EntityRelationalMap, O\CastExpression $Expression) {
-        return $ExpressionConverter->MapCast(
-                $this->OperatorMapper->MapCastOperator($Expression->GetCastType()),
-                $this->MapExpression($EntityRelationalMap, $Expression->GetCastValueExpression())
-                );
+    private function MapBinaryOperation(O\BinaryOperationExpression $Expression) {
+        $MappedLeftOperandExpression = $this->MapExpression($Expression->GetLeftOperandExpression());
+        $Operator = $Expression->GetOperator();
+        $MappedRightOperandExpression = $this->MapExpression($Expression->GetLeftOperandExpression());
+        
+        
+        return $this->OperationMapper->MapBinary(
+                $MappedLeftOperandExpression, 
+                $Operator, 
+                $MappedRightOperandExpression);
     }
         
-    private function MapFunctionCall(IEntityRelationalMap $EntityRelationalMap, O\FunctionCallExpression $Expression) {
-        return $ExpressionConverter->MapFunctionCall(
-                $Expression->GetName(),
-                array_map(function($Expression) use (&$EntityRelationalMap) {
-                    return $this->MapExpression($EntityRelationalMap, $Expression);
-                }, $Expression->GetArgumentExpressions())
-                );
+    private function MapUnaryOperation(O\UnaryOperationExpression $Expression) {
+        $Operator = $Expression->GetOperator();
+        $MappedOperandExpression = $this->MapExpression($Expression->GetOperandExpression());
+        
+        
+        return $this->OperationMapper->MapUnary(
+                $Operator, 
+                $MappedOperandExpression);
     }
         
-    private function MapTernary(IEntityRelationalMap $EntityRelationalMap, O\TernaryExpression $Expression) {
-        return $ExpressionConverter->MapIfExpression(
-                $this->MapExpression($EntityRelationalMap, $Expression->GetConditionExpression()),
-                $this->MapExpression($EntityRelationalMap, $Expression->GetIfTrueExpression()),
-                $this->MapExpression($EntityRelationalMap, $Expression->GetIfFalseExpression())
-                );
+    private function MapCast(O\CastExpression $Expression) {
+        $CastType = $Expression->GetCastType();
+        $MappedCastValueExpression = $this->MapExpression($Expression->GetCastValueExpression());
+        
+        return $this->OperationMapper->MapCast(
+                $CastType, 
+                $MappedCastValueExpression);
     }
         
-    private function MapPropertyExpression(IEntityRelationalMap $EntityRelationalMap, O\PropertyExpression $Expression) {
-        return array_map(
-            [Expression::GetType(), 'ReviveColumn'], 
-            $EntityRelationalMap->GetMappedReviveColumns($Expression->GetProperty()));
+    private function MapTernary(O\TernaryExpression $Expression) {
+        $MappedConditionExpression = $this->MapExpression($Expression->GetConditionExpression());
+        $MappedIfTrueExpression = $this->MapExpression($Expression->GetIfTrueExpression());
+        $MappedIfFalseExpression = $this->MapExpression($Expression->GetIfFalseExpression());
+        
+        return $this->ControlFlowMapper->MapTernary(
+                $MappedConditionExpression, 
+                $MappedIfTrueExpression, 
+                $MappedIfFalseExpression);
     }
 }
 

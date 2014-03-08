@@ -50,16 +50,6 @@ interface IEntityPropertyToOneRelationMapping extends IRelationshipPropertyRelat
      * @return void
      */
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, Relational\RelationshipChange $RelationshipChange);
-    
-    /**
-     * @return Relational\Expression[]
-     */
-    public function MapAssignment(Relational\Criterion $Criterion, Expressions\Expression $AssignmentValueExpression);
-    
-    /**
-     * @return Relational\Expression[]
-     */
-    public function MapBinary(Relational\Criterion $Criterion, Expressions\Expression $OperandValueExpression);
 }
 
 ?>

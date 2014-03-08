@@ -3,9 +3,9 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
-use \Storm\Api\Base\FunctionToASTConverter;
 use \Storm\Drivers\Fluent\Object\Request;
-use \Storm\Drivers\Fluent\Object\Functional;
+use \Storm\Core\Object\Expressions\ExpressionTree;
+use \Storm\Drivers\Fluent\Object\IFunctionToExpressionTreeConverter;
 
 /**
  * The RequestBuilder provides a fluent interface for building requests
@@ -14,12 +14,15 @@ use \Storm\Drivers\Fluent\Object\Functional;
  */
 class RequestBuilder extends CriterionBuilder {
     private $Properties;
+    private $GroupByExpresssionTrees = [];
+    private $AggregatePredicateExpressionTrees = [];
+    private $Properties;
     private $IsSingleEntity;
     
     public function __construct(
             Object\IEntityMap $EntityMap, 
-            FunctionToASTConverter $FunctionToASTConverter) {
-        parent::__construct($EntityMap, $FunctionToASTConverter);
+            IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
+        parent::__construct($EntityMap, $FunctionToExpressionTreeConverter);
         
         $this->EntityMap = $EntityMap;
         $this->Properties = $this->EntityMap->GetProperties();
@@ -35,13 +38,15 @@ class RequestBuilder extends CriterionBuilder {
         return new Request(
             $this->EntityMap, 
             $this->Properties, 
+            $this->GroupByExpresssionTrees,
+            $this->AggregatePredicateExpressionTrees,
             $this->IsSingleEntity, 
             $this->BuildCriterion());
     }
     
     /**
      * Sets the request to return only the first entity or null if 
-     * none exists.
+     * it does not exists.
      * 
      * @return RequestBuilder
      */
@@ -60,6 +65,42 @@ class RequestBuilder extends CriterionBuilder {
     public function AsArray() {  
         $this->IsSingleEntity = false;
         
+        return $this;
+    }
+        
+    /**
+     * Specifies the function to use as grouping for the criterion.
+     * 
+     * Example expression closure:
+     * <code>
+     * function (Car $Car) {
+     *     return $Car->GetBrand();
+     * }
+     * </code>
+     * 
+     * @param callable $Expression The expression function
+     * @return RequestBuilder
+     */
+    final public function GroupBy(callable $Expression) {
+        $this->GroupByExpresssionTrees[] = $this->FunctionToExpressionTree($Expression);        
+        return $this;
+    }
+        
+    /**
+     * Specifies a function to parse as the predicate for the groups.
+     * 
+     * Example expression closure:
+     * <code>
+     * function (Car $Car) {
+     *     return max($Car->GetPrice()) < 50000;
+     * }
+     * </code>
+     * 
+     * @param callable $Expression The expression function
+     * @return RequestBuilder
+     */
+    final public function Having(callable $Expression) {
+        $this->AggregatePredicateExpressionTrees[] = $this->FunctionToExpressionTree($Expression);        
         return $this;
     }
 }

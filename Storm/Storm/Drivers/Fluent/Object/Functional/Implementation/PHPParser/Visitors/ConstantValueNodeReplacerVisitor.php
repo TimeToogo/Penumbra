@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser\Visitors;
 
-use \Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser\PHPParserConstantValueNode;
+use \Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser\PHPParserResolvedValueNode;
 use \Storm\Drivers\Fluent\Object\Functional\Implementation\PHPParser\AST;
 
 class ConstantValueNodeReplacerVisitor extends \PHPParser_NodeVisitorAbstract {
@@ -12,13 +12,13 @@ class ConstantValueNodeReplacerVisitor extends \PHPParser_NodeVisitorAbstract {
         $Value = $this->GetConstantValue($Node, $IsConstant);
         
         if($IsConstant) {
-            return new PHPParserConstantValueNode($Value);
+            return new PHPParserResolvedValueNode($Value);
         }
     }
     
     private function GetConstantValue(\PHPParser_Node $Node, &$IsConstant) {
         switch (true) {
-            case $Node instanceof PHPParserConstantValueNode:
+            case $Node instanceof PHPParserResolvedValueNode:
                 return $Node->Value;
             
             case $Node instanceof \PHPParser_Node_Scalar_DNumber:
