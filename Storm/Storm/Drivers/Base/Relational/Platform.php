@@ -112,13 +112,30 @@ class Platform implements IPlatform {
         return $this->DatabaseSyncer->Sync($this->Connection, $Database);
     }
     
-    final public function Select(Core\Relational\Select $Select) {
+    final public function LoadResultSet(Core\Relational\ResultSetSelect $Select) {
         $this->VerifyConnection(__METHOD__);
         
         $QueryBuilder = $this->Connection->QueryBuilder();
         $this->QueryCompiler->AppendSelect($QueryBuilder, $Select);
         
         return $QueryBuilder->Build()->Execute()->FetchAll();
+    }
+    
+    final public function LoadValue(Core\Relational\ValueSelect $Select) {
+        $this->VerifyConnection(__METHOD__);
+        
+        $QueryBuilder = $this->Connection->QueryBuilder();
+        $this->QueryCompiler->AppendSelect($QueryBuilder, $Select);
+        
+        $SelectType = $Select->GetSelectType();
+        $Value = $QueryBuilder->Build()->Execute()->FetchValue();
+        
+        if($SelectType === Core\Relational\SelectType::Count) {
+            return (int)$Value;
+        }
+        else {
+            return (bool)$Value;
+        }
     }
 
     final public function Commit(

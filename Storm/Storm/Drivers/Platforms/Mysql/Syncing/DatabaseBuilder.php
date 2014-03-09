@@ -19,7 +19,7 @@ class DatabaseBuilder implements IDatabaseBuilder {
         
         $Tables = $this->BuildTables($Connection, $DatabaseName);
         
-        return new Relational\Database(new Null\NullPlatform(), $Tables);
+        return new Relational\Database($Tables);
     }
     
     // <editor-fold defaultstate="collapsed" desc="Table Builders">

@@ -12,13 +12,13 @@ class ForeignKeyPredicateExpression extends CompoundBooleanExpression {
         
         $ConstraintExpressions = [];
         
-        foreach($ReferencedColumnMap as $PrimaryColumn) {
-            $ForeignColumn = $ReferencedColumnMap[$PrimaryColumn];
+        foreach($ReferencedColumnMap as $ParentColumn) {
+            $ReferencedColumn = $ReferencedColumnMap[$ParentColumn];
             
             $ConstraintExpressions[] = Expression::BinaryOperation(
-                            Expression::Column($PrimaryColumn), 
+                            Expression::Column($ParentColumn), 
                             Binary::Equality,
-                            Expression::Column($ForeignColumn));
+                            Expression::Column($ReferencedColumn));
             
         }
         

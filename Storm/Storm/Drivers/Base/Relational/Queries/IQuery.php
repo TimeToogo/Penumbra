@@ -25,6 +25,11 @@ interface IQuery {
      * @return array[]
      */
     public function FetchAll();
+    
+    /**
+     * @return mixed
+     */
+    public function FetchValue();
 }
 
 ?>

@@ -12,7 +12,7 @@ interface ICollectionLoading {
     public function AddToRelationalRequest(
             Mapping\IEntityRelationalMap $EntityRelationalMap,
             Relational\IToManyRelation $ToManyRelation,
-            Relational\Select $RelationalRequest);
+            Relational\ResultSetSelect $Select);
     
     public function Load(
             Mapping\IEntityRelationalMap $EntityRelationalMap,

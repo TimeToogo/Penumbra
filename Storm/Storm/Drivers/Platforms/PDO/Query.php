@@ -45,6 +45,10 @@ class Query implements Queries\IQuery {
         return $this->Statement->fetch(\PDO::FETCH_ASSOC);
     }
     
+    public function FetchValue() {
+        return $this->Statement->fetchColumn();
+    }
+    
     private function BindAll() {
         foreach($this->Bindings->Get() as $ParameterKey => $Binding) {
             //PDO positional parameters are one based

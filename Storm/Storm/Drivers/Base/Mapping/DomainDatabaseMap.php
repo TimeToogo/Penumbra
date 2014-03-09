@@ -30,11 +30,12 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
      * @param IRequest $ObjectRequest The object request
      * @return Relational\Select The equivalent relational select
      */
-    final protected function MapRequest(Object\IRequest $ObjectRequest) {
+    final protected function MapRequest(Object\IRequest $ObjectRequest, $SelectType) {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped();
         
-        $RelationalRequest = new Relational\Select($this->GetRelationalCriterion($ObjectRequest->GetEntityType()));
-        $EntityRelationalMap->MapPropetiesToRelationalRequest($RelationalRequest, $ObjectRequest->GetProperties());
+        $RelationalRequest = Relational\Select::OfType($SelectType, $this->GetRelationalCriterion($ObjectRequest->GetEntityType()));
+        
+        $EntityRelationalMap->MapPropetiesToSelect($RelationalRequest, $ObjectRequest->GetProperties());
         
         $this->MapCriterion($ObjectRequest->GetCriterion(), $RelationalRequest->GetCriterion());
         

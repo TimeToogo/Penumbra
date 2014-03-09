@@ -43,10 +43,11 @@ interface IRelation {
      * If parent rows are specified the request will be constrained such
      * that it only loads the related rows of the parents.
      * 
+     * @param $Type The select type
      * @param ResultRows[]|null $ParentRows The parent rows
      * @return Select
      */
-    public function RelationSelect(array $ParentRows = null);
+    public function RelationSelect($Type, array $ParentRows = null);
     
     /**
      * Adds the columns required by the relation to the parent request.

@@ -3,7 +3,7 @@
 namespace Storm\Core\Object\Expressions\Operators;
 
 /**
- * The class containing php level binary operators
+ * The class containing php binary operators
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
@@ -28,7 +28,7 @@ final class Binary {
     const Equality = '==';
     const Identity = '===';
     const Inequality = '!=';
-    const NonIdentity = '!==';
+    const NotIdentitical = '!==';
     const LessThan = '<';
     const LessThanOrEqualTo = '<=';
     const GreaterThan = '>';

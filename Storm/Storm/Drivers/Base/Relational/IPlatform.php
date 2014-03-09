@@ -76,9 +76,14 @@ interface IPlatform {
     public function Sync(Database $Database);
     
     /**
-     * @return ResultRow[]
+     * @return array[]
      */
-    public function Select(Core\Relational\Select $Select);
+    public function LoadResultSet(Core\Relational\ResultSetSelect $Select);
+    
+    /**
+     * @return int|bool
+     */
+    public function LoadValue(Core\Relational\ValueSelect $Select);
     
     public function Commit(
             array $TablesOrderedByPersistingDependency,

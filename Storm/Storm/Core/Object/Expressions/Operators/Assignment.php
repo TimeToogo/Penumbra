@@ -3,7 +3,7 @@
 namespace Storm\Core\Object\Expressions\Operators;
 
 /**
- * The class containing php level assignment operators
+ * The class containing php assignment operators
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */

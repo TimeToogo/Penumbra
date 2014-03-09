@@ -3,9 +3,9 @@
 namespace Storm\Api\Base\Fluent;
 
 use \Storm\Core\Object;
-use \Storm\Drivers\Fluent\Object\Criterion;
-use \Storm\Core\Object\Expressions\ExpressionTree;
-use \Storm\Drivers\Fluent\Object\IFunctionToExpressionTreeConverter;
+use \Storm\Drivers\Pinq\Object\Criterion;
+use \Storm\Drivers\Pinq\Object\Functional\ExpressionTree;
+use \Storm\Drivers\Pinq\Object\IFunctionToExpressionTreeConverter;
 
 /**
  * The CriterionBuilder provides a fluent interface for building criteria
@@ -14,6 +14,9 @@ use \Storm\Drivers\Fluent\Object\IFunctionToExpressionTreeConverter;
  */
 class CriterionBuilder {
     protected $EntityType;
+    /**
+     * @var Object\IEntityMap
+     */
     protected $EntityMap;
     private $FunctionToExpressionTreeConverter;
     private $Criterion;
@@ -60,7 +63,7 @@ class CriterionBuilder {
      * </code>
      * 
      * @param callable $Predicate The predicate function
-     * @return CriterionBuilder 
+     * @return static 
      */
     final public function Where(callable $Predicate) {
         $this->Criterion->AddPredicateExpression($this->FunctionToExpressionTree($Predicate));        
@@ -78,7 +81,7 @@ class CriterionBuilder {
      * </code>
      * 
      * @param callable $Expression The expression closure
-     * @return CriterionBuilder
+     * @return static
      */
     final public function OrderBy(callable $Expression) {
         $this->Criterion->AddOrderByExpression($this->FunctionToExpressionTree($Expression), true);        
@@ -96,7 +99,7 @@ class CriterionBuilder {
      * </code>
      * 
      * @param callable $Expression The expression closure
-     * @return CriterionBuilder
+     * @return static
      */
     final public function OrderByDescending(callable $Expression) {
         $this->Criterion->AddOrderByExpression($this->FunctionToExpressionTree($Expression), false);        
@@ -107,7 +110,7 @@ class CriterionBuilder {
      * Specifies the amount of entities to skip.
      * 
      * @param int $Amount The amount of entities to skip
-     * @return CriterionBuilder
+     * @return static
      */
     final public function Skip($Amount) {
         $this->Criterion->SetRangeOffset($Amount);        
@@ -119,7 +122,7 @@ class CriterionBuilder {
      * Specifies the amount of entities to retrieve. Pass null to remove limit.
      * 
      * @param int|null $Amount The amount of entities to retrieve
-     * @return CriterionBuilder
+     * @return static
      */
     final public function Limit($Amount) {
         $this->Criterion->SetRangeAmount($Amount);        

@@ -8,48 +8,51 @@ use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
 class StandardQueryCompiler implements Queries\IQueryCompiler {
     
-    protected function DeleteQuery(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
-        $QueryBuilder->AppendIdentifiers('DELETE # ', array_keys($Criterion->GetAllTables()), ',');
-        
-        $this->AppendCriterion($QueryBuilder, $Criterion);
-    }
-    
-    protected function DeletePrimaryKeysQuery(QueryBuilder $QueryBuilder, Table $Table, array $PrimaryKeys) {
-        $TableName = $Table->GetName();        
-        $DerivedTableName = $TableName . 'PrimaryKeys';
-        $TransformedDerivedTableName = $TableName . 'PersistencePrimaryKeys';
-        
-        $PrimaryKeysColumns = $Table->GetPrimaryKeyColumns();
-        $PrimaryKeyNames = array_keys($PrimaryKeysColumns);
-        
-        $QueryBuilder->AppendIdentifier('DELETE # FROM # INNER JOIN (', [$TableName]);        
-        $this->StandardPersister->AppendDataAsInlineTable(
-                $QueryBuilder,
-                $PrimaryKeysColumns, 
-                $DerivedTableName, 
-                $PrimaryKeys);
-        $QueryBuilder->AppendIdentifier(') #', [$TransformedDerivedTableName]);   
-        
-        $QueryBuilder->Append(' ON ');
-        
-        foreach($QueryBuilder->Delimit($PrimaryKeyNames, ' AND ') as $PrimaryKeyName) {
-            $QueryBuilder->AppendIdentifier('# = ', [$TableName, $PrimaryKeyName]);
-            $QueryBuilder->AppendIdentifier('#', [$TransformedDerivedTableName, $PrimaryKeyName]);
-        }
-
-    }
-    
     public function AppendSelect(QueryBuilder $QueryBuilder, Relational\Select $Select) {
-        $Criterion = $Select->GetCriterion();
-        
+        switch ($Select->GetSelectType()) {
+            
+            case Relational\SelectType::ResultSet:
+                return $this->AppendResultSetSelect($QueryBuilder, $Select);
+            
+            case Relational\SelectType::Count:
+                return $this->AppendCountSelect($QueryBuilder, $Select);
+            
+            case Relational\SelectType::Exists:
+                return $this->AppendExistsSelect($QueryBuilder, $Select);
+            
+            default:
+                throw new \Storm\Drivers\Base\Relational\PlatformException(
+                        'Cannot compile select of type %s: unknown select type %s',
+                        get_class($Select),
+                        $Select->GetSelectType());
+        }
+    }
+    
+    protected function AppendResultSetSelect(QueryBuilder $QueryBuilder, Relational\ResultSetSelect $ResultSetSelect) {
         $QueryBuilder->Append('SELECT ');
-        foreach($QueryBuilder->Delimit($Select->GetColumns(), ',') as $Column) {
+        foreach($QueryBuilder->Delimit($ResultSetSelect->GetColumns(), ',') as $Column) {
             $QueryBuilder->AppendExpression(Expression::ReviveColumn($Column));
             $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetIdentifier()]);
         }
         
+        $this->AppendSelectClauses($QueryBuilder, $ResultSetSelect);
+    }
+    
+    protected function AppendCountSelect(QueryBuilder $QueryBuilder, Relational\ValueSelect $ValueSelect) {
+        $QueryBuilder->Append('SELECT COUNT(*)');
+        
+        $this->AppendSelectClauses($QueryBuilder, $ValueSelect);
+    }
+    
+    protected function AppendExistsSelect(QueryBuilder $QueryBuilder, Relational\ValueSelect $ValueSelect) {
+        $QueryBuilder->Append('SELECT EXISTS (SELECT *');
+        $this->AppendSelectClauses($QueryBuilder, $ValueSelect);
+        $QueryBuilder->Append(')');
+    }
+    
+    protected function AppendSelectClauses(QueryBuilder $QueryBuilder, Relational\Select $Select) {
         $QueryBuilder->Append(' FROM ');
-        $QueryBuilder->AppendTableDefinition($Criterion);
+        $QueryBuilder->AppendTableDefinition($Select->GetCriterion());
         $this->AppendSelectCriterion($QueryBuilder, $Select);
     }
     

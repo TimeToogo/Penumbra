@@ -10,8 +10,8 @@ class EagerEntityLoading extends EntityLoading {
     public function AddToRelationalRequest(
             Mapping\IEntityRelationalMap $EntityRelationalMap, 
             Relational\IToOneRelation $ToOneRelation, 
-            Relational\Select $RelationalRequest) {
-        $this->MapEntityToRelationalRequest($EntityRelationalMap, $RelationalRequest);
+            Relational\ResultSetSelect $Select) {
+        $this->MapEntityToRelationalRequest($EntityRelationalMap, $Select);
     }
 
     public function Load(

@@ -6,18 +6,18 @@ namespace Storm\Core\Object\Expressions;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class FunctionCallExpression extends Expression {
-    private $Name;
+    private $NameExpression;
     private $ArgumentExpressions;
-    public function __construct($Name, array $ArgumentExpressions = []) {
-        $this->Name = $Name;
+    public function __construct(Expression $NameExpression, array $ArgumentExpressions = []) {
+        $this->NameExpression = $NameExpression;
         $this->ArgumentExpressions = $ArgumentExpressions;
     }
     
     /**
-     * @return string
+     * @return Expression
      */
-    public function GetName() {
-        return $this->Name;
+    public function GetNameExpression() {
+        return $this->NameExpression;
     }
     
     /**
@@ -34,20 +34,20 @@ class FunctionCallExpression extends Expression {
     public function Simplify() {
         //TODO: Add a whitelist of deteministic and side-effect free function.
         return $this->Update(
-                $this->Name,
+                $this->NameExpression,
                 self::SimplifyAll($this->ArgumentExpressions));
     }
     
     /**
      * @return self
      */
-    public function Update($Name, array $ArgumentExpressions = []) {
-        if($this->Name === $Name
+    public function Update(Expression $NameExpression, array $ArgumentExpressions = []) {
+        if($this->NameExpression === $NameExpression
                 && $this->ArgumentExpressions === $ArgumentExpressions) {
             return $this;
         }
         
-        return new self($Name, $ArgumentExpressions);
+        return new self($NameExpression, $ArgumentExpressions);
     }
 }
 

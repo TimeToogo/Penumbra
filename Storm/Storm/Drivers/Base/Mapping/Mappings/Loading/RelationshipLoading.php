@@ -11,8 +11,8 @@ abstract class RelationshipLoading {
     public function AddToRelationalRequest(
             Mapping\IEntityRelationalMap $EntityRelationalMap, 
             Relational\IToOneRelation $ToOneRelation, 
-            Relational\Select $RelationalRequest) {
-        $RelationalRequest->AddColumns($ToOneRelation->GetRelationalParentColumns());
+            Relational\ResultSetSelect $Select) {
+        $Select->AddColumns($ToOneRelation->GetRelationalParentColumns());
     }    
     
     final protected function LoadRelatedRows(
@@ -20,22 +20,22 @@ abstract class RelationshipLoading {
             Relational\Database $Database, 
             array $ParentRows, 
             Object\RevivalData $AlreadyKnownRevivalData = null) {
-        $RelatedRowRequest = $Relation->RelationSelect($ParentRows);
+        $RelatedRowRequest = $Relation->RelationSelect(Relational\SelectType::ResultSet, $ParentRows);
         $this->MapEntityToRelationalRequest($RelatedRowRequest, $AlreadyKnownRevivalData);
         return $Database->Load($RelatedRowRequest);
     }
     
     final protected function MapEntityToRelationalRequest(
             Mapping\IEntityRelationalMap $EntityRelationalMap,
-            Relational\Select $RelationalRequest, 
+            Relational\ResultSetSelect $Select, 
             Object\RevivalData $AlreadyKnownRevivalData = null) {
         if($AlreadyKnownRevivalData !== null) {
             $AlreadyKnownPropertyIdentifiers = array_keys($AlreadyKnownRevivalData->GetPropertyData());
             $AlreadyKnownProperties = $AlreadyKnownRevivalData->GetProperties($AlreadyKnownPropertyIdentifiers);
-            $EntityRelationalMap->MapEntityToRelationalRequest($RelationalRequest, $AlreadyKnownProperties);
+            $EntityRelationalMap->MapEntityToSelect($Select, $AlreadyKnownProperties);
         }
         else {
-            $EntityRelationalMap->MapEntityToRelationalRequest($RelationalRequest);
+            $EntityRelationalMap->MapEntityToSelect($Select);
         }
     }
 }

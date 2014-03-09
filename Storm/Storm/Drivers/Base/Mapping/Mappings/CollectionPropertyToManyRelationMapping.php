@@ -54,11 +54,11 @@ class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelati
         $this->Loading = $Loading;
     }
     
-    final public function AddToRelationalSelect(Relational\Select $RelationalRequest) {
+    final public function AddToRelationalSelect(Relational\ResultSetSelect $Select) {
         return $this->Loading->AddToRelationalRequest(
                 $this->EntityRelationalMap, 
                 $this->ToManyRelation, 
-                $RelationalRequest);
+                $Select);
     }
     
     final public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {

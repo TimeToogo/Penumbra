@@ -3,7 +3,7 @@
 namespace Storm\Core\Object\Expressions\Operators;
 
 /**
- * The class containing php level unary operators
+ * The class containing php unary operators
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */

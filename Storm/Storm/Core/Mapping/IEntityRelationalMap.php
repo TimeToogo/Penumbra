@@ -118,7 +118,7 @@ interface IEntityRelationalMap {
     public function ResultRow($ColumnData = []);
     
     /**
-     * Get the criterion that must be included for every request/procedure.
+     * Get the criterion that must be included for every select/update.
      * 
      * @param Relational\Database $Database The database of the criterion
      * @return Relational\Criterion
@@ -186,24 +186,23 @@ interface IEntityRelationalMap {
     /**
      * @access private
      * 
-     * Maps an entity such that its all its properties will be loaded in the given relational request.
+     * Maps an entity such that its all its properties will be loaded in the given relational select.
      * 
-     * @param Relational\Select $RelationalRequest The request to add to
+     * @param Relational\ResultSetSelect $Select The select to add to
      * @return void
      */
-    public function MapEntityToRelationalRequest(Relational\Select $RelationalRequest, array $AlreadyKnownProperties = []);
+    public function MapEntityToSelect(Relational\ResultSetSelect $Select, array $AlreadyKnownProperties = []);
     
     /**
      * @access private
      * 
-     * Maps the supplied properties such that they will be loaded in the given relational request.
+     * Maps the supplied properties such that they will be loaded in the given relational select.
      * 
-     * @param \Storm\Core\Mapping\IEntityRelationalMap $EntityRelationalMap The relational map of the entity
-     * @param \Storm\Core\Relational\Select $RelationalRequest The request to add to
+     * @param Relational\ResultSetSelect $Select The select to add to
      * @param array|null $Properties The array of properties to map or null if all properties should be mapped
      * @return void
      */
-    public function MapPropetiesToRelationalRequest(Relational\Select $RelationalRequest, array $Properties = null);
+    public function MapPropetiesToSelect(Relational\ResultSetSelect $Select, array $Properties = null);
     
     /**
      * @access private

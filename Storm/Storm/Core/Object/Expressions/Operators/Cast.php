@@ -3,7 +3,7 @@
 namespace Storm\Core\Object\Expressions\Operators;
 
 /**
- * The class containing php level cast operators
+ * The class containing php cast operators
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */

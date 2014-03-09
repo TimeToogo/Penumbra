@@ -29,6 +29,7 @@ class Request implements Object\IRequest {
             $EntityOrType = get_class($EntityOrType);
         }
         $this->EntityType = $EntityOrType;
+        
         foreach($Properties as $Property) {
             $this->AddProperty($Property);
         }
@@ -52,22 +53,6 @@ class Request implements Object\IRequest {
     
     final protected function AddProperty(Object\IProperty $Property) {
         $this->Properties[$Property->GetIdentifier()] = $Property;
-    }
-    
-    final protected function AddGroupByExpression(Expression $GroupByExpression) {
-        $this->GroupByExpressions[] = $GroupByExpression;
-    }
-    
-    final protected function AddAggregatePredicateExpression(Expression $AggregatePredicateExpression) {
-        if(count($this->GroupByExpressions) === 0) {
-            throw new Object\ObjectException(
-                    'Cannot have any aggregate predicate expression when no group by expressions are specified');
-        }
-        $this->AggregatePredicateExpressions[] = $AggregatePredicateExpression;
-    }
-    
-    final public function IsSingleEntity() {
-        return $this->IsSingleEntity;
     }
 
     final public function GetEntityType() {
@@ -97,7 +82,18 @@ class Request implements Object\IRequest {
     final public function GetAggregatePredicateExpressions() {
         return $this->AggregatePredicateExpressions;
     }
-
+    
+    final protected function AddGroupByExpression(Expression $GroupByExpression) {
+        $this->GroupByExpressions[] = $GroupByExpression;
+    }
+    
+    final protected function AddAggregatePredicateExpression(Expression $AggregatePredicateExpression) {
+        if(count($this->GroupByExpressions) === 0) {
+            throw new Object\ObjectException(
+                    'Cannot have any aggregate predicate expression when no group by expressions are specified');
+        }
+        $this->AggregatePredicateExpressions[] = $AggregatePredicateExpression;
+    }
 }
 
 ?>

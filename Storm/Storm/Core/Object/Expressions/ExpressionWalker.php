@@ -13,17 +13,23 @@ class ExpressionWalker {
         return $Expression === null ? null : $Expression->Traverse($this);
     }
     
+    /**
+     * @return Expression|null
+     */
     final public function Walk(Expression $Expression = null) {
         return $Expression === null ? null : $Expression->Traverse($this);
     }
     
+    /**
+     * @return Expression[]
+     */
     final public function WalkAll(array $Expressions) {
-        $VisitedExpressions = [];
+        $WalkedExpressions = [];
         foreach ($Expressions as $Key => $Expression) {
-            $VisitedExpressions[$Key] = $Expression->Traverse($Expression);
+            $WalkedExpressions[$Key] = $Expression->Traverse($Expression);
         }
         
-        return $VisitedExpressions;
+        return $WalkedExpressions;
     }
     
     public function WalkArray(ArrayExpression $Expression) {
@@ -61,19 +67,19 @@ class ExpressionWalker {
     public function WalkField(FieldExpression $Expression) {
         return $Expression->Update(
                 $this->Walk($Expression->GetValueExpression()),
-                $this->Walk($Expression->GetName()));
+                $this->Walk($Expression->GetNameExpression()));
     }
     
     public function WalkMethodCall(MethodCallExpression $Expression) {
         return $Expression->Update(
                 $this->WalkAll($Expression->GetArgumentExpressions()),
-                $this->Walk($Expression->GetName()));
+                $this->Walk($Expression->GetNameExpression()));
     }
     
     public function WalkIndex(IndexExpression $Expression) {
         return $Expression->Update(
                 $this->Walk($Expression->GetValueExpression()),
-                $this->Walk($Expression->GetIndex()));
+                $this->Walk($Expression->GetIndexExpression()));
     }
     
     public function WalkInvocation(InvocationExpression $Expression) {
@@ -84,7 +90,7 @@ class ExpressionWalker {
     
     public function WalkFunctionCall(FunctionCallExpression $Expression) {
         return $Expression->Update(
-                $this->Walk($Expression->GetName()),
+                $this->Walk($Expression->GetNameExpression()),
                 $this->WalkAll($Expression->GetArgumentExpressions()));
     }
     
@@ -117,7 +123,8 @@ class ExpressionWalker {
     }
     
     public function WalkUnresolvedValue(UnresolvedVariableExpression $Expression) {
-        return $Expression;
+        return $Expression->Update(
+                $this->Walk($Expression->GetNameExpression()));
     }
     
     public function WalkValue(ValueExpression $Expression) {

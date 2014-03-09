@@ -140,7 +140,8 @@ class One implements \StormExamples\IStormExample {
         $Outside->sub(new \DateInterval('P1D'));
 
         $Array = [1,2,3,4,5,6];
-        $RevivedBlog = $BlogRepository->Load($BlogRepository->Request()
+        $RevivedBlog = 
+                $BlogRepository->Request()
                 ->Where(function ($Blog) use($Id, $Outside, $Array) {
                     $Foo = $Id;
                     $Sandy = 40;
@@ -162,7 +163,7 @@ class One implements \StormExamples\IStormExample {
                 ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
                 ->OrderByDescending(function ($Blog) { return $Blog->Id; })
                 ->GroupBy(function ($Blog) { return $Blog->Id; })
-                ->First());
+                ->First();
         
         if($RevivedBlog === null) {
             throw new \Exception("Entity with id: $Id does not exist");
@@ -191,12 +192,11 @@ class One implements \StormExamples\IStormExample {
     }
     
     private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $Procedure = $BlogRepository->Procedure([$this, 'UpdateBlog'])
+        $BlogRepository->Procedure([$this, 'UpdateBlog'])
                 ->Where(function ($Blog) use ($Id) {
                     return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
-                }); 
-
-        $BlogRepository->Execute($Procedure);
+                })
+                ->Execute();
 
         $BlogRepository->SaveChanges();
     }

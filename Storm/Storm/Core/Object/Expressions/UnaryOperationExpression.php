@@ -47,17 +47,18 @@ class UnaryOperationExpression extends Expression {
     private static function UnaryOperation($Operator, $Value) {
         if(self::$UnaryOperations === null) {
             self::$UnaryOperations = [
-                Operators\Unary::BitwiseNot => function ($I) { return ~$I; },
-                Operators\Unary::Not => function ($I) { return !$I; },
-                Operators\Unary::Increment => function ($I) { return $I++; },
-                Operators\Unary::Decrement => function ($I) { return $I--; },
-                Operators\Unary::PreIncrement => function ($I) { return ++$I; },
-                Operators\Unary::PreDecrement => function ($I) { return --$I; },
-                Operators\Unary::Negation => function ($I) { return -$I; },
+                Operators\Unary::BitwiseNot =>      function ($I) { return ~$I; },
+                Operators\Unary::Not =>             function ($I) { return !$I; },
+                Operators\Unary::Increment =>       function ($I) { return $I++; },
+                Operators\Unary::Decrement =>       function ($I) { return $I--; },
+                Operators\Unary::PreIncrement =>    function ($I) { return ++$I; },
+                Operators\Unary::PreDecrement =>    function ($I) { return --$I; },
+                Operators\Unary::Negation =>        function ($I) { return -$I; },
             ];
         }
         
-        return self::$UnaryOperations[$Operator]($Value);
+        $Operation = self::$UnaryOperations[$Operator];
+        return $Operation($Value);
     }
     
     /**

@@ -6,7 +6,7 @@ use \Storm\Api\IConfiguration;
 use \Storm\Core\Object;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base;
-use \Storm\Drivers\Fluent\Object\Functional;
+use \Storm\Drivers\Pinq\Object\Functional;
 
 /**
  * The Repository provides the clean api for querying on a specific
@@ -143,7 +143,7 @@ class Repository {
      * @return Fluent\RequestBuilder 
      */
     final public function Request() {
-        return new Fluent\RequestBuilder($this->EntityMap, $this->FunctionToASTConverter);
+        return new Fluent\RequestBuilder($this, $this->EntityMap, $this->FunctionToASTConverter);
     }
     
     /**
@@ -152,7 +152,7 @@ class Repository {
      * @return Fluent\ProcedureBuilder
      */
     final function Procedure(callable $ProcedureClosure) {
-        return new Fluent\ProcedureBuilder($this->EntityMap, $this->FunctionToASTConverter, $ProcedureClosure);
+        return new Fluent\ProcedureBuilder($this, $this->EntityMap, $this->FunctionToASTConverter, $ProcedureClosure);
     }
     
     /**
@@ -165,36 +165,68 @@ class Repository {
     }
     
     /**
-     * Load a request directly from the builder instance.
+     * Loads an array of entities specified by the supplied request.
      * 
-     * @param Fluent\RequestBuilder $RequestBuilder The builder representing the request to load
-     * @return object|null|array The returned results
+     * @param Object\IRequest $Request The request to load
+     * @return object[]
      */
-    public function Load(Fluent\RequestBuilder $RequestBuilder) {
-        return $this->LoadRequest($RequestBuilder->BuildRequest());
+    final public function LoadAsArray(Object\IRequest $Request) {
+        $this->VerifyRequestType($Request);
+        
+        $Entities = $this->DomainDatabaseMap->LoadArrayOfEntities($Request);
+        $this->IdentityMap->CacheEntities($Entities);
+        
+        return $Entities;
     }
     
     /**
-     * Load entities specified by a request instance.
+     * Loads the first entity specified by the supplied request or null if none exists.
      * 
      * @param Object\IRequest $Request The request to load
-     * @return object|null|array
-     * @throws Object\TypeMismatchException
+     * @return object|null
      */
-    public function LoadRequest(Object\IRequest $Request) {
+    final public function LoadFirst(Object\IRequest $Request) {
+        $this->VerifyRequestType($Request);
+        
+        $Entity = $this->DomainDatabaseMap->LoadSingleEntity($Request);
+        if($Entity !== null) {
+            $this->IdentityMap->CacheEntity($Entity);
+        }
+        
+        return $Entity;
+    }
+    
+    /**
+     * Loads the amount of entities that match the request
+     * 
+     * @param Object\IRequest $Request The request to load
+     * @return int
+     */
+    public function LoadCount(Object\IRequest $Request) {
+        $this->VerifyRequestType($Request);
+        
+        return $this->DomainDatabaseMap->LoadCount($Request);
+    }
+    
+    /**
+     * Loads whether any entities match the request
+     * 
+     * @param Object\IRequest $Request The request to load
+     * @return bool
+     */
+    public function LoadExists(Object\IRequest $Request) {
+        $this->VerifyRequestType($Request);
+        
+        return $this->DomainDatabaseMap->LoadExists($Request);
+    }
+    
+    private function VerifyRequestType(Object\IRequest $Request) {
         if($Request->GetEntityType() !== $this->EntityType) {
-            throw new Object\TypeMismatchException('The supplied request is of type %s, expecting: %s', $Request->GetEntityType(), $this->EntityType);
+            throw new Object\TypeMismatchException(
+                    'The supplied request is of type %s, expecting: %s', 
+                    $Request->GetEntityType(), 
+                    $this->EntityType);
         }
-        $Entities = $this->DomainDatabaseMap->Load($Request);
-        
-        if(is_array($Entities)) {
-            $this->IdentityMap->CacheEntities($Entities);
-        }
-        else if ($Entities instanceof $this->EntityType) {
-            $this->IdentityMap->CacheEntity($Entities);
-        }
-        
-        return $Entities;
     }
     
     /**
@@ -279,24 +311,13 @@ class Repository {
     }
     
     /**
-     * Adds a procedure to the execution queue directly from the builder. 
-     * If AutoSave is enabled, the action will be commited.
-     * 
-     * @param Fluent\ProcedureBuilder $ProcedureBuilder The procedure to build and execute
-     * @return void
-     */
-    public function Execute(Fluent\ProcedureBuilder $ProcedureBuilder) {
-        $this->ExecuteProcedure($ProcedureBuilder->BuildProcedure());
-    }
-    
-    /**
      * Adds a procedure to the execution queue. 
      * If AutoSave is enabled, the action will be commited.
      * 
      * @param Fluent\ProcedureBuilder $ProcedureBuilder The procedure to execute
      * @return void
      */
-    public function ExecuteProcedure(Object\IProcedure $Procedure) {
+    public function Execute(Object\IProcedure $Procedure) {
         if($Procedure->GetEntityType() !== $this->EntityType) {
             throw new Object\TypeMismatchException('The supplied procedure is of type %s, expecting: %s', $Procedure->GetEntityType(), $this->EntityType);
         }

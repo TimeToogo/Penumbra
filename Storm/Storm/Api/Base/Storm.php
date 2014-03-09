@@ -5,8 +5,8 @@ namespace Storm\Api\Base;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
-use \Storm\Drivers\Fluent\Object\Functional;
-use \Storm\Drivers\Fluent\Object\FunctionToExpressionTreeConverter;
+use \Storm\Drivers\Pinq\Object\Functional;
+use \Storm\Drivers\Pinq\Object\FunctionToExpressionTreeConverter;
 
 /**
  * The Storm class provides the api surrounding a DomainDatabaseMap.

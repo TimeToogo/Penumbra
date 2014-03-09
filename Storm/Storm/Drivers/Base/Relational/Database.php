@@ -48,9 +48,14 @@ abstract class Database extends Relational\Database {
         $this->Platform->Sync($this);
     }
     
-    final protected function LoadResultRowData(Relational\Select $Request) {
+    final protected function LoadResultRowData(Relational\ResultSetSelect $Select) {
         $this->VerifyPlatform(__METHOD__);
-        return $this->Platform->Select($Request);
+        return $this->Platform->LoadResultSet($Select);
+    }
+    
+    final protected function LoadValue(Relational\ValueSelect $Select) {
+        $this->VerifyPlatform(__METHOD__);
+        return $this->Platform->LoadValue($Select);
     }
     
     final public function CommitTransaction(Relational\Transaction $Transaction) {

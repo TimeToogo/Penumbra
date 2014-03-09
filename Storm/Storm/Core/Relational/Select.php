@@ -3,20 +3,11 @@
 namespace Storm\Core\Relational;
 
 /**
- * The request represents a range of rows to load specified by the criterion.
- * This can be thought of as a SELECT 
+ * The base class for a select
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class Select {    
-    /**
-     * The columns to load from.
-     * 
-     * @var IColumn[]
-     */
-    private $Columns = [];
-    
-    
+abstract class Select {
     /**
      * @var Expression[] 
      */
@@ -36,51 +27,32 @@ class Select {
         $this->Criterion = $Criterion;
     }
     
-    final public function HasColumn(IColumn $Column) {
-        return isset($this->Columns[$Column->GetIdentifier()]);
-    }
-    
     /**
-     * Add a column to the request.
+     * Returns a select of type
      * 
-     * @param IColumn $Column The column to add
-     * @return void
+     * @param int $Type
+     * @param Criterion $Criterion
+     * @return Select
+     * @throws RelationalException
      */
-    final public function AddColumn(IColumn $Column) {
-        if(!$this->Criterion->HasTable($Column->GetTable()->GetName())) {
-            throw new RelationalException(
-                    'Cannot add column \'%s\' to relational request the parent table table \'%s\' has not part of the request',
-                    $Column->GetName(),
-                    $Column->GetTable()->GetName());
+    final public static function OfType($Type, Criterion $Criterion) {
+        switch ($Type) {
+            case SelectType::ResultSet:
+                return new ResultSetSelect($Criterion);
+                
+            case SelectType::Count:
+            case SelectType::Exists:
+                return new ValueSelect($Type, $Criterion);
+
+            default:
+                throw new RelationalException(
+                        'Unknown select type: %s',
+                        $Type);
         }
-        $this->Columns[$Column->GetIdentifier()] = $Column;
     }
+    
+    public abstract function GetSelectType();
         
-    /**
-     * Add an array of columns to the request.
-     * 
-     * @param IColumn[] $Column The columns to add
-     * @return void
-     */
-    final public function AddColumns(array $Columns) {
-        array_walk($Columns, [$this, 'AddColumn']);
-    }
-    
-    final public function RemoveColumn(IColumn $Column) {
-        unset($this->Columns[$Column->GetIdentifier()]);
-    }
-    
-    final public function RemoveColumns(array $Columns) {
-        array_walk($Columns, [$this, 'RemoveColumn']);
-    }
-    
-    /**
-     * @return IColumn[]
-     */
-    final public function GetColumns() {
-        return $this->Columns;
-    }
-    
     /**
      * @return ITable[]
      */

@@ -31,9 +31,9 @@ class PropertyExpressionResolver {
         return $this->DomainDatabaseMap->GetPropertyMapping($Expression->GetProperty());
     }
             
-    public function MapProperty(O\PropertyExpression $Expression) {
+    public function MapProperty(O\PropertyExpression $Expression, O\TraversalExpression $TraversalExpression = null) {
         $this->AddPropertyToCriterion($Expression);
-        return $PropertyMapping->MapPropertyExpression();
+        return $this->GetPropertyMapping($Expression)->MapPropertyExpression($TraversalExpression);
     }
     
     private function AddPropertyToCriterion(O\PropertyExpression $Expression) {

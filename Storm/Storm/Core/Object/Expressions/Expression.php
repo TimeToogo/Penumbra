@@ -12,10 +12,19 @@ use Storm\Core\Object\IProperty;
 abstract class Expression {
     use \Storm\Core\Helpers\Type;
     
+    /**
+     * @return Expression
+     */
     public abstract function Traverse(ExpressionWalker $Walker);
     
+    /**
+     * @return Expression
+     */
     public abstract function Simplify();
     
+    /**
+     * @return Expression[]
+     */
     final protected static function SimplifyAll(array $Expressions) {
         $ReducedExpressions = [];
         foreach($Expressions as $Key => $Expression) {
@@ -25,6 +34,9 @@ abstract class Expression {
         return $ReducedExpressions;
     }
     
+    /**
+     * @return boolean
+     */
     final protected static function AllOfType(array $Expressions, $Type) {
         foreach ($Expressions as $Expression) {
             if(!($Expression instanceof $Type)) {
@@ -36,9 +48,8 @@ abstract class Expression {
     }
 
 
-    // <editor-fold defaultstate="collapsed" desc="Factory Methods">
+    // <editor-fold desc="Factory Methods">
     
-
     /**
      * @return AssignmentExpression
      */
@@ -80,22 +91,22 @@ abstract class Expression {
     /**
      * @return MethodCallExpression
      */
-    final public static function MethodCall(Expression $ValueExpression, $Name, array $ArgumentValueExpressions = []) {
-        return new MethodCallExpression($ValueExpression, $Name, $ArgumentValueExpressions);
+    final public static function MethodCall(Expression $ValueExpression, Expression $NameExpression, array $ArgumentValueExpressions = []) {
+        return new MethodCallExpression($ValueExpression, $NameExpression, $ArgumentValueExpressions);
     }
     
     /**
      * @return FieldExpression
      */
-    final public static function Field(Expression $ValueExpression, $Name) {
-        return new FieldExpression($ValueExpression, $Name);
+    final public static function Field(Expression $ValueExpression, Expression $NameExpression) {
+        return new FieldExpression($ValueExpression, $NameExpression);
     }
     
     /**
      * @return IndexExpression
      */
-    final public static function Index(Expression $ValueExpression, $Index) {
-        return new IndexExpression($ValueExpression, $Index);
+    final public static function Index(Expression $ValueExpression, Expression $IndexExpression) {
+        return new IndexExpression($ValueExpression, $IndexExpression);
     }
     
     /**
@@ -115,8 +126,8 @@ abstract class Expression {
     /**
      * @return FunctionCallExpression
      */
-    final public static function FunctionCall($Name, array $ArgumentValueExpressions = []) {
-        return new FunctionCallExpression($Name, $ArgumentValueExpressions);
+    final public static function FunctionCall(Expression $NameExpression, array $ArgumentValueExpressions = []) {
+        return new FunctionCallExpression($NameExpression, $ArgumentValueExpressions);
     }
     
     
@@ -152,10 +163,10 @@ abstract class Expression {
     }
     
     /**
-     * @return UnresolvedVariable
+     * @return UnresolvedVariableExpression
      */
-    final public static function UnresolvedVariable($Name) {
-        return new UnresolvedVariable($Name);
+    final public static function UnresolvedVariable(Expression $NameExpression) {
+        return new UnresolvedVariableExpression($NameExpression);
     }
     
     /**

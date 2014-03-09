@@ -6,21 +6,21 @@ namespace Storm\Core\Object\Expressions;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class MethodCallExpression extends ObjectOperationExpression {
-    private $Name;
+    private $NameExpression;
     private $ArgumentExpressions;
     
-    public function __construct(Expression $ObjectValueExpression, $Name, array $ArgumentExpressions = []) {
+    public function __construct(Expression $ObjectValueExpression, Expression $NameExpression, array $ArgumentExpressions = []) {
         parent::__construct($ObjectValueExpression);
         
-        $this->Name = $Name;
+        $this->NameExpression = $NameExpression;
         $this->ArgumentExpressions = $ArgumentExpressions;
     }
     
     /**
-     * @return string
+     * @return Expression
      */
-    public function GetName() {
-        return $this->Name;
+    public function GetNameExpression() {
+        return $this->NameExpression;
     }
     
     /**
@@ -36,40 +36,44 @@ class MethodCallExpression extends ObjectOperationExpression {
     
     public function Simplify() {
         $ValueExpression = $this->ValueExpression->Simplify();
+        $NameExpression = $this->NameExpression->Simplify();
         $ArgumentExpressions = self::SimplifyAll($this->ArgumentExpressions);
         
         if($ValueExpression instanceof ValueExpression 
+                && $NameExpression instanceof ValueExpression
                 && self::AllOfType($ArgumentExpressions, ValueExpression::GetType())) {
             $ObjectValue = $ValueExpression->GetValue();
+            $Name = $NameExpression->GetValue();
+            
             $ArgumentValues = [];
             foreach($ArgumentExpressions as $ArgumentExpression) {
                 $ArgumentValues[] = $ArgumentExpression->GetValue();
             }
             
-            return Expression::Value(call_user_func_array([$ObjectValue, $this->Name], $ArgumentValues));
+            return Expression::Value(call_user_func_array([$ObjectValue, $Name], $ArgumentValues));
         }
         
         return $this->Update(
                 $ValueExpression,
-                $this->Name,
+                $this->NameExpression,
                 $ArgumentExpressions);
     }
     
     /**
      * @return self
      */
-    public function Update(Expression $ObjectValueExpression, $Name, array $ArgumentExpressions) {
+    public function Update(Expression $ObjectValueExpression, Expression $NameExpression, array $ArgumentExpressions) {
         if($this->ValueExpression === $ObjectValueExpression
-                && $this->Name === $Name
+                && $this->NameExpression === $NameExpression
                 && $this->ArgumentExpressions === $ArgumentExpressions) {
             return $this;
         }
         
-        return new self($ObjectValueExpression, $Name, $ArgumentExpressions);
+        return new self($ObjectValueExpression, $NameExpression, $ArgumentExpressions);
     }
     
     protected function UpdateValueExpression(Expression $ValueExpression) {
-        return new self($ValueExpression, $this->Name, $this->ArgumentExpressions);
+        return new self($ValueExpression, $this->NameExpression, $this->ArgumentExpressions);
     }
 }
 

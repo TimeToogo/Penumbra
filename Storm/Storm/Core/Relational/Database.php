@@ -147,31 +147,56 @@ abstract class Database {
     }
     
     /**
-     * Load the rows specified by the request.
+     * Load the rows specified by the select.
      * 
-     * @param Select $Request The request to load
-     * @return ResultRow[] The loaded result rows
+     * @param Select $Select The select to load
+     * @return ResultRow[]|int|bool The loaded value from the select
      */
-    final public function Load(Select $Request) {
-        $Columns = [];
-        foreach($Request->GetTables() as $Table) {
+    final public function Load(Select $Select) {
+        foreach($Select->GetTables() as $Table) {
             $this->VerifyTable(__METHOD__, $Table);
-            $Columns += $Table->GetColumnsIndexedByIdentifier();
         }
-        $ResultRowData = $this->LoadResultRowData($Request);
         
-        $ResultRow = new ResultRow($Columns, []);
+        switch ($Select->GetSelectType()) {
+            case SelectType::ResultSet:
+                return $this->LoadResultSet($Select);
+                
+            case SelectType::Count:
+            case SelectType::Exists:
+                return $this->LoadValue($Select);
+                
+            default:
+                throw new RelationalException(
+                        'Cannot load select: unknown select type, %s',
+                        $Select->GetSelectType());
+        }
+    }
+    
+    private function LoadResultSet(ResultSetSelect $Select) {
+        $ResultRowData = $this->LoadResultRowData($Select);
+        
+        $ResultRow = new ResultRow($Select->GetColumns(), []);
         
         return array_map([$ResultRow, 'Another'], $ResultRowData);
     }
+    
     /**
      * This method should be implemented such that is returns the rows specified
-     * by the request from the underlying database.
+     * by the select from the underlying database.
      * 
-     * @param Select $Request The request to load
+     * @param ResultSetSelect $Select The select to load
      * @return array[] The loaded result rows data as an associative array indexed by column identifiers
      */
-    protected abstract function LoadResultRowData(Select $Request);
+    protected abstract function LoadResultRowData(ResultSetSelect $Select);
+    
+    /**
+     * This method should be implemented such that is returns a single value
+     * by the select from the underlying database.
+     * 
+     * @param ValueSelect $Select The select to load
+     * @return int|bool
+     */
+    protected abstract function LoadValue(ValueSelect $Select);
     
     /**
      * Commits the supplied transaction.

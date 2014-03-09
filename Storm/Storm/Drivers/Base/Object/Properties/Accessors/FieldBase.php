@@ -26,8 +26,9 @@ abstract class FieldBase extends ReflectionBase {
     }
     
     public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
-        if($Expression instanceof Expressions\FieldExpression 
-                && $Expression->GetName() === $this->FieldName) {
+        if($Expression instanceof Expressions\FieldExpression
+                && $Expression->GetNameExpression() instanceof Expressions\ValueExpression
+                && $Expression->GetNameExpression()->GetValue() === $this->FieldName) {
             return $PropertyExpression;
         }
     }

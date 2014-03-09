@@ -6,9 +6,9 @@ use \Storm\Api\Base;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
-use \Storm\Drivers\Fluent\Object\Functional;
+use \Storm\Drivers\Pinq\Object\Functional;
 use \Storm\Utilities\Cache;
-use \Storm\Drivers\Fluent\Object\CachingFunctionToExpressionTreeConverter;
+use \Storm\Drivers\Pinq\Object\CachingFunctionToExpressionTreeConverter;
 
 /**
  * This class provides a caching to an instance of DomainDatabaseMap, which can be very

@@ -10,7 +10,7 @@ class MethodGetter extends MethodBase implements IPropertyGetter {
     
     public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
         if($Expression instanceof Expressions\MethodCallExpression
-                && $Expression->GetName() === $this->MethodName
+                && $this->MatchesName($Expression->GetNameExpression())
                 && $this->MatchesContantArguments($Expression->GetArgumentExpressions())) {
             return $PropertyExpression;
         }

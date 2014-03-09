@@ -52,8 +52,8 @@ class JoinTableRelation extends ToManyRelationBase {
         return $this->ParentForeignKey->GetReferencedColumns();
     }
     
-    protected function NewRelationRequest() {
-        $Request = new Relational\Select(new Relational\Criterion($this->JoinTable));
+    protected function NewRelationRequest($Type) {
+        $Request = new Relational\Select($Type, new Relational\Criterion($this->JoinTable));
         $Request->GetCriterion()->AddJoins(parent::GetRelationJoins($this->GetTable()));
         
         return $Request;

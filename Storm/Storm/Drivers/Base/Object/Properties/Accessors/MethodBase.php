@@ -27,6 +27,14 @@ abstract class MethodBase extends ReflectionBase {
                 implode(', ', array_map(function ($I) { return var_export($I, true); }, $this->ConstantArguments)));
     }
     
+    final protected function MatchesName(Expressions\Expression $Expression) {
+        if(!($Expression instanceof Expressions\ValueExpression)) {
+            return false;
+        }
+        
+        return $Expression->GetValue() === $this->MethodName;
+    }
+    
     final protected function MatchesContantArguments(array $Expressions) {
         if(count($Expressions) !== count($this->ConstantArguments) || !$this->AreConstants($Expressions)) {
             return false;

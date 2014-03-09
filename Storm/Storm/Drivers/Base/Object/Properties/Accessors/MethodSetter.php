@@ -11,7 +11,7 @@ class MethodSetter extends MethodBase implements IPropertySetter {
     
     public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
         if($Expression instanceof Expressions\MethodCallExpression
-                && $Expression->GetName() === $this->MethodName) {
+                && $this->MatchesName($Expression->GetNameExpression())) {
             $ArgumentExpressions = $Expression->GetArgumentExpressions();
             $AssignmentValue = array_pop($ArgumentExpressions);
             

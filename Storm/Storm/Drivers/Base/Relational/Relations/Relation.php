@@ -62,8 +62,8 @@ abstract class Relation implements Relational\IRelation {
         return $this->DiscardingOrder;
     }
     
-    final public function RelationSelect(array $ParentRows = null) {
-        $Request = $this->NewRelationRequest();
+    final public function RelationSelect($Type, array $ParentRows = null) {
+        $Request = $this->NewRelationRequest($Type);
         $this->AddParentPredicate($Request->GetCriterion(), $ParentRows);
         
         return $Request;
@@ -71,8 +71,8 @@ abstract class Relation implements Relational\IRelation {
     /**
      * Relational\Request
      */
-    protected function NewRelationRequest() {
-        return new Relational\Select(new Relational\Criterion($this->Table));
+    protected function NewRelationRequest($Type) {
+        return new Relational\Select($Type, new Relational\Criterion($this->Table));
     }
 }
 

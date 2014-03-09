@@ -51,7 +51,7 @@ class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMap
         $this->Loading = $Loading;
     }
     
-    final public function AddToRelationalSelect(Relational\Select $RelationalRequest) {
+    final public function AddToRelationalSelect(Relational\ResultSetSelect $RelationalRequest) {
         return $this->Loading->AddToRelationalRequest(
                 $this->EntityRelationalMap, 
                 $this->ToOneRelation, 

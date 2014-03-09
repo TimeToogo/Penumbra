@@ -114,8 +114,8 @@ final class ExpressionMapper {
         }
     }
     
-    private function MapProperty(O\PropertyExpression $Expression) {
-        return $this->PropertyExpressionResolver->MapProperty($Expression);
+    private function MapProperty(O\PropertyExpression $Expression, O\TraversalExpression $TraversalExpression = null) {
+        return $this->PropertyExpressionResolver->MapProperty($Expression, $TraversalExpression);
     }
     
     private function MapValue(O\ValueExpression $Expression, O\TraversalExpression $TraversalExpression = null) {
@@ -157,6 +157,9 @@ final class ExpressionMapper {
                 
             case $TraversalOriginExpression instanceof O\FunctionCallExpression:
                 return $this->MapFunctionCall($TraversalOriginExpression, $TraversalExpression);
+                
+            case $TraversalOriginExpression instanceof O\PropertyExpression:
+                return $this->MapProperty($TraversalOriginExpression, $TraversalExpression);
              
             default:
                 throw new Mapping\MappingException(

@@ -32,7 +32,7 @@ class Table extends \Storm\Drivers\Base\Relational\Table {
         $this->RelationalTraits = $RelationalTraits;
         $this->ToOneRelations = $ToOneRelations;
         $this->ToManyRelations = $ToManyRelations;
-        $this->InitializeStructure(new Database(new \Storm\Drivers\Platforms\Null\NullPlatform(), []));
+        $this->InitializeStructure(new Database([]));
         
         parent::__construct();
     }

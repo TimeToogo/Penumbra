@@ -30,7 +30,8 @@ abstract class IndexBase {
     
     public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
         if($Expression instanceof Expressions\IndexExpression 
-                && $Expression->GetIndex() === $this->FieldName) {
+                && $Expression->GetIndexExpression() instanceof Expressions\ValueExpression
+                && $Expression->GetIndexExpression()->GetValue() === $this->Index) {
             return $PropertyExpression;
         }
     }

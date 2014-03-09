@@ -2,10 +2,11 @@
 
 namespace Storm\Api\Base\Fluent;
 
+use \Storm\Api\Base\Repository;
 use \Storm\Core\Object;
-use \Storm\Drivers\Fluent\Object\Procedure;
-use \Storm\Core\Object\Expressions\ExpressionTree;
-use \Storm\Drivers\Fluent\Object\IFunctionToExpressionTreeConverter;
+use \Storm\Drivers\Pinq\Object\Procedure;
+use \Storm\Drivers\Pinq\Object\Functional\ExpressionTree;
+use \Storm\Drivers\Pinq\Object\IFunctionToExpressionTreeConverter;
 
 /**
  * The ProcedureBuilder provides a fluent interface for building procedures
@@ -13,14 +14,17 @@ use \Storm\Drivers\Fluent\Object\IFunctionToExpressionTreeConverter;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class ProcedureBuilder extends CriterionBuilder {
+    private $Repository;
     private $ProcedureFunction;
     
     public function __construct(
+            Repository $Repository,
             Object\IEntityMap $EntityMap, 
             IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter,
             callable $ProcedureFunction) {
         parent::__construct($EntityMap, $FunctionToExpressionTreeConverter);
         
+        $this->Repository = $Repository;
         $this->ProcedureFunction = $ProcedureFunction;
     }
     
@@ -33,6 +37,13 @@ class ProcedureBuilder extends CriterionBuilder {
         return new Procedure(
             $this->FunctionToExpressionTree($this->ProcedureFunction), 
             $this->BuildCriterion());
+    }
+    
+    /**
+     * @return void
+     */
+    final public function Execute() {
+        $this->Repository->Execute($this->BuildProcedure());
     }
 }
 

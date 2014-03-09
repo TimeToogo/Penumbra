@@ -11,10 +11,6 @@ use \Storm\Core\Containers\Map;
  * The DomainDatabaseMap class provides the nessecary data and api to map between a
  * entity instances and a relational database.
  * 
- * Currently this has become a minor God-Object and should be broken up into more 
- * consice and well-defined classes. This could be a bit of a refactoring job as it relied heavily upon.
- * Currently I have organized the groups of behavor into editor fold tags. 
- * These should become individual classes.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
@@ -218,30 +214,63 @@ abstract class DomainDatabaseMap {
     }
     
     /**
-     * Loads all entities that are specified from the given request instance.
+     * Loads all entities that are specified from the given request.
      * 
-     * @param Object\IRequest $ObjectRequest The request to load
-     * @return array|object|null Depending on the supplied request, either all the entities are
-     * returned as an array or the first is returned or null if none are found.
+     * @param Object\IRequest $Request The request to load
+     * @return object[] All matching entities are retrieved as an array
      */
-    final public function Load(Object\IRequest $ObjectRequest) {
-        $EntityType = $ObjectRequest->GetEntityType();
+    final public function LoadArrayOfEntities(Object\IRequest $Request) {
+        $EntityType = $Request->GetEntityType();
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
         
-        $RelationalRequest = $this->MapRequest($ObjectRequest);
-        
-        $ResultRows = $this->Database->Load($RelationalRequest);
+        $Select = $this->MapRequest($Request, Relational\SelectType::ResultSet);
+        $ResultRows = $this->Database->Load($Select);
         
         $RevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($this->Database, $ResultRows);
+        return $this->Domain->ReviveEntities($EntityType, $RevivalDataArray);        
+    }
+    
+    /**
+     * Loads a single entity specified from the given request or null if none are found.
+     * 
+     * @param Object\IRequest $Request The request to load
+     * @return object|null The matching entity or null if none are matched
+     */
+    final public function LoadSingleEntity(Object\IRequest $Request) {
+        $EntityType = $Request->GetEntityType();
+        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
         
-        $RevivedEntities = $this->Domain->ReviveEntities($EntityType, $RevivalDataArray);
+        $Select = $this->MapRequest($Request, Relational\SelectType::ResultSet);
+        $LoadedResultRows = $this->Database->Load($Select);
+        if(count($LoadedResultRows) === 0) {
+            return null;
+        }
+        $ResultRows = array_slice($LoadedResultRows, 0, 1);
         
-        if($ObjectRequest->IsSingleEntity()) {
-            return count($RevivedEntities) > 0 ? reset($RevivedEntities) : null;
-        }
-        else {
-            return $RevivedEntities;
-        }
+        $RevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($this->Database, $ResultRows);
+        return $this->Domain->ReviveEntities($EntityType, $RevivalDataArray)[0];        
+    }
+    
+    /**
+     * Loads the amount of matching entities
+     * 
+     * @param Object\IRequest $Request The request to load
+     * @return boolean Whether there are any matchin entities
+     */
+    final public function LoadCount(Object\IRequest $Request) {
+        $Select = $this->MapRequest($Request, Relational\SelectType::Count);
+        return $this->Database->Load($Select);
+    }
+    
+    /**
+     * Returns where any entities match the given request
+     * 
+     * @param Object\IRequest $Request The request to load
+     * @return int The amount of matching entities
+     */
+    final public function LoadExists(Object\IRequest $Request) {
+        $Select = $this->MapRequest($Request, Relational\SelectType::Exists);
+        return $this->Database->Load($Select);
     }
     
     /**
@@ -274,7 +303,7 @@ abstract class DomainDatabaseMap {
     /**
      * @return Relational\Select
      */
-    protected abstract function MapRequest(Object\IRequest $Request);
+    protected abstract function MapRequest(Object\IRequest $Request, $SelectType);
     
     /**
      * @return Relational\Update

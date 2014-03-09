@@ -6,19 +6,19 @@ namespace Storm\Core\Object\Expressions;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class IndexExpression extends TraversalExpression {
-    private $Index;
+    private $IndexExpression;
     
-    public function __construct(Expression $ValueExpression, $Index) {
+    public function __construct(Expression $ValueExpression, Expression $IndexExpression) {
         parent::__construct($ValueExpression);
         
-        $this->Index = $Index;
+        $this->IndexExpression = $IndexExpression;
     }
     
     /**
-     * @return mixed
+     * @return Expression
      */
-    public function GetIndex() {
-        return $this->Index;
+    public function GetIndexExpression() {
+        return $this->IndexExpression;
     }
     
     public function Traverse(ExpressionWalker $Walker) {
@@ -27,31 +27,34 @@ class IndexExpression extends TraversalExpression {
     
     public function Simplify() {
         $ValueExpression = $this->ValueExpression->Simplify();
+        $IndexExpression = $this->IndexExpression->Simplify();
         
-        if($ValueExpression instanceof ValueExpression) {
-            $Value = $ValueExpression;
-            return Expression::Value($Value[$this->Index]);
+        if($ValueExpression instanceof ValueExpression
+                && $IndexExpression instanceof ValueExpression) {
+            $Value = $ValueExpression->GetValue();
+            $Index = $IndexExpression->GetValue();
+            return Expression::Value($Value[$Index]);
         }        
         
         return $this->Update(
                 $ValueExpression,
-                $this->Index);
+                $this->IndexExpression);
     }
     
     /**
      * @return self
      */
-    public function Update(Expression $ValueExpression, $Index) {
+    public function Update(Expression $ValueExpression, Expression $IndexExpression) {
         if($this->ValueExpression === $ValueExpression
-                && $this->Index === $Index) {
+                && $this->IndexExpression === $IndexExpression) {
             return $this;
         }
         
-        return new self($ValueExpression, $Index);
+        return new self($ValueExpression, $IndexExpression);
     }
     
     protected function UpdateValueExpression(Expression $ValueExpression) {
-        return new self($ValueExpression, $this->Index);
+        return new self($ValueExpression, $this->IndexExpression);
     }
 }
 
