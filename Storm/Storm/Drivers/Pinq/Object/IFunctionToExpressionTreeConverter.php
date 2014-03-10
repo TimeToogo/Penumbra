@@ -11,7 +11,7 @@ interface IFunctionToExpressionTreeConverter {
     /**
      * @return Functional\ExpressionTree
      */
-    public function ConvertAndResolve(Object\IEntityMap $EntityMap, callable $Function);
+    public function ConvertAndResolve(Object\IEntityMap $EntityMap, callable $Function, array $ParameterExpressionMap = []);
 }
 
 ?>

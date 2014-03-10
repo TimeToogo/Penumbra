@@ -14,8 +14,8 @@ class StandardQueryCompiler implements Queries\IQueryCompiler {
             case Relational\SelectType::ResultSet:
                 return $this->AppendResultSetSelect($QueryBuilder, $Select);
             
-            case Relational\SelectType::Count:
-                return $this->AppendCountSelect($QueryBuilder, $Select);
+            case Relational\SelectType::Data:
+                return $this->AppendDataSelect($QueryBuilder, $Select);
             
             case Relational\SelectType::Exists:
                 return $this->AppendExistsSelect($QueryBuilder, $Select);
@@ -38,15 +38,19 @@ class StandardQueryCompiler implements Queries\IQueryCompiler {
         $this->AppendSelectClauses($QueryBuilder, $ResultSetSelect);
     }
     
-    protected function AppendCountSelect(QueryBuilder $QueryBuilder, Relational\ValueSelect $ValueSelect) {
-        $QueryBuilder->Append('SELECT COUNT(*)');
+    protected function AppendDataSelect(QueryBuilder $QueryBuilder, Relational\DataSelect $DataSelect) {
+        $QueryBuilder->Append('SELECT ');
+        foreach($QueryBuilder->Delimit($DataSelect->GetAliasExpressionMap(), ',') as $Alias => $Expression) {
+            $QueryBuilder->AppendExpression($Expression);
+            $QueryBuilder->AppendIdentifier(' AS #', $Alias);
+        }
         
-        $this->AppendSelectClauses($QueryBuilder, $ValueSelect);
+        $this->AppendSelectClauses($QueryBuilder, $DataSelect);
     }
     
-    protected function AppendExistsSelect(QueryBuilder $QueryBuilder, Relational\ValueSelect $ValueSelect) {
+    protected function AppendExistsSelect(QueryBuilder $QueryBuilder, Relational\ExistsSelect $ExistsSelect) {
         $QueryBuilder->Append('SELECT EXISTS (SELECT *');
-        $this->AppendSelectClauses($QueryBuilder, $ValueSelect);
+        $this->AppendSelectClauses($QueryBuilder, $ExistsSelect);
         $QueryBuilder->Append(')');
     }
     

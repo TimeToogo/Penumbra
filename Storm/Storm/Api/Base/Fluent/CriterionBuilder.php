@@ -14,20 +14,19 @@ use \Storm\Drivers\Pinq\Object\IFunctionToExpressionTreeConverter;
  */
 class CriterionBuilder {
     protected $EntityType;
-    /**
-     * @var Object\IEntityMap
-     */
     protected $EntityMap;
-    private $FunctionToExpressionTreeConverter;
+    protected $FunctionToExpressionTreeConverter;
+    
     private $Criterion;
     
     public function __construct(
             Object\IEntityMap $EntityMap,
             IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
-        $this->EntityMap = $EntityMap;
         $this->EntityType = $EntityMap->GetEntityType();
+        $this->EntityMap = $EntityMap;
         $this->FunctionToExpressionTreeConverter = $FunctionToExpressionTreeConverter;
-        $this->Criterion = new Criterion($EntityMap->GetEntityType());
+        
+        $this->Criterion = new Criterion($EntityMap, $FunctionToExpressionTreeConverter);
     }
     
     /**
@@ -37,19 +36,6 @@ class CriterionBuilder {
      */
     final public function BuildCriterion() {
         return $this->Criterion;
-    }
-    
-    /**
-     * Parses a given function into an expression tree structure using the provided converter
-     * 
-     * @param callable $Function The function to parse
-     * 
-     * @return ExpressionTree The resolved function's expression tree
-     */
-    final protected function FunctionToExpressionTree(callable $Function) {
-        $EpresstionTree = $this->FunctionToExpressionTreeConverter->ConvertAndResolve($this->EntityMap, $Function);
-        
-        return $EpresstionTree;
     }
     
     /**
@@ -66,7 +52,7 @@ class CriterionBuilder {
      * @return static 
      */
     final public function Where(callable $Predicate) {
-        $this->Criterion->AddPredicateExpression($this->FunctionToExpressionTree($Predicate));        
+        $this->Criterion->AddPredicateFunction($Predicate);        
         return $this;
     }
     
@@ -84,7 +70,7 @@ class CriterionBuilder {
      * @return static
      */
     final public function OrderBy(callable $Expression) {
-        $this->Criterion->AddOrderByExpression($this->FunctionToExpressionTree($Expression), true);        
+        $this->Criterion->AddOrderByFunction($Expression, true);
         return $this;
     }
     
@@ -102,7 +88,7 @@ class CriterionBuilder {
      * @return static
      */
     final public function OrderByDescending(callable $Expression) {
-        $this->Criterion->AddOrderByExpression($this->FunctionToExpressionTree($Expression), false);        
+        $this->Criterion->AddOrderByFunction($Expression, true);        
         return $this;
     }
     

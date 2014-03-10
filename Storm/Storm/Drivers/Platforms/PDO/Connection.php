@@ -5,15 +5,13 @@ namespace Storm\Drivers\Platforms\PDO;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Queries;
 
-class Connection extends Queries\Connection {
-    const DefaultEmulatePrepares = true;
-    
+class Connection extends Queries\Connection {    
     private $PDO;
     
-    public function __construct(\PDO $Connection, $EmulatePreparedStatements = self::DefaultEmulatePrepares) {
+    public function __construct(\PDO $Connection) {
         $Connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $Connection->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
-        $Connection->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $EmulatePreparedStatements);
+        $Connection->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
         $Connection->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
         $Connection->setAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
         $this->PDO = $Connection;
@@ -22,8 +20,8 @@ class Connection extends Queries\Connection {
     /**
      * @return Connection
      */
-    public static function Connect($DSN, $Username = null, $Password = null, array $DriverOptions = null, $EmulatePreparedStatements = self::DefaultEmulatePrepares) {
-        return new self(new \PDO($DSN, $Username, $Password, $DriverOptions), $EmulatePreparedStatements);
+    public static function Connect($DSN, $Username = null, $Password = null, array $DriverOptions = null) {
+        return new self(new \PDO($DSN, $Username, $Password, $DriverOptions));
     }
     
     public function BeginTransaction() {

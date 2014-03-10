@@ -50,12 +50,17 @@ abstract class Database extends Relational\Database {
     
     final protected function LoadResultRowData(Relational\ResultSetSelect $Select) {
         $this->VerifyPlatform(__METHOD__);
-        return $this->Platform->LoadResultSet($Select);
+        return $this->Platform->LoadResultRowData($Select);
     }
     
-    final protected function LoadValue(Relational\ValueSelect $Select) {
+    protected function LoadData(Relational\DataSelect $Select) {
         $this->VerifyPlatform(__METHOD__);
-        return $this->Platform->LoadValue($Select);
+        return $this->Platform->LoadData($Select);
+    }
+    
+    final protected function LoadExists(Relational\ExistsSelect $Select) {
+        $this->VerifyPlatform(__METHOD__);
+        return $this->Platform->LoadExists($Select);
     }
     
     final public function CommitTransaction(Relational\Transaction $Transaction) {

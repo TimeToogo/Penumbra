@@ -10,6 +10,13 @@ use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 use \Storm\Drivers\Base\Object\Properties\Proxies;
 
+function Test(\Storm\Drivers\Pinq\Object\IGroup &$Foo = null) {
+    /* @var $Foo \ */
+    $Foo = new \Storm\Drivers\Pinq\Object\Group('');
+}
+
+Test($dsgdg);
+
 class One implements \StormExamples\IStormExample {
     const DevelopmentMode = 1;
     const UseCache = false;
@@ -176,6 +183,77 @@ class One implements \StormExamples\IStormExample {
         $BlogRepository->GetIdentityMap()->Clear();
 
         return null;
+    }
+    
+    private function AggregationOptions(Repository $BlogRepository) {
+        //#1 ----------------------------------------------------- Yes
+        $BlogRepository->Request()
+                ->Where(function ($Blog) use($Id) {
+                    return $Blog->Id === $Id;
+                })
+                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
+                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
+                ->Group(function ($Blog) { return $Blog->Hits; })->By(function ($Blog) { return $Blog->Name; })->Into($Hits)
+                ->Data(function ($Blog, \Storm\Drivers\Pinq\Object\IAggregate $Hits)  {
+                    return [
+                        'Name' => $Blog->GetName(),
+                        'MaxHits' => $Hits->Maximum(),
+                        'MinHits' => $Hits->Minimum(),
+                        'Sum' => $Hits->Sum(),
+                        'Implode' => $Hits->Implode(', '),
+                        'Count' => $Hits->Count(),
+                    ];
+                });
+                
+        //#1 ----------------------------------------------------- Yes
+        $Sums = $BlogRepository->Request()
+                ->Where(function ($Blog) use($Id) {
+                    return $Blog->Id === $Id;
+                })
+                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
+                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
+                ->GroupBy(function ($Blog) { return $Blog->Name; })
+                ->Sum(function ($Blog) { return $Blog->GetHits(); });
+                
+                
+                
+                
+        //#2 -----------------------------------------------------NO
+        $BlogRepository->Request()
+                ->Where(function ($Blog) use($Id) {
+                    return $Blog->Id === $Id;
+                })
+                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
+                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
+                ->GroupBy(function ($Blog) { return $Blog->Name; })
+                ->Data([
+                    'MaxHits' => function ($Blog) { return $Blog->GetHits(); },
+                    'MaxHits' => function ($Blog) { return $Blog->GetHits(); },
+                    'MinHits' => function ($Blog) { return $Blog->GetHits(); },
+                    'Sum' => function ($Blog) { return $Blog->GetId(); },
+                    'Implode' => function ($Blog) { return $Blog->GetHits(); },
+                    'Count' => function ($Blog) { return $Blog; },
+                ]);
+        
+        //#3 ----------------------------------------------------- Possibly
+        $BlogRepository->RequestData()
+                
+                ->Value(function ($Blog) { return $Blog->Name; })->As('Name')
+                ->Maximum(function ($Blog) { return $Blog->GetHits(); })->As('MaxHits')
+                ->Minimum(function ($Blog) { return $Blog->GetHits(); })->As('MinHits')
+                ->Sum(function ($Blog) { return $Blog->GetHits(); })->As('Sum')
+                ->Implode(', ', function ($Blog) { return $Blog->GetHits(); })->As('Implode')
+                ->Count()->As('Count')
+                
+                ->Where(function ($Blog) use($Id) {
+                    return $Blog->Id === $Id;
+                })
+                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
+                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
+                ->GroupBy(function ($Blog) { return $Blog->Name; })
+                
+                ->Load()
+                ;
     }
     
     private function PersistExisting($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {

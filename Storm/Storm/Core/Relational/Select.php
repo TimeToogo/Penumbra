@@ -32,7 +32,7 @@ abstract class Select {
      * 
      * @param int $Type
      * @param Criterion $Criterion
-     * @return Select
+     * @return ResultSetSelect|DataSelect|ExistsSelect
      * @throws RelationalException
      */
     final public static function OfType($Type, Criterion $Criterion) {
@@ -40,9 +40,11 @@ abstract class Select {
             case SelectType::ResultSet:
                 return new ResultSetSelect($Criterion);
                 
-            case SelectType::Count:
+            case SelectType::Data:
+                return new DataSelect([], $Criterion);
+                
             case SelectType::Exists:
-                return new ValueSelect($Type, $Criterion);
+                return new ExistsSelect($Criterion);
 
             default:
                 throw new RelationalException(

@@ -15,14 +15,6 @@ abstract class ParserBase implements IParser {
                     $Reflection->getName());
         }
         
-        if($Reflection->getNumberOfParameters() !== 1) {
-            throw new InvalidFunctionException(
-                    'Cannot parse function %s: Function must take a single parameter as the entity, currently takes %d',
-                    $Reflection->getName(),
-                    $Reflection->getNumberOfParameters());
-        }
-        $EntityVariableName = $Reflection->getParameters()[0]->getName();
-        
         $FileName = $Reflection->getFileName();
         if(!is_readable($FileName)) {
             throw new InvalidFunctionException(
@@ -31,10 +23,10 @@ abstract class ParserBase implements IParser {
                     $FileName);
         }
         
-        return $this->ParseFunction($Reflection, $FileName, $EntityVariableName);
+        return $this->ParseFunction($Reflection, $FileName);
     }
     
-    protected abstract function ParseFunction(\ReflectionFunctionAbstract $Reflection, $FileName, $EntityVariableName);
+    protected abstract function ParseFunction(\ReflectionFunctionAbstract $Reflection, $FileName);
 }
 
 ?>

@@ -112,30 +112,34 @@ class Platform implements IPlatform {
         return $this->DatabaseSyncer->Sync($this->Connection, $Database);
     }
     
-    final public function LoadResultSet(Core\Relational\ResultSetSelect $Select) {
-        $this->VerifyConnection(__METHOD__);
+    final public function LoadResultRowData(Core\Relational\ResultSetSelect $Select) {
+        $Query = $this->ExecuteSelect(__METHOD__, $Select);
         
-        $QueryBuilder = $this->Connection->QueryBuilder();
-        $this->QueryCompiler->AppendSelect($QueryBuilder, $Select);
-        
-        return $QueryBuilder->Build()->Execute()->FetchAll();
+        return $Query->FetchAll();
     }
     
-    final public function LoadValue(Core\Relational\ValueSelect $Select) {
-        $this->VerifyConnection(__METHOD__);
+    public function LoadData(Core\Relational\DataSelect $Select) {
+        $Query = $this->ExecuteSelect(__METHOD__, $Select);
+        
+        return $Query->FetchAll();
+    }
+    
+    final public function LoadExists(Core\Relational\ExistsSelect $Select) {
+        $Value = $this->ExecuteSelect(__METHOD__, $Select)->FetchValue();
+        
+        return (bool)$Value;
+    }
+    
+    /**
+     * @return IQuery
+     */
+    private function ExecuteSelect($Method, Core\Relational\Select $Select) {
+        $this->VerifyConnection($Method);
         
         $QueryBuilder = $this->Connection->QueryBuilder();
         $this->QueryCompiler->AppendSelect($QueryBuilder, $Select);
         
-        $SelectType = $Select->GetSelectType();
-        $Value = $QueryBuilder->Build()->Execute()->FetchValue();
-        
-        if($SelectType === Core\Relational\SelectType::Count) {
-            return (int)$Value;
-        }
-        else {
-            return (bool)$Value;
-        }
+        return $QueryBuilder->Build()->Execute();
     }
 
     final public function Commit(

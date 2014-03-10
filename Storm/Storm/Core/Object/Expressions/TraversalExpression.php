@@ -32,8 +32,13 @@ abstract class TraversalExpression extends Expression {
     /**
      * @return boolean
      */
-    final public function IsTraversingEntity() {
-        return $this->IsTraversingEntity;
+    final public function OriginatesFrom($ExpressionType) {
+        $TraversalExpression = $this;
+        while ($TraversalExpression instanceof self) {
+            $TraversalExpression = $TraversalExpression->GetValueExpression();
+        }
+        
+        return $TraversalExpression instanceof $ExpressionType;
     }
     
     /**

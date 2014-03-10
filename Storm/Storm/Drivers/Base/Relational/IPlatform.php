@@ -78,12 +78,17 @@ interface IPlatform {
     /**
      * @return array[]
      */
-    public function LoadResultSet(Core\Relational\ResultSetSelect $Select);
+    public function LoadResultRowData(Core\Relational\ResultSetSelect $Select);
     
     /**
-     * @return int|bool
+     * @return array
      */
-    public function LoadValue(Core\Relational\ValueSelect $Select);
+    public function LoadData(Core\Relational\DataSelect $Select);
+    
+    /**
+     * @return bool
+     */
+    public function LoadExists(Core\Relational\ExistsSelect $Select);
     
     public function Commit(
             array $TablesOrderedByPersistingDependency,

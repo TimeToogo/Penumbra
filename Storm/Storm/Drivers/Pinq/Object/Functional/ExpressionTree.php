@@ -11,6 +11,7 @@ use \Storm\Core\Object\Expressions as O;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class ExpressionTree {
+    
     /**
      * The expressions in this expression tree 
      * 
@@ -28,61 +29,71 @@ class ExpressionTree {
     
     public function __construct(array $Expressions) {
         $this->Expressions = $Expressions;
+        
         $this->VariableResolverWalker = new Walkers\VariableResolverWalker();
         $this->TraversalResolverWalker = new Walkers\TraversalResolverWalker();
+        
         $this->LoadReturnExpression();
     }
     
     /**
      * @return O\Expression[]
      */
-    public function GetExpressions() {
+    final public function GetExpressions() {
         return $this->Expressions;
     }
     
     /**
      * @return boolean
      */
-    public function HasReturnExpression() {
+    final public function HasReturnExpression() {
         return $this->ReturnExpression !== null;
     }
     
     /**
      * @return O\ReturnExpression|null
      */
-    public function GetReturnExpression() {
+    final public function GetReturnExpression() {
         return $this->ReturnExpression;
     }
     
-    public function ResolveTraversalExpressions(Object\IEntityMap $EntityMap) {
+    final public function ResolveTraversalExpressions(Object\IEntityMap $EntityMap) {
         $this->TraversalResolverWalker->SetEntityMap($EntityMap);
         $this->Expressions = $this->TraversalResolverWalker->WalkAll($this->Expressions);
         $this->LoadReturnExpression();
     }
     
-    public function Simplify() {
+    final public function Simplify() {
         foreach ($this->Expressions as $Key => $Expression) {
             $this->Expressions[$Key] = $Expression->Simplify();
         }
         $this->LoadReturnExpression();
     }
     
-    public function IsResolved() {
+    final public function IsResolved() {
         return $this->VariableResolverWalker->HasAnyUnresolvedValues();
     }
     
-    public function GetUnresolvedVariables() {
+    final public function GetUnresolvedVariables() {
         return $this->VariableResolverWalker->GetUnresolvedVariables();
     }
     
-    public function ResolveVariables(array $VariableValueMap) {
+    final public function ResolveVariables(array $VariableValueMap) {
+        foreach($VariableValueMap as $VariableName => $Value) {
+            $VariableValueMap[$VariableName] = O\Expression::Value($Value);
+        }
+        
+        $this->ResolveVariablesToExpressions($Value);
+    }
+    
+    final public function ResolveVariablesToExpressions(array $VariableExpressionMap) {
         $this->VariableResolverWalker->ResetUnresolvedVariables();
-        $this->VariableResolverWalker->SetVariableValueMap($VariableValueMap);
+        $this->VariableResolverWalker->SetVariableResolutionMap($VariableExpressionMap);
         $this->Expressions = $this->VariableResolverWalker->WalkAll($this->Expressions);
         $this->LoadReturnExpression();
     }
     
-    private function LoadReturnExpression() {
+    final protected function LoadReturnExpression() {
         $this->ReturnExpression = null;
         foreach ($this->Expressions as $Expression) {
             if($Expression instanceof O\ReturnExpression) {

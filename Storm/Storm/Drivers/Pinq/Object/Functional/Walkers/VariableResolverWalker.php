@@ -29,6 +29,10 @@ class VariableResolverWalker extends O\ExpressionWalker {
     private $UnresolvedVariables = [];
     private $VariableExpressionMap = [];
     
+    public function __construct(array $VariableExpressionMap = []) {
+        $this->VariableExpressionMap = $VariableExpressionMap;
+    }
+    
     public function HasUnresolvedVariables() {
         return count($this->UnresolvedVariables) > 0;
     }
@@ -41,10 +45,8 @@ class VariableResolverWalker extends O\ExpressionWalker {
         $this->UnresolvedVariables = [];
     }
     
-    public function SetVariableValueMap(array $VariableValueMap) {
-        foreach($VariableValueMap as $VariableName => $Value) {
-            $this->VariableExpressionMap[$VariableName] = O\Expression::Value($Value);
-        }
+    public function SetVariableResolutionMap(array $VariableExpressionMap) {
+        $this->VariableExpressionMap = $VariableExpressionMap;
     }
     
     private static $AssignmentToBinaryOperator = [

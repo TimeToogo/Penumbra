@@ -2,15 +2,13 @@
 
 namespace Storm\Drivers\Pinq\Object\Functional;
 
-use \Storm\Core\Object;
+use \Storm\Core\Object\Expressions\Expression;
 
 interface IAST {
-    public function GetEntityVariableName();
-    
     /**
-     * @return ExpressionTree
+     * @return Expression[]
      */
-    public function GetExpressionTree();
+    public function GetExpressions();
 }
 
 ?>

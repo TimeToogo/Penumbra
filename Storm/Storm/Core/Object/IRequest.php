@@ -3,7 +3,7 @@
 namespace Storm\Core\Object;
 
 /**
- * The request represents a range of entities to load specified by the criterion.
+ * The request represents a data to retrieved with rules in the domain model.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
@@ -14,14 +14,7 @@ interface IRequest {
      * @return string
      */
     public function GetEntityType();
-    
-    /**
-     * The properties to load.
-     * 
-     * @return IProperty[]
-     */
-    public function GetProperties();
-    
+        
     /**
      * @return ICriterion
      */

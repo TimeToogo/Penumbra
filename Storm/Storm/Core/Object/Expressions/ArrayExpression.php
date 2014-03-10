@@ -22,7 +22,7 @@ class ArrayExpression extends Expression {
     }
     
     /**
-     * @return Expression[]
+     * @return Expression|null[]
      */
     public function GetKeyExpressions() {
         return $this->KeyExpressions;

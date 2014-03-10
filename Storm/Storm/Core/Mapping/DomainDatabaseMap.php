@@ -219,57 +219,37 @@ abstract class DomainDatabaseMap {
      * @param Object\IRequest $Request The request to load
      * @return object[] All matching entities are retrieved as an array
      */
-    final public function LoadArrayOfEntities(Object\IRequest $Request) {
+    final public function LoadEntities(Object\IEntityRequest $Request) {
         $EntityType = $Request->GetEntityType();
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
         
-        $Select = $this->MapRequest($Request, Relational\SelectType::ResultSet);
+        $Select = $this->MapEntityRequest($Request);
         $ResultRows = $this->Database->Load($Select);
         
         $RevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($this->Database, $ResultRows);
+        
         return $this->Domain->ReviveEntities($EntityType, $RevivalDataArray);        
     }
     
     /**
-     * Loads a single entity specified from the given request or null if none are found.
+     * Loads the data specified by the supplied request
      * 
      * @param Object\IRequest $Request The request to load
-     * @return object|null The matching entity or null if none are matched
+     * @return array[] The loaded data
      */
-    final public function LoadSingleEntity(Object\IRequest $Request) {
-        $EntityType = $Request->GetEntityType();
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-        
-        $Select = $this->MapRequest($Request, Relational\SelectType::ResultSet);
-        $LoadedResultRows = $this->Database->Load($Select);
-        if(count($LoadedResultRows) === 0) {
-            return null;
-        }
-        $ResultRows = array_slice($LoadedResultRows, 0, 1);
-        
-        $RevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($this->Database, $ResultRows);
-        return $this->Domain->ReviveEntities($EntityType, $RevivalDataArray)[0];        
-    }
-    
-    /**
-     * Loads the amount of matching entities
-     * 
-     * @param Object\IRequest $Request The request to load
-     * @return boolean Whether there are any matchin entities
-     */
-    final public function LoadCount(Object\IRequest $Request) {
-        $Select = $this->MapRequest($Request, Relational\SelectType::Count);
+    final public function LoadData(Object\IDataRequest $Request) {
+        $Select = $this->MapDataRequest($Request);
         return $this->Database->Load($Select);
     }
     
     /**
-     * Returns where any entities match the given request
+     * Returns whether any entities match the given request
      * 
      * @param Object\IRequest $Request The request to load
-     * @return int The amount of matching entities
+     * @return bool
      */
     final public function LoadExists(Object\IRequest $Request) {
-        $Select = $this->MapRequest($Request, Relational\SelectType::Exists);
+        $Select = $this->MapToExistsSelect($Request);
         return $this->Database->Load($Select);
     }
     
@@ -301,9 +281,29 @@ abstract class DomainDatabaseMap {
     }
     
     /**
-     * @return Relational\Select
+     * Maps a given object request to the relational equivalent.
+     * 
+     * @param Object\IRequest $Request The request
+     * @return Relational\ExistsSelect The exists relational select
      */
-    protected abstract function MapRequest(Object\IRequest $Request, $SelectType);
+    final protected function MapToExistsSelect(Object\IRequest $Request);
+    
+    /**
+     * Maps a given entity request to the relational equivalent.
+     * 
+     * @param Object\IEntityRequest $EntityRequest The entity request
+     * @return Relational\ResultSetSelect The equivalent relational select
+     */
+    final protected function MapEntityRequest(Object\IEntityRequest $EntityRequest);
+    
+    /**
+     * Maps a given data request to the relational equivalent.
+     * 
+     * @param Object\IDataRequest $DataRequest The data request
+     * @return Relational\DataSelect The data select
+     */
+    final protected function MapDataRequest(Object\IDataRequest $DataRequest);
+    
     
     /**
      * @return Relational\Update

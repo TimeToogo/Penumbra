@@ -130,6 +130,10 @@ class ExpressionWalker {
     public function WalkValue(ValueExpression $Expression) {
         return $Expression;
     }
+    
+    public function WalkAggregate(Aggregates\AggregateExpression $Expression) {
+        return $Expression;
+    }
 }
 
 ?>

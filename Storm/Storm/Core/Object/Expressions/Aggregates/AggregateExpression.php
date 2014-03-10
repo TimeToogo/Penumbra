@@ -2,27 +2,17 @@
 
 namespace Storm\Core\Object\Expressions\Aggregates;
 
-use \Storm\Core\Object\IProperty;
+use \Storm\Core\Object\Expressions\Expression;
+use \Storm\Core\Object\Expressions\ExpressionWalker;
 
 /**
- * Expression for an aggregate function.
- * Count, Maximum, Minimum, Average, Sum, Implode, All, Any
+ * Expression for an aggregate.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 abstract class AggregateExpression extends Expression {
-    private $UniqueValuesOnly;
-    
-    public function __construct($UniqueValuesOnly) {
-        $this->UniqueValuesOnly = $UniqueValuesOnly;
-    }
-    
-    final public function UniqueValuesOnly() {
-        return $this->UniqueValuesOnly;
-    }
-    
-    final protected function MatchesAggregate($UniqueValuesOnly) {
-        return $this->UniqueValuesOnly === $UniqueValuesOnly;
+    final public function Traverse(ExpressionWalker $Walker) {
+        $Walker->WalkAggregate($this);
     }
 }
 

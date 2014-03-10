@@ -2,22 +2,26 @@
 
 namespace Storm\Drivers\Pinq\Object;
 
+use \Storm\Core\Object\IEntityMap;
 use \Storm\Drivers\Base\Object;
+use \Storm\Core\Object\Expressions\Expression;
 
 class Criterion extends Object\Criterion {
     
-    use ReturnExpression;
+    use FunctionParsing;
     
-    public function __construct($EntityType) {
-        parent::__construct($EntityType);
+    public function __construct(IEntityMap $EntityMap, IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
+        parent::__construct($EntityMap->GetEntityType());
+        $this->EntityMap = $EntityMap;
+        $this->FunctionToExpressionTreeConverter = $FunctionToExpressionTreeConverter;
     }
     
-    public function AddPredicateExpression(Functional\ExpressionTree $ExpressionTree) {
-        $this->AddPredicate($this->ParseReturnExpression($ExpressionTree, 'predicate'));
+    public function AddPredicateFunction(callable $Function) {
+        $this->AddPredicate($this->ParseFunctionReturn($Function, 'predicate', [0 => Expression::Entity()]));
     }
     
-    public function AddOrderByExpression(Functional\ExpressionTree $ExpressionTree, $Ascending) {
-        $this->AddOrderByExpression($this->ParseReturnExpression($ExpressionTree, 'order by'), $Ascending);
+    public function AddOrderByFunction(callable $Function, $Ascending) {
+        $this->AddOrderByExpression($this->ParseFunctionReturn($Function, 'order by', [0 => Expression::Entity()]), $Ascending);
     }
 }
 

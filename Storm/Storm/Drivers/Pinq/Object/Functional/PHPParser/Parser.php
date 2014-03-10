@@ -13,7 +13,7 @@ class Parser extends ParserBase {
         
     }
     
-    protected function ParseFunction(\ReflectionFunctionAbstract $Reflection, $FileName, $EntityVariableName) {
+    protected function ParseFunction(\ReflectionFunctionAbstract $Reflection, $FileName) {
         if(self::$PHPParser === null) {
             self::$PHPParser = new \PHPParser_Parser(new \PHPParser_Lexer());
         }
@@ -21,7 +21,7 @@ class Parser extends ParserBase {
         $FileNodes = $this->GetFileNodes($FileName);
         $FunctionBodyNodes = $this->GetFunctionBodyNodes($FileNodes, $Reflection);
         
-        return new AST($FunctionBodyNodes, $EntityVariableName);
+        return new AST($FunctionBodyNodes);
     }
     
     private function GetFileNodes($FileName) {

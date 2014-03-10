@@ -35,7 +35,9 @@ class ProcedureBuilder extends CriterionBuilder {
      */
     final public function BuildProcedure() {
         return new Procedure(
-            $this->FunctionToExpressionTree($this->ProcedureFunction), 
+            $this->EntityMap,
+            $this->FunctionToExpressionTreeConverter,
+            $this->ProcedureFunction, 
             $this->BuildCriterion());
     }
     

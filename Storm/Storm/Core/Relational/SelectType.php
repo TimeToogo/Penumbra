@@ -9,7 +9,7 @@ class SelectType {
     private function __construct() { }
     
     const ResultSet = 0;
-    const Count = 1;
+    const Data = 1;
     const Exists = 2;
 }
 

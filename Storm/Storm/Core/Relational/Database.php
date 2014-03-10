@@ -161,9 +161,11 @@ abstract class Database {
             case SelectType::ResultSet:
                 return $this->LoadResultSet($Select);
                 
-            case SelectType::Count:
+            case SelectType::Data:
+                return $this->LoadData($Select);
+                
             case SelectType::Exists:
-                return $this->LoadValue($Select);
+                return $this->LoadExists($Select);
                 
             default:
                 throw new RelationalException(
@@ -190,13 +192,22 @@ abstract class Database {
     protected abstract function LoadResultRowData(ResultSetSelect $Select);
     
     /**
-     * This method should be implemented such that is returns a single value
-     * by the select from the underlying database.
+     * This method should be implemented such that is returns the data
+     * from the supplied select
      * 
-     * @param ValueSelect $Select The select to load
-     * @return int|bool
+     * @param DataSelect $Select The select to load
+     * @return bool
      */
-    protected abstract function LoadValue(ValueSelect $Select);
+    protected abstract function LoadData(DataSelect $Select);
+    
+    /**
+     * This method should be implemented such that is returns a boolean
+     * from the underlying database.
+     * 
+     * @param ExistsSelect $Select The select to load
+     * @return bool
+     */
+    protected abstract function LoadExists(ExistsSelect $Select);
     
     /**
      * Commits the supplied transaction.

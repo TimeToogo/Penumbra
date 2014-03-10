@@ -2,7 +2,7 @@
 
 namespace Storm\Drivers\Pinq\Object\Functional\PHPParser;
 
-use \Storm\Drivers\Pinq\Object\Functional\ASTBase;
+use \Storm\Drivers\Pinq\Object\Functional\IAST;
 use \Storm\Drivers\Pinq\Object\Functional\PHPParser\PHPParserResolvedValueNode;
 use \Storm\Drivers\Pinq\Object\Functional\ExpressionTree;
 use \Storm\Core\Object;
@@ -13,16 +13,12 @@ use \Storm\Drivers\Pinq\Object\Functional\ASTException;
 
 require_once 'NodeSimplifiers.php';
 
-class AST extends ASTBase {
+class AST implements IAST {
     private $Nodes = [];
     
     private $ConstantValueNodeReplacer;
         
-    public function __construct(
-            array $Nodes, 
-            $EntityVariableName) {
-        
-        parent::__construct($EntityVariableName);
+    public function __construct(array $Nodes) {
         $this->Nodes = $Nodes;
                 
         $this->InitializeVisitors();
@@ -41,7 +37,7 @@ class AST extends ASTBase {
         $this->Nodes = $this->ConstantValueNodeReplacer->traverse($this->Nodes);
     }
     
-    public function GetExpressionTree() {
+    public function GetExpressions() {
         $Expressions = $this->ParseNodes($this->Nodes);
         return new ExpressionTree($Expressions);
     }
@@ -140,13 +136,8 @@ class AST extends ASTBase {
                 return $this->ParseTernaryNode($Node);
                      
             case $Node instanceof \PHPParser_Node_Expr_Variable:
-                if($Node->name === $this->EntityVariableName) {
-                    return Expression::Entity();
-                }
-                else {
-                    $NameExpression = $this->ParseNameNode($Node->name);
-                    return Expression::UnresolvedVariable($NameExpression);
-                }
+                $NameExpression = $this->ParseNameNode($Node->name);
+                return Expression::UnresolvedVariable($NameExpression);
                 
             default:
                 throw new ASTException(
@@ -160,7 +151,7 @@ class AST extends ASTBase {
         $ValueExpressions = [];
         foreach ($Node->items as $Key => $Item) {
             //Keys must match
-            $KeyExpressions[$Key] = $this->ParseNode($Item->key);
+            $KeyExpressions[$Key] = $Item->key === null ? null : $this->ParseNode($Item->key);
             $ValueExpressions[$Key] = $this->ParseNode($Item->value);
         }
         return Expression::NewArray($KeyExpressions, $ValueExpressions);

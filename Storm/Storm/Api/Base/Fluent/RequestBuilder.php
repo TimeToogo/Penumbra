@@ -4,7 +4,9 @@ namespace Storm\Api\Base\Fluent;
 
 use \Storm\Api\Base\Repository;
 use \Storm\Core\Object;
-use \Storm\Drivers\Pinq\Object\Request;
+use \Storm\Core\Object\Expressions as O;
+use \Storm\Drivers\Pinq\Object\EntityRequest;
+use \Storm\Drivers\Pinq\Object\DataRequest;
 use \Storm\Drivers\Pinq\Object\Functional\ExpressionTree;
 use \Storm\Drivers\Pinq\Object\IFunctionToExpressionTreeConverter;
 
@@ -19,8 +21,9 @@ class RequestBuilder extends CriterionBuilder {
      */
     protected $Repository;
     private $Properties;
-    private $GroupByExpresssionTrees = [];
-    private $AggregatePredicateExpressionTrees = [];
+    private $DataFunctionOrExpression = null;
+    private $GroupByFunctions = [];
+    private $AggregatePredicateFunctions = [];
     private $Properties;
     
     public function __construct(
@@ -40,13 +43,24 @@ class RequestBuilder extends CriterionBuilder {
      * @return Request
      */
     final public function BuildRequest() {
-        return new Request(
-            $this->EntityMap,
-            $this->Properties,
-            $this->GroupByExpresssionTrees,
-            $this->AggregatePredicateExpressionTrees,
-            $this->IsSingleEntity, 
-            $this->BuildCriterion());
+        if($this->DataFunctionOrExpression === null) {
+            return new EntityRequest(
+                $this->EntityMap,
+                $this->FunctionToExpressionTreeConverter,
+                $this->Properties,
+                $this->GroupByFunctions,
+                $this->AggregatePredicateFunctions,
+                $this->BuildCriterion());
+        }
+        else {
+            return new DataRequest(
+                $this->EntityMap,
+                $this->FunctionToExpressionTreeConverter,
+                $this->DataFunctionOrExpression,
+                $this->GroupByFunctions,
+                $this->AggregatePredicateFunctions,
+                $this->BuildCriterion());
+        }
     }
     
     /**
@@ -63,7 +77,7 @@ class RequestBuilder extends CriterionBuilder {
      * @return static
      */
     final public function GroupBy(callable $Expression) {
-        $this->GroupByExpresssionTrees[] = $this->FunctionToExpressionTree($Expression);        
+        $this->GroupByFunctions[] = $this->FunctionToExpressionTree($Expression);        
         return $this;
     }
         
@@ -81,7 +95,7 @@ class RequestBuilder extends CriterionBuilder {
      * @return static
      */
     final public function Having(callable $Expression) {
-        $this->AggregatePredicateExpressionTrees[] = $this->FunctionToExpressionTree($Expression);        
+        $this->AggregatePredicateFunctions[] = $this->FunctionToExpressionTree($Expression);        
         return $this;
     }
     
@@ -89,21 +103,25 @@ class RequestBuilder extends CriterionBuilder {
      * @return object[]
      */
     public function AsArray() {
-        return $this->Repository->LoadAsArray($this->BuildRequest());
+        return $this->Repository->LoadEntities($this->BuildRequest());
     }
     
     /**
      * @return object|null
      */
-    public function First() {  
-        return $this->Repository->LoadFirst($this->BuildRequest());
+    public function First() {
+        $this->Limit(1);
+        $Entities = $this->Repository->LoadEntities($this->BuildRequest());
+        
+        return count($Entities) === 0 ? null : reset($Entities);
     }
     
     /**
-     * @return int
+     * @return int|int[]
      */
     public function Count() {
-        return $this->Repository->LoadCount($this->BuildRequest());
+        
+        return $this->Repository->LoadData($this->BuildRequest());
     }
     
     /**
@@ -111,6 +129,18 @@ class RequestBuilder extends CriterionBuilder {
      */
     public function Exists() {
         return $this->Repository->LoadExists($this->BuildRequest());
+    }
+    
+    /**
+     * @return boolean
+     */
+    public function Data(callable $DataFunction) {
+        $this->DataFunctionOrExpression = $DataFunction;
+        return $this->Repository->LoadData($this->BuildRequest());
+    }
+    
+    private function LoadAggregateExpression(O\Expression $Expression) {
+        $this->DataFunctionOrExpression = O\Expression::NewArray([O\Expression::Value(0)], $Expression);
     }
 }
 

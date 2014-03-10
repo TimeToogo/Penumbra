@@ -2,34 +2,43 @@
 
 namespace Storm\Drivers\Pinq\Object;
 
+use \Storm\Core\Object\IEntityMap;
 use \Storm\Drivers\Base\Object;
-use \Storm\Core\Object\Expressions as O;;
+use \Storm\Core\Object\Expressions as O;
 
 class Procedure extends Object\Procedure {
+    
+    use FunctionParsing;
+    
     public function __construct(
-            $EntityType,
-            Functional\ExpressionTree $ExpressionTree,
+            IEntityMap $EntityMap, 
+            IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter,
+            callable $Function,
             \Storm\Core\Object\ICriterion $Criterion = null) {
+        $this->EntityMap = $EntityMap;
+        $this->FunctionToExpressionTreeConverter = $FunctionToExpressionTreeConverter;
+        
+        $ProcedureExpressionTree = $this->ParseFunction($Function, [0 => O\Expression::Entity()]);
         
         parent::__construct(
-                $EntityType, 
-                $this->ParseAssignmentExpressions($ExpressionTree), 
-                $Criterion ?: new Criterion($EntityType));
+                $EntityMap->GetEntityType(), 
+                $this->ParseAssignmentExpressions($ProcedureExpressionTree), 
+                $Criterion ?: new Criterion($EntityMap, $FunctionToExpressionTreeConverter));
     }
     
-    private function ParseAssignmentExpressions(Functional\ExpressionTree $ExpressionTree) {
+    final protected function ParseAssignmentExpressions(Functional\ExpressionTree $ExpressionTree) {
         $Expressions = $ExpressionTree->GetExpressions();
         
+        $PropertyAssignmentExpressions = [];
         foreach ($Expressions as $Key => $Expression) {
             if($Expression instanceof O\AssignmentExpression
                     && $Expression->GetAssignToExpression() instanceof O\PropertyExpression) {
-                continue;
+                $PropertyAssignmentExpressions[$Key] = $Expressions[$Key];
             }
             
-            unset($Expressions[$Key]);
         }
         
-        return $Expressions;
+        return $PropertyAssignmentExpressions;
     }
 }
 

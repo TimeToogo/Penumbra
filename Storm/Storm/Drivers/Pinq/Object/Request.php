@@ -4,36 +4,37 @@ namespace Storm\Drivers\Pinq\Object;
 
 use \Storm\Drivers\Base\Object;
 use \Storm\Core\Object\IEntityMap;
-use \Storm\Drivers\Pinq\Object\Functional;
 
-class Request extends Object\Request {
+abstract class Request extends Object\Request {
     
-    use ReturnExpression;
+    use FunctionParsing;
     
     public function __construct(
             IEntityMap $EntityMap, 
-            array $Properties = null, 
-            array $GroupByExpressionTrees = array(), 
-            array $AggregatePredicateExpressionTrees = array(), 
-            $IsSingleEntity = false,
+            IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter,
+            IGroup $Group = null, 
+            array $AggregatePredicateFunctions = [], 
             \Storm\Core\Object\ICriterion $Criterion = null) {
-        $EntityType = $EntityMap->GetEntityType();
+        $this->EntityMap = $EntityMap;
+        $this->FunctionToExpressionTreeConverter = $FunctionToExpressionTreeConverter;
         
         $GroupByExpressions = array_map(
-                function ($I) { return $this->ParseReturnExpression($I, 'group by'); }, 
-                $GroupByExpressionTrees);
+                function ($I) { return $this->ParseFunctionReturn($I, 'group by'); }, 
+                $Groups);
                 
         $AggregatePredicateExpressions = array_map(
-                function ($I) { return $this->ParseReturnExpression($I, 'aggregate predicate'); }, 
-                $AggregatePredicateExpressionTrees);
+                function ($I) { return $this->ParseFunctionReturn($I, 'aggregate predicate'); }, 
+                $AggregatePredicateFunctions);
         
         parent::__construct(
-                $EntityType,
-                $Properties ?: $EntityMap->GetProperties(),
+                $EntityMap->GetEntityType(),
                 $GroupByExpressions,
                 $AggregatePredicateExpressions,
-                $IsSingleEntity,
-                $Criterion ?: new Criterion($EntityType));
+                $Criterion ?: new Criterion($EntityMap, $FunctionToExpressionTreeConverter));
+    }
+    
+    private function ParseGroup(IGroup $Group) {
+        $Group->H
     }
 }
 

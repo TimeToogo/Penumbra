@@ -5,12 +5,10 @@ namespace Storm\Drivers\Base\Object;
 use \Storm\Core\Object;
 use \Storm\Core\Object\Expressions\Expression;
 
-class Request implements Object\IRequest {
+abstract class Request implements Object\IRequest {
     private $EntityType;
-    private $Properties = [];
     private $GroupByExpressions = [];
     private $AggregatePredicateExpressions = [];
-    private $IsSingleEntity;
     
     /**
      * @var Object\ICriterion 
@@ -19,10 +17,8 @@ class Request implements Object\IRequest {
     
     public function __construct(
             $EntityOrType, 
-            array $Properties, 
             array $GroupByExpressions,
             array $AggregatePredicateExpressions,
-            $IsSingleEntity, 
             Object\ICriterion $Criterion = null) {
         
         if(is_object($EntityOrType)) {
@@ -30,9 +26,6 @@ class Request implements Object\IRequest {
         }
         $this->EntityType = $EntityOrType;
         
-        foreach($Properties as $Property) {
-            $this->AddProperty($Property);
-        }
         
         foreach($GroupByExpressions as $GroupByExpression) {
             $this->AddGroupByExpression($GroupByExpression);
@@ -41,7 +34,6 @@ class Request implements Object\IRequest {
             $this->AddAggregatePredicateExpression($AggregatePredicateExpression);
         }
         
-        $this->IsSingleEntity = $IsSingleEntity;
         $this->Criterion = $Criterion ?: new Criterion($this->EntityType);
         if($this->Criterion->GetEntityType() !== $this->EntityType) {
             throw new Object\TypeMismatchException(
@@ -50,19 +42,11 @@ class Request implements Object\IRequest {
                     $this->Criterion->GetEntityType());
         }
     }
-    
-    final protected function AddProperty(Object\IProperty $Property) {
-        $this->Properties[$Property->GetIdentifier()] = $Property;
-    }
 
     final public function GetEntityType() {
         return $this->EntityType;
     }
-    
-    final public function GetProperties() {
-        return $this->Properties;
-    }
-    
+        
     final public function GetCriterion() {
         return $this->Criterion;
     }

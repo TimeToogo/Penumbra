@@ -170,42 +170,25 @@ class Repository {
      * @param Object\IRequest $Request The request to load
      * @return object[]
      */
-    final public function LoadAsArray(Object\IRequest $Request) {
+    final public function LoadEntities(Object\IEntityRequest $Request) {
         $this->VerifyRequestType($Request);
         
-        $Entities = $this->DomainDatabaseMap->LoadArrayOfEntities($Request);
+        $Entities = $this->DomainDatabaseMap->LoadEntities($Request);
         $this->IdentityMap->CacheEntities($Entities);
         
         return $Entities;
     }
     
     /**
-     * Loads the first entity specified by the supplied request or null if none exists.
+     * Loads the data specified by the request
      * 
      * @param Object\IRequest $Request The request to load
-     * @return object|null
+     * @return array[] the loaded data
      */
-    final public function LoadFirst(Object\IRequest $Request) {
+    public function LoadData(Object\IDataRequest $Request) {
         $this->VerifyRequestType($Request);
         
-        $Entity = $this->DomainDatabaseMap->LoadSingleEntity($Request);
-        if($Entity !== null) {
-            $this->IdentityMap->CacheEntity($Entity);
-        }
-        
-        return $Entity;
-    }
-    
-    /**
-     * Loads the amount of entities that match the request
-     * 
-     * @param Object\IRequest $Request The request to load
-     * @return int
-     */
-    public function LoadCount(Object\IRequest $Request) {
-        $this->VerifyRequestType($Request);
-        
-        return $this->DomainDatabaseMap->LoadCount($Request);
+        return $this->DomainDatabaseMap->LoadData($Request);
     }
     
     /**

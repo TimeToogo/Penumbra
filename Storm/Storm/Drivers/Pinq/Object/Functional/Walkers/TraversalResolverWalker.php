@@ -35,7 +35,7 @@ class TraversalResolverWalker extends O\ExpressionWalker {
     }
     
     private function WalkTraversal(O\TraversalExpression $Expression) {
-        if($Expression->IsTraversingEntity()) {
+        if($Expression->OriginatesFrom(O\EntityExpression::GetType())) {
             return $this->EntityMap->ResolveTraversalExpression($Expression);
         }
         

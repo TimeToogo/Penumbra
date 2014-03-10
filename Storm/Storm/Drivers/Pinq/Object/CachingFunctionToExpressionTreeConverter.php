@@ -15,7 +15,7 @@ class CachingFunctionToExpressionTreeConverter extends FunctionToExpressionTreeC
         $this->Cache = $Cache;
     }
 
-    public function ConvertAndResolve(Object\IEntityMap $EntityMap, callable $Function) {
+    public function ConvertAndResolve(Object\IEntityMap $EntityMap, callable $Function, array $ParameterExpressionMap = []) {
         $Reflection = $this->Parser->GetReflection($Function);
         $FunctionHash = $this->FunctionHash($Reflection);
         
@@ -25,13 +25,14 @@ class CachingFunctionToExpressionTreeConverter extends FunctionToExpressionTreeC
         }
         
         if(!($ExpressionTree instanceof Functional\ExpressionTree)) {
-            $ExpressionTree = $this->Parser->Parse($Reflection)->GetExpressionTree();
+            $ExpressionTree = $this->Parser->Parse($Reflection)->GetExpressions();
             
             /*
              * Resolve all that can be currently resolved and save the expression tree 
              * with all the unresolvable variables so it can be resolved with different values later
              */
-            $this->Resolve($ExpressionTree, $EntityMap, []);
+            $ParameterExpressionMap = $this->ParametersToVariableNames($Reflection, $ParameterExpressionMap);
+            $this->Resolve($ExpressionTree, $EntityMap, $ParameterExpressionMap);
             $this->Cache->Save($FunctionHash, $ExpressionTree);
         }
         
