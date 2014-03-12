@@ -34,8 +34,8 @@ class TransactionCommiter implements ITransactionCommiter {
                 }
             }
             
-            foreach($Transaction->GetDeletes() as $Criterion) {
-                $this->DeleteWhereQuery($Connection, $Criterion);
+            foreach($Transaction->GetDeletes() as $Criteria) {
+                $this->DeleteWhereQuery($Connection, $Criteria);
             }
             
             foreach($Transaction->GetUpdates() as $Procedure) {

@@ -7,7 +7,7 @@ use \Storm\Core\Object\Expressions\Expression;
 /**
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class SumExpression extends AggregateExpression {
+class SumExpression extends UniqueValueAggregateExpression {
     
 }
 

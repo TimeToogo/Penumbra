@@ -56,14 +56,14 @@ class StandardQueryCompiler implements Queries\IQueryCompiler {
     
     protected function AppendSelectClauses(QueryBuilder $QueryBuilder, Relational\Select $Select) {
         $QueryBuilder->Append(' FROM ');
-        $QueryBuilder->AppendTableDefinition($Select->GetCriterion());
-        $this->AppendSelectCriterion($QueryBuilder, $Select);
+        $QueryBuilder->AppendTableDefinition($Select->GetCriteria());
+        $this->AppendSelectCriteria($QueryBuilder, $Select);
     }
     
-    protected function AppendSelectCriterion(QueryBuilder $QueryBuilder, Relational\Select $Select) {
-        $Criterion = $Select->GetCriterion();
+    protected function AppendSelectCriteria(QueryBuilder $QueryBuilder, Relational\Select $Select) {
+        $Criteria = $Select->GetCriteria();
         
-        $QueryBuilder->AppendWhere($Criterion);
+        $QueryBuilder->AppendWhere($Criteria);
         
         if($Select->IsGrouped()) {
             $this->AppendGroupByClause($QueryBuilder, $Select->GetGroupByExpressions());
@@ -72,8 +72,8 @@ class StandardQueryCompiler implements Queries\IQueryCompiler {
             $this->AppendHavingClause($QueryBuilder, $Select->GetAggregatePredicateExpressions());
         }
         
-        $QueryBuilder->AppendOrderBy($Criterion);
-        $QueryBuilder->AppendRange($Criterion);
+        $QueryBuilder->AppendOrderBy($Criteria);
+        $QueryBuilder->AppendRange($Criteria);
     }
     
     protected function AppendGroupByClause(QueryBuilder $QueryBuilder, array $Expressions) {
@@ -91,34 +91,34 @@ class StandardQueryCompiler implements Queries\IQueryCompiler {
     }
 
     public function AppendUpdate(QueryBuilder $QueryBuilder, Relational\Update $Update) {
-        $Criterion = $Update->GetCriterion();
+        $Criteria = $Update->GetCriteria();
         
         $QueryBuilder->Append('UPDATE ');
-        $QueryBuilder->AppendTableDefinition($Criterion);
+        $QueryBuilder->AppendTableDefinition($Criteria);
         $QueryBuilder->Append(' SET ');
         
         foreach($QueryBuilder->Delimit($Update->GetExpressions(), ',') as $Expression) {
             $QueryBuilder->AppendExpression($Expression);
         }
         
-        $this->AppendCriterion($QueryBuilder, $Criterion);
+        $this->AppendCriteria($QueryBuilder, $Criteria);
     }
 
     public function AppendDelete(QueryBuilder $QueryBuilder, Relational\Delete $Delete) {
-        $Criterion = $Delete->GetCriterion();
+        $Criteria = $Delete->GetCriteria();
         
         $QueryBuilder->AppendIdentifiers('DELETE # ', array_keys($Delete->GetTables()), ',');
         $QueryBuilder->Append(' FROM ');
         
-        $QueryBuilder->AppendTableDefinition($Criterion);
+        $QueryBuilder->AppendTableDefinition($Criteria);
         
-        $this->AppendCriterion($QueryBuilder, $Criterion);
+        $this->AppendCriteria($QueryBuilder, $Criteria);
     }
     
-    protected function AppendCriterion(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
-        $QueryBuilder->AppendWhere($Criterion);
-        $QueryBuilder->AppendOrderBy($Criterion);
-        $QueryBuilder->AppendRange($Criterion);
+    protected function AppendCriteria(QueryBuilder $QueryBuilder, Relational\Criteria $Criteria) {
+        $QueryBuilder->AppendWhere($Criteria);
+        $QueryBuilder->AppendOrderBy($Criteria);
+        $QueryBuilder->AppendRange($Criteria);
     }
 }
 

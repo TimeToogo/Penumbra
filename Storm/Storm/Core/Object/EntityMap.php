@@ -259,9 +259,6 @@ abstract class EntityMap implements IEntityMap {
      * {@inheritDoc}
      */
     public function ResolveTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null) {
-        if(!$Expression->OriginatesFrom(Expressions\EntityExpression::GetType())) {
-            throw new ObjectException('Cannot resolve traversal expression: must be traversing the entity');
-        }
         foreach ($this->Properties as $Property) {
             $ResolvedPropertyExpression = $Property->ResolveTraversalExpression($Expression, $ParentPropertyExpression);
             if($ResolvedPropertyExpression !== null) {

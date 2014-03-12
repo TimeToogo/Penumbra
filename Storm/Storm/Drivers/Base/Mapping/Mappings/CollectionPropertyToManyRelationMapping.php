@@ -78,11 +78,11 @@ class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelati
         }
     }
 
-    public function MapFunctionCall(Relational\Criterion $Criterion, Expressions\FunctionCallExpression $FunctionCallExpression) {
-        $this->ToManyRelation->AddRelationToCriterion($Criterion);
+    public function MapFunctionCall(Relational\Criteria $Criteria, Expressions\FunctionCallExpression $FunctionCallExpression) {
+        $this->ToManyRelation->AddRelationToCriteria($Criteria);
     }
 
-    public function AddToCriterion(Relational\Criterion $Criterion) {
+    public function AddToCriteria(Relational\Criteria $Criteria) {
         
     }
 

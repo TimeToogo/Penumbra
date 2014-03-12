@@ -3,11 +3,11 @@
 namespace Storm\Core\Relational;
 
 /**
- * The criterion represents the data nessecary to specify which rows should the operation apply to.
+ * The criteria represents the data nessecary to specify which rows should the operation apply to.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-final class Criterion {
+final class Criteria {
     /**
      * @var ITable 
      */
@@ -86,7 +86,7 @@ final class Criterion {
     }
     
     /**
-     * Add a joined table to the criterion.
+     * Add a joined table to the criteria.
      * 
      * @param Join $Join The join to add
      * @return void
@@ -98,7 +98,7 @@ final class Criterion {
     }
     
     /**
-     * Add multiple joined tables to the criterion.
+     * Add multiple joined tables to the criteria.
      * 
      * @param array $Joins The joins to add
      * @return void

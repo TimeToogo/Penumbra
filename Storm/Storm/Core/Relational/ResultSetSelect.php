@@ -10,8 +10,8 @@ namespace Storm\Core\Relational;
 class ResultSetSelect extends Select {
     private $Columns = [];
     
-    public function __construct(Criterion $Criterion) {
-        parent::__construct($Criterion);
+    public function __construct(Criteria $Criteria) {
+        parent::__construct($Criteria);
     }
     
     final public function GetSelectType() {
@@ -29,7 +29,7 @@ class ResultSetSelect extends Select {
      * @return void
      */
     final public function AddColumn(IColumn $Column) {
-        if(!$this->Criterion->HasTable($Column->GetTable()->GetName())) {
+        if(!$this->Criteria->HasTable($Column->GetTable()->GetName())) {
             throw new RelationalException(
                     'Cannot add column \'%s\' to relational select the parent table table \'%s\' has not part of the select',
                     $Column->GetName(),

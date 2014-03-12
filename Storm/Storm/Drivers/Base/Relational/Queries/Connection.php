@@ -22,9 +22,9 @@ abstract class Connection implements IConnection {
      */
     protected $ProcedureCompiler;
     /**
-     * @var ICriterionCompiler 
+     * @var ICriteriaCompiler 
      */
-    protected $CriterionCompiler;
+    protected $CriteriaCompiler;
     
     final public function SetExpressionCompiler(IExpressionCompiler $ExpressionCompiler) {
         $this->ExpressionCompiler = $ExpressionCompiler;
@@ -34,8 +34,8 @@ abstract class Connection implements IConnection {
         $this->IdentifierEscaper = $IdentifierEscaper;
     }
     
-    final public function SetCriterionCompiler(ICriterionCompiler $CriterionCompiler) {
-        $this->CriterionCompiler = $CriterionCompiler;
+    final public function SetCriteriaCompiler(ICriteriaCompiler $CriteriaCompiler) {
+        $this->CriteriaCompiler = $CriteriaCompiler;
     }
     
     final public function SetRequestCompiler(ISelectCompiler $RequestCompiler) {

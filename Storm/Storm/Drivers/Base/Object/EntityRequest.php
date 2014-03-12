@@ -9,21 +9,21 @@ class EntityRequest extends Request implements Object\IEntityRequest {
     private $Properties = [];
     
     /**
-     * @var Object\ICriterion 
+     * @var Object\ICriteria 
      */
-    private $Criterion;
+    private $Criteria;
     
     public function __construct(
             $EntityOrType, 
             array $Properties, 
             array $GroupByExpressions,
             array $AggregatePredicateExpressions,
-            Object\ICriterion $Criterion = null) {
+            Object\ICriteria $Criteria = null) {
         parent::__construct(
                 $EntityOrType, 
                 $GroupByExpressions, 
                 $AggregatePredicateExpressions, 
-                $Criterion);
+                $Criteria);
         
         foreach($Properties as $Property) {
             $this->AddProperty($Property);

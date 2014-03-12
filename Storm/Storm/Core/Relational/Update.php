@@ -6,7 +6,7 @@ use \Storm\Core\Relational\Expressions;
 
 /**
  * The procedure represents a set of changes to columns values to
- * a variable amount of rows defined by a criterion.
+ * a variable amount of rows defined by a criteria.
  * This can be thought of an UPDATE statement
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
@@ -21,12 +21,12 @@ class Update {
     private $Expressions;
     
     /**
-     * @var Criterion
+     * @var Criteria
      */
-    private $Criterion;
+    private $Criteria;
     
-    public function __construct(Criterion $Criterion = null) {
-        $this->Criterion = $Criterion ?: $Criterion;
+    public function __construct(Criteria $Criteria = null) {
+        $this->Criteria = $Criteria ?: $Criteria;
     }
     
     /**
@@ -45,19 +45,19 @@ class Update {
     }
     
     /**
-     * @return Criterion
+     * @return Criteria
      */
-    final public function GetCriterion() {
-        return $this->Criterion;
+    final public function GetCriteria() {
+        return $this->Criteria;
     }
     
     /**
-     * Set the procedure's criterion.
+     * Set the procedure's criteria.
      * 
-     * @param Criterion $Criterion The criterion to set
+     * @param Criteria $Criteria The criteria to set
      */
-    final public function SetCriterion(Criterion $Criterion) {
-        $this->Criterion = $Criterion;
+    final public function SetCriteria(Criteria $Criteria) {
+        $this->Criteria = $Criteria;
     }
 }
 

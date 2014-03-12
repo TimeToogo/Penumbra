@@ -63,12 +63,12 @@ interface IDataPropertyColumnMapping extends IPropertyMapping {
     /**
      * @return Relational\Expression[]
      */
-    public function MapAssignment(Relational\Criterion $Criterion, Expressions\Expression $AssignmentValueExpression);
+    public function MapAssignment(Relational\Criteria $Criteria, Expressions\Expression $AssignmentValueExpression);
     
     /**
      * @return Relational\Expression[]
      */
-    public function MapBinary(Relational\Criterion $Criterion, Expressions\Expression $OperandValueExpression);
+    public function MapBinary(Relational\Criteria $Criteria, Expressions\Expression $OperandValueExpression);
 }
 
 ?>

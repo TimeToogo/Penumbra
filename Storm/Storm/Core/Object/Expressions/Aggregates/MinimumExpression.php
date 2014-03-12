@@ -7,7 +7,7 @@ use \Storm\Core\Object\Expressions\Expression;
 /**
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class MinimumExpression extends UniqueValueAggregateExpression {
+class MinimumExpression extends ValueAggregateExpression {
     
 }
 

@@ -44,7 +44,7 @@ final class UnitOfWork {
     private $DiscardedIdentityGroups = [];
     
     /**
-     * @var ICriterion[] 
+     * @var ICriteria[] 
      */
     private $DiscardedCriteria = [];
     
@@ -158,15 +158,15 @@ final class UnitOfWork {
     }
     
     /**
-     * Discard all entities matching the supplied criterion.
+     * Discard all entities matching the supplied criteria.
      * 
-     * @param ICriterion $Criterion The criterion to discard by
+     * @param ICriteria $Criteria The criteria to discard by
      */
-    public function DiscardWhere(ICriterion $Criterion) {
-        if(!$this->Domain->HasEntityMap($Criterion->GetEntityType())) {
-            throw $this->TypeMismatch('criterion', $Criterion->GetEntityType());
+    public function DiscardWhere(ICriteria $Criteria) {
+        if(!$this->Domain->HasEntityMap($Criteria->GetEntityType())) {
+            throw $this->TypeMismatch('criteria', $Criteria->GetEntityType());
         }
-        $this->DiscardedCriteria[spl_object_hash($Criterion)] = $Criterion;
+        $this->DiscardedCriteria[spl_object_hash($Criteria)] = $Criteria;
     }
     
     /**
@@ -205,7 +205,7 @@ final class UnitOfWork {
     }
     
     /**
-     * @return ICriterion[]
+     * @return ICriteria[]
      */
     public function GetDiscardedCriteria() {
         return $this->DiscardedCriteria;

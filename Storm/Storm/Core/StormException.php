@@ -3,6 +3,8 @@
 namespace Storm\Core;
 
 class StormException extends \Exception {
+    private static $Reflection = null;
+    
     /**
      * @var \Exception 
      */
@@ -13,7 +15,7 @@ class StormException extends \Exception {
      * @param type $MessageFormat
      * @param mixed ... The values to interpole the message with
      */
-    public function __construct($MessageFormat) {
+    public function __construct($MessageFormat, $_ = null) {
         if(func_num_args() === 1) {
             $Message = $MessageFormat;
         }
@@ -24,8 +26,9 @@ class StormException extends \Exception {
         parent::__construct($Message, null, null);
     }
     
-    final public function Forward(array $Arguments) {
-        return call_user_func_array(['self', '__construct'], $Arguments);
+    final public static function Construct(array $Arguments) {
+        $Message = call_user_func_array('sprintf', $Arguments);
+        return new static($Message);
     }
     
     final public function GetInnerException() {

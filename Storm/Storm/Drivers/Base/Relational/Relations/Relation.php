@@ -25,16 +25,16 @@ abstract class Relation implements Relational\IRelation {
     }
     
     final public function AddRelationToSelect(Relational\Select $Request, array $ParentRows = null) {
-        $this->AddRelationToCriterion($Request->GetCriterion(), $ParentRows);
+        $this->AddRelationToCriteria($Request->GetCriteria(), $ParentRows);
         
         if($ParentRows !== null && count($ParentRows) > 0) {
             $this->AddParentColumnsToRequest($Request);
         }
     }
     
-    final public function AddRelationToCriterion(Relational\Criterion $Criterion, array $ParentRows = null) {
-        $Criterion->AddJoins($this->RelationJoins());
-        $this->AddParentPredicate($Criterion, $ParentRows);
+    final public function AddRelationToCriteria(Relational\Criteria $Criteria, array $ParentRows = null) {
+        $Criteria->AddJoins($this->RelationJoins());
+        $this->AddParentPredicate($Criteria, $ParentRows);
     }
     
     final protected function RelationJoins() {
@@ -45,12 +45,12 @@ abstract class Relation implements Relational\IRelation {
      * Relational\Join[]
      */
     protected abstract function GetRelationJoins(Relational\ITable $Table);
-    private function AddParentPredicate(Relational\Criterion $Criterion, array $ParentRows = null) {
+    private function AddParentPredicate(Relational\Criteria $Criteria, array $ParentRows = null) {
         if($ParentRows !== null && count($ParentRows) > 0) {
-            $this->AddParentPredicateToCriterion($Criterion, $ParentRows);
+            $this->AddParentPredicateToCriteria($Criteria, $ParentRows);
         }
     }
-    protected abstract function AddParentPredicateToCriterion(Relational\Criterion $Criterion, array $ParentRows);
+    protected abstract function AddParentPredicateToCriteria(Relational\Criteria $Criteria, array $ParentRows);
     
     protected abstract function AddParentColumnsToRequest(Relational\Select $Request);
     
@@ -64,7 +64,7 @@ abstract class Relation implements Relational\IRelation {
     
     final public function RelationSelect($Type, array $ParentRows = null) {
         $Request = $this->NewRelationRequest($Type);
-        $this->AddParentPredicate($Request->GetCriterion(), $ParentRows);
+        $this->AddParentPredicate($Request->GetCriteria(), $ParentRows);
         
         return $Request;
     }
@@ -72,7 +72,7 @@ abstract class Relation implements Relational\IRelation {
      * Relational\Request
      */
     protected function NewRelationRequest($Type) {
-        return new Relational\Select($Type, new Relational\Criterion($this->Table));
+        return new Relational\Select($Type, new Relational\Criteria($this->Table));
     }
 }
 

@@ -27,8 +27,8 @@ final class BlogRelationalMap extends Mapping\EntityRelationalMap {
         $this->Map($EntityMap->Posts)->ToCollection($Table->Posts);
     }
     
-    protected function RelationalCriterion(Relational\Criterion $RelationalCriterion, Relational\Database $Database) {
-        $RelationalCriterion->AddJoin(new Relational\Join(Relational\JoinType::Left, $Database->Authors));
+    protected function RelationalCriteria(Relational\Criteria $RelationalCriteria, Relational\Database $Database) {
+        $RelationalCriteria->AddJoin(new Relational\Join(Relational\JoinType::Left, $Database->Authors));
     }
 }
 

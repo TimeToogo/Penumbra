@@ -4,7 +4,7 @@ namespace Storm\Drivers\Base\Relational\Queries;
 
 use \Storm\Drivers\Base\Relational;
 use \Storm\Core\Relational\Expression;
-use \Storm\Core\Relational\Criterion;
+use \Storm\Core\Relational\Criteria;
 use \Storm\Core\Relational\Select;
 use \Storm\Core\Relational\Update;
 
@@ -15,7 +15,7 @@ class QueryBuilder {
     private $Bindings;
     private $QueryString = '';
     private $ExpressionCompiler;
-    private $CriterionCompiler;
+    private $CriteriaCompiler;
     private $QueryCompiler;
     private $ProcedureCompiler;
     private $IdentifierEscaper;
@@ -25,7 +25,7 @@ class QueryBuilder {
             $ParameterPlaceholder,
             Bindings $Bindings,
             IExpressionCompiler $ExpressionCompiler,
-            ICriterionCompiler $CriterionCompiler,
+            ICriteriaCompiler $CriteriaCompiler,
             IQueryCompiler $QueryCompiler,
             IUpdateCompiler $ProcedureCompiler,
             IIdentifierEscaper $IdentifierEscaper) {
@@ -33,7 +33,7 @@ class QueryBuilder {
         $this->ParameterPlaceholder = $ParameterPlaceholder;
         $this->Bindings = $Bindings;
         $this->ExpressionCompiler = $ExpressionCompiler;
-        $this->CriterionCompiler = $CriterionCompiler;
+        $this->CriteriaCompiler = $CriteriaCompiler;
         $this->QueryCompiler = $QueryCompiler;
         $this->ProcedureCompiler = $ProcedureCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
@@ -69,10 +69,10 @@ class QueryBuilder {
     }
     
     /**
-     * @return ICriterionCompiler
+     * @return ICriteriaCompiler
      */
-    final public function GetCriterionCompiler() {
-        return $this->CriterionCompiler;
+    final public function GetCriteriaCompiler() {
+        return $this->CriteriaCompiler;
     }
     
     /**
@@ -139,21 +139,21 @@ class QueryBuilder {
         $this->QueryCompiler->AppendUpdate($this, $Update);
     }
     
-    final public function AppendTableDefinition(Criterion $Criterion) {
-        $this->CriterionCompiler->AppendTableDefinition($this, $Criterion);
+    final public function AppendTableDefinition(Criteria $Criteria) {
+        $this->CriteriaCompiler->AppendTableDefinition($this, $Criteria);
     }
 
-    final public function AppendWhere(Criterion $Criterion) {
-        $this->CriterionCompiler->AppendWhere($this, $Criterion);
+    final public function AppendWhere(Criteria $Criteria) {
+        $this->CriteriaCompiler->AppendWhere($this, $Criteria);
     }
 
-    final public function AppendOrderBy(Criterion $Criterion) {
-        $this->CriterionCompiler->AppendOrderBy($this, $Criterion);
+    final public function AppendOrderBy(Criteria $Criteria) {
+        $this->CriteriaCompiler->AppendOrderBy($this, $Criteria);
         
     }
     
-    final public function AppendRange(Criterion $Criterion) {
-        $this->CriterionCompiler->AppendRange($this, $Criterion);
+    final public function AppendRange(Criteria $Criteria) {
+        $this->CriteriaCompiler->AppendRange($this, $Criteria);
     }
 
     // </editor-fold>

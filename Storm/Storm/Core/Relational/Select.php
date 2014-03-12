@@ -19,32 +19,32 @@ abstract class Select {
     private $GroupByExpressions = [];
     
     /**
-     * @var Criterion
+     * @var Criteria
      */
-    private $Criterion;
+    private $Criteria;
     
-    public function __construct(Criterion $Criterion) {
-        $this->Criterion = $Criterion;
+    public function __construct(Criteria $Criteria) {
+        $this->Criteria = $Criteria;
     }
     
     /**
      * Returns a select of type
      * 
      * @param int $Type
-     * @param Criterion $Criterion
+     * @param Criteria $Criteria
      * @return ResultSetSelect|DataSelect|ExistsSelect
      * @throws RelationalException
      */
-    final public static function OfType($Type, Criterion $Criterion) {
+    final public static function OfType($Type, Criteria $Criteria) {
         switch ($Type) {
             case SelectType::ResultSet:
-                return new ResultSetSelect($Criterion);
+                return new ResultSetSelect($Criteria);
                 
             case SelectType::Data:
-                return new DataSelect([], $Criterion);
+                return new DataSelect([], $Criteria);
                 
             case SelectType::Exists:
-                return new ExistsSelect($Criterion);
+                return new ExistsSelect($Criteria);
 
             default:
                 throw new RelationalException(
@@ -59,14 +59,14 @@ abstract class Select {
      * @return ITable[]
      */
     final public function GetTables() {
-        return $this->Criterion->GetAllTables();
+        return $this->Criteria->GetAllTables();
     }
     
     /**
-     * @return Criterion
+     * @return Criteria
      */
-    final public function GetCriterion() {
-        return $this->Criterion;
+    final public function GetCriteria() {
+        return $this->Criteria;
     }
         
     // <editor-fold defaultstate="collapsed" desc="Grouping">

@@ -64,7 +64,7 @@ class Connection extends Queries\Connection {
         }        
         return new Queries\QueryBuilder($this, '?', $Bindings, 
                 $this->ExpressionCompiler, 
-                $this->CriterionCompiler, 
+                $this->CriteriaCompiler, 
                 $this->RequestCompiler, 
                 $this->ProcedureCompiler, 
                 $this->IdentifierEscaper);

@@ -6,7 +6,7 @@ use \Storm\Api\IConfiguration;
 use \Storm\Core\Object;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base;
-use \Storm\Drivers\Pinq\Object\Functional;
+use \Storm\Pinq\Functional;
 
 /**
  * The Repository provides the clean api for querying on a specific
@@ -81,7 +81,7 @@ class Repository {
      * 
      * @var array 
      */
-    private $DiscardedCriterionQueue = [];    
+    private $DiscardedCriteriaQueue = [];    
     
     /**
      * The cache to use as the identity map for the repository
@@ -156,12 +156,12 @@ class Repository {
     }
     
     /**
-     * Quick access to a new CriterionBuilder instance.
+     * Quick access to a new CriteriaBuilder instance.
      * 
-     * @return Fluent\CriterionBuilder
+     * @return Fluent\CriteriaBuilder
      */
-    final function Criterion() {
-        return new Fluent\CriterionBuilder($this->EntityMap, $this->FunctionToASTConverter);
+    final function Criteria() {
+        return new Fluent\CriteriaBuilder($this->EntityMap, $this->FunctionToASTConverter);
     }
     
     /**
@@ -255,7 +255,7 @@ class Repository {
                         $this->EntityType, 
                         $this->EntityMap->GetProperties(), 
                         true, 
-                        new Base\Object\Criteria\MatchesCriterion($Identity)));
+                        new Base\Object\Criteria\MatchesPropertyDataCriteria($Identity)));
         
         if($Entity instanceof $this->EntityType) {
             $this->IdentityMap->CacheEntity($Entity, $Identity);
@@ -309,23 +309,23 @@ class Repository {
     }
     
     /**
-     * Adds an entity or criterion to the discardence queue. 
+     * Adds an entity or criteria to the discardence queue. 
      * If AutoSave is enabled, the action will be commited.
      * 
-     * @param object|Fluent\CriterionBuilder|Object\ICriterion $EntityOrCriterion The entity or criterion to discard
+     * @param object|Fluent\CriteriaBuilder|Object\ICriteria $EntityOrCriteria The entity or criteria to discard
      * @return void
      */
-    public function Discard($EntityOrCriterion) {
-        if($EntityOrCriterion instanceof Fluent\CriterionBuilder) {
-            $this->DiscardedCriterionQueue[] = $EntityOrCriterion->BuildCriterion();
+    public function Discard($EntityOrCriteria) {
+        if($EntityOrCriteria instanceof Fluent\CriteriaBuilder) {
+            $this->DiscardedCriteriaQueue[] = $EntityOrCriteria->BuildCriteria();
         }
-        else if($EntityOrCriterion instanceof Object\ICriterion) {
-            $this->DiscardedCriterionQueue[] = $EntityOrCriterion;
+        else if($EntityOrCriteria instanceof Object\ICriteria) {
+            $this->DiscardedCriteriaQueue[] = $EntityOrCriteria;
         }
         else {
-            $this->VerifyEntity(__METHOD__, $EntityOrCriterion);
-            $this->IdentityMap->RemoveFromCache($EntityOrCriterion);
-            $this->DiscardedQueue[] = $EntityOrCriterion;
+            $this->VerifyEntity(__METHOD__, $EntityOrCriteria);
+            $this->IdentityMap->RemoveFromCache($EntityOrCriteria);
+            $this->DiscardedQueue[] = $EntityOrCriteria;
         }
         
         $this->AutoSave();
@@ -364,7 +364,7 @@ class Repository {
         if(count($this->PersistedQueue) === 0 && 
                 count($this->ExecutionQueue) === 0 &&
                 count($this->DiscardedQueue) === 0 &&
-                count($this->DiscardedCriterionQueue) === 0) {
+                count($this->DiscardedCriteriaQueue) === 0) {
             return;
         }
         
@@ -372,7 +372,7 @@ class Repository {
                 $this->PersistedQueue, 
                 $this->ExecutionQueue, 
                 $this->DiscardedQueue, 
-                $this->DiscardedCriterionQueue);
+                $this->DiscardedCriteriaQueue);
         
         $this->ClearChanges();
     }
@@ -386,7 +386,7 @@ class Repository {
         return [$this->PersistedQueue, 
                 $this->ExecutionQueue, 
                 $this->DiscardedQueue, 
-                $this->DiscardedCriterionQueue];
+                $this->DiscardedCriteriaQueue];
     }
     
     /**
@@ -399,7 +399,7 @@ class Repository {
         $this->PersistedQueue = [];
         $this->ExecutionQueue = [];
         $this->DiscardedQueue = [];
-        $this->DiscardedCriterionQueue = [];
+        $this->DiscardedCriteriaQueue = [];
     }
 }
 

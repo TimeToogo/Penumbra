@@ -4,19 +4,35 @@ namespace Storm\Core\Object\Expressions\Aggregates;
 
 use \Storm\Core\Object\Expressions\Expression;
 
+use \Storm\Core\Object\Expressions\Expression;
+use \Storm\Core\Object\Expressions\ExpressionWalker;
+
 /**
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class ImplodeExpression extends AggregateExpression {
+    private $UniqueValuesOnly;
     private $Delimiter;
     private $ValueExpression;
     
     public function __construct($UniqueValuesOnly, $Delimiter, Expression $ValueExpression) {
-        parent::__construct($UniqueValuesOnly);
+        $this->UniqueValuesOnly = $UniqueValuesOnly;
         $this->Delimiter = $Delimiter;
         $this->ValueExpression = $ValueExpression;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $this->Update(
+                $this->UniqueValuesOnly,
+                $this->Delimiter,
+                $Walker->Walk($this->ValueExpression));
+    }
+    
+    
+    public function UniqueValuesOnly() {
+        return $this->UniqueValuesOnly;
+    }
+        
     public function GetDelimiter() {
         return $this->Delimiter;
     }

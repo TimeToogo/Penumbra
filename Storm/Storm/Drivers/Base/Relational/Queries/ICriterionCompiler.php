@@ -2,16 +2,16 @@
 
 namespace Storm\Drivers\Base\Relational\Queries;
 
-use \Storm\Core\Relational\Criterion;
+use \Storm\Core\Relational\Criteria;
 
-interface ICriterionCompiler {
-    public function AppendTableDefinition(QueryBuilder $QueryBuilder, Criterion $Criterion);
+interface ICriteriaCompiler {
+    public function AppendTableDefinition(QueryBuilder $QueryBuilder, Criteria $Criteria);
     
-    public function AppendWhere(QueryBuilder $QueryBuilder, Criterion $Criterion);
+    public function AppendWhere(QueryBuilder $QueryBuilder, Criteria $Criteria);
     
-    public function AppendOrderBy(QueryBuilder $QueryBuilder, Criterion $Criterion);
+    public function AppendOrderBy(QueryBuilder $QueryBuilder, Criteria $Criteria);
     
-    public function AppendRange(QueryBuilder $QueryBuilder, Criterion $Criterion);
+    public function AppendRange(QueryBuilder $QueryBuilder, Criteria $Criteria);
 }
 
 ?>

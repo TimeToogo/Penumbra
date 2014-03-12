@@ -3,7 +3,7 @@
 namespace Storm\Core\Relational;
 
 /**
- * The request represents a range of rows to load specified by the criterion.
+ * The request represents a range of rows to load specified by the criteria.
  * This can be thought of as a SELECT 
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
@@ -17,12 +17,12 @@ class Delete {
     private $Tables = [];
     
     /**
-     * @var Criterion
+     * @var Criteria
      */
-    private $Criterion;
+    private $Criteria;
     
-    public function __construct(Criterion $Criterion) {
-        $this->Criterion = $Criterion;
+    public function __construct(Criteria $Criteria) {
+        $this->Criteria = $Criteria;
     }
     
     final public function HasTable($TableName) {
@@ -36,9 +36,9 @@ class Delete {
      * @return void
      */
     final public function AddTable(ITable $Table) {
-        if(!$this->Criterion->HasTable($Table->GetName())) {
+        if(!$this->Criteria->HasTable($Table->GetName())) {
             throw new RelationalException(
-                    'Cannot add table \'%s\' to delete: it is not a table in the underlying criterion',
+                    'Cannot add table \'%s\' to delete: it is not a table in the underlying criteria',
                     $Table->GetName());
         }
         $this->Tables[$Table->GetName()] = $Table;
@@ -62,10 +62,10 @@ class Delete {
     }
     
     /**
-     * @return Criterion
+     * @return Criteria
      */
-    final public function GetCriterion() {
-        return $this->Criterion;
+    final public function GetCriteria() {
+        return $this->Criteria;
     }
 }
 

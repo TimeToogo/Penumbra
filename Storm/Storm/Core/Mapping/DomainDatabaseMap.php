@@ -208,9 +208,9 @@ abstract class DomainDatabaseMap {
      * @param string $TableName The name of primary key table.
      * @return IEntityRelationalMap|null The relational map or null if not found
      */
-    final protected function GetRelationalCriterion($EntityType) {
+    final protected function GetRelationalCriteria($EntityType) {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-        $EntityRelationalMap->GetCriterion($this->Database);
+        $EntityRelationalMap->GetCriteria($this->Database);
     }
     
     /**
@@ -313,12 +313,12 @@ abstract class DomainDatabaseMap {
     /**
      * @access private
      * 
-     * Maps the supplied object criterion the supplied relational equivalent.
+     * Maps the supplied object criteria the supplied relational equivalent.
      * 
-     * @param Object\ICriterion $Criterion The object criterion to map
-     * @return Relational\Criterion The relational equivalent
+     * @param Object\ICriteria $Criteria The object criteria to map
+     * @return Relational\Criteria The relational equivalent
      */
-    protected abstract function MapCriterion(Object\ICriterion $Criterion, Relational\Criterion $RelationalCriterion = null);
+    protected abstract function MapCriteria(Object\ICriteria $Criteria, Relational\Criteria $RelationalCriteria = null);
     
     // <editor-fold defaultstate="collapsed" desc="Entity Persistence mapping">
     
@@ -351,10 +351,10 @@ abstract class DomainDatabaseMap {
             }            
         }
         
-        foreach($UnitOfWork->GetDiscardedCriteria() as $DiscardedCriterion) {
-            $RelationalCriterion = $this->GetRelationalCriterion($DiscardedCriterion->GetEntityType());
-            $this->MapCriterion($DiscardedCriterion, $RelationalCriterion);
-            $Transaction->AddDelete($RelationalCriterion);
+        foreach($UnitOfWork->GetDiscardedCriteria() as $DiscardedCriteria) {
+            $RelationalCriteria = $this->GetRelationalCriteria($DiscardedCriteria->GetEntityType());
+            $this->MapCriteria($DiscardedCriteria, $RelationalCriteria);
+            $Transaction->AddDelete($RelationalCriteria);
         }
     }
     

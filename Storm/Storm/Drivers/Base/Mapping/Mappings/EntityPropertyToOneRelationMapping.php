@@ -75,17 +75,17 @@ class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMap
         }
     }
 
-    public function MapAssignment(Relational\Criterion $Criterion, Object\Expressions\Expression $AssignmentValueExpression) {
-        $this->ToOneRelation->AddRelationToCriterion($Criterion);
+    public function MapAssignment(Relational\Criteria $Criteria, Object\Expressions\Expression $AssignmentValueExpression) {
+        $this->ToOneRelation->AddRelationToCriteria($Criteria);
         
     }
 
-    public function MapBinary(Relational\Criterion $Criterion, Object\Expressions\Expression $OperandValueExpression) {
-        $this->ToOneRelation->AddRelationToCriterion($Criterion);
+    public function MapBinary(Relational\Criteria $Criteria, Object\Expressions\Expression $OperandValueExpression) {
+        $this->ToOneRelation->AddRelationToCriteria($Criteria);
         
     }
 
-    public function AddToCriterion(Relational\Criterion $Criterion) {
+    public function AddToCriteria(Relational\Criteria $Criteria) {
         
     }
 

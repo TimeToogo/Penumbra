@@ -16,12 +16,12 @@ interface IRequest {
     public function GetEntityType();
         
     /**
-     * @return ICriterion
+     * @return ICriteria
      */
-    public function GetCriterion();
+    public function GetCriteria();
     
     /**
-     * Whether or not the criterion contains any group by expressions.
+     * Whether or not the criteria contains any group by expressions.
      * 
      * return boolean
      */
@@ -33,7 +33,7 @@ interface IRequest {
     public function GetGroupByExpressions();
     
     /**
-     * Whether or not the criterion contains any group by expressions.
+     * Whether or not the criteria contains any group by expressions.
      * 
      * return boolean
      */

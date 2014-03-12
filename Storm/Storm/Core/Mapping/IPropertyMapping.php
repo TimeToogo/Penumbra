@@ -22,11 +22,11 @@ interface IPropertyMapping {
     public function GetProperty();
     
     /**
-     * Adds the necessary constraints to the criterion.
+     * Adds the necessary constraints to the criteria.
      * 
      * @return void
      */
-    public function AddToCriterion(Relational\Criterion $Criterion);
+    public function AddToCriteria(Relational\Criteria $Criteria);
     
     /**
      * @return Relational\Expression

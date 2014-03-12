@@ -288,14 +288,14 @@ abstract class Domain {
      * @param object[] $EntitiesToPersist
      * @param IProcedure[] $ProceduresToExecute
      * @param object[] $EntitiesToDiscard
-     * @param ICriterion[] $CriterionToDiscard
+     * @param ICriteria[] $CriteriaToDiscard
      * @return UnitOfWork The constructed unit of work
      */
     final public function BuildUnitOfWork(
             array $EntitiesToPersist = [],
             array $ProceduresToExecute = [],
             array $EntitiesToDiscard = [], 
-            array $CriterionToDiscard = []) {
+            array $CriteriaToDiscard = []) {
         $UnitOfWork = new UnitOfWork($this);
         
         foreach($EntitiesToPersist as $Entity) {
@@ -307,8 +307,8 @@ abstract class Domain {
         foreach($EntitiesToDiscard as $Entity) {
             $UnitOfWork->Discard($Entity);
         }
-        foreach($CriterionToDiscard as $Criterion) {
-            $UnitOfWork->DiscardWhere($Criterion);
+        foreach($CriteriaToDiscard as $Criteria) {
+            $UnitOfWork->DiscardWhere($Criteria);
         }
         
         return $UnitOfWork;

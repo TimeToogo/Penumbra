@@ -16,8 +16,8 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
         $this->GetDatabase()->SetPlatform($Platform->GetRelationalPlatform());
     }
     
-    private function GetPropertyExpressionResolver(Relational\Criterion $Criterion) {
-        return new Expressions\PropertyExpressionResolver($Criterion, $this);
+    private function GetPropertyExpressionResolver(Relational\Criteria $Criteria) {
+        return new Expressions\PropertyExpressionResolver($Criteria, $this);
     }
     
     // <editor-fold defaultstate="collapsed" desc="Request  mappers">
@@ -31,11 +31,11 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
     final protected function MapToExistsSelect(Object\IRequest $Request) {
         $this->VerifyEntityTypeIsMapped($Request->GetEntityType());
         
-        $RelationalCriterion = $this->GetRelationalCriterion($Request->GetEntityType());
-        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriterion);
-        $this->MapCriterion($Request->GetCriterion(), $RelationalCriterion, $PropertyExpressionResolver);
+        $RelationalCriteria = $this->GetRelationalCriteria($Request->GetEntityType());
+        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriteria);
+        $this->MapCriteria($Request->GetCriteria(), $RelationalCriteria, $PropertyExpressionResolver);
         
-        $Select = new Relational\ExistsSelect($RelationalCriterion);
+        $Select = new Relational\ExistsSelect($RelationalCriteria);
         $this->MapRequestAggregates($Request, $Select, $PropertyExpressionResolver);
                 
         return $Select;
@@ -50,11 +50,11 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
     final protected function MapEntityRequest(Object\IEntityRequest $EntityRequest) {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityRequest->GetEntityType());
         
-        $RelationalCriterion = $this->GetRelationalCriterion($EntityRequest->GetEntityType());
-        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriterion);
-        $this->MapCriterion($EntityRequest->GetCriterion(), $RelationalCriterion, $PropertyExpressionResolver);
+        $RelationalCriteria = $this->GetRelationalCriteria($EntityRequest->GetEntityType());
+        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriteria);
+        $this->MapCriteria($EntityRequest->GetCriteria(), $RelationalCriteria, $PropertyExpressionResolver);
         
-        $Select = new Relational\ResultSetSelect($RelationalCriterion);
+        $Select = new Relational\ResultSetSelect($RelationalCriteria);
         $this->MapRequestAggregates($EntityRequest, $Select, $PropertyExpressionResolver);
         $EntityRelationalMap->MapPropetiesToSelect($Select, $EntityRequest->GetProperties());
                 
@@ -70,13 +70,13 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
     final protected function MapDataRequest(Object\IDataRequest $DataRequest) {
         $this->VerifyEntityTypeIsMapped($DataRequest->GetEntityType());
         
-        $RelationalCriterion = $this->GetRelationalCriterion($DataRequest->GetEntityType());
-        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriterion);
-        $this->MapCriterion($DataRequest->GetCriterion(), $RelationalCriterion, $PropertyExpressionResolver);
+        $RelationalCriteria = $this->GetRelationalCriteria($DataRequest->GetEntityType());
+        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriteria);
+        $this->MapCriteria($DataRequest->GetCriteria(), $RelationalCriteria, $PropertyExpressionResolver);
         
         $MappedAliasExpressionMap = $this->MapExpressions($DataRequest->GetAliasExpressionMap(), $PropertyExpressionResolver);
         
-        $Select = new Relational\DataSelect($MappedAliasExpressionMap, $RelationalCriterion);
+        $Select = new Relational\DataSelect($MappedAliasExpressionMap, $RelationalCriteria);
         $this->MapRequestAggregates($DataRequest, $Select, $PropertyExpressionResolver);
         
         return $Select;
@@ -106,8 +106,8 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
      * @return Relational\Update The equivalent relational update
      */
     final protected function MapProcedure(Object\IProcedure $ObjectProcedure) {
-        $RelationalCriterion = $this->MapCriterion($ObjectProcedure->GetCriterion());
-        $Update = new Relational\Update($RelationalCriterion);
+        $RelationalCriteria = $this->MapCriteria($ObjectProcedure->GetCriteria());
+        $Update = new Relational\Update($RelationalCriteria);
         
         $AssignmentExpressions = $ObjectProcedure->GetExpressions();
         
@@ -127,47 +127,47 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
     // <editor-fold defaultstate="collapsed" desc="Criteria mappers">
     
     /**
-     * Maps the supplied object criterion the the relational equivalent.
+     * Maps the supplied object criteria the the relational equivalent.
      * 
-     * @param Object\ICriterion $ObjectCriterion The object criterion to map
-     * @param Relational\Criterion $RelationalCriterion The relational criterion to map to
-     * @return Relational\Criterion
+     * @param Object\ICriteria $ObjectCriteria The object criteria to map
+     * @param Relational\Criteria $RelationalCriteria The relational criteria to map to
+     * @return Relational\Criteria
      */
-    final protected function MapCriterion(
-            Object\ICriterion $ObjectCriterion, 
-            Relational\Criterion $RelationalCriterion = null,
+    final protected function MapCriteria(
+            Object\ICriteria $ObjectCriteria, 
+            Relational\Criteria $RelationalCriteria = null,
             Expressions\PropertyExpressionResolver $PropertyExpressionResolver = null) {
-        if($RelationalCriterion === null) {
-            $RelationalCriterion = $this->GetRelationalCriterion($ObjectCriterion->GetEntityType());
+        if($RelationalCriteria === null) {
+            $RelationalCriteria = $this->GetRelationalCriteria($ObjectCriteria->GetEntityType());
         }
         if($PropertyExpressionResolver === null) {
-            $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriterion);
+            $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriteria);
         }
         
-        if ($ObjectCriterion->IsConstrained()) {
-            foreach ($this->MapExpressions($ObjectCriterion->GetPredicateExpressions(), $PropertyExpressionResolver) as $PredicateExpression) {
-                $RelationalCriterion->AddPredicateExpression($PredicateExpression);
+        if ($ObjectCriteria->IsConstrained()) {
+            foreach ($this->MapExpressions($ObjectCriteria->GetPredicateExpressions(), $PropertyExpressionResolver) as $PredicateExpression) {
+                $RelationalCriteria->AddPredicateExpression($PredicateExpression);
             }
         }
         
-        if ($ObjectCriterion->IsOrdered()) {
-            $ExpressionAscendingMap = $ObjectCriterion->GetOrderByExpressionsAscendingMap();
+        if ($ObjectCriteria->IsOrdered()) {
+            $ExpressionAscendingMap = $ObjectCriteria->GetOrderByExpressionsAscendingMap();
             
             foreach ($ExpressionAscendingMap as $Expression) {
                 $IsAscending = $ExpressionAscendingMap[$Expression];
                 $Expressions = $this->MapExpression($Expression, $PropertyExpressionResolver);
                 foreach($Expressions as $Expression) {
-                    $RelationalCriterion->AddOrderByExpression($Expression, $IsAscending);
+                    $RelationalCriteria->AddOrderByExpression($Expression, $IsAscending);
                 }
             }
         }
         
-        if ($ObjectCriterion->IsRanged()) {
-            $RelationalCriterion->SetRangeOffset($ObjectCriterion->GetRangeOffset());
-            $RelationalCriterion->SetRangeAmount($ObjectCriterion->GetRangeAmount());
+        if ($ObjectCriteria->IsRanged()) {
+            $RelationalCriteria->SetRangeOffset($ObjectCriteria->GetRangeOffset());
+            $RelationalCriteria->SetRangeAmount($ObjectCriteria->GetRangeAmount());
         }
         
-        return $RelationalCriterion;
+        return $RelationalCriteria;
     }
     
     // </editor-fold>

@@ -70,7 +70,7 @@ abstract class RelationshipPropertyRelationMapping extends PropertyMapping imple
         return $this->Relation;
     }
 
-    public function MapTraversalExpression(Relational\Criterion $Criterion, Object\Expressions\TraversalExpression $TraversalExpression) {
+    public function MapTraversalExpression(Relational\Criteria $Criteria, Object\Expressions\TraversalExpression $TraversalExpression) {
         throw MappingException::UnresolvableEntityProperty($this->EntityType, $this->Property);
     }
 }

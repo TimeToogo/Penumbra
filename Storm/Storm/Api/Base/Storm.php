@@ -5,8 +5,8 @@ namespace Storm\Api\Base;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
-use \Storm\Drivers\Pinq\Object\Functional;
-use \Storm\Drivers\Pinq\Object\FunctionToExpressionTreeConverter;
+use \Storm\Pinq\Functional;
+use \Storm\Pinq\FunctionToExpressionTreeConverter;
 
 /**
  * The Storm class provides the api surrounding a DomainDatabaseMap.
@@ -93,17 +93,17 @@ class Storm {
         $PersistedQueues = [];
         $ExecutionQueues = [];
         $DiscardedQueues = [];
-        $DiscardedCriterionQueues = [];
+        $DiscardedCriteriaQueues = [];
         
         foreach($this->Repositories as $Repository) {
             list($PersistedQueue,
             $ExecutionQueue,
             $DiscardedQueue,
-            $DiscardedCriterionQueue) = $Repository->GetChanges();
+            $DiscardedCriteriaQueue) = $Repository->GetChanges();
             $PersistedQueues[] = $PersistedQueue;
             $ExecutionQueues[] = $ExecutionQueue;
             $DiscardedQueues[] = $DiscardedQueue;
-            $DiscardedCriterionQueues[] = $DiscardedCriterionQueue;
+            $DiscardedCriteriaQueues[] = $DiscardedCriteriaQueue;
             
             $Repository->ClearChanges();
         }
@@ -111,13 +111,13 @@ class Storm {
         $PersistedQueue = call_user_func_array('array_merge', $PersistedQueues);
         $ExecutionQueue = call_user_func_array('array_merge', $ExecutionQueues);
         $DiscardedQueue = call_user_func_array('array_merge', $DiscardedQueues);
-        $DiscardedCriterionQueue = call_user_func_array('array_merge', $DiscardedCriterionQueues);
+        $DiscardedCriteriaQueue = call_user_func_array('array_merge', $DiscardedCriteriaQueues);
         
         $this->DomainDatabaseMap->Commit(
                 $PersistedQueue, 
                 $ExecutionQueue, 
                 $DiscardedQueue, 
-                $DiscardedCriterionQueue);
+                $DiscardedCriteriaQueue);
     }
     
     /**

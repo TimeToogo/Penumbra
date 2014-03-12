@@ -49,7 +49,7 @@ abstract class KeyedRelation extends Relation {
         $Request->AddColumns($this->GetReferencedColumns());
     }
     
-    protected function AddParentPredicateToCriterion(Relational\Criterion $Criterion, array $ParentRows) {
+    protected function AddParentPredicateToCriteria(Relational\Criteria $Criteria, array $ParentRows) {
         $MatchExpressions = [];
         foreach($ParentRows as $ParentRow) {
             $ReferencedKey = $this->MapParentRowToRelatedKey($this->ForeignKey, $ParentRow);
@@ -57,7 +57,7 @@ abstract class KeyedRelation extends Relation {
             $MatchExpressions[] = new Expressions\MatchesColumnDataExpression($ReferencedKey);
         }
         
-        $Criterion->AddPredicateExpression(
+        $Criteria->AddPredicateExpression(
                 Expressions\Expression::CompoundBoolean($MatchExpressions, Expressions\Operators\Binary::LogicalOr));
     }
     /**

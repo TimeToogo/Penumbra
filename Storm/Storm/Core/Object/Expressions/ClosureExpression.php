@@ -7,22 +7,18 @@ class ClosureExpression extends Expression {
     private $UsedVariables;
     private $BodyExpressions;
     
-    public function __construct(araay $ParameterNames, array $UsedVariables, array $BodyExpressions) {
+    public function __construct(array $ParameterNames, array $UsedVariables, array $BodyExpressions) {
         $this->ParameterNames = $ParameterNames;
         $this->UsedVariables = $UsedVariables;
         $this->BodyExpressions = $BodyExpressions;
     }
-    
+
     public function GetParameterNames() {
         return $this->ParameterNames;
     }
 
-    public function GetUsedVariables() {
+    public function GetUsedVariableNames() {
         return $this->UsedVariables;
-    }
-
-    public function GetBodyExpressions() {
-        return $this->BodyExpressions;
     }
 
     /**
@@ -33,11 +29,24 @@ class ClosureExpression extends Expression {
     }
 
     public function Traverse(ExpressionWalker $Walker) {
-        return $Walker->WalkFunction($this);
+        return $Walker->WalkClosure($this);
     }
     
     public function Simplify() {
-        return $this;
+        return $this->Update(
+                $this->ParameterNames, 
+                $this->UsedVariables, 
+                self::SimplifyAll($this->BodyExpressions));
+    }
+    
+    public function Update(array $ParameterNames, array $UsedVariables, array $BodyExpressions) {
+        if($this->ParameterNames === $ParameterNames
+                && $this->UsedVariables === $UsedVariables
+                && $this->BodyExpressions === $BodyExpressions) {
+            return $this;
+        }
+        
+        return new self($ParameterNames, $UsedVariables, $BodyExpressions);
     }
 }
 

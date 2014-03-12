@@ -4,7 +4,7 @@ namespace Storm\Core\Object;
 
 /**
  * The procedure represents a set of assigments that should be carried out upon
- * a variable amount of entities defined by a criterion.
+ * a variable amount of entities defined by a criteria.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
@@ -22,9 +22,9 @@ interface IProcedure {
     public function GetExpressions();
     
     /**
-     * @return ICriterion
+     * @return ICriteria
      */
-    public function GetCriterion();
+    public function GetCriteria();
 }
 
 ?>

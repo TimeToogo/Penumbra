@@ -56,7 +56,7 @@ class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IData
         return $this->DataProperty;
     }
 
-    public function AddToCriterion(Relational\Criterion $Criterion) {
+    public function AddToCriteria(Relational\Criteria $Criteria) {
         
     }
 
@@ -64,7 +64,7 @@ class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IData
         return \Storm\Drivers\Base\Relational\Expressions\Expression::ReviveColumn($this->Column);
     }
     
-    public function MapTraversalExpression(Relational\Criterion $Criterion, Expressions\TraversalExpression $TraversalExpression) {
+    public function MapTraversalExpression(Relational\Criteria $Criteria, Expressions\TraversalExpression $TraversalExpression) {
         if($this->Column instanceof Columns\Column) {
             $DataType = $this->Column->GetDataType();
             if($DataType instanceof Columns\ObjectDataType) {
@@ -73,11 +73,11 @@ class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IData
         }
     }
 
-    public function MapAssignment(Relational\Criterion $Criterion, Mapping\Expressions\Expression $AssignmentValueExpression) {
+    public function MapAssignment(Relational\Criteria $Criteria, Mapping\Expressions\Expression $AssignmentValueExpression) {
         return \Storm\Drivers\Base\Relational\Expressions\Expression::PersistData($this->Column, $AssignmentValueExpression);
     }
 
-    public function MapBinary(Relational\Criterion $Criterion, Mapping\Expressions\Expression $OperandValueExpression) {
+    public function MapBinary(Relational\Criteria $Criteria, Mapping\Expressions\Expression $OperandValueExpression) {
         
     }
     

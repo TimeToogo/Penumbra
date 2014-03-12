@@ -9,11 +9,11 @@ class Procedure implements Object\IProcedure {
     private $EntityType;
     private $AssignmentExpressions;
     /**
-     * @var Object\ICriterion
+     * @var Object\ICriteria
      */
-    private $Criterion;
+    private $Criteria;
     
-    public function __construct($EntityOrType, array $AssignmentExpressions, Object\ICriterion $Criterion = null) {
+    public function __construct($EntityOrType, array $AssignmentExpressions, Object\ICriteria $Criteria = null) {
         if(count($AssignmentExpressions) === 0) {
             throw new Object\ObjectException(
                     'Procedure must contain atleast one assignment expression: none given');
@@ -21,13 +21,13 @@ class Procedure implements Object\IProcedure {
         
         $this->EntityType = is_object($EntityOrType) ? get_class($EntityOrType) : $EntityOrType;
         $this->AssignmentExpressions = $AssignmentExpressions;
-        $this->Criterion = $Criterion ?: new Criterion($this->EntityType);
+        $this->Criteria = $Criteria ?: new Criteria($this->EntityType);
         
-        if($this->Criterion->GetEntityType() !== $this->EntityType) {
+        if($this->Criteria->GetEntityType() !== $this->EntityType) {
             throw new Object\TypeMismatchException(
-                    'The supplied criterion must be for %s, %s given',
+                    'The supplied criteria must be for %s, %s given',
                     $this->EntityType,
-                    $this->Criterion->GetEntityType());
+                    $this->Criteria->GetEntityType());
         }
     }
     
@@ -39,8 +39,8 @@ class Procedure implements Object\IProcedure {
         return $this->AssignmentExpressions;
     }
 
-    public function GetCriterion() {
-        return $this->Criterion;
+    public function GetCriteria() {
+        return $this->Criteria;
     }
 }
 

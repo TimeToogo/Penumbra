@@ -49,9 +49,9 @@ interface IPlatform {
     public function GetExpressionCompiler();
     
     /**
-     * @return Queries\ICriterionCompiler
+     * @return Queries\ICriteriaCompiler
      */
-    public function GetCriterionCompiler();
+    public function GetCriteriaCompiler();
     
     /**
      * @return Queries\IQueryCompiler

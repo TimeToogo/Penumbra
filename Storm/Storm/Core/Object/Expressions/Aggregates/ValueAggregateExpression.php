@@ -3,10 +3,10 @@
 namespace Storm\Core\Object\Expressions\Aggregates;
 
 use \Storm\Core\Object\Expressions\Expression;
+use \Storm\Core\Object\Expressions\ExpressionWalker;
 
 /**
  * Expression for an aggregate function.
- * Count, Maximum, Minimum, Average, Sum, Implode, All, Any
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
@@ -14,8 +14,12 @@ abstract class ValueAggregateExpression extends AggregateExpression {
     private $ValueExpression;
     
     final public function __construct(Expression $ValueExpression) {
-        parent::__construct();
         $this->ValueExpression = $ValueExpression;
+    }
+    
+    final public function Traverse(ExpressionWalker $Walker) {
+        return $this->Update(
+                $Walker->Walk($this->ValueExpression));
     }
 
     /**

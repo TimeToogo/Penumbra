@@ -6,7 +6,7 @@ use \Storm\Core\Relational;
 use \Storm\Drivers\Platforms\Base\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
-class CriterionCompiler extends Queries\CriterionCompiler {
+class CriteriaCompiler extends Queries\CriteriaCompiler {
     
     protected function JoinTypes() {
         $JoinTypes = parent::JoinTypes();

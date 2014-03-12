@@ -10,13 +10,6 @@ use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 use \Storm\Drivers\Base\Object\Properties\Proxies;
 
-function Test(\Storm\Drivers\Pinq\Object\IGroup &$Foo = null) {
-    /* @var $Foo \ */
-    $Foo = new \Storm\Drivers\Pinq\Object\Group('');
-}
-
-Test($dsgdg);
-
 class One implements \StormExamples\IStormExample {
     const DevelopmentMode = 1;
     const UseCache = false;
@@ -187,21 +180,24 @@ class One implements \StormExamples\IStormExample {
     
     private function AggregationOptions(Repository $BlogRepository) {
         //#1 ----------------------------------------------------- Yes
-        $BlogRepository->Request()
-                ->Where(function ($Blog) use($Id) {
+        $Request = $BlogRepository->Request();
+        
+        $Request->Where(function ($Blog) use($Id) {
                     return $Blog->Id === $Id;
                 })
                 ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
                 ->OrderByDescending(function ($Blog) { return $Blog->Id; })
-                ->Group(function ($Blog) { return $Blog->Hits; })->By(function ($Blog) { return $Blog->Name; })->Into($Hits)
-                ->Data(function ($Blog, \Storm\Drivers\Pinq\Object\IAggregate $Hits)  {
+                ->GroupBy(function ($Blog) { return $Blog->Name; })
+                ->Select(function ($Blog, \Storm\Pinq\IAggregate $Blogs) {
                     return [
+                        'Full Name' => $x,
                         'Name' => $Blog->GetName(),
                         'MaxHits' => $Hits->Maximum(),
                         'MinHits' => $Hits->Minimum(),
                         'Sum' => $Hits->Sum(),
                         'Implode' => $Hits->Implode(', '),
                         'Count' => $Hits->Count(),
+                        'AllBig' => $Blogs->All(function ($Blog) { return $Blog->Hits > 50; }),
                     ];
                 });
                 
@@ -254,6 +250,37 @@ class One implements \StormExamples\IStormExample {
                 
                 ->Load()
                 ;
+              
+        //THE GOAL:---
+        $Request->Where(function ($Blog) use ($Request) { return $Request->All(function ($Blog) { return $Blog->Id % 10 === 0; }); })
+                ->GroupBy(function ($Blog) { return $Blog->GetYear(); })
+                ->Select(function (\Storm\Pinq\IAggregate $Blogs) {
+                    $Hits = function ($Blog) { return $Blog->Hits; };
+                    $Blog = $Blogs->First();
+                    return [
+                        'Full Name' => $Blog->GetId(),
+                        'Name' => $Blog->GetName(),
+                        'MaxHits' => $Blogs->Maximum($Hits),
+                        'MinHits' => $Blogs->Minimum($Hits),
+                        'Sum' => $Blogs->Sum($Hits),
+                        'Implode' => $Blogs->Implode(', ', $Hits),
+                        'Count' => $Blogs->Count(),
+                        'AllBig' => $Blogs->All(function ($Blog) { return $Blog->Hits > 50; }),
+                    ];
+                });
+        /**
+         * SELECT 
+         *      Id AS `Full Name`,
+         *      Name AS `Name`,
+         *      MAX(Hits) AS `MaxHits`,
+         *      Min(Hits) AS `MinHits`,
+         *      SUM(Hits) AS `Sum`,
+         *      GROUP_CONCAT(Hits SEPARATOR ', ') AS `Implode`,
+         *      COUNT(*) AS `Count`,
+         *      BIT_AND(IF(Hits > 50, 1, 0)) AS `AllBig`
+         * FROM Blogs WHERE (SELECT BIT_AND(IF(Id, 1, 0)) FROM Blogs WHERE Id % 10 = 0) 
+         * GROUP BY Year
+         */
     }
     
     private function PersistExisting($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {

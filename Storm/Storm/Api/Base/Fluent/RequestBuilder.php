@@ -5,17 +5,17 @@ namespace Storm\Api\Base\Fluent;
 use \Storm\Api\Base\Repository;
 use \Storm\Core\Object;
 use \Storm\Core\Object\Expressions as O;
-use \Storm\Drivers\Pinq\Object\EntityRequest;
-use \Storm\Drivers\Pinq\Object\DataRequest;
-use \Storm\Drivers\Pinq\Object\Functional\ExpressionTree;
-use \Storm\Drivers\Pinq\Object\IFunctionToExpressionTreeConverter;
+use \Storm\Pinq\EntityRequest;
+use \Storm\Pinq\DataRequest;
+use \Storm\Pinq\Functional\ExpressionTree;
+use \Storm\Pinq\IFunctionToExpressionTreeConverter;
 
 /**
  * The RequestBuilder provides a fluent interface for building requests
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class RequestBuilder extends CriterionBuilder {
+class RequestBuilder extends CriteriaBuilder {
     /**
      * @var Repository
      */
@@ -50,7 +50,7 @@ class RequestBuilder extends CriterionBuilder {
                 $this->Properties,
                 $this->GroupByFunctions,
                 $this->AggregatePredicateFunctions,
-                $this->BuildCriterion());
+                $this->BuildCriteria());
         }
         else {
             return new DataRequest(
@@ -59,12 +59,12 @@ class RequestBuilder extends CriterionBuilder {
                 $this->DataFunctionOrExpression,
                 $this->GroupByFunctions,
                 $this->AggregatePredicateFunctions,
-                $this->BuildCriterion());
+                $this->BuildCriteria());
         }
     }
     
     /**
-     * Specifies the function to use as grouping for the criterion.
+     * Specifies the function to use as grouping for the criteria.
      * 
      * Example expression closure:
      * <code>

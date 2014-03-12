@@ -6,7 +6,7 @@ use \Storm\Core\Relational;
 
 interface IConnection {
     public function SetExpressionCompiler(IExpressionCompiler $ExpressionCompiler);
-    public function SetCriterionCompiler(ICriterionCompiler $CriterionCompiler);
+    public function SetCriteriaCompiler(ICriteriaCompiler $CriteriaCompiler);
     public function SetQueryCompiler(IQueryCompiler $QueryCompiler);
     public function SetIdentifierEscaper(IIdentifierEscaper $IdentifierEscaper);
     

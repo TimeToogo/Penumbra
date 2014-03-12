@@ -9,9 +9,9 @@ use \Storm\Core\Relational\Expression;
 
 class PropertyExpressionResolver {
     /**
-     * @var Relational\Criterion 
+     * @var Relational\Criteria 
      */
-    private $Criterion;
+    private $Criteria;
     /**
      * @var Mapping\DomainDatabaseMap 
      */
@@ -22,8 +22,8 @@ class PropertyExpressionResolver {
      */
     private $AddedPropertyExpressions = [];
     
-    public function __construct(Relational\Criterion $Criterion, Mapping\DomainDatabaseMap $DomainDatabaseMap) {
-        $this->Criterion = $Criterion;
+    public function __construct(Relational\Criteria $Criteria, Mapping\DomainDatabaseMap $DomainDatabaseMap) {
+        $this->Criteria = $Criteria;
         $this->DomainDatabaseMap = $DomainDatabaseMap;
     }
     
@@ -32,18 +32,18 @@ class PropertyExpressionResolver {
     }
             
     public function MapProperty(O\PropertyExpression $Expression, O\TraversalExpression $TraversalExpression = null) {
-        $this->AddPropertyToCriterion($Expression);
+        $this->AddPropertyToCriteria($Expression);
         return $this->GetPropertyMapping($Expression)->MapPropertyExpression($TraversalExpression);
     }
     
-    private function AddPropertyToCriterion(O\PropertyExpression $Expression) {
+    private function AddPropertyToCriteria(O\PropertyExpression $Expression) {
         if($Expression->HasParentPropertyExpression()) {
-            $this->AddPropertyToCriterion($Expression->GetParentPropertyExpression());
+            $this->AddPropertyToCriteria($Expression->GetParentPropertyExpression());
         }
         $PropertyMapping = $this->GetPropertyMapping($Expression);
         
         if(!in_array($Expression, $this->AddedPropertyExpressions)) {
-            $PropertyMapping->AddToCriterion($this->Criterion);
+            $PropertyMapping->AddToCriteria($this->Criteria);
             $this->AddedPropertyExpressions[] = $Expression;
         }
     }

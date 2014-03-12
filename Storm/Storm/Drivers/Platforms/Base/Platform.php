@@ -13,7 +13,7 @@ abstract class Platform extends Relational\Platform {
             Relational\Columns\IColumnSet $ColumnSet, 
             Relational\PrimaryKeys\IKeyGeneratorSet $KeyGeneratorSet, 
             Relational\Queries\IExpressionCompiler $ExpressionCompiler, 
-            Relational\Queries\ICriterionCompiler $CriterionCompiler, 
+            Relational\Queries\ICriteriaCompiler $CriteriaCompiler, 
             Relational\Queries\ISelectCompiler $RequestCompiler, 
             Relational\Queries\IUpdateCompiler $ProcedureCompiler, 
             Relational\Queries\IIdentifierEscaper $IdentifierEscaper,
@@ -29,7 +29,7 @@ abstract class Platform extends Relational\Platform {
                 $ExpressionCompiler,
                 $RequestCompiler,
                 $ProcedureCompiler,
-                $CriterionCompiler, 
+                $CriteriaCompiler, 
                 $IdentifierEscaper, 
                 $DevelopmentMode ? 
                         new Platforms\Development\Syncing\DatabaseSyncer

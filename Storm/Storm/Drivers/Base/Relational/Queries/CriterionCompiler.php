@@ -5,30 +5,30 @@ namespace Storm\Drivers\Base\Relational\Queries;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
-abstract class CriterionCompiler implements ICriterionCompiler {
+abstract class CriteriaCompiler implements ICriteriaCompiler {
     
-    final public function AppendTableDefinition(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
-        $Table = $Criterion->GetTable();
-        $Joins = $Criterion->IsJoined() ? $Criterion->GetJoins() : null;
+    final public function AppendTableDefinition(QueryBuilder $QueryBuilder, Relational\Criteria $Criteria) {
+        $Table = $Criteria->GetTable();
+        $Joins = $Criteria->IsJoined() ? $Criteria->GetJoins() : null;
         
         $this->AppendTableDefinitionClause($QueryBuilder, $Table, $Joins);
     }
 
-    final public function AppendWhere(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
-        if($Criterion->IsConstrained()) {
-            $this->AppendWhereClause($QueryBuilder, $Criterion->GetPredicateExpressions());
+    final public function AppendWhere(QueryBuilder $QueryBuilder, Relational\Criteria $Criteria) {
+        if($Criteria->IsConstrained()) {
+            $this->AppendWhereClause($QueryBuilder, $Criteria->GetPredicateExpressions());
         }
     }
 
-    final public function AppendOrderBy(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
-        if($Criterion->IsOrdered()) {
-            $this->AppendOrderByClause($QueryBuilder, $Criterion->GetOrderedExpressionsAscendingMap());
+    final public function AppendOrderBy(QueryBuilder $QueryBuilder, Relational\Criteria $Criteria) {
+        if($Criteria->IsOrdered()) {
+            $this->AppendOrderByClause($QueryBuilder, $Criteria->GetOrderedExpressionsAscendingMap());
         }
     }
     
-    final public function AppendRange(QueryBuilder $QueryBuilder, Relational\Criterion $Criterion) {
-        if($Criterion->IsRanged()) {
-            $this->AppendGroupByClause($QueryBuilder, $Criterion->GetRangeOffset(), $Criterion->GetRangeAmount());
+    final public function AppendRange(QueryBuilder $QueryBuilder, Relational\Criteria $Criteria) {
+        if($Criteria->IsRanged()) {
+            $this->AppendGroupByClause($QueryBuilder, $Criteria->GetRangeOffset(), $Criteria->GetRangeAmount());
         }
     }
 

@@ -4,7 +4,7 @@ namespace Storm\Api;
 
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
-use \Storm\Drivers\Pinq\Object\Functional;
+use \Storm\Pinq\Functional;
 use \Storm\Utilities\Cache\ICache;
 
 /**

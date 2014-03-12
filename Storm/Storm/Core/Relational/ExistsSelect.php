@@ -9,8 +9,8 @@ namespace Storm\Core\Relational;
  */
 class ExistsSelect extends Select {
     
-    public function __construct( Criterion $Criterion) {
-        parent::__construct($Criterion);
+    public function __construct( Criteria $Criteria) {
+        parent::__construct($Criteria);
     }
 
     final public function GetSelectType() {

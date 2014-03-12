@@ -11,15 +11,15 @@ abstract class Request implements Object\IRequest {
     private $AggregatePredicateExpressions = [];
     
     /**
-     * @var Object\ICriterion 
+     * @var Object\ICriteria 
      */
-    private $Criterion;
+    private $Criteria;
     
     public function __construct(
             $EntityOrType, 
             array $GroupByExpressions,
             array $AggregatePredicateExpressions,
-            Object\ICriterion $Criterion = null) {
+            Object\ICriteria $Criteria = null) {
         
         if(is_object($EntityOrType)) {
             $EntityOrType = get_class($EntityOrType);
@@ -34,12 +34,12 @@ abstract class Request implements Object\IRequest {
             $this->AddAggregatePredicateExpression($AggregatePredicateExpression);
         }
         
-        $this->Criterion = $Criterion ?: new Criterion($this->EntityType);
-        if($this->Criterion->GetEntityType() !== $this->EntityType) {
+        $this->Criteria = $Criteria ?: new Criteria($this->EntityType);
+        if($this->Criteria->GetEntityType() !== $this->EntityType) {
             throw new Object\TypeMismatchException(
-                    'The supplied criterion must be for %s, %s given',
+                    'The supplied criteria must be for %s, %s given',
                     $this->EntityType,
-                    $this->Criterion->GetEntityType());
+                    $this->Criteria->GetEntityType());
         }
     }
 
@@ -47,8 +47,8 @@ abstract class Request implements Object\IRequest {
         return $this->EntityType;
     }
         
-    final public function GetCriterion() {
-        return $this->Criterion;
+    final public function GetCriteria() {
+        return $this->Criteria;
     }
 
     final public function IsGrouped() {

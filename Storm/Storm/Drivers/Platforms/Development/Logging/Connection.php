@@ -87,7 +87,7 @@ class Connection implements Queries\IConnection {
                 $QueryBuilder->GetParameterPlaceholder(), 
                 $QueryBuilder->GetBindings(),
                 $QueryBuilder->GetExpressionCompiler(),
-                $QueryBuilder->GetCriterionCompiler(),
+                $QueryBuilder->GetCriteriaCompiler(),
                 $QueryBuilder->GetIdentifierEscaper());
     }
     
@@ -99,8 +99,8 @@ class Connection implements Queries\IConnection {
         return $this->Connection->SetIdentifierEscaper($IdentifierEscaper);
     }
 
-    public function SetCriterionCompiler(Queries\ICriterionCompiler $RequestCompiler) {
-        return $this->Connection->SetCriterionCompiler($RequestCompiler);
+    public function SetCriteriaCompiler(Queries\ICriteriaCompiler $RequestCompiler) {
+        return $this->Connection->SetCriteriaCompiler($RequestCompiler);
     }
 
     public function SetExpressionCompiler(Queries\IExpressionCompiler $ExpressionCompiler) {

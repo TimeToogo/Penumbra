@@ -134,6 +134,13 @@ class ExpressionWalker {
     public function WalkAggregate(Aggregates\AggregateExpression $Expression) {
         return $Expression;
     }
+    
+    public function WalkClosure(ClosureExpression $Expression) {
+        return $Expression->Update(
+                $Expression->GetParameterNames(), 
+                $Expression->GetUsedVariableNames(), 
+                $this->WalkAll($Expression->GetBodyExpressions()));
+    }
 }
 
 ?>

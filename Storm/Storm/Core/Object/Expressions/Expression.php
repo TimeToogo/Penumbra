@@ -75,13 +75,6 @@ abstract class Expression {
     }
     
     /**
-     * @return EntityExpression
-     */
-    final public static function Entity() {
-        return new EntityExpression();
-    }
-    
-    /**
      * @return NewExpression
      */
     final public static function Constructor($ClassType, array $ArgumentValueExpressions = []) {
@@ -174,6 +167,13 @@ abstract class Expression {
      */
     final public static function NewArray(array $KeyExpressions, array $ValueExpressions) {
         return new ArrayExpression($KeyExpressions, $ValueExpressions);
+    }
+    
+    /**
+     * @return ClosureExpression
+     */
+    final public static function Closure(array $ParameterNames, array $UsedVariables, array $BodyExpressions) {
+        return new ClosureExpression($ParameterNames, $UsedVariables, $BodyExpressions);
     }
     // </editor-fold>
 }

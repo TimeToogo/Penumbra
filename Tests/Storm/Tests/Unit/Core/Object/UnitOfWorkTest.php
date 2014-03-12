@@ -125,27 +125,27 @@ class UnitOfWorkTest extends StormTestCase {
         $this->UnitOfWork->Execute($Procedure);
     }
     
-    public function testCriterionIsStoredForDiscarding() {
-        $Criterion = $this->getMock(self::CoreObjectNamespace . 'ICriterion');
-        $Criterion->expects($this->any())
+    public function testCriteriaIsStoredForDiscarding() {
+        $Criteria = $this->getMock(self::CoreObjectNamespace . 'ICriteria');
+        $Criteria->expects($this->any())
                 ->method('GetEntityType')
                 ->will($this->returnValue(self::EntityType));
         
-        $this->UnitOfWork->DiscardWhere($Criterion);
+        $this->UnitOfWork->DiscardWhere($Criteria);
         
-        $this->assertContains($Criterion, $this->UnitOfWork->GetDiscardedCriteria());
+        $this->assertContains($Criteria, $this->UnitOfWork->GetDiscardedCriteria());
     }
     
     /**
      * @expectedException \Storm\Core\Object\ObjectException
      */
-    public function testUnmappedCriterionIsDisallowed() {
-        $Criterion = $this->getMock(self::CoreObjectNamespace . 'ICriterion');
-        $Criterion->expects($this->any())
+    public function testUnmappedCriteriaIsDisallowed() {
+        $Criteria = $this->getMock(self::CoreObjectNamespace . 'ICriteria');
+        $Criteria->expects($this->any())
                 ->method('GetEntityType')
                 ->will($this->returnValue(__CLASS__));
         
-        $this->UnitOfWork->DiscardWhere($Criterion);
+        $this->UnitOfWork->DiscardWhere($Criteria);
     }
 }
 
