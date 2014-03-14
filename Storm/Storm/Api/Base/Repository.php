@@ -6,6 +6,7 @@ use \Storm\Api\IConfiguration;
 use \Storm\Core\Object;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base;
+use \Storm\Pinq;
 use \Storm\Pinq\Functional;
 
 /**
@@ -23,7 +24,7 @@ class Repository {
     protected $DomainDatabaseMap;
     
     /**
-     * @var FunctionToASTConverter
+     * @var IFunctionToASTConverter
      */
     protected $FunctionToASTConverter;
     
@@ -92,7 +93,7 @@ class Repository {
     
     public function __construct(
             DomainDatabaseMap $DomainDatabaseMap,
-            FunctionToASTConverter $FunctionToASTConverter,
+            IFunctionToASTConverter $FunctionToASTConverter,
             $EntityType) {
         $this->DomainDatabaseMap = $DomainDatabaseMap;
         $this->EntityMap = $this->DomainDatabaseMap->GetDomain()->GetEntityMap($EntityType);
@@ -138,30 +139,33 @@ class Repository {
     }
     
     /**
-     * Quick access to a new RequestBuilder instance.
-     * 
-     * @return Fluent\RequestBuilder 
+     * @return Pinq\Request 
      */
     final public function Request() {
-        return new Fluent\RequestBuilder($this, $this->EntityMap, $this->FunctionToASTConverter);
+        return new Pinq\Request(
+                $this, 
+                $this->EntityMap, 
+                $this->FunctionToASTConverter);
     }
     
     /**
-     * Quick access to a new ProcedureBuilder instance.
-     * 
-     * @return Fluent\ProcedureBuilder
+     * @return Pinq\Procedure
      */
-    final function Procedure(callable $ProcedureClosure) {
-        return new Fluent\ProcedureBuilder($this, $this->EntityMap, $this->FunctionToASTConverter, $ProcedureClosure);
+    final public function Procedure() {
+        return new Pinq\Procedure(
+                $this, 
+                $this->EntityMap, 
+                $this->FunctionToASTConverter);
     }
     
     /**
-     * Quick access to a new CriteriaBuilder instance.
-     * 
-     * @return Fluent\CriteriaBuilder
+     * @return Pinq\Removal 
      */
-    final function Criteria() {
-        return new Fluent\CriteriaBuilder($this->EntityMap, $this->FunctionToASTConverter);
+    final public function Remove() {
+        return new Pinq\Removal(
+                $this, 
+                $this->EntityMap, 
+                $this->FunctionToASTConverter);
     }
     
     /**
@@ -195,7 +199,7 @@ class Repository {
      * Loads whether any entities match the request
      * 
      * @param Object\IRequest $Request The request to load
-     * @return bool
+     * @return boolean
      */
     public function LoadExists(Object\IRequest $Request) {
         $this->VerifyRequestType($Request);
@@ -297,7 +301,7 @@ class Repository {
      * Adds a procedure to the execution queue. 
      * If AutoSave is enabled, the action will be commited.
      * 
-     * @param Fluent\ProcedureBuilder $ProcedureBuilder The procedure to execute
+     * @param Object\IProcedure $ProcedureBuilder The procedure to execute
      * @return void
      */
     public function Execute(Object\IProcedure $Procedure) {
@@ -312,14 +316,11 @@ class Repository {
      * Adds an entity or criteria to the discardence queue. 
      * If AutoSave is enabled, the action will be commited.
      * 
-     * @param object|Fluent\CriteriaBuilder|Object\ICriteria $EntityOrCriteria The entity or criteria to discard
+     * @param object|Object\ICriteria $EntityOrCriteria The entity or criteria to discard
      * @return void
      */
     public function Discard($EntityOrCriteria) {
-        if($EntityOrCriteria instanceof Fluent\CriteriaBuilder) {
-            $this->DiscardedCriteriaQueue[] = $EntityOrCriteria->BuildCriteria();
-        }
-        else if($EntityOrCriteria instanceof Object\ICriteria) {
+        if($EntityOrCriteria instanceof Object\ICriteria) {
             $this->DiscardedCriteriaQueue[] = $EntityOrCriteria;
         }
         else {

@@ -27,7 +27,7 @@ class CachingFunctionToExpressionTreeConverter extends FunctionToExpressionTreeC
         }
         
         if(!($ExpressionTree instanceof Functional\ExpressionTree)) {
-            $ExpressionTree = $this->Parser->Parse($Reflection)->GetExpressions();
+            $ExpressionTree = new Functional\ExpressionTree($this->Parser->Parse($Reflection)->GetExpressions());
             
             /*
              * Resolve all that can be currently resolved and save the expression tree 

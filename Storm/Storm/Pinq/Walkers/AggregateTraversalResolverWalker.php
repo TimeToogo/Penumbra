@@ -53,7 +53,7 @@ class AggregateTraversalResolverWalker extends O\ExpressionWalker {
                 
             case 'Any':
                 return A\AggregateExpression::Any($this->ParseClosureArgument($ArgumentExpressions));
-                
+            
             case 'Implode':
                 return A\AggregateExpression::Implode(
                         false, 

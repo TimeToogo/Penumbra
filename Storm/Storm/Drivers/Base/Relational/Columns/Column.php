@@ -125,5 +125,13 @@ class Column implements Relational\IColumn {
     public function ToPersistenceValue($Value) {
         return $this->DataType->ToPersistedValue($Value);
     }
+    
+    public function GetReviveExpression(Relational\Expression $ValueExpression) {
+        return $this->DataType->GetReviveExpression($Expression);
+    }
+    
+    public function GetPersistExpression(Relational\Expression $ValueExpression) {
+        return $this->DataType->GetPersistExpression($Expression);
+    }
 }
 ?>

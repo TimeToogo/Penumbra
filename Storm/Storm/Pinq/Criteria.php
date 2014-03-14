@@ -3,26 +3,198 @@
 namespace Storm\Pinq;
 
 use \Storm\Core\Object\IEntityMap;
-use \Storm\Drivers\Base\Object;
-use \Storm\Core\Object\Expressions\Expression;
+use \Storm\Drivers\Base\Object\Criteria;
 
-class Criteria extends Object\Criteria {
+class Criteria implements IPredicated, IOrdered, IRanged  {
+    /**
+     * @var string 
+     */
+    protected $EntityType;
     
-    use FunctionParsing;
+    /**
+     * @var IEntityMap 
+     */
+    protected $EntityMap;
+    
+    /**
+     * @var IFunctionToExpressionTreeConverter 
+     */
+    protected $FunctionToExpressionTreeConverter;
+    
+    /**
+     * @var Functional\ParameterParser 
+     */
+    protected $FunctionParameterParser;
+    
+    protected $WhereFunctions = [];
+    protected $OrderByFunctionAscendingTuples = [];
+    protected $SkipAmount = 0;
+    protected $LimitAmount = null;
     
     public function __construct(IEntityMap $EntityMap, IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
-        parent::__construct($EntityMap->GetEntityType());
+        $this->EntityType = $EntityMap->GetEntityType();
         $this->EntityMap = $EntityMap;
         $this->FunctionToExpressionTreeConverter = $FunctionToExpressionTreeConverter;
+        $this->FunctionParameterParser = new Functional\ParameterParser();
     }
     
-    public function AddPredicateFunction(callable $Function) {
-        $this->AddPredicate($this->ParseFunctionReturn($Function, 'predicate', [0 => Expression::Entity()]));
+    /**
+     * @return static
+     */
+    public function ClearQuery() {
+        $this->WhereFunctions = [];
+        $this->OrderByFunctionAscendingTuples = [];
+        $this->SkipAmount = 0;
+        $this->LimitAmount = null;
+        
+        return $this;
     }
     
-    public function AddOrderByFunction(callable $Function, $Ascending) {
-        $this->AddOrderByExpression($this->ParseFunctionReturn($Function, 'order by', [0 => Expression::Entity()]), $Ascending);
+    /**
+     * @return static
+     */
+    public function Where(callable $Function) {
+        $this->WhereFunctions[] = $Function;
+        return $this;
     }
+    
+    /**
+     * @return static
+     */
+    public function OrderBy(callable $Function) {
+        $this->OrderByFunctionAscendingTuples[] = [$Function, true];
+        return $this;
+    }
+
+    /**
+     * @return static
+     */
+    public function OrderByDescending(callable $Function) {
+        $this->OrderByFunctionAscendingTuples[] = [$Function, false];
+        return $this;
+    }
+
+    /**
+     * @return static
+     */
+    public function Skip($Amount) {
+        $this->SkipAmount = $Amount;
+        return $this;
+    }
+
+    /**
+     * @return static
+     */
+    public function Limit($Amount) {
+        $this->LimitAmount = $Amount;
+        return $this;
+    }
+    
+    final protected function BuildCriteria() {
+        return new Criteria(
+                $this->EntityType, 
+                $this->GetPredicateExpressions($this->WhereFunctions), 
+                $this->GetOrderByAscendingMap($this->OrderByFunctionAscendingTuples), 
+                $this->SkipAmount, 
+                $this->LimitAmount);
+    }
+    
+    final protected function ConvertAndResolve(\ReflectionFunctionAbstract $Reflection, array $ParameterNameExpressionMap) {
+        return $this->FunctionToExpressionTreeConverter->ConvertAndResolve(
+                $Reflection, 
+                $this->EntityMap, 
+                $ParameterNameExpressionMap);
+    }
+    
+    private function GetPredicateExpressions(array $WhereFunctions) {
+        $PredicateExpressions = [];
+        foreach ($WhereFunctions as $Key => $WhereFunction) {
+            $PredicateExpressions[$Key] = 
+                    $this->GetReturnExpression($this->GetEntityFunctionExpressionTree($WhereFunction));
+        }
+        
+        return $PredicateExpressions;
+    }    
+    
+    private function GetOrderByAscendingMap(array $OrderByAscendingTuples) {
+        $OrderByAscendingMap = new \SplObjectStorage();
+        foreach ($OrderByAscendingTuples as $Tuple) {
+            list($OrderByFunction, $Ascending) = $Tuple;
+            $OrderByAscendingMap->attach(
+                    $this->GetReturnExpression($this->GetEntityAndOrAggregateFunctionExpressionTree($OrderByFunction)), 
+                    $Ascending);
+        }
+        
+        return $OrderByAscendingMap;
+    }
+    
+    
+    // <editor-fold defaultstate="collapsed" desc="Function parsers">
+    
+    final protected function GetReturnExpression(Functional\ExpressionTree $ExpressionTree) {
+        if(!$ExpressionTree->HasReturnExpression()) {
+            throw PinqException::MustContainValidReturnExpression('');
+        }
+        if(!$ExpressionTree->GetReturnExpression()->HasValueExpression()) {
+            throw PinqException::MustContainValidReturnExpression('');
+        }
+        
+        return $ExpressionTree->GetReturnExpression()->GetValueExpression();
+    }
+    
+    final protected function GetEntityFunctionExpressionTree(callable $Function) {
+        $Reflection = $this->FunctionToExpressionTreeConverter->GetReflection($Function);
+        $EntityParameterName = $this->GetSingleParameterName($Reflection, $this->EntityType);
+
+        return $this->ConvertAndResolve($Reflection, [$EntityParameterName => new Expressions\EntityVariableExpression()]);
+    }
+
+
+    final protected function GetAggregateFunctionExpressionTree(callable $Function) {
+        $Reflection = $this->FunctionToExpressionTreeConverter->GetReflection($Function);
+        $AggregateParameterName = $this->GetSingleParameterName($Reflection, IAggregate::IAggregateType);
+
+        return $this->ConvertAndResolve($Reflection, [$AggregateParameterName => new Expressions\AggregateVariableExpression()]);
+    }
+
+
+    final protected function GetSingleParameterName(\ReflectionFunctionAbstract $Reflection, $Type) {
+        if ($Reflection->getNumberOfParameters() !== 1) {
+            throw PinqException::InvalidFunctionSignature($Reflection, [$Type]);
+        }
+
+        $TypeHintNameMap = $this->FunctionParameterParser->GetFunctionParameterNames($Reflection, [$Type]);
+
+        if (!isset($TypeHintNameMap[$Type])) {
+            throw PinqException::InvalidFunctionSignature($Reflection, [$Type]);
+        }
+
+        return $TypeHintNameMap[$this->EntityType];
+    }
+
+
+    final protected function GetEntityAndOrAggregateFunctionExpressionTree(callable $Function) {
+        $Reflection = $this->FunctionToExpressionTreeConverter->GetReflection($Function);
+
+        $TypeHints = [$this->EntityType, IAggregate::IAggregateType];
+        if ($Reflection->getNumberOfParameters() === 0 || $Reflection->getNumberOfParameters() > 2) {
+            throw PinqException::InvalidFunctionSignature($Reflection, [$this->EntityType, IAggregate::IAggregateType]);
+        }
+
+        $TypeHintNameMap = $this->FunctionParameterParser->GetFunctionParameterNames($Reflection, $TypeHints);
+
+        $ParameterExpressions = [];
+        if (isset($TypeHintNameMap[$this->EntityType])) {
+            $ParameterExpressions[$TypeHintParameterMap[$this->EntityType]] = new Expressions\EntityVariableExpression();
+        }         
+        else if (isset($TypeHintNameMap[IAggregate::IAggregateType])) {
+            $ParameterExpressions[$TypeHintParameterMap[IAggregate::IAggregateType]] = new Expressions\AggregateVariableExpression();
+        }
+
+        return $this->ConvertAndResolve($Reflection, $ParameterExpressions);
+    }
+
+    // </editor-fold>
 }
 
 ?>

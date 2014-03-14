@@ -24,7 +24,7 @@ interface IAggregate {
      * Returns the maximum value.
      * 
      * @param callable $Function The function which will return the values
-     * @return mixed
+     * @return int|null
      */
     public function Maximum(callable $Function);
     
@@ -33,7 +33,7 @@ interface IAggregate {
      * Returns the maximum value.
      * 
      * @param callable $Function The function which will return the values
-     * @return mixed
+     * @return int|null
      */
     public function Minimum(callable $Function);
     
@@ -41,7 +41,7 @@ interface IAggregate {
      * Returns the sum of the values.
      * 
      * @param callable $Function The function which will return the values
-     * @return mixed
+     * @return int|null
      */
     public function Sum(callable $Function);
     
@@ -50,7 +50,7 @@ interface IAggregate {
      * Returns the average of the values.
      * 
      * @param callable $Function The function which will return the values
-     * @return mixed
+     * @return double|null
      */
     public function Average(callable $Function);
     
@@ -59,7 +59,7 @@ interface IAggregate {
      * Returns a boolean of if all the values evaluate to true
      * 
      * @param callable $Function The function which will return the values
-     * @return boolean
+     * @return boolean|null
      */
     public function All(callable $Function);
     
@@ -67,16 +67,24 @@ interface IAggregate {
      * Returns a boolean of if any the values evaluate to true
      * 
      * @param callable $Function The function which will return the values
-     * @return boolean
+     * @return boolean|null
      */
     public function Any(callable $Function);
+    
+    /**
+     * Returns a boolean of if the aggregate contains a value
+     * 
+     * @param callable $Function The function which will return the values
+     * @return boolean|null
+     */
+    public function Contains($Value);
     
     /**
      * Returns a string of all the values concatented with the separator
      * 
      * @param string $Delimiter The string to delimit the values by
      * @param callable $Function The function which will return the values
-     * @return boolean
+     * @return boolean|null
      */
     public function Implode($Delimiter, callable $Function);
 }

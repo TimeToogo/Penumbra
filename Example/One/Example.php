@@ -297,11 +297,11 @@ class One implements \StormExamples\IStormExample {
     }
     
     private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $BlogRepository->Procedure([$this, 'UpdateBlog'])
+        $BlogRepository->Procedure()
                 ->Where(function ($Blog) use ($Id) {
                     return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
                 })
-                ->Execute();
+                ->Execute([$this, 'UpdateBlog']);
 
         $BlogRepository->SaveChanges();
     }
@@ -318,7 +318,13 @@ class One implements \StormExamples\IStormExample {
     private function Discard($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
 
         $BlogRepository->Discard($BlogRepository->LoadById($Id));
-
+        $BlogRepository->Remove()
+                ->Where(function (Entities\Blog $Blog) use ($Id) { return $Blog->Id === $Id; })
+                ->Skip(0)
+                ->Limit(1)
+                ->OrderByDescending(function (Entities\Blog $Blog) { return mt_rand(); })
+                ->Execute();
+                
         $BlogRepository->SaveChanges();
     }
     

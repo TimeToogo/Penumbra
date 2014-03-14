@@ -57,9 +57,13 @@ interface IColumn {
      */
     public function SetName($Name);
     
+    
+    
     public function ToPropertyValue($Value);
+    public function GetReviveExpression(Expression $ValueExpression);
     
     public function ToPersistenceValue($Value);
+    public function GetPersistExpression(Expression $ValueExpression);
 
 }
 

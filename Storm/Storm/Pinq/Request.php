@@ -2,40 +2,238 @@
 
 namespace Storm\Pinq;
 
-use \Storm\Drivers\Base\Object;
+use \Storm\Core\Object;
 use \Storm\Core\Object\IEntityMap;
+use \Storm\Api\Base\Repository;
+use \Storm\Drivers\Base\Object\EntityRequest;
+use \Storm\Drivers\Base\Object\DataRequest;
+use \Storm\Core\Object\Expressions as O;
+use \Storm\Core\Object\Expressions\Aggregates as A;
 
-abstract class Request extends Object\Request {
+class Request extends Criteria implements IQueryable  {
+    /**
+     * @var Repository
+     */
+    private $Repository;
     
-    use FunctionParsing;
+    private $GroupByFunctions = [];
+    private $HavingFunctions = [];
+    
+    /**
+     * @var Object\IEntityRequest|null
+     */
+    private $SubEntityRequest;
     
     public function __construct(
+            Repository $Repository, 
             IEntityMap $EntityMap, 
-            IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter,
-            array $GroupByFunctions = [], 
-            array $LetVariableFunctions = [], 
-            array $AggregatePredicateFunctions = [], 
-            \Storm\Core\Object\ICriteria $Criteria = null) {
-        $this->EntityMap = $EntityMap;
-        $this->FunctionToExpressionTreeConverter = $FunctionToExpressionTreeConverter;
+            IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
+        parent::__construct($EntityMap, $FunctionToExpressionTreeConverter);
         
-        $GroupByExpressions = array_map(
-                function ($I) { return $this->ParseFunctionReturn($I, 'group by'); }, 
-                $Groups);
-                
-        $AggregatePredicateExpressions = array_map(
-                function ($I) { return $this->ParseFunctionReturn($I, 'aggregate predicate'); }, 
-                $AggregatePredicateFunctions);
-        
-        parent::__construct(
-                $EntityMap->GetEntityType(),
-                $GroupByExpressions,
-                $AggregatePredicateExpressions,
-                $Criteria ?: new Criteria($EntityMap, $FunctionToExpressionTreeConverter));
+        $this->Repository = $Repository;
     }
     
-    private function ParseGroup(IGroup $Group) {
+    /**
+     * @return static
+     */
+    public function ClearQuery() {
+        $this->GroupByFunctions = [];
+        $this->HavingFunctions = [];
+        $this->SubEntityRequest = null;
+        return parent::ClearQuery();;
+    }
+
+    /**
+     * @return static
+     */
+    public function GroupBy(callable $Function) {
+        $this->GroupByFunctions[] = $Function;
+        return $this;
+    }
+
+    /**
+     * @return static
+     */
+    public function Having(callable $Function) {
+        $this->HavingFunctions[] = $Function;
+        return $this;
+    }
+    
+    private function BuildEntityRequest(array $Properties) {
+        return new EntityRequest(
+                $this->EntityType, 
+                $Properties, 
+                $this->GetGroupByExpressions($this->GroupByFunctions), 
+                $this->GetAggregatePredicateExpressions($this->HavingFunctions), 
+                $this->BuildCriteria(),
+                $this->SubEntityRequest);
+    }
+    
+    private function BuildDataRequest(array $AliasExpressionMap) {
+        return new DataRequest(
+                $this->EntityType, 
+                $AliasExpressionMap, 
+                $this->GetGroupByExpressions($this->GroupByFunctions), 
+                $this->GetAggregatePredicateExpressions($this->HavingFunctions), 
+                $this->BuildCriteria(),
+                $this->SubEntityRequest);
+    }
+    
+    private function GetGroupByExpressions($GroupByFunctions) {
+        $GroupByExpressions = [];
+        foreach($GroupByFunctions as $Key => $GroupByFunction) {
+            $GroupByExpressions[$Key] = 
+                    $this->GetReturnExpression($this->GetEntityFunctionExpressionTree($GroupByFunction));
+        }
         
+        return $GroupByExpressions;
+    }
+    
+    private function GetAggregatePredicateExpressions($HavingFunctions) {
+        $AggregatePredicates = [];
+        foreach($HavingFunctions as $Key => $HavingFunction) {
+            $AggregatePredicates[$Key] = 
+                    $this->GetReturnExpression($this->GetAggregateFunctionExpressionTree($HavingFunction));
+        }
+        
+        return $AggregatePredicates;
+    }
+    
+    public function AsArray() {
+        return $this->Repository->LoadEntities(
+                $this->BuildEntityRequest($this->EntityMap->GetProperties()));
+    }
+
+    public function getIterator() {
+        return new \ArrayIterator($this->AsArray());
+    }
+    
+    public function First() {
+        $this->LimitAmount = 1;
+        $Array = $this->AsArray();
+        return reset($Array) ?: null;
+    }
+    
+    public function Exists() {
+        return $this->Repository->LoadExists($this->BuildDataRequest(['E' => O\Expression::Value(1)]));
+    }
+    
+    public function Select(callable $Function) {
+        $ReturnExpression = $this->GetReturnExpression($this->GetEntityAndOrAggregateFunctionExpressionTree($Function));
+        if(!($ReturnExpression instanceof O\ArrayExpression)) {
+            return $this->LoadArrayOfValues($ReturnExpression);
+        }
+        else {
+            $AliasExpressionMap = $this->ParseDataExpression($ReturnExpression);
+            
+            return $this->Repository->LoadData($this->BuildDataRequest($AliasExpressionMap));
+        }
+    }
+
+    private function ParseDataExpression(O\ArrayExpression $ReturnDataExpression) {        
+        $AliasExpressionMap = [];
+        
+        $KeyExpressions = $ReturnDataExpression->GetKeyExpressions();
+        $ValueExpressions = $ReturnDataExpression->GetValueExpressions();
+        
+        foreach ($KeyExpressions as $Key => $KeyExpression) {
+            if(!($KeyExpression instanceof O\ValueExpression)) {
+                throw new PinqException(
+                        'Return array for data request must contain constant keys.');
+            }
+            
+            $ValueExpression = $ValueExpressions[$Key];
+            
+            if($KeyExpression !== null) {
+                $Alias = $KeyExpression->GetValue();
+                $AliasExpressionMap[$Alias] = $ValueExpression;
+            }
+            else {
+                $AliasExpressionMap[] = $ValueExpression;
+            }
+        }
+        
+        if(count($AliasExpressionMap) === 0) {
+            if(!($KeyExpression instanceof O\ValueExpression)) {
+                throw new PinqException(
+                        'Return array must contain atleast one key value pair');
+            }
+        }
+        
+        return $AliasExpressionMap;
+    }
+    
+    private function LoadArrayOfValues(O\Expression $ValueExpression) {
+        $ValueSet = $this->Repository->LoadData($this->BuildDataRequest(['E' => $ValueExpression]));
+        
+        $Values = [];
+        foreach($ValueSet as $ValueRow) {
+            $Values[] = $ValueRow['E'];
+        }
+        
+        return $Values;
+    }
+    
+    private function LoadAggregateValue(A\AggregateExpression $AggregateExpression) {
+        if(count($this->GroupByFunctions) === 0 
+                && $this->LimitAmount === null
+                && $this->SkipAmount === 0) {
+            
+            $Values = $this->LoadArrayOfValues($AggregateExpression);
+        }
+        else {
+            $SubEntityRequest = $this->BuildEntityRequest($this->EntityMap->GetProperties());
+            $this->ClearQuery();
+            $this->SubEntityRequest = $SubEntityRequest;
+            $this->LimitAmount = 1;
+            
+            $Values = $this->LoadArrayOfValues($AggregateExpression);
+        }
+        
+        return reset($Values) ?: null;
+    }
+
+    public function Count() {
+        return $this->LoadAggregateValue(A\AggregateExpression::Count());
+    }
+    
+    public function All(callable $Function) {
+        return $this->LoadAggregateValue(A\AggregateExpression::All(
+                $this->GetReturnExpression($this->GetEntityFunctionExpressionTree($Function))));
+    }
+
+    public function Any(callable $Functionl) {
+        return $this->LoadAggregateValue(A\AggregateExpression::Any(
+                $this->GetReturnExpression($this->GetEntityFunctionExpressionTree($Function))));
+    }
+
+    public function Average(callable $Function) {
+        return $this->LoadAggregateValue(A\AggregateExpression::Average(
+                false,
+                $this->GetReturnExpression($this->GetEntityFunctionExpressionTree($Function))));
+    }
+
+    public function Implode($Delimiter, callable $Function) {
+        return $this->LoadAggregateValue(A\AggregateExpression::Implode(
+                false,
+                $Delimiter,
+                $this->GetReturnExpression($this->GetEntityFunctionExpressionTree($Function))));
+    }
+
+    public function Maximum(callable $Function) {
+        return $this->LoadAggregateValue(A\AggregateExpression::Maximum(
+                $this->GetReturnExpression($this->GetEntityFunctionExpressionTree($Function))));
+    }
+
+    public function Minimum(callable $Function) {
+        return $this->LoadAggregateValue(A\AggregateExpression::Minimum(
+                $this->GetReturnExpression($this->GetEntityFunctionExpressionTree($Function))));
+    }
+
+    public function Sum(callable $Function) {
+        return $this->LoadAggregateValue(A\AggregateExpression::Sum(
+                false,
+                $this->GetReturnExpression($this->GetEntityFunctionExpressionTree($Function))));
     }
 }
 

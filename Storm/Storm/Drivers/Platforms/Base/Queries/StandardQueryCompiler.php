@@ -5,6 +5,7 @@ namespace Storm\Drivers\Platforms\Base\Queries;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
+use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
 class StandardQueryCompiler implements Queries\IQueryCompiler {
     
@@ -31,7 +32,7 @@ class StandardQueryCompiler implements Queries\IQueryCompiler {
     protected function AppendResultSetSelect(QueryBuilder $QueryBuilder, Relational\ResultSetSelect $ResultSetSelect) {
         $QueryBuilder->Append('SELECT ');
         foreach($QueryBuilder->Delimit($ResultSetSelect->GetColumns(), ',') as $Column) {
-            $QueryBuilder->AppendExpression(Expression::ReviveColumn($Column));
+            $QueryBuilder->AppendExpression($Column->GetReviveExpression(Expression::Column($Column)));
             $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetIdentifier()]);
         }
         

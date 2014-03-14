@@ -27,32 +27,6 @@ abstract class Select {
         $this->Criteria = $Criteria;
     }
     
-    /**
-     * Returns a select of type
-     * 
-     * @param int $Type
-     * @param Criteria $Criteria
-     * @return ResultSetSelect|DataSelect|ExistsSelect
-     * @throws RelationalException
-     */
-    final public static function OfType($Type, Criteria $Criteria) {
-        switch ($Type) {
-            case SelectType::ResultSet:
-                return new ResultSetSelect($Criteria);
-                
-            case SelectType::Data:
-                return new DataSelect([], $Criteria);
-                
-            case SelectType::Exists:
-                return new ExistsSelect($Criteria);
-
-            default:
-                throw new RelationalException(
-                        'Unknown select type: %s',
-                        $Type);
-        }
-    }
-    
     public abstract function GetSelectType();
         
     /**

@@ -15,13 +15,11 @@ class Criteria implements Object\ICriteria {
             $EntityType,
             array $PredicateExpressions = [],
             \SplObjectStorage $OrderByExpressionsAscendingMap = null,
-            array $GroupByExpressions = [],
             $RangeOffset = 0,
             $RangeAmount = null) {
         $this->EntityType = $EntityType;
         $this->PredicateExpressions = $PredicateExpressions;
         $this->OrderByExpressionsAscendingMap = $OrderByExpressionsAscendingMap ?: new \SplObjectStorage();
-        $this->GroupByExpressions = $GroupByExpressions;
         $this->RangeOffset = $RangeOffset;
         $this->RangeAmount = $RangeAmount;
     }

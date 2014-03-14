@@ -21,6 +21,16 @@ interface IRequest {
     public function GetCriteria();
     
     /**
+     * @return boolean
+     */
+    public function HasSubEntityRequest();
+    
+    /**
+     * @return IEntityRequest|null
+     */
+    public function GetSubEntityRequest();
+    
+    /**
      * Whether or not the criteria contains any group by expressions.
      * 
      * return boolean

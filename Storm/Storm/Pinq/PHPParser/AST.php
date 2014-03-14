@@ -38,8 +38,7 @@ class AST implements IAST {
     }
     
     public function GetExpressions() {
-        $Expressions = $this->ParseNodes($this->Nodes);
-        return new ExpressionTree($Expressions);
+        return $this->ParseNodes($this->Nodes);
     }
 
     private function ParseNodes(array $Nodes) {
@@ -138,6 +137,10 @@ class AST implements IAST {
             case $Node instanceof \PHPParser_Node_Expr_Closure:
                 return $this->ParseClosureNode($Node);
                      
+            case $Node instanceof \PHPParser_Node_Expr_Empty:
+                return Expression::IsEmpty(
+                        $this->ParseNode($Node->expr));
+                
             case $Node instanceof \PHPParser_Node_Expr_Variable:
                 $NameExpression = $this->ParseNameNode($Node->name);
                 return Expression::UnresolvedVariable($NameExpression);

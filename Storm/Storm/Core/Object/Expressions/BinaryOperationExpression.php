@@ -76,7 +76,7 @@ class BinaryOperationExpression extends Expression {
                 Operators\Binary::ShiftLeft =>              function ($L, $R) { return $L << $R; },
                 Operators\Binary::ShiftRight =>             function ($L, $R) { return $L >> $R; },
                 Operators\Binary::LogicalAnd =>             function ($L, $R) { return $L && $R; },
-                Operators\Binary::BooleanOr =>              function ($L, $R) { return $L || $R; },
+                Operators\Binary::LogicalOr =>              function ($L, $R) { return $L || $R; },
                 Operators\Binary::Addition =>               function ($L, $R) { return $L + $R; },
                 Operators\Binary::Subtraction =>            function ($L, $R) { return $L - $R; },
                 Operators\Binary::Multiplication =>         function ($L, $R) { return $L * $R; },

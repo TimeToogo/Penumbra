@@ -171,8 +171,8 @@ class ForeignKey extends RelationalTableTrait {
             return false;
         
         return 
-            count(array_diff_assoc($this->ReferencedColumnNameMap, $OtherTrait->ReferencedColumnNameMap)) === 0 &&
-            count(array_diff_assoc($OtherTrait->ReferencedColumnNameMap, $this->ReferencedColumnNameMap)) === 0; 
+            count(array_diff_assoc($this->ParentReferencedColumnNameMap, $OtherTrait->ParentReferencedColumnNameMap)) === 0 &&
+            count(array_diff_assoc($OtherTrait->ParentReferencedColumnNameMap, $this->ParentReferencedColumnNameMap)) === 0; 
     }
     
     final public function HasParentKey(Relational\ColumnData $ParentKeyData) {

@@ -7,6 +7,7 @@ use \Storm\Core\Object\Expressions\Expression;
 
 abstract class Request implements Object\IRequest {
     private $EntityType;
+    
     private $GroupByExpressions = [];
     private $AggregatePredicateExpressions = [];
     
@@ -15,11 +16,18 @@ abstract class Request implements Object\IRequest {
      */
     private $Criteria;
     
+    /**
+     * @var Object\IEntityRequest|null
+     */
+    private $SubEntityRequest;
+    
+    
     public function __construct(
             $EntityOrType, 
             array $GroupByExpressions,
             array $AggregatePredicateExpressions,
-            Object\ICriteria $Criteria = null) {
+            Object\ICriteria $Criteria = null,
+            Object\IEntityRequest $SubEntityRequest = null) {
         
         if(is_object($EntityOrType)) {
             $EntityOrType = get_class($EntityOrType);
@@ -41,10 +49,20 @@ abstract class Request implements Object\IRequest {
                     $this->EntityType,
                     $this->Criteria->GetEntityType());
         }
+        
+        $this->SubEntityRequest = $SubEntityRequest;
     }
 
     final public function GetEntityType() {
         return $this->EntityType;
+    }
+    
+    public function HasSubEntityRequest() {
+        return $this->SubEntityRequest !== null;
+    }
+    
+    public function GetSubEntityRequest() {
+        return $this->SubEntityRequest;
     }
         
     final public function GetCriteria() {

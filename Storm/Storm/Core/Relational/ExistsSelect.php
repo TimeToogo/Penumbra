@@ -9,7 +9,7 @@ namespace Storm\Core\Relational;
  */
 class ExistsSelect extends Select {
     
-    public function __construct( Criteria $Criteria) {
+    public function __construct(Criteria $Criteria) {
         parent::__construct($Criteria);
     }
 

@@ -117,6 +117,13 @@ abstract class Expression {
     }
     
     /**
+     * @return EmptyExpression
+     */
+    final public static function IsEmpty(Expression $ValueExpression) {
+        return new EmptyExpression($ValueExpression);
+    }
+    
+    /**
      * @return FunctionCallExpression
      */
     final public static function FunctionCall(Expression $NameExpression, array $ArgumentValueExpressions = []) {
@@ -175,6 +182,14 @@ abstract class Expression {
     final public static function Closure(array $ParameterNames, array $UsedVariables, array $BodyExpressions) {
         return new ClosureExpression($ParameterNames, $UsedVariables, $BodyExpressions);
     }
+    
+    /**
+     * @return SubRequestExpression
+     */
+    final public static function SubRequest(\Storm\Core\Object\IRequest $Request) {
+        return new SubRequestExpression($Request);
+    }
+    
     // </editor-fold>
 }
 

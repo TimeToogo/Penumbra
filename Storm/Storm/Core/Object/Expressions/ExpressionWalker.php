@@ -64,6 +64,11 @@ class ExpressionWalker {
                 $this->Walk($Expression->GetCastValueExpression()));
     }
     
+    public function WalkEmpty(EmptyExpression $Expression) {
+        return $Expression->Update(
+                $this->Walk($Expression->GetValueExpression()));
+    }
+    
     public function WalkField(FieldExpression $Expression) {
         return $Expression->Update(
                 $this->Walk($Expression->GetValueExpression()),
