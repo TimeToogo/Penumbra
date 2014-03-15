@@ -10,8 +10,8 @@ namespace Storm\Core\Relational;
 class ResultSetSelect extends Select implements IResultSetSource {
     private $Columns = [];
     
-    public function __construct(ResultSetSources $Sources, Criteria $Criteria) {
-        parent::__construct($Sources, $Criteria);
+    public function __construct(ResultSetSpecification $ResultSetSpecification) {
+        parent::__construct($ResultSetSpecification);
     }
     
     final public function GetSelectType() {

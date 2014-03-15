@@ -8,6 +8,10 @@ class LiteralExpression extends Expression {
         $this->String = $String;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkLiteral($this);
+    }
+    
     public function GetString() {
         return $this->String;
     }

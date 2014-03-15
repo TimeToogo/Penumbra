@@ -39,42 +39,39 @@ interface IRelation {
     public function GetDiscardingDependencyOrder();
     
     /**
-     * Constructs a request that is constrained by this relation.
-     * If parent rows are specified the request will be constrained such
-     * that it only loads the related rows of the parents.
-     * 
-     * @param $Type The select type
-     * @param ResultRows[]|null $ParentRows The parent rows
-     * @return Select
-     */
-    public function RelationSelect($Type, array $ParentRows = null);
-    
-    /**
-     * Adds the columns required by the relation to the parent request.
-     * 
-     * @return void
-     */
-    public function GetRelationalParentColumns();
-    
-    /**
-     * Adds the relation constraint to the supplied request.
+     * Constructs a select that is constrained by this relation.
      * If parent rows are specified the request will be constrained such
      * that it only loads the related rows of the parents.
      * 
      * @param ResultRows[]|null $ParentRows The parent rows
-     * @return void
+     * @return ResultSetSelect
      */
-    public function AddRelationToSelect(Select $Select, array $ParentRows = null);
+    public function RelationResultSetSelect(array $ParentRows = null);
     
     /**
-     * Adds the relation constraint to the supplied criteria.
+     * Gets the columns required by the relation to the parent request.
+     * 
+     * @return void
+     */
+    public function GetParentColumns();
+    
+    /**
+     * Gets the columns referenced columns.
+     * 
+     * @return void
+     */
+    public function GetReferencedColumns();
+    
+    /**
+     * Adds the relation constraint to the supplied result set specification.
      * If parent rows are specified the request will be constrained such
      * that it only loads the related rows of the parents.
      * 
+     * @param ResultSetSpecification $ResultSetSpecification
      * @param ResultRows[]|null $ParentRows The parent rows
      * @return void
      */
-    public function AddRelationToCriteria(Criteria $Criteria, array $ParentRows = null);
+    public function AddRelationToResultSet(ResultSetSpecification $ResultSetSpecification, array $ParentRows = null);
     
     /**
      * Map the relational data (foreign key data) from the parent row to the related row.

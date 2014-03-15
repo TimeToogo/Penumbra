@@ -26,7 +26,7 @@ abstract class StandardRowPersister extends UpsertPersister {
         
         $QueryBuilder->Append('(');
         foreach($QueryBuilder->Delimit($Columns, ',') as $Column) {
-            $QueryBuilder->AppendColumnData($Column, null);
+            $QueryBuilder->AppendExpression($Column->GetPersistExpression(Expression::Constant(null)));
         }
         $QueryBuilder->Append(')');
         
@@ -82,7 +82,7 @@ abstract class StandardRowPersister extends UpsertPersister {
          */
         foreach($QueryBuilder->Delimit($Columns, ', ') as $ColumnName => $Column) {
             $QueryBuilder->AppendExpression(
-                    Expression::PersistData($Column, Expression::Identifier([$DerivedTableName, $ColumnName])));
+                    $Column->GetPersistExpression(Expression::Identifier([$DerivedTableName, $ColumnName])));
         }
 
         $QueryBuilder->Append(' FROM (');
@@ -128,7 +128,7 @@ abstract class StandardRowPersister extends UpsertPersister {
         $QueryBuilder->Append(' SELECT ');
         foreach($QueryBuilder->Delimit($Columns, ', ') as $Column) {
             $QueryBuilder->AppendExpression(
-                    Expression::PersistData($Column, Expression::Constant($ColumnData[$Column])));
+                    $Column->GetPersistExpression(Expression::Constant($ColumnData[$Column])));
         }
     }
     

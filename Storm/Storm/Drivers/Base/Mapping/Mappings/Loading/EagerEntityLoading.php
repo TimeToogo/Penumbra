@@ -7,21 +7,22 @@ use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
 class EagerEntityLoading extends EntityLoading {
-    public function AddToRelationalRequest(
+    
+    public function AddLoadingRequirementsToSelect(
             Mapping\IEntityRelationalMap $EntityRelationalMap, 
             Relational\IToOneRelation $ToOneRelation, 
             Relational\ResultSetSelect $Select) {
-        $this->MapEntityToRelationalRequest($EntityRelationalMap, $Select);
+        $ToOneRelation->AddRelationToResultSet($Select->GetResultSetSpecification());
+        $this->MapEntityToSelect($EntityRelationalMap, $Select);
     }
 
     public function Load(
             Mapping\IEntityRelationalMap $EntityRelationalMap, 
-            Relational\Database $Database, 
             Relational\IToOneRelation $ToOneRelation, 
             array $ParentAndRelatedRowArray) {
         $this->UnsetNullRows($EntityRelationalMap, $ParentAndRelatedRowArray);
         //Maintains keys
-        $RelatedRevivalData = $EntityRelationalMap->MapResultRowsToRevivalData($Database, $ParentAndRelatedRowArray);
+        $RelatedRevivalData = $EntityRelationalMap->MapResultRowsToRevivalData($ParentAndRelatedRowArray);
         
         //Fill any unset rows with null
         return $RelatedRevivalData + array_fill_keys(array_keys($ParentAndRelatedRowArray), null);

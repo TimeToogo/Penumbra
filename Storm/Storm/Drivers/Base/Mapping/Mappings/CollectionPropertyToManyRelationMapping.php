@@ -54,11 +54,15 @@ class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelati
         $this->Loading = $Loading;
     }
     
-    final public function AddToRelationalSelect(Relational\ResultSetSelect $Select) {
-        return $this->Loading->AddToRelationalRequest(
+    final public function AddLoadingRequirementsToSelect(Relational\ResultSetSelect $Select) {
+        return $this->Loading->AddLoadingRequirementsToSelect(
                 $this->EntityRelationalMap, 
                 $this->ToManyRelation, 
                 $Select);
+    }
+    
+    public function AddTraversalRequirementsToResultSet(Relational\ResultSetSpecification $ResultSetSpecification) {
+        throw new \Exception();
     }
     
     final public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
@@ -81,15 +85,10 @@ class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelati
     public function MapFunctionCall(Relational\Criteria $Criteria, Expressions\FunctionCallExpression $FunctionCallExpression) {
         $this->ToManyRelation->AddRelationToCriteria($Criteria);
     }
-
-    public function AddToCriteria(Relational\Criteria $Criteria) {
-        
+    
+    public function MapPropertyExpression(Object\Expressions\TraversalExpression $TraversalExpression = null) {
+        throw new \Exception();
     }
-
-    public function MapPropertyExpression() {
-        
-    }
-
 }
 
 ?>

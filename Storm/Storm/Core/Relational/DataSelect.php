@@ -10,12 +10,10 @@ namespace Storm\Core\Relational;
 class DataSelect extends Select {
     private $AliasExpressionMap = [];
     
-    public function __construct(array $AliasExpressionMap, ResultSetSources $SelectSources, Criteria $Criteria) {
-        parent::__construct($SelectSources, $Criteria);
+    public function __construct(array $AliasExpressionMap, ResultSetSpecification $ResultSetSpecification) {
+        parent::__construct($ResultSetSpecification);
         
-        foreach ($AliasExpressionMap as $Alias => $DataExpression) {
-            $this->AddData($Alias, $DataExpression);
-        }
+        $this->AddAllDataExpressions($AliasExpressionMap);
     }
 
     final public function GetSelectType() {
@@ -29,9 +27,17 @@ class DataSelect extends Select {
         return $this->AliasExpressionMap;
     }
     
-    public function AddData($Alias, Expression $DataExpression) {
+    public function AddDataExpression($Alias, Expression $DataExpression) {
         $this->AliasExpressionMap[$Alias] = $DataExpression;
     }
+    
+    public function AddAllDataExpressions(array $AliasExpressionMap) {
+        foreach ($AliasExpressionMap as $Alias => $DataExpression) {
+            $this->AddDataExpression($Alias, $DataExpression);
+        }
+    }
+    
+    
 }
 
 ?>

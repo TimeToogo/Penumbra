@@ -7,6 +7,10 @@ class KeywordExpression extends LiteralExpression {
         parent::__construct($Keyword);
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkKeyword($this);
+    }
+    
     /**
      * @return self
      */

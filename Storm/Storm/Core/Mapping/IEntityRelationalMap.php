@@ -29,6 +29,13 @@ interface IEntityRelationalMap {
     public function GetEntityMap();
     
     /**
+     * The database for the entity relational map
+     * 
+     * @return Relational\Database
+     */
+    public function GetDatabase();
+    
+    /**
      * The table in which the identity is stored.
      * 
      * @return Relational\ITable
@@ -118,22 +125,6 @@ interface IEntityRelationalMap {
     public function ResultRow($ColumnData = []);
     
     /**
-     * Gets the sources that must be included for every select/update/delete.
-     * 
-     * @param Relational\Database $Database The database of the criteria
-     * @return Relational\ResultSetSources
-     */
-    public function GetSelectSources(Relational\Database $Database);
-    
-    /**
-     * Get the criteria that must be included for every select/update/delete.
-     * 
-     * @param Relational\Database $Database The database of the criteria
-     * @return Relational\Criteria
-     */
-    public function GetSelectCriteria(Relational\Database $Database);
-    
-    /**
      * @param Object\IProperty $Property The mapped property
      * @return Relational\IColumn[]
      */
@@ -156,6 +147,47 @@ interface IEntityRelationalMap {
      * @return Relational\IColumn[]
      */
     public function GetAllMappedPersistColumns(array $Properties = null);
+    
+    /**
+     * Gets the sources that must be included for every select/update/delete.
+     * 
+     * @param Relational\Database $Database The database of the criteria
+     * @return Relational\ResultSetSources
+     */
+    public function GetSelectSources();
+    
+    /**
+     * Get the criteria that must be included for every select/update/delete.
+     * 
+     * @param Relational\Database $Database The database of the criteria
+     * @return Relational\Criteria
+     */
+    public function GetSelectCriteria();
+    
+    /**
+     * Gets the select with the required sources and criteria.
+     * 
+     * @param Relational\Database $Database The database of the criteria
+     * @return Relational\ResultSetSelect
+     */
+    public function GetEntitySelect();
+    
+    /**
+     * Adds the select sources and criteria to the supplied result set specification.
+     * 
+     * @param Relational\ResultSetSpecification $ResultSetSpecification
+     * @return void
+     */
+    public function AddEntityToResultSet(Relational\ResultSetSpecification $ResultSetSpecification);
+    
+    /**
+     * Maps the supplied properties so they will be loaded in the given select.
+     * 
+     * @param Relational\ResultSetSelect $Select The select to add to
+     * @param Object\IProperty[] $AlreadyKnownProperties The array of properties to not map
+     * @return void
+     */
+    public function MapPropetiesToSelect(Relational\ResultSetSelect $Select, array $AlreadyKnownProperties = []);
     
     /**
      * Maps an identity to the equivalent primary key.
@@ -189,28 +221,7 @@ interface IEntityRelationalMap {
      * @param Relational\PrimaryKey[] The primary keys to map
      * @return Object\Identity[] $Identity The mapped identities
      */
-    public function MapPrimaryKeysToIdentities(array $PrimaryKeys); 
-    
-    /**
-     * @access private
-     * 
-     * Maps an entity such that its all its properties will be loaded in the given relational select.
-     * 
-     * @param Relational\ResultSetSelect $Select The select to add to
-     * @return void
-     */
-    public function MapEntityToSelect(Relational\ResultSetSelect $Select, array $AlreadyKnownProperties = []);
-    
-    /**
-     * @access private
-     * 
-     * Maps the supplied properties such that they will be loaded in the given relational select.
-     * 
-     * @param Relational\ResultSetSelect $Select The select to add to
-     * @param array|null $Properties The array of properties to map or null if all properties should be mapped
-     * @return void
-     */
-    public function MapPropetiesToSelect(Relational\ResultSetSelect $Select, array $Properties = null);
+    public function MapPrimaryKeysToIdentities(array $PrimaryKeys);
     
     /**
      * @access private
@@ -218,11 +229,10 @@ interface IEntityRelationalMap {
      * Maps the supplied result rows to an array of revival data.
      * NOTE: Array keys are preserved.
      * 
-     * @param Relational\Database $Database The database to load the relations from
      * @param Relational\ResultRows[] $ResultRows The result row to map
      * @return Object\RevivalData[]
      */
-    public function MapResultRowsToRevivalData(Relational\Database $Database, array $ResultRowArray);
+    public function MapResultRowsToRevivalData(array $ResultRowArray);
     
     /**
      * @access private

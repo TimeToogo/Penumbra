@@ -2,19 +2,21 @@
 
 namespace Storm\Drivers\Base\Relational\Expressions;
 
-use \Storm\Core\Relational\Expression as CoreExpression;
-
 class BinaryOperationExpression extends Expression {
     private $LeftOperandExpression;
     private $Operator;
     private $RightOperandExpression;
     public function __construct(
-            CoreExpression $LeftOperandExpression, 
+            Expression $LeftOperandExpression, 
             $Operator, 
-            CoreExpression $RightOperandExpression) {
+            Expression $RightOperandExpression) {
         $this->LeftOperandExpression = $LeftOperandExpression;
         $this->Operator = $Operator;
         $this->RightOperandExpression = $RightOperandExpression;
+    }
+    
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkBinaryOperation($this);
     }
     
     public function GetOperator() {
@@ -39,9 +41,9 @@ class BinaryOperationExpression extends Expression {
      * @return self
      */
     public function Update(
-            CoreExpression $LeftOperandExpression, 
+            Expression $LeftOperandExpression, 
             $Operator, 
-            CoreExpression $RightOperandExpression) {
+            Expression $RightOperandExpression) {
         if($this->LeftOperandExpression === $LeftOperandExpression
                 && $this->Operator === $Operator
                 && $this->RightOperandExpression === $RightOperandExpression) {

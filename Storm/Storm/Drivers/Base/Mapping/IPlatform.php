@@ -3,7 +3,7 @@
 namespace Storm\Drivers\Base\Mapping;
 
 use \Storm\Core\Object\Expressions as O;
-use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Relational;
 use \Storm\Core\Relational\Expressions as R;
 
 /**

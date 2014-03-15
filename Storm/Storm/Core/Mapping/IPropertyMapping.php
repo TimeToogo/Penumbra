@@ -22,16 +22,25 @@ interface IPropertyMapping {
     public function GetProperty();
     
     /**
-     * Adds the necessary constraints to the criteria.
+     * Adds the necessary constraints and/or columns to the select for loading this property mapping.
      * 
+     * @param Relational\ResultSetSelect $Select
      * @return void
      */
-    public function AddToCriteria(Relational\Criteria $Criteria);
+    public function AddLoadingRequirementsToSelect(Relational\ResultSetSelect $Select);
+    
+    /**
+     * Adds the necessary constraints to the result set for querying this property mapping.
+     * 
+     * @param Relational\ResultSetSpecification $ResultSetSpecification
+     * @return void
+     */
+    public function AddTraversalRequirementsToResultSet(Relational\ResultSetSpecification $ResultSetSpecification);
     
     /**
      * @return Relational\Expression
      */
-    public function MapPropertyExpression();
+    public function MapPropertyExpression(Relational\ResultSetSources $Sources, O\TraversalExpression $TraversalExpression = null);
 }
 
 ?>

@@ -3,18 +3,18 @@
 namespace Storm\Drivers\Base\Relational\Expressions;
 
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Relational\Columns\Column;
 
 abstract class Expression extends Relational\Expression {
+    
+    public abstract function Traverse(ExpressionWalker $Walker);
     
     /**
      * @return ColumnExpression
      */
-    public static function Column(Relational\IColumn $Column) {
-        return new ColumnExpression($Column);
+    public static function Column(Relational\IResultSetSource $Source, Relational\IColumn $Column) {
+        return new ColumnExpression($Source, $Column);
     }
-
-
+    
     /**
      * @return ConstantExpression
      */
@@ -37,21 +37,10 @@ abstract class Expression extends Relational\Expression {
     }
     
     /**
-     * @return Expression
+     * @return AliasExpression
      */
-    public static function ReviveColumn(Relational\IColumn $Column) {
-        return $Column instanceof Column ?
-                $Column->GetDataType()->GetReviveExpression(Expression::Column($Column)) : 
-                Expression::Column($Column);
-    }
-    
-    /**
-     * @return Expression
-     */
-    public static function PersistData(Relational\IColumn $Column, parent $ValueExpression) {
-        return $Column instanceof Column ?
-                $Column->GetDataType()->GetPersistExpression($ValueExpression) : 
-                $ValueExpression;
+    public static function Alias(Expression $ValueExpression, $Alias) {
+        return new AliasExpression($ValueExpression, $Alias);
     }
     
     /**
@@ -66,13 +55,6 @@ abstract class Expression extends Relational\Expression {
      */
     public static function UnaryOperation($UnaryOperator, parent $OperandExpression) {
         return new UnaryOperationExpression($UnaryOperator, $OperandExpression);
-    }
-    
-    /**
-     * @return CastExpression
-     */
-    public static function Cast($CastType, parent $CastValueExpression) {
-        return new CastExpression($CastType, $CastValueExpression);
     }
     
     /**
@@ -105,10 +87,10 @@ abstract class Expression extends Relational\Expression {
     }
     
     /**
-     * @return SetExpression
+     * @return SubSelectExpression
      */
-    public static function Set(Expressions\ColumnExpression $AssignToColumnExpression, $AssignmentOperator, parent $AssignmentValueExpression) {
-        return new SetExpression($AssignToColumnExpression, $AssignmentOperator, $AssignmentValueExpression);
+    public static function SubSelect(Relational\Select $Select) {
+        return new SubSelectExpression($Select);
     }
     
     /**

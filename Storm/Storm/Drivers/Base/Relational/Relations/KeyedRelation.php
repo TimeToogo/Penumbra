@@ -35,7 +35,7 @@ abstract class KeyedRelation extends Relation {
         return $this->IsInversed;
     }
     
-    public function GetRelationalParentColumns() {
+    public function GetParentColumns() {
         return $this->GetParentColumns();
     }
     
@@ -44,10 +44,6 @@ abstract class KeyedRelation extends Relation {
     }
     
     protected abstract function JoinType();
-    
-    protected function AddParentColumnsToRequest(Relational\Select $Request) {
-        $Request->AddColumns($this->GetReferencedColumns());
-    }
     
     protected function AddParentPredicateToCriteria(Relational\Criteria $Criteria, array $ParentRows) {
         $MatchExpressions = [];

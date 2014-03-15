@@ -8,6 +8,8 @@ use \Storm\Drivers\Base\Relational\Expressions\Operators\Binary;
 class ForeignKeyPredicateExpression extends CompoundBooleanExpression {
     
     public function __construct(ForeignKey $ForeignKey) {
+        $ParentTable = $ForeignKey->GetParentTable();
+        $ReferencedTable = $ForeignKey->GetReferencedTable();
         $ReferencedColumnMap = $ForeignKey->GetReferencedColumnMap();
         
         $ConstraintExpressions = [];
@@ -16,9 +18,9 @@ class ForeignKeyPredicateExpression extends CompoundBooleanExpression {
             $ReferencedColumn = $ReferencedColumnMap[$ParentColumn];
             
             $ConstraintExpressions[] = Expression::BinaryOperation(
-                            Expression::Column($ParentColumn), 
+                            Expression::Column($ParentTable, $ParentColumn), 
                             Binary::Equality,
-                            Expression::Column($ReferencedColumn));
+                            Expression::Column($ReferencedTable, $ReferencedColumn));
             
         }
         

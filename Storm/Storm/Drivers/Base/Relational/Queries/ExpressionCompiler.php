@@ -12,28 +12,28 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
         $this->ExpressionOptimizer = $ExpressionOptimizer;
     }
     
-    final public function Append(QueryBuilder $QueryBuilder, Expression $Expression) {
+    final public function Append(
+            QueryBuilder $QueryBuilder, 
+            Expression $Expression, 
+            \SplObjectStorage $SourceAliasMap = null) {
         $Expression = $this->ExpressionOptimizer->Optimize($Expression);
         
         switch (true) {
             case $Expression instanceof E\MultipleExpression:
                 foreach($Expression->GetExpressions() as $Expression) {
-                    $this->Append($QueryBuilder, $Expression);
+                    $this->Append($QueryBuilder, $Expression, $SourceAliasMap);
                 }
                 return;
                 
-            case $Expression instanceof CoreE\ColumnExpression:
+            case $Expression instanceof E\ColumnExpression:
                 return $this->AppendColumn($QueryBuilder, $Expression);
                 
-            case $Expression instanceof CoreE\ConstantExpression:
+            case $Expression instanceof E\ConstantExpression:
                 return $this->AppendConstant($QueryBuilder, $Expression);
                 
             case $Expression instanceof E\IdentifierExpression:
                 return $this->AppendIdentifier($QueryBuilder, $Expression);
-                
-            case $Expression instanceof E\SetExpression:
-                return $this->AppendSet($QueryBuilder, $Expression);
-                
+            
             case $Expression instanceof E\BinaryOperationExpression:
                 return $this->AppendBinaryOperation($QueryBuilder, $Expression);
                 
@@ -72,11 +72,11 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
         }
     }
     
-    protected function AppendColumn(QueryBuilder $QueryBuilder, CoreE\ColumnExpression $Expression) {
-        $QueryBuilder->AppendColumn('#', $Expression->GetColumn());
+    protected function AppendColumn(QueryBuilder $QueryBuilder, E\ColumnExpression $Expression) {
+        $QueryBuilder->AppendIdentifier('#', [$Expression->GetColumn()->GetName()]);
     }
     
-    protected function AppendConstant(QueryBuilder $QueryBuilder, CoreE\ConstantExpression $Expression) {
+    protected function AppendConstant(QueryBuilder $QueryBuilder, E\ConstantExpression $Expression) {
         $QueryBuilder->AppendSingleValue($Expression->GetValue());
     }
     

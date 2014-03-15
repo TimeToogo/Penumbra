@@ -4,9 +4,9 @@ namespace Storm\Drivers\Base\Relational\Queries;
 
 use \Storm\Drivers\Base\Relational;
 use \Storm\Core\Relational\Expression;
-use \Storm\Core\Relational\Criteria;
 use \Storm\Core\Relational\Select;
 use \Storm\Core\Relational\Update;
+use \Storm\Core\Relational\Delete;
 
 class QueryBuilder {
     const DefaultPlaceholder = '#';
@@ -15,7 +15,6 @@ class QueryBuilder {
     private $Bindings;
     private $QueryString = '';
     private $ExpressionCompiler;
-    private $CriteriaCompiler;
     private $QueryCompiler;
     private $ProcedureCompiler;
     private $IdentifierEscaper;
@@ -25,7 +24,6 @@ class QueryBuilder {
             $ParameterPlaceholder,
             Bindings $Bindings,
             IExpressionCompiler $ExpressionCompiler,
-            ICriteriaCompiler $CriteriaCompiler,
             IQueryCompiler $QueryCompiler,
             IUpdateCompiler $ProcedureCompiler,
             IIdentifierEscaper $IdentifierEscaper) {
@@ -33,7 +31,6 @@ class QueryBuilder {
         $this->ParameterPlaceholder = $ParameterPlaceholder;
         $this->Bindings = $Bindings;
         $this->ExpressionCompiler = $ExpressionCompiler;
-        $this->CriteriaCompiler = $CriteriaCompiler;
         $this->QueryCompiler = $QueryCompiler;
         $this->ProcedureCompiler = $ProcedureCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
@@ -69,13 +66,6 @@ class QueryBuilder {
     }
     
     /**
-     * @return ICriteriaCompiler
-     */
-    final public function GetCriteriaCompiler() {
-        return $this->CriteriaCompiler;
-    }
-    
-    /**
      * @return IQueryCompiler
      */
     final public function GetQueryCompiler() {
@@ -89,6 +79,15 @@ class QueryBuilder {
         return $this->Connection->Prepare($this->QueryString, $this->Bindings);
     }
     
+    /**
+     * Returns an iterator which will append the delimiter inbetween every iteration.
+     * NOTE: Do not use this if the iteration can be interrupted (break, continue), the
+     * delimiter will not be appended properly.
+     * 
+     * @param array|Traversable $Iteratable
+     * @param string $Delimiter
+     * @return \CallbackFilterIterator
+     */
     final public function Delimit($Iteratable, $Delimiter) {
         $Iterator = is_array($Iteratable) ? 
                 new \ArrayIterator($Iteratable) : new \IteratorIterator($Iteratable);
@@ -109,19 +108,44 @@ class QueryBuilder {
     
     // <editor-fold defaultstate="collapsed" desc="Expresion appenders">
     
+    /**
+     * @var Relational\Expressions\ExpressionWalker[]
+     */
+    private $ExpressionWalkers = [];
+    
+    final public function AddExpressionWalker(Relational\Expressions\ExpressionWalker $Walker) {
+        if(!in_array($Walker, $this->ExpressionWalkers, true)) {
+            $this->ExpressionWalkers[] = $Walker;
+        }
+    }
+    
+    final public function RemoveExpressionWalker(Relational\Expressions\ExpressionWalker $Walker) {
+        foreach ($this->ExpressionWalkers as $Key => $OtherWalker) {
+            if($Walker === $OtherWalker) {
+                unset($this->ExpressionWalkers[$Key]);
+                return;
+            }
+        }
+    }
+    
     final public function AppendExpression(Expression $Expression) {
+        foreach($this->ExpressionWalkers as $Walker) {
+            $Expression = $Walker->Walk($Expression);
+        }
         $this->ExpressionCompiler->Append($this, $Expression);
     }
-
-
+    
     final public function AppendExpressions(array $Expressions, $Delimiter) {
+        foreach($this->ExpressionWalkers as $Walker) {
+            $Expressions = $Walker->WalkAll($Expressions);
+        }
+        
         $First = true;
         foreach ($Expressions as $Expression) {
             if ($First)
                 $First = false;
             else
                 $this->QueryString .= $Delimiter;
-
 
             $this->AppendExpression($Expression);
         }
@@ -138,18 +162,9 @@ class QueryBuilder {
     final public function AppendUpdate(Update $Update) {
         $this->QueryCompiler->AppendUpdate($this, $Update);
     }
-    
-    final public function AppendWhere(Criteria $Criteria) {
-        $this->CriteriaCompiler->AppendWhere($this, $Criteria);
-    }
 
-    final public function AppendOrderBy(Criteria $Criteria) {
-        $this->CriteriaCompiler->AppendOrderBy($this, $Criteria);
-        
-    }
-    
-    final public function AppendRange(Criteria $Criteria) {
-        $this->CriteriaCompiler->AppendRange($this, $Criteria);
+    final public function AppendDelete(Delete $Delete) {
+        $this->QueryCompiler->AppendDelete($this, $Delete);
     }
 
     // </editor-fold>
@@ -180,35 +195,16 @@ class QueryBuilder {
         $this->AppendEscapedIdentifiers($QueryStringFormat, $EscapedIdentifiers, $Delimiter, $ValuePlaceholder);
     }
 
-
-    final public function AppendColumn($QueryStringFormat, \Storm\Core\Relational\IColumn $Column, $ValuePlaceholder = self::DefaultPlaceholder) {
-        $EscapedIdentifier = $this->GetColumnIdentifier($Column);
-        
-        $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $EscapedIdentifier);
-    }
-
     private function AppendEscapedIdentifiers($QueryStringFormat, array $Identifiers, $Delimiter, $ValuePlaceholder) {
         $QueryIdentifiers = implode($Delimiter, $Identifiers);
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $QueryIdentifiers);
     }
     
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Identifier Helpers">    
-    
-    private function GetColumnIdentifier(\Storm\Core\Relational\IColumn $Column, $Alias = null) {
-        $EscapedIdentifier = $this->IdentifierEscaper->Escape([$Column->GetTable()->GetName(), $Column->GetName()]);
-        if($Alias !== null) {
-            $EscapedIdentifier = $this->IdentifierEscaper->Alias($EscapedIdentifier, $Alias);
-        }
-        
-        return $EscapedIdentifier;
-    }
-
     private function EscapeIdentifiers(array $Identifiers) {
         foreach ($Identifiers as &$IdentifierSegments) {
-            if (is_string($IdentifierSegments))
+            if (is_string($IdentifierSegments)) {
                 $IdentifierSegments = [$IdentifierSegments];
+            }
         }
         
         return $this->IdentifierEscaper->EscapeAll($Identifiers);
@@ -257,8 +253,7 @@ class QueryBuilder {
         
         $this->QueryString .= $this->ParameterPlaceholder;
     }
-
-
+    
     final public function AppendValues($QueryStringFormat, array $Values, $Delimiter, $ValuePlaceholder = self::DefaultPlaceholder) {
         $PlaceholderCount = substr_count($QueryStringFormat, $ValuePlaceholder);
         foreach ($Values as $Value) {
@@ -269,30 +264,6 @@ class QueryBuilder {
 
         $QueryPlaceholders = implode($Delimiter, array_fill(0, count($Values), $this->ParameterPlaceholder));
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $QueryPlaceholders);
-    }
-    
-    final public function AppendColumnData(Relational\Columns\Column $Column, $Value) {     
-        $ValueExpression = Relational\Expressions\Expression::Constant($Value);
-        $PersistExpression = $Column->GetDataType()->GetPersistExpression($ValueExpression);
-        
-        if($ValueExpression === $PersistExpression) {
-            $this->AppendSingleValue($Value);
-        }
-        else {
-            $this->ExpressionCompiler->Append($this, $PersistExpression);
-        }
-    }
-    
-    final public function AppendAllColumnData(\Storm\Core\Relational\ColumnData $Data, $Delimiter) {     
-        $First = true;
-        foreach($Data->GetData() as $ColumnIdentifier => $Value) {
-            if($First) $First = false;
-            else
-                $this->QueryString .= $Delimiter;
-            
-            $Column = $Data->GetColumn($ColumnIdentifier);
-            $this->AppendColumnData($Column, $Value);
-        }
     }
     
     // </editor-fold>

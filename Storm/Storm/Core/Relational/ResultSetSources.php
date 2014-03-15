@@ -14,17 +14,25 @@ class ResultSetSources {
     private $Joins = [];
     
     /**
+     * @var ITable[] 
+     */
+    private $Tables = [];
+    
+    /**
      * @var array<string, IResultSetSource>
      */
     private $ColumnIdentifierSourceMap = [];
     
     public function __construct(IResultSetSource $Source, array $Joins = []) {
-        $this->AddSourceColumns($Source);
+        $this->AddSource($Source);
         $this->Source = $Source;
         $this->AddJoins($Joins);
     }
     
-    private function AddSourceColumns(IResultSetSource $Source) {
+    private function AddSource(IResultSetSource $Source) {
+        if($Source instanceof ITable) {
+            $this->Tables[$Source->GetName()] = $Source;
+        }
         foreach ($Source->GetColumns() as $Column) {
             $Identifier = $Column->GetIdentifier();
             if(isset($this->ColumnIdentifierSourceMap[$Identifier])) {
@@ -33,7 +41,7 @@ class ResultSetSources {
                         $Identifier);
             }
             
-            $this->ColumnIdentifierSourceMap[$Column] = $Source;
+            $this->ColumnIdentifierSourceMap[$Identifier] = $Source;
         }
     }
     
@@ -58,7 +66,7 @@ class ResultSetSources {
      * @return void
      */
     final public function AddJoin(Join $Join) {
-        $this->AddSourceColumns($Join->GetSource());
+        $this->AddSource($Join->GetSource());
         $this->Joins[] = $Join;
     }
     
@@ -79,6 +87,13 @@ class ResultSetSources {
      */
     final public function IsJoined() {
         return count($this->Joins) > 0;
+    }
+    
+    /**
+     * @return boolean
+     */
+    final public function ContainsTable(ITable $Table) {
+        return isset($this->Tables[$Table->GetName()]);
     }
     
     /**

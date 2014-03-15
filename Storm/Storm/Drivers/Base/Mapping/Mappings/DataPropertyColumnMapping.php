@@ -56,28 +56,11 @@ class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IData
         return $this->DataProperty;
     }
 
-    public function AddToCriteria(Relational\Criteria $Criteria) {
-        
-    }
-
-    public function MapPropertyExpression() {
-        return \Storm\Drivers\Base\Relational\Expressions\Expression::ReviveColumn($this->Column);
+    public function AddLoadingRequirementsToSelect(Relational\ResultSetSelect $Select) {
+        $Select->AddColumn($this->Column);
     }
     
-    public function MapTraversalExpression(Relational\Criteria $Criteria, Expressions\TraversalExpression $TraversalExpression) {
-        if($this->Column instanceof Columns\Column) {
-            $DataType = $this->Column->GetDataType();
-            if($DataType instanceof Columns\ObjectDataType) {
-                
-            }
-        }
-    }
-
-    public function MapAssignment(Relational\Criteria $Criteria, Mapping\Expressions\Expression $AssignmentValueExpression) {
-        return \Storm\Drivers\Base\Relational\Expressions\Expression::PersistData($this->Column, $AssignmentValueExpression);
-    }
-
-    public function MapBinary(Relational\Criteria $Criteria, Mapping\Expressions\Expression $OperandValueExpression) {
+    public function AddTraversalRequirementsToResultSet(Relational\ResultSetSpecification $ResultSetSpecification) {
         
     }
     
@@ -95,8 +78,20 @@ class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IData
                 $ColumnDataArray[$Key][$this->Column] = $this->Column->ToPersistenceValue($PropertyData[$this->DataProperty]);
             }
         }
+    }    
+    
+    public function MapPropertyExpression(
+            Relational\ResultSetSources $Sources,
+            Object\Expressions\TraversalExpression $TraversalExpression = null) {
+        if($TraversalExpression !== null) {
+            throw new \Exception();
+        }
+        
+        return $this->Column->GetReviveExpression(
+                \Storm\Drivers\Base\Relational\Expressions\Expression::Column(
+                        $Sources->GetColumnSource($this->Column),
+                        $this->Column));
     }
-
 }
 
 ?>

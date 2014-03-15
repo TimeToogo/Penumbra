@@ -19,7 +19,6 @@ class EagerCollectionLoading extends CollectionLoading {
         //Groups by parent row key
         $RelatedRevivalDataArrays = $this->MapParentRowKeysToRelatedRevivalDataArray(
                 $EntityRelationalMap, 
-                $Database, 
                 $ToManyRelation, 
                 $ParentRowArray, 
                 $RelatedRowArray);

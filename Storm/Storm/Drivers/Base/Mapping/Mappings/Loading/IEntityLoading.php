@@ -9,7 +9,7 @@ use \Storm\Core\Relational;
 interface IEntityLoading {
     public function VerifyCompatibility(Object\IEntityProperty $Property);
     
-    public function AddToRelationalRequest(
+    public function AddLoadingRequirementsToSelect(
             Mapping\IEntityRelationalMap $EntityRelationalMap,
             Relational\IToOneRelation $ToOneRelation,
             Relational\ResultSetSelect $Select);

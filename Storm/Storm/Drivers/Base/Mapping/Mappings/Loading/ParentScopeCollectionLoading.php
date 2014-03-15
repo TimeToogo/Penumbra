@@ -21,7 +21,7 @@ class ParentScopeCollectionLoading extends CollectionLoading {
                     function () use (&$EntityRelationalMap, &$Database, &$ToManyRelation, $ParentRow) {
                         $RelatedRows = $this->LoadRelatedRows($ToManyRelation, $Database, [$ParentRow]);
                         
-                        $RelatedRevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($Database, $RelatedRows);
+                        $RelatedRevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($RelatedRows);
 
                         return $RelatedRevivalDataArray;
                     };

@@ -9,10 +9,6 @@ use \Storm\Core\Object;
  */
 class ExpressionWalker {
     
-    final public static function On($Expression) {
-        return $Expression === null ? null : $Expression->Traverse($this);
-    }
-    
     /**
      * @return Expression|null
      */
@@ -26,7 +22,7 @@ class ExpressionWalker {
     final public function WalkAll(array $Expressions) {
         $WalkedExpressions = [];
         foreach ($Expressions as $Key => $Expression) {
-            $WalkedExpressions[$Key] = $Expression->Traverse($Expression);
+            $WalkedExpressions[$Key] = $this->Walk($Expression);
         }
         
         return $WalkedExpressions;

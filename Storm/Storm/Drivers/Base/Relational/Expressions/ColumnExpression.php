@@ -2,8 +2,7 @@
 
 namespace Storm\Drivers\Base\Relational\Expressions;
 
-use \Storm\Core\Relational\ITable;
-use \Storm\Core\Relational\IColumn;
+use \Storm\Core\Relational;
 
 /**
  * Expression representing a column in a table.
@@ -12,45 +11,50 @@ use \Storm\Core\Relational\IColumn;
  */
 class ColumnExpression extends Expression {
     /**
-     * @var ITable 
+     * @var Relational\IResultSetSource 
      */
-    private $Table;
+    private $Source;
     
     /**
-     * @var IColumn 
+     * @var Relational\IColumn 
      */
     private $Column;
     
-    /**
-     * @var string|null
-     */
-    private $Alias;
-    
-    public function __construct(IColumn $Column, $Alias = null) {        
-        $this->Table = $Column->GetTable();
+    public function __construct(Relational\IResultSetSource $Source, Relational\IColumn $Column) {
+        if(!$Source->HasColumn($Column)) {
+            throw new Relational\RelationalException(
+                    'Cannot create column expression with source that does not contain the supplied column: %s',
+                    $Column->GetName());
+        }
+        $this->Source = $Source;
         $this->Column = $Column;
-        $this->Alias = $Alias;
+    }
+    
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkColumn($this);
     }
     
     /**
-     * @return ITable
+     * @return Relational\IResultSetSource
      */
-    final public function GetTable() {
-        return $this->Table;
+    public function GetSource() {
+        return $this->Source;
     }
-    
+
     /**
-     * @return IColumn
+     * @return Relational\IColumn
      */
     final public function GetColumn() {
         return $this->Column;
     }
     
-    /**
-     * @return string|null
-     */
-    final public function GetAlias() {
-        return $this->Alias;
+    public function Update(Relational\IResultSetSource $Source, Relational\IColumn $Column) {
+        if($this->Source === $Source
+                && $this->Column === $Column) {
+            return $this;
+        }
+        
+        return new self($Source, $Column);
     }
 }
 

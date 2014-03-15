@@ -17,6 +17,10 @@ class ConstantExpression extends Expression {
         $this->Value = $Value;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkConstant($this);
+    }
+    
     /**
      * @return mixed
      */

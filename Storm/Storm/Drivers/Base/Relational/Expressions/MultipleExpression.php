@@ -9,8 +9,12 @@ class MultipleExpression extends Expression {
         $this->Expressions = $Expressions;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkMultiple($this);
+    }
+    
     /**
-     * @return CoreExpression[]
+     * @return Expression[]
      */
     public function GetExpressions() {
         return $this->Expressions;

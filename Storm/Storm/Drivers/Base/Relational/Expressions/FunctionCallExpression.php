@@ -2,14 +2,16 @@
 
  namespace Storm\Drivers\Base\Relational\Expressions;
 
-use \Storm\Core\Relational\Expression as CoreExpression;
-
 class FunctionCallExpression extends Expression {
     private $Name;
     private $ArgumentValueListExpression;
     public function __construct($Name, ValueListExpression $ArgumentValueListExpression) {
         $this->Name = $Name;
         $this->ArgumentValueListExpression = $ArgumentValueListExpression;
+    }
+    
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkFunctionCall($this);
     }
     
     public function GetName() {

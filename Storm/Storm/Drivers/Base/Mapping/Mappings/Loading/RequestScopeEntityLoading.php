@@ -30,7 +30,6 @@ class RequestScopeEntityLoading extends EntityLoading {
                 
                 $ParentKeyRelatedRevivalDataMap = $this->MapParentRowKeysToRelatedRevivalData(
                                 $EntityRelationalMap, 
-                                $Database,
                                 $ToOneRelation, 
                                 $ParentRowArray, 
                                 $RelatedRows);

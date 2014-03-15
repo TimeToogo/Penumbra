@@ -66,7 +66,6 @@ class GlobalScopeLazyEntityLoading extends EntityLoading {
         
         return $this->MapParentRowKeysToRelatedRevivalData(
                 $EntityRelationalMap, 
-                $Database, 
                 $ToOneRelation, 
                 $ParentRowArray, 
                 $this->RelatedRowArrays[$LoadIndex]);

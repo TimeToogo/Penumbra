@@ -5,7 +5,7 @@ namespace Storm\Drivers\Base\Relational;
 use \Storm\Core;
 
 /**
- * The platform contains all specific implementation related to
+ * The platform contains querying implementation specific to
  * the underlying database.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
@@ -47,11 +47,6 @@ interface IPlatform {
      * @return Queries\IExpressionCompiler
      */
     public function GetExpressionCompiler();
-    
-    /**
-     * @return Queries\ICriteriaCompiler
-     */
-    public function GetCriteriaCompiler();
     
     /**
      * @return Queries\IQueryCompiler

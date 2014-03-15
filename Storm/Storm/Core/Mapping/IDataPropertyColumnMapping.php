@@ -59,16 +59,6 @@ interface IDataPropertyColumnMapping extends IPropertyMapping {
      * @return void
      */
     public function Persist(array $PropertyDataArray, array $ColumnDataArray);
-    
-    /**
-     * @return Relational\Expression[]
-     */
-    public function MapAssignment(Relational\Criteria $Criteria, Expressions\Expression $AssignmentValueExpression);
-    
-    /**
-     * @return Relational\Expression[]
-     */
-    public function MapBinary(Relational\Criteria $Criteria, Expressions\Expression $OperandValueExpression);
 }
 
 ?>

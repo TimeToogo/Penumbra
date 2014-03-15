@@ -8,57 +8,28 @@ namespace Storm\Core\Relational;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class Delete {    
+class Delete extends Query {    
     /**
      * The table to delete the rows from
      * 
      * @var ITable[]
      */
     private $Tables = [];
-    
-    /**
-     * @var ResultSetSources
-     */
-    private $Sources;
-    
-    /**
-     * @var Criteria
-     */
-    private $Criteria;
-    
-    public function __construct(ResultSetSources $Sources, Criteria $Criteria) {
-        $this->Sources = $Sources;
-        $this->Criteria = $Criteria;
-    }
-    
-    /**
-     * @return ResultSetSources
-     */
-    final public function GetSources() {
-        return $this->Sources;
-    }
-
-    /**
-     * @return Criteria
-     */
-    final public function GetCriteria() {
-        return $this->Criteria;
-    }
-    
+        
     final public function HasTable($TableName) {
         return isset($this->Tables[$TableName]);
     }
     
     /**
-     * Add a table to the delete.
+     * Add a table to the delete. (The rows of the supplied table will be deleted)
      * 
      * @param ITable[] $Tables The tables to add
      * @return void
      */
     final public function AddTable(ITable $Table) {
-        if(!$this->Criteria->HasTable($Table->GetName())) {
+        if(!$this->Sources->ContainsTable($Table)) {
             throw new RelationalException(
-                    'Cannot add table \'%s\' to delete: it is not a table in the underlying criteria',
+                    'Cannot add table \'%s\' to delete: it is not part of the underlying result set source',
                     $Table->GetName());
         }
         $this->Tables[$Table->GetName()] = $Table;

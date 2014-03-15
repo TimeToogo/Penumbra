@@ -9,12 +9,41 @@ use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
 class StandardQueryCompiler implements Queries\IQueryCompiler {
     /**
+     * @var ICriteriaCompiler 
+     */
+    private $CriteriaCompiler;
+    
+    /**
      * @var IResultSetSourceCompiler 
      */
     private $ResultSetSourceCompiler;
     
-    public function __construct(IResultSetSourceCompiler $ResultSetSourceCompiler = null) {
+    public function __construct(
+            ICriteriaCompiler $CriteriaCompiler = null,
+            IResultSetSourceCompiler $ResultSetSourceCompiler = null) {
+        $this->CriteriaCompiler = $CriteriaCompiler ?: new StandardCriteriaCompiler();
         $this->ResultSetSourceCompiler = $ResultSetSourceCompiler ?: new StandardResultSetSourceCompiler();
+    }
+    
+    private function GetColumnResolverWalker(\SplObjectStorage $SourceAliasMap) {
+        $ColumnResolverWalker = new Walkers\ColumnResolverWalker($SourceAliasMap);
+        
+        return $ColumnResolverWalker;
+    }
+    
+    protected function GetSourceAliasMap(Relational\ResultSetSources $Sources) {
+        $Map = new \SplObjectStorage();
+        
+        $Prefix = 't';
+        $Map[$Sources->GetSource()] = $Prefix;
+        
+        $Index = 1;
+        foreach ($Sources->GetJoins() as $Join) {
+            $Map[$Join->GetSource()] = $Prefix . $Index;
+            $Index++;
+        }
+        
+        return $Map;
     }
     
     public function AppendSelect(QueryBuilder $QueryBuilder, Relational\Select $Select) {
@@ -38,34 +67,57 @@ class StandardQueryCompiler implements Queries\IQueryCompiler {
     }
     
     protected function AppendResultSetSelect(QueryBuilder $QueryBuilder, Relational\ResultSetSelect $ResultSetSelect) {
+        $Sources = $ResultSetSelect->GetSources();
+        $SourceAliasMap = $this->GetSourceAliasMap($Sources);
+        $ColumnResolverWalker = $this->GetColumnResolverWalker($SourceAliasMap);
+        $QueryBuilder->AddExpressionWalker($ColumnResolverWalker);
+        
         $QueryBuilder->Append('SELECT ');
+        
         foreach($QueryBuilder->Delimit($ResultSetSelect->GetColumns(), ',') as $Column) {
-            $QueryBuilder->AppendExpression($Column->GetReviveExpression(Expression::Column($Column)));
+            $ColumnExpression = Expression::Column($Sources->GetColumnSource($Column), $Column);
+            
+            $QueryBuilder->AppendExpression($Column->GetReviveExpression($ColumnExpression));
             $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetIdentifier()]);
         }
         
-        $this->AppendSelectClauses($QueryBuilder, $ResultSetSelect);
+        $this->AppendSelectClauses($QueryBuilder, $ResultSetSelect, $SourceAliasMap);
+        
+        $QueryBuilder->RemoveExpressionWalker($ColumnResolverWalker);
     }
     
     protected function AppendDataSelect(QueryBuilder $QueryBuilder, Relational\DataSelect $DataSelect) {
+        $SourceAliasMap = $this->GetSourceAliasMap($DataSelect->GetSources());
+        $ColumnResolverWalker = $this->GetColumnResolverWalker($SourceAliasMap);
+        $QueryBuilder->AddExpressionWalker($ColumnResolverWalker);
+        
         $QueryBuilder->Append('SELECT ');
+        
         foreach($QueryBuilder->Delimit($DataSelect->GetAliasExpressionMap(), ',') as $Alias => $Expression) {
             $QueryBuilder->AppendExpression($Expression);
             $QueryBuilder->AppendIdentifier(' AS #', $Alias);
         }
         
-        $this->AppendSelectClauses($QueryBuilder, $DataSelect);
+        $this->AppendSelectClauses($QueryBuilder, $DataSelect, $ColumnResolverWalker);
+        
+        $QueryBuilder->RemoveExpressionWalker($ColumnResolverWalker);
     }
     
     protected function AppendExistsSelect(QueryBuilder $QueryBuilder, Relational\ExistsSelect $ExistsSelect) {
+        $SourceAliasMap = $this->GetSourceAliasMap($DataSelect->GetSources());
+        $ColumnResolverWalker = $this->GetColumnResolverWalker($SourceAliasMap);
+        $QueryBuilder->AddExpressionWalker($ColumnResolverWalker);
+        
         $QueryBuilder->Append('SELECT EXISTS (SELECT *');
-        $this->AppendSelectClauses($QueryBuilder, $ExistsSelect);
+        $this->AppendSelectClauses($QueryBuilder, $ExistsSelect, $SourceAliasMap);
         $QueryBuilder->Append(')');
+        
+        $QueryBuilder->RemoveExpressionWalker($ColumnResolverWalker);
     }
     
-    protected function AppendSelectClauses(QueryBuilder $QueryBuilder, Relational\Select $Select) {
+    protected function AppendSelectClauses(QueryBuilder $QueryBuilder, Relational\Select $Select, \SplObjectStorage $SourceAliasMap) {
         $QueryBuilder->Append(' FROM ');
-        $this->ResultSetSourceCompiler->AppendResultSetSources($QueryBuilder, $Sources, $SourceAliasMap);
+        $this->ResultSetSourceCompiler->AppendResultSetSources($QueryBuilder, $Select->GetSources(), $SourceAliasMap);
         $this->AppendSelectCriteria($QueryBuilder, $Select);
     }
     
@@ -100,28 +152,36 @@ class StandardQueryCompiler implements Queries\IQueryCompiler {
     }
 
     public function AppendUpdate(QueryBuilder $QueryBuilder, Relational\Update $Update) {
-        $Criteria = $Update->GetCriteria();
+        $SourceAliasMap = $this->GetSourceAliasMap($Delete->GetSources());
+        $ColumnResolverWalker = $this->GetColumnResolverWalker($SourceAliasMap);
+        $QueryBuilder->AddExpressionWalker($ColumnResolverWalker);
         
         $QueryBuilder->Append('UPDATE ');
-        $QueryBuilder->AppendTableDefinition($Criteria);
+        $this->ResultSetSourceCompiler->AppendResultSetSources($Update->GetSources());
         $QueryBuilder->Append(' SET ');
         
-        foreach($QueryBuilder->Delimit($Update->GetExpressions(), ',') as $Expression) {
+        foreach($QueryBuilder->Delimit($Update->GetColumnExpressionMap(), ',') as $Expression) {
             $QueryBuilder->AppendExpression($Expression);
         }
         
-        $this->AppendCriteria($QueryBuilder, $Criteria);
+        $this->AppendCriteria($QueryBuilder, $Update->GetCriteria());
+        
+        $QueryBuilder->RemoveExpressionWalker($ColumnResolverWalker);
     }
 
     public function AppendDelete(QueryBuilder $QueryBuilder, Relational\Delete $Delete) {
-        $Criteria = $Delete->GetCriteria();
+        $SourceAliasMap = $this->GetSourceAliasMap($Delete->GetSources());
+        $ColumnResolverWalker = $this->GetColumnResolverWalker($SourceAliasMap);
+        $QueryBuilder->AddExpressionWalker($ColumnResolverWalker);
         
         $QueryBuilder->AppendIdentifiers('DELETE # ', array_keys($Delete->GetTables()), ',');
         $QueryBuilder->Append(' FROM ');
         
-        $QueryBuilder->AppendTableDefinition($Criteria);
+        $this->ResultSetSourceCompiler->AppendResultSetSources($Delete->GetSources());
         
-        $this->AppendCriteria($QueryBuilder, $Criteria);
+        $this->AppendCriteria($QueryBuilder, $Delete->GetCriteria());
+        
+        $QueryBuilder->RemoveExpressionWalker($ColumnResolverWalker);
     }
     
     protected function AppendCriteria(QueryBuilder $QueryBuilder, Relational\Criteria $Criteria) {

@@ -26,6 +26,11 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     private $EntityType;
     
     /**
+     * @var Relational\Database
+     */
+    private $Database;
+    
+    /**
      * @var Relational\ITable
      */
     private $PrimaryKeyTable;
@@ -97,7 +102,8 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         }
         
         $Registrar = new Registrar(IPropertyMapping::IPropertyMappingType);
-        $this->RegisterPropertyMappings($Registrar, $this->EntityMap, $DomainDatabaseMap->GetDatabase());
+        $this->Database = $DomainDatabaseMap->GetDatabase();
+        $this->RegisterPropertyMappings($Registrar, $this->EntityMap, $this->Database);
         
         foreach($Registrar->GetRegistered() as $PropertyMapping) {
             $this->AddPropertyMapping($PropertyMapping);
@@ -221,6 +227,13 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * {@inheritDoc}
      */
+    final public function GetDatabase() {
+        return $this->Database;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
     final public function GetPrimaryKeyTable() {
         return $this->PrimaryKeyTable;
     }
@@ -310,28 +323,6 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         
         return $this->ResultRow->Another($ColumnData);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    final public function GetSelectSource(Relational\Database $Database) {
-        $SelectSources = new Relational\ResultSetSources($this->PrimaryKeyTable);
-        $this->SelectSources($SelectSources, $Database);
-        
-        return $SelectSources;
-    }
-    protected function SelectSources(Relational\ResultSetSources $SelectSources, Relational\Database $Database) { }
-
-    /**
-     * {@inheritDoc}
-     */
-    final public function GetSelectCriteria(Relational\Database $Database) {
-        $RelationalCriteria = new Relational\Criteria();
-        $this->SelectCriteria($RelationalCriteria, $Database);
-        
-        return $RelationalCriteria;
-    }
-    protected function SelectCriteria(Relational\Criteria $RelationalCriteria, Relational\Database $Database) { }
     
     /**
      * Verifies that the data property column mapping exists for the supplied property.
@@ -389,6 +380,60 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         $Columns = call_user_func_array('array_merge', $ColumnGroups);
         return $Columns;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    final public function GetSelectSources() {
+        $SelectSources = new Relational\ResultSetSources($this->PrimaryKeyTable);
+        $this->SelectSources($SelectSources, $this->Database);
+        
+        return $SelectSources;
+    }
+    protected function SelectSources(Relational\ResultSetSources $SelectSources, Relational\Database $Database) { }
+
+    /**
+     * {@inheritDoc}
+     */
+    final public function GetSelectCriteria() {
+        $RelationalCriteria = new Relational\Criteria();
+        $this->SelectCriteria($RelationalCriteria, $this->Database);
+        
+        return $RelationalCriteria;
+    }
+    protected function SelectCriteria(Relational\Criteria $SelectCriteria, Relational\Database $Database) { }
+    
+    /**
+     * {@inheritDoc}
+     */
+    final public function GetEntitySelect() {
+        return new Relational\ResultSetSelect($this->GetSelectSource(), $this->GetSelectCriteria());
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    final public function AddEntityToResultSet(Relational\ResultSetSpecification $ResultSetSpecification) {
+        $this->SelectSources($ResultSetSpecification->GetSources(), $this->Database);
+        $this->SelectCriteria($ResultSetSpecification->GetCriteria(), $this->Database);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    final public function MapPropetiesToSelect(Relational\ResultSetSelect $Select, array $AlreadyKnownProperties = []) {
+        $Properties = $this->MappedProperties;
+        
+        if(count($AlreadyKnownProperties) > 0) {
+            foreach($AlreadyKnownProperties as $AlreadyKnownProperty) {
+                unset($Properties[$AlreadyKnownProperty->GetIdentifier()]);
+            } 
+        }
+        
+        foreach($Properties as $PropertyIdentifier => $Property) {
+            $this->PropertyMappings[$PropertyIdentifier]->AddLoadingRequirementsToSelect($Select);
+        }
+    }
         
     /**
      * {@inheritDoc}
@@ -441,55 +486,18 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * {@inheritDoc}
      */
-    final public function MapEntityToSelect(Relational\ResultSetSelect $Select, array $AlreadyKnownProperties = []) {
-        $Properties = $this->MappedProperties;
-        if(count($AlreadyKnownProperties) > 0) {
-            foreach($AlreadyKnownProperties as $AlreadyKnownProperty) {
-                unset($Properties[$AlreadyKnownProperty->GetIdentifier()]);
-            } 
-        }
-        $this->MapPropetiesToSelect($Select, $Properties);
-    }
-        
-    /**
-     * {@inheritDoc}
-     */
-    final public function MapPropetiesToSelect(Relational\ResultSetSelect $Select, array $Properties = null) {
-        if($Properties === null) {
-            $Properties = $this->MappedProperties;
-        }
-        else {
-            $Properties = array_combine(array_map(function ($Property) { return $Property->GetIdentifier(); }, $Properties), $Properties);
-        }
-        
-        foreach($Properties as $PropertyIdentifier => $Property) {
-            if(isset($this->DataPropertyColumnMappings[$PropertyIdentifier])) {
-                $Select->AddColumns($this->DataPropertyColumnMappings[$PropertyIdentifier]->GetReviveColumns());
-            }
-            else if(isset($this->EntityPropertyToOneRelationMappings[$PropertyIdentifier])) {
-                $this->EntityPropertyToOneRelationMappings[$PropertyIdentifier]->AddToRelationalSelect($Select);
-            }
-            else if(isset($this->CollectionPropertyToManyRelationMappings[$PropertyIdentifier])) {
-                $this->CollectionPropertyToManyRelationMappings[$PropertyIdentifier]->AddToRelationalSelect($Select);
-            }
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    final public function MapResultRowsToRevivalData(Relational\Database $Database, array $ResultRowArray) {
-        return $this->MapResultRowsToRevivalDataByMappings($Database, $ResultRowArray, $this->PropertyMappings);
+    final public function MapResultRowsToRevivalData(array $ResultRowArray) {
+        return $this->MapResultRowsToRevivalDataByMappings($ResultRowArray, $this->PropertyMappings);
     }
     
     /**
      * {@inheritDoc}
      */
     final public function MapResultRowDataToRevivalData(array $ResultRowArray) {
-        return $this->MapResultRowsToRevivalDataByMappings(null, $ResultRowArray, $this->DataPropertyColumnMappings);
+        return $this->MapResultRowsToRevivalDataByMappings($ResultRowArray, $this->DataPropertyColumnMappings);
     }
     
-    private function MapResultRowsToRevivalDataByMappings(Relational\Database $Database = null, array $ResultRowArray, array $PropertyMappings) {
+    private function MapResultRowsToRevivalDataByMappings(array $ResultRowArray, array $PropertyMappings) {
         $RevivalDataArray = [];
         foreach ($ResultRowArray as $Key => $ResultRow) {
             $RevivalData = $this->EntityMap->RevivalData();
@@ -498,7 +506,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         
         foreach($PropertyMappings as $PropertyIdentifier => $PropertyMapping) {
             if($PropertyMapping instanceof IRelationshipPropertyRelationMapping) {
-                $PropertyMapping->Revive($Database, $ResultRowArray, $RevivalDataArray);
+                $PropertyMapping->Revive($this->Database, $ResultRowArray, $RevivalDataArray);
             }
             else {
                 $PropertyMapping->Revive($ResultRowArray, $RevivalDataArray);

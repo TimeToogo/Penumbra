@@ -207,7 +207,7 @@ abstract class DomainDatabaseMap {
      */
     final protected function GetSelectCriteria($EntityType) {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-        $EntityRelationalMap->GetSelectCriteria($this->Database);
+        $EntityRelationalMap->GetSelectCriteria();
     }
     
     /**
@@ -215,7 +215,7 @@ abstract class DomainDatabaseMap {
      */
     final protected function GetSelectSources($EntityType) {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-        $EntityRelationalMap->GetSelectSources($this->Database);
+        $EntityRelationalMap->GetSelectSources();
     }
     
     /**
@@ -231,7 +231,7 @@ abstract class DomainDatabaseMap {
         $Select = $this->MapEntityRequest($Request);
         $ResultRows = $this->Database->Load($Select);
         
-        $RevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($this->Database, $ResultRows);
+        $RevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($ResultRows);
         
         return $this->Domain->ReviveEntities($EntityType, $RevivalDataArray);        
     }
@@ -316,14 +316,20 @@ abstract class DomainDatabaseMap {
     protected abstract function MapProcedure(Object\IProcedure $Procedure);
     
     /**
-     * @access private
-     * 
      * Maps the supplied object criteria the supplied relational equivalent.
      * 
      * @param Object\ICriteria $Criteria The object criteria to map
      * @return Relational\Criteria The relational equivalent
      */
     protected abstract function MapCriteria(Object\ICriteria $Criteria, Relational\Criteria $RelationalCriteria = null);
+    
+    /**
+     * Maps the supplied object criteria to the equivalent delete
+     * 
+     * @param Object\ICriteria $Criteria The object criteria to map
+     * @return Relational\Delete The delete
+     */
+    protected abstract function MapCriteriaToDelete(Object\ICriteria $Criteria);
     
     // <editor-fold defaultstate="collapsed" desc="Entity Persistence mapping">
     
@@ -357,9 +363,7 @@ abstract class DomainDatabaseMap {
         }
         
         foreach($UnitOfWork->GetDiscardedCriteria() as $DiscardedCriteria) {
-            $RelationalCriteria = $this->GetSelectCriteria($DiscardedCriteria->GetEntityType());
-            $this->MapCriteria($DiscardedCriteria, $RelationalCriteria);
-            $Transaction->AddDelete($RelationalCriteria);
+            $Transaction->AddDelete($this->MapCriteriaToDelete($DiscardedCriteria));
         }
     }
     

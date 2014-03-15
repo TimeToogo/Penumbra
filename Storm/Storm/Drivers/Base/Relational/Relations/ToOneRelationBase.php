@@ -16,7 +16,6 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
         if(count($RelatedRows) === 0) {
             return [];
         }
-
         
         if(count($ParentRows) === 1) {
             return [key($ParentRows) => reset($RelatedRows)];

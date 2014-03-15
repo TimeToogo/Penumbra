@@ -24,35 +24,22 @@ abstract class Relation implements Relational\IRelation {
         return $this->Table;
     }
     
-    final public function AddRelationToSelect(Relational\Select $Request, array $ParentRows = null) {
-        $this->AddRelationToCriteria($Request->GetCriteria(), $ParentRows);
-        
-        if($ParentRows !== null && count($ParentRows) > 0) {
-            $this->AddParentColumnsToRequest($Request);
-        }
-    }
-    
-    final public function AddRelationToCriteria(Relational\Criteria $Criteria, array $ParentRows = null) {
-        $Criteria->AddJoins($this->RelationJoins());
-        $this->AddParentPredicate($Criteria, $ParentRows);
-    }
-    
-    final protected function RelationJoins() {
-        return $this->GetRelationJoins($this->Table);
+    final public function AddRelationToResultSet(Relational\ResultSetSpecification $ResultSetSpecification, array $ParentRows = null) {
+        $ResultSetSpecification->GetSources()->AddJoins($this->GetRelationJoins($this->Table));
+        $this->AddParentPredicate($ResultSetSpecification->GetCriteria(), $ParentRows);
     }
     
     /**
      * Relational\Join[]
      */
     protected abstract function GetRelationJoins(Relational\ITable $Table);
+    
     private function AddParentPredicate(Relational\Criteria $Criteria, array $ParentRows = null) {
         if($ParentRows !== null && count($ParentRows) > 0) {
             $this->AddParentPredicateToCriteria($Criteria, $ParentRows);
         }
     }
     protected abstract function AddParentPredicateToCriteria(Relational\Criteria $Criteria, array $ParentRows);
-    
-    protected abstract function AddParentColumnsToRequest(Relational\Select $Request);
     
     final public function GetPersistingDependencyOrder() {
         return $this->PersistingOrder;
@@ -62,17 +49,17 @@ abstract class Relation implements Relational\IRelation {
         return $this->DiscardingOrder;
     }
     
-    final public function RelationSelect($Type, array $ParentRows = null) {
-        $Request = $this->NewRelationRequest($Type);
+    final public function RelationResultSetSelect(array $ParentRows = null) {
+        $Request = $this->NewRelationSelect();
         $this->AddParentPredicate($Request->GetCriteria(), $ParentRows);
         
         return $Request;
     }
     /**
-     * Relational\Request
+     * @return Relational\Select
      */
-    protected function NewRelationRequest($Type) {
-        return new Relational\Select($Type, new Relational\Criteria($this->Table));
+    protected function NewRelationSelect() {
+        return new Relational\ResultSetSelect(new Relational\ResultSetSources($this->Table), new Relational\Criteria());
     }
 }
 

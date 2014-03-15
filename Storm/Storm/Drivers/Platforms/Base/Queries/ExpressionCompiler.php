@@ -140,14 +140,21 @@ abstract class ExpressionCompiler extends Queries\ExpressionCompiler {
     }
 
     protected function AppendIf(QueryBuilder $QueryBuilder, E\IfExpression $Expression) {
-        $QueryBuilder->Append('IF');
-        $QueryBuilder->Append('(');
-        $this->Append($QueryBuilder, $Expression->GetConditionExpression());
-        $QueryBuilder->Append(',');
+        $QueryBuilder->Append('CASE ');
+        
+        $this->AppendBinaryOperation($QueryBuilder, 
+                E\Expression::BinaryOperation(
+                        $Expression->GetConditionExpression(), 
+                        E\Operators\Binary::LogicalAnd, 
+                        E\Expression::Constant(1)));
+        
+        $QueryBuilder->Append('WHEN 1 THEN');
         $this->Append($QueryBuilder, $Expression->GetIfTrueExpression());
-        $QueryBuilder->Append(',');
+        
+        $QueryBuilder->Append('ELSE');
         $this->Append($QueryBuilder, $Expression->GetIfFalseExpression());
-        $QueryBuilder->Append(')');
+        
+        $QueryBuilder->Append('END');
     }
 }
 

@@ -2,14 +2,16 @@
 
 namespace Storm\Drivers\Base\Relational\Expressions;
 
-use \Storm\Core\Relational\Expression as CoreExpression;
-
 class UnaryOperationExpression extends Expression {
     private $Operator;
     private $OperandExpression;
-    public function __construct($UnaryOperator, CoreExpression $OperandExpression) {
+    public function __construct($UnaryOperator, Expression $OperandExpression) {
         $this->Operator = $UnaryOperator;
         $this->OperandExpression = $OperandExpression;
+    }
+    
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkUnaryOperation($this);
     }
     
     public function GetOperator() {
@@ -26,7 +28,7 @@ class UnaryOperationExpression extends Expression {
     /**
      * @return self
      */
-    public function Update($UnaryOperator, CoreExpression $OperandExpression) {
+    public function Update($UnaryOperator, Expression $OperandExpression) {
         if($this->Operator === $UnaryOperator
                 && $this->OperandExpression === $OperandExpression) {
             return $this;

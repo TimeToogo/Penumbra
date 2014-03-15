@@ -7,7 +7,7 @@ namespace Storm\Core\Relational;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-abstract class Select  {
+abstract class Select extends Query {
     /**
      * @var Expression[] 
      */
@@ -18,37 +18,8 @@ abstract class Select  {
      */
     private $GroupByExpressions = [];
     
-    /**
-     * @var Criteria
-     */
-    protected $Criteria;
-    
-    /**
-     * @var ResultSetSources
-     */
-    protected $Sources;
-    
-    public function __construct(ResultSetSources $Sources, Criteria $Criteria) {
-        $this->Sources = $Sources;
-        $this->Criteria = $Criteria;
-    }
-    
     public abstract function GetSelectType();
-        
-    /**
-     * @return ResultSetSources
-     */
-    final public function GetSources() {
-        return $this->Sources;
-    }
-
-    /**
-     * @return Criteria
-     */
-    final public function GetCriteria() {
-        return $this->Criteria;
-    }
-        
+    
     // <editor-fold defaultstate="collapsed" desc="Grouping">
 
     /**

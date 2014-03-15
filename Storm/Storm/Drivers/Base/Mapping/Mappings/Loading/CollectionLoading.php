@@ -13,13 +13,12 @@ abstract class CollectionLoading extends RelationshipLoading implements ICollect
     
     final protected function MapParentRowKeysToRelatedRevivalDataArray(
             Mapping\IEntityRelationalMap $EntityRelationalMap,
-            Relational\Database $Database, 
             Relational\IToManyRelation $ToManyRelation,
             array $ParentRows, 
             array $RelatedRows) {
         $ParentKeyRelatedRowsMap = $ToManyRelation->MapParentKeysToRelatedRows($ParentRows, $RelatedRows);
         
-        $RelatedRevivalData = $EntityRelationalMap->MapResultRowsToRevivalData($Database, $RelatedRows);
+        $RelatedRevivalData = $EntityRelationalMap->MapResultRowsToRevivalData($RelatedRows);
         
         $MappedRelatedRevivalData = [];
         foreach($ParentRows as $Key => $ParentRow) {            

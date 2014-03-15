@@ -4,10 +4,12 @@ namespace Storm\Drivers\Base\Mapping\Expressions;
 
 use \Storm\Core\Relational\Expression;
 
-/**
- * Converts object expressions to the equivalent platform-specific relational expressions 
- */
 interface IOperationMapper {
+    
+    public function MapAssignmentToBinary(
+            Expression $AssignToExpression,
+            $Operator,
+            Expression $AssignmentValueExpression);
     
     public function MapBinary(
             Expression $MappedLeftOperandExpression,

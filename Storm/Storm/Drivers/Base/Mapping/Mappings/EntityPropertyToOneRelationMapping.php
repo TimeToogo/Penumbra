@@ -51,11 +51,16 @@ class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMap
         $this->Loading = $Loading;
     }
     
-    final public function AddToRelationalSelect(Relational\ResultSetSelect $RelationalRequest) {
-        return $this->Loading->AddToRelationalRequest(
+    final public function AddLoadingRequirementsToSelect(Relational\ResultSetSelect $RelationalRequest) {
+        return $this->Loading->AddLoadingRequirementsToSelect(
                 $this->EntityRelationalMap, 
                 $this->ToOneRelation, 
                 $RelationalRequest);
+    }
+    
+    public function AddTraversalRequirementsToResultSet(Relational\ResultSetSpecification $ResultSetSpecification) {
+        $this->ToOneRelation->AddRelationToResultSet($ResultSetSpecification);
+        $this->EntityRelationalMap->AddEntityToResultSet($ResultSetSpecification);
     }
     
     final public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray) {
@@ -75,21 +80,7 @@ class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMap
         }
     }
 
-    public function MapAssignment(Relational\Criteria $Criteria, Object\Expressions\Expression $AssignmentValueExpression) {
-        $this->ToOneRelation->AddRelationToCriteria($Criteria);
-        
-    }
-
-    public function MapBinary(Relational\Criteria $Criteria, Object\Expressions\Expression $OperandValueExpression) {
-        $this->ToOneRelation->AddRelationToCriteria($Criteria);
-        
-    }
-
-    public function AddToCriteria(Relational\Criteria $Criteria) {
-        
-    }
-
-    public function MapPropertyExpression() {
+    public function MapPropertyExpression(Object\Expressions\TraversalExpression $TraversalExpression = null) {
         
     }
 

@@ -12,7 +12,6 @@ class Platform implements IPlatform {
     private $ColumnSet;
     private $KeyGeneratorSet;
     private $ExpressionCompiler;
-    private $CriteriaCompiler;
     private $QueryCompiler;
     private $IdentifierEscaper;
     private $DatabaseSyncer;
@@ -22,7 +21,6 @@ class Platform implements IPlatform {
             Columns\IColumnSet $ColumnSet,
             PrimaryKeys\IKeyGeneratorSet $KeyGeneratorSet,
             Queries\IExpressionCompiler $ExpressionCompiler, 
-            Queries\ICriteriaCompiler $CriteriaCompiler, 
             Queries\IQueryCompiler $QueryCompiler, 
             Queries\IIdentifierEscaper $IdentifierEscaper,
             Syncing\IDatabaseSyncer $DatabaseSyncer, 
@@ -30,9 +28,7 @@ class Platform implements IPlatform {
         $this->ColumnSet = $ColumnSet;
         $this->KeyGeneratorSet = $KeyGeneratorSet;
         $this->ExpressionCompiler = $ExpressionCompiler;
-        $this->CriteriaCompiler = $CriteriaCompiler;
         $this->QueryCompiler = $QueryCompiler;
-        $this->ProcedureCompiler = $ProcedureCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
         $this->DatabaseSyncer = $DatabaseSyncer;
         $this->TransactionCommiter = $TransactionCommiter;
@@ -50,9 +46,7 @@ class Platform implements IPlatform {
     public function SetConnection(Queries\IConnection $Connection) {
         $this->Connection = $Connection;
         $this->Connection->SetExpressionCompiler($this->ExpressionCompiler);
-        $this->Connection->SetCriteriaCompiler($this->CriteriaCompiler);
         $this->Connection->SetRequestCompiler($this->QueryCompiler);
-        $this->Connection->SetProcedureCompiler($this->ProcedureCompiler);
         $this->Connection->SetIdentifierEscaper($this->IdentifierEscaper);
         $this->OnSetConnection($Connection);
     }
@@ -84,10 +78,6 @@ class Platform implements IPlatform {
     
     final public function GetExpressionCompiler() {
         return $this->ExpressionCompiler;
-    }
-    
-    final public function GetCriteriaCompiler() {
-        return $this->CriteriaCompiler;
     }
     
     final public function GetQueryCompiler() {

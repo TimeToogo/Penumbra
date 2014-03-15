@@ -1,8 +1,6 @@
 <?php
 
 namespace Storm\Drivers\Base\Relational\Expressions;
- 
-use \Storm\Core\Relational\Expression as CoreExpression;
 
 class ValueListExpression extends Expression {
     private $ValueExpressions;
@@ -10,8 +8,12 @@ class ValueListExpression extends Expression {
         $this->ValueExpressions = $ValueExpressions;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkValueList($this);
+    }
+    
     /**
-     * @return CoreExpression[]
+     * @return Expression[]
      */
     public function GetValueExpressions() {
         return $this->ValueExpressions;

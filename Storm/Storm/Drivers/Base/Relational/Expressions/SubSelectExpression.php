@@ -11,6 +11,10 @@ class SubSelectExpression extends Expression {
         $this->Select = $Select;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkSubSelect($this);
+    }
+    
     /**
      * @return Select
      */

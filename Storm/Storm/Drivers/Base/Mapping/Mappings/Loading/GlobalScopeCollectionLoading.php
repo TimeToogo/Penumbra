@@ -59,7 +59,6 @@ class GlobalScopeCollectionLoading extends CollectionLoading {
         
         return $this->MapParentRowKeysToRelatedRevivalDataArray(
                 $EntityRelationalMap, 
-                $Database, 
                 $ToManyRelation, 
                 $ParentRowArray, 
                 $this->RelatedRowArrays[$LoadIndex]);

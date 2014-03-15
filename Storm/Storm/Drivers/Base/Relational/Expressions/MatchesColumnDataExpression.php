@@ -3,7 +3,6 @@
 namespace Storm\Drivers\Base\Relational\Expressions;
 
 use \Storm\Core\Relational\ColumnData;
-use \Storm\Drivers\Base\Relational\Expressions\Operators\Binary;
 
 class MatchesColumnDataExpression extends CompoundBooleanExpression {
     
@@ -11,14 +10,14 @@ class MatchesColumnDataExpression extends CompoundBooleanExpression {
         
         $ConstraintExpressions = [];
         
-        foreach($ColumnData as $ColumnIdentifier => $Value) {
+        foreach($ColumnData->GetData() as $ColumnIdentifier => $Value) {
             $Column = $ColumnData->GetColumn($ColumnIdentifier);
             
             $ConstraintExpressions[] =
                     Expression::BinaryOperation(
-                            Expression::Column($Column), 
-                            Binary::Equality,
-                            Expression::PersistData($Column, Expression::Constant($Value)));
+                            Expression::Column($Column->GetTable(), $Column), 
+                            Operators\Binary::Equality,
+                            $Column->GetPersistExpression(Expression::Constant($Value)));
         }
         
         parent::__construct($ConstraintExpressions, Binary::LogicalAnd);

@@ -8,11 +8,11 @@ use \Storm\Core\Relational;
 
 abstract class RelationshipLoading {
     
-    public function AddToRelationalRequest(
+    public function AddLoadingRequirementsToSelect(
             Mapping\IEntityRelationalMap $EntityRelationalMap, 
             Relational\IToOneRelation $ToOneRelation, 
             Relational\ResultSetSelect $Select) {
-        $Select->AddColumns($ToOneRelation->GetRelationalParentColumns());
+        $Select->AddColumns($ToOneRelation->GetParentColumns());
     }    
     
     final protected function LoadRelatedRows(
@@ -20,22 +20,22 @@ abstract class RelationshipLoading {
             Relational\Database $Database, 
             array $ParentRows, 
             Object\RevivalData $AlreadyKnownRevivalData = null) {
-        $RelatedRowRequest = $Relation->RelationSelect(Relational\SelectType::ResultSet, $ParentRows);
-        $this->MapEntityToRelationalRequest($RelatedRowRequest, $AlreadyKnownRevivalData);
+        $RelatedRowRequest = $Relation->RelationResultSetSelect($ParentRows);
+        $this->MapEntityToSelect($RelatedRowRequest, $AlreadyKnownRevivalData);
         return $Database->Load($RelatedRowRequest);
     }
     
-    final protected function MapEntityToRelationalRequest(
+    final protected function MapEntityToSelect(
             Mapping\IEntityRelationalMap $EntityRelationalMap,
             Relational\ResultSetSelect $Select, 
             Object\RevivalData $AlreadyKnownRevivalData = null) {
         if($AlreadyKnownRevivalData !== null) {
             $AlreadyKnownPropertyIdentifiers = array_keys($AlreadyKnownRevivalData->GetPropertyData());
             $AlreadyKnownProperties = $AlreadyKnownRevivalData->GetProperties($AlreadyKnownPropertyIdentifiers);
-            $EntityRelationalMap->MapEntityToSelect($Select, $AlreadyKnownProperties);
+            $EntityRelationalMap->MapPropetiesToSelect($Select, $AlreadyKnownProperties);
         }
         else {
-            $EntityRelationalMap->MapEntityToSelect($Select);
+            $EntityRelationalMap->MapPropetiesToSelect($Select);
         }
     }
 }

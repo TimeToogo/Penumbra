@@ -11,6 +11,10 @@ class IdentifierExpression extends Expression {
         $this->IdentifierSegments = $IdentifierSegments;
     }
     
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkIdentifier($this);
+    }
+    
     public function GetIdentifierSegments() {
         return $this->IdentifierSegments;
     }

@@ -48,15 +48,15 @@ class JoinTableRelation extends ToManyRelationBase {
         return $this->ParentForeignKey;
     }
     
-    public function GetRelationalParentColumns() {
+    public function GetParentColumns() {
         return $this->ParentForeignKey->GetReferencedColumns();
     }
     
-    protected function NewRelationRequest($Type) {
-        $Request = new Relational\Select($Type, new Relational\Criteria($this->JoinTable));
-        $Request->GetCriteria()->AddJoins(parent::GetRelationJoins($this->GetTable()));
+    protected function NewRelationSelect() {
+        $Select = new Relational\ResultSetSelect(new Relational\ResultSetSources($this->JoinTable), new Relational\Criteria($this->JoinTable));
+        $Select->GetCriteria()->AddJoins(parent::GetRelationJoins($this->GetTable()));
         
-        return $Request;
+        return $Select;
     }
     
     protected function JoinType() {
@@ -68,9 +68,9 @@ class JoinTableRelation extends ToManyRelationBase {
         return array_merge($Joins, parent::GetRelationJoins($Table));
     }
     
-    protected function AddParentColumnsToRequest(Relational\Select $Request) {
-        parent::AddParentColumnsToRequest($Request);
-        $Request->AddColumns($this->ParentForeignKey->GetParentColumns());
+    protected function AddParentColumnsToSelect(Relational\ResultSetSelect $Select) {
+        parent::AddParentColumnsToRequest($Select);
+        $Select->AddColumns($this->ParentForeignKey->GetParentColumns());
     }
     
     protected function MapParentRowToRelatedKey(ForeignKey $ForeignKey, Relational\ResultRow $ParentRow) {

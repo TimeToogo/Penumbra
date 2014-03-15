@@ -16,8 +16,8 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
         $this->GetDatabase()->SetPlatform($Platform->GetRelationalPlatform());
     }
     
-    private function GetPropertyExpressionResolver(Relational\Criteria $Criteria) {
-        return new Expressions\PropertyExpressionResolver($Criteria, $this);
+    private function GetPropertyExpressionResolver(Relational\Query $Query) {
+        return new Expressions\PropertyExpressionResolver($Query->GetResultSetSpecification(), $this);
     }
     
     // <editor-fold defaultstate="collapsed" desc="Request  mappers">
@@ -29,10 +29,13 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
      * @return Relational\ExistsSelect The exists relational select
      */
     final protected function MapToExistsSelect(Object\IRequest $Request) {
-        return $this->MapRequest($Request, 
-                function ($Request, $SelectSources, $SelectCriteria) {
-                    return new Relational\ExistsSelect($SelectSources, $SelectCriteria);
-                });
+        $ExistsSelect = new Relational\ExistsSelect(new Relational\ResultSetSpecification(
+                $this->GetResultSetSources($Request), 
+                $this->GetSelectCriteria($Request->GetEntityType())));
+        
+        $this->MapRequestToSelect($Request, $ExistsSelect);
+        
+        return $ExistsSelect;
     }
     
     /**
@@ -42,15 +45,16 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
      * @return Relational\ResultSetSelect The equivalent relational select
      */
     final protected function MapEntityRequest(Object\IEntityRequest $EntityRequest) {
-        return $this->MapRequest($EntityRequest, 
-                function ($EntityRequest, $SelectSources, $SelectCriteria) {
-                    $EntityRelationalMap = $this->GetEntityRelationalMap($EntityRequest->GetEntityType());
-                    
-                    $Select = new Relational\ResultSetSelect($SelectSources, $SelectCriteria);
-                    $EntityRelationalMap->MapPropetiesToSelect($Select);
-                    
-                    return $Select;
-                });
+        $ResultSetSelect = new Relational\ResultSetSelect(new Relational\ResultSetSpecification(
+                $this->GetResultSetSources($EntityRequest), 
+                $this->GetSelectCriteria($EntityRequest->GetEntityType())));
+        
+        $this->MapRequestToSelect($EntityRequest, $ResultSetSelect);
+        
+        $EntityRelationalMap = $this->GetEntityRelationalMap($EntityRequest->GetEntityType());
+        $EntityRelationalMap->MapPropertiesToSelect($ResultSetSelect, $EntityRequest->GetProperties());
+        
+        return $ResultSetSelect;
     }
     
     /**
@@ -60,30 +64,40 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
      * @return Relational\DataSelect The data select
      */
     final protected function MapDataRequest(Object\IDataRequest $DataRequest) {
-        return $this->MapRequest($DataRequest, 
-                
-                function ($DataRequest, $SelectSources, $SelectCriteria, $PropertyExpressionResolver) {
-                    $MappedAliasExpressionMap = 
-                            $this->MapExpressions($DataRequest->GetAliasExpressionMap(), $PropertyExpressionResolver);
-                    
-                    return new Relational\DataSelect($MappedAliasExpressionMap, $SelectSources, $SelectCriteria);
-                });
+        $DataSelect = new Relational\DataSelect([], new Relational\ResultSetSpecification(
+                $this->GetResultSetSources($DataRequest), 
+                $this->GetSelectCriteria($DataRequest->GetEntityType())));
+        
+        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($DataSelect);
+        $this->MapRequestToSelect($DataRequest, $DataSelect, $PropertyExpressionResolver);
+        
+        $RelationalAliasExpressionMap = $this->MapExpressions($DataRequest->GetAliasExpressionMap(), $PropertyExpressionResolver);
+        $DataSelect->AddAllDataExpressions($RelationalAliasExpressionMap);
+        
+        return $DataSelect;
     }
     
-    private function MapRequest(Object\IRequest $Request, callable $SelectTypeFactory) {
-        $EntityType = $Request->GetEntityType();
-        $this->VerifyEntityTypeIsMapped($EntityType);
+    private function MapRequestToSelect(
+            Object\IRequest $Request, 
+            Relational\Select $Select, 
+            Expressions\PropertyExpressionResolver $PropertyExpressionResolver = null) {
         
-        $SelectCriteria = $this->GetSelectCriteria($EntityType);
-        $SelectSources = $this->GetSelectSources($EntityType);
-        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($SelectCriteria);
-        $this->MapCriteria($Request->GetCriteria(), $SelectCriteria, $PropertyExpressionResolver);
-        
-        $Select = $SelectTypeFactory($Request, $SelectSources, $SelectCriteria, $PropertyExpressionResolver);
+        $PropertyExpressionResolver = $PropertyExpressionResolver ?: $this->GetPropertyExpressionResolver($Select);
+        $this->MapCriteria($Request->GetCriteria(), $Select->GetCriteria(), $PropertyExpressionResolver);
         
         $this->MapRequestAggregates($Request, $Select, $PropertyExpressionResolver);
         
         return $Select;
+    }
+    
+    private function GetResultSetSources(Object\IRequest $Request) {
+        if($Request->HasSubEntityRequest()) {
+            $SubEntitySelect = $this->MapEntityRequest($Request->GetSubEntityRequest());
+            return new Relational\ResultSetSources($SubEntitySelect);
+        }
+        else {
+            return $this->GetSelectSources($Request->GetEntityType());
+        }
     }
     
     private function MapRequestAggregates(Object\IRequest $Request, Relational\Select $Select, Expressions\PropertyExpressionResolver $PropertyExpressionResolver) {
@@ -115,12 +129,27 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
         
         $AssignmentExpressions = $ObjectProcedure->GetExpressions();
         
+        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($Update);
+        
         foreach($AssignmentExpressions as $AssignmentExpression) {
-            $ResolvedExpressions = $this->GetPropertyMapping($AssignmentExpression->GetAssignToExpression()->GetProperty())->ResolveAssignmentExpression(
-                    $AssignmentExpression->GetOperator(), 
-                    $AssignmentExpression->GetAssignmentValueExpression());
+            $AssignToExpression = $AssignmentExpression->GetAssignToExpression();
             
-            $Update->AddExpressions($ResolvedExpressions);
+            if(!($AssignToExpression instanceof Object\Expressions\PropertyExpression)) {
+                throw new Mapping\MappingException('Cannot map assignment expression: invalid assign to expression expecting %s, %s given',
+                        Object\Expressions\PropertyExpression::GetType(),
+                        $AssignToExpression->GetType());
+            }
+            
+            $ColumnExpression = $PropertyExpressionResolver->MapProperty($AssignToExpression);
+            $Column = $ColumnExpression->GetColumn();
+            
+            $MappedAssignmentExpression = $this->MapExpression($AssignmentExpression, $PropertyExpressionResolver);
+            $MappedNewValueExpression = $this->Platform->GetOperationMapper()->MapAssignmentToBinary(
+                    $ColumnExpression, 
+                    $AssignmentExpression->GetOperator(), 
+                    $MappedAssignmentExpression);
+            
+            $Update->AddColumn($Column, $MappedNewValueExpression);
         }
         
         return $Update;
@@ -176,6 +205,30 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
     
     // </editor-fold>
         
+    // <editor-fold defaultstate="collapsed" desc="Delete mappers">
+    
+    /**
+     * Maps the supplied object criteria the the relational equivalent.
+     * 
+     * @param Object\ICriteria $ObjectCriteria The object criteria to map
+     * @return Relational\Delete
+     */
+    final protected function MapCriteriaToDelete(Object\ICriteria $ObjectCriteria) {
+        $EntityType = $ObjectCriteria->GetEntityType();
+        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
+        
+        $Delete = new Relational\Delete(new Relational\ResultSetSpecification(
+                $this->GetSelectSources($ObjectCriteria->GetEntityType()), 
+                $this->GetSelectCriteria($ObjectCriteria->GetEntityType())));
+        
+        $Delete->AddTables($EntityRelationalMap->GetMappedPersistTables());
+        $this->MapCriteria($ObjectCriteria, $Delete->GetCriteria());
+        
+        return $Delete;
+    }
+    
+    // </editor-fold>
+        
     // <editor-fold defaultstate="collapsed" desc="Expression mapping">
     
     /**
@@ -186,7 +239,7 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
      * @return Relational\Expression[] The equivalent expressions
      */
     final protected function MapExpressions(array $Expressions, Expressions\PropertyExpressionResolver $PropertyExpressionResolver) {
-        return $this->Platform->MapExpressions($Expression, $PropertyExpressionResolver);
+        return $this->Platform->MapExpressions($Expressions, $PropertyExpressionResolver);
     }
 
     /**

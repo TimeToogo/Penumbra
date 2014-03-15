@@ -13,13 +13,12 @@ abstract class EntityLoading extends RelationshipLoading implements IEntityLoadi
     
     final protected function MapParentRowKeysToRelatedRevivalData(
             Mapping\IEntityRelationalMap $EntityRelationalMap,
-            Relational\Database $Database, 
             Relational\IToOneRelation $ToOneRelation,
             array $ParentRows, 
             array $RelatedRows) {
         $ParentKeyRelatedRowMap = $ToOneRelation->MapParentKeysToRelatedRow($ParentRows, $RelatedRows);
         
-        $RelatedRevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($Database, $ParentKeyRelatedRowMap);
+        $RelatedRevivalDataArray = $EntityRelationalMap->MapResultRowsToRevivalData($ParentKeyRelatedRowMap);
         
         $MappedRelatedRevivalData = [];
         foreach($ParentRows as $Key => $ParentRow) {            

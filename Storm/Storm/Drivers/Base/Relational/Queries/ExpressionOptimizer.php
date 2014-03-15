@@ -39,25 +39,7 @@ abstract class ExpressionOptimizer implements IExpressionOptimizer {
     }
     
     protected function OptimizeBinaryOperationExpression(BinaryOperationExpression $Expression) {
-        $LeftOperand = $Expression->GetLeftOperandExpression();
-        $RightOperand = $Expression->GetRightOperandExpression();
-        
-        if($LeftOperand instanceof ReviveColumnExpression && $this->IsExpressionConstant($RightOperand)) {
-            $this->OptimizeReviveColumnCompareConstantExpression($LeftOperand, $RightOperand);
-        }
-        else if($RightOperand instanceof ReviveColumnExpression && $this->IsExpressionConstant($LeftOperand)) {
-            $this->OptimizeReviveColumnCompareConstantExpression($RightOperand, $LeftOperand);
-        }
-        else {
-            return $Expression;
-        }
-        
-        return Expression::BinaryOperation($LeftOperand, $Expression->GetOperator(), $RightOperand);
-    }
-    private function OptimizeReviveColumnCompareConstantExpression(ReviveColumnExpression &$ColumnExpression, CoreExpression &$ConstantExpression) {
-        $Column = $ColumnExpression->GetColumn();
-        $ColumnExpression = Expression::Column($Column);
-        $ConstantExpression = Expression::PersistData($Column, $ConstantExpression);
+        return $Expression;
     }
     
     final protected function AreExpressionsConstant(array $Expressions) {

@@ -10,12 +10,16 @@ class IfExpression extends Expression {
     private $IfFalseExpression;
     
     public function __construct(
-            CoreExpression $ConditionExpression,
-            CoreExpression $IfTrueExpression, 
-            CoreExpression $IfFalseExpression) {
+            Expression $ConditionExpression,
+            Expression $IfTrueExpression, 
+            Expression $IfFalseExpression) {
         $this->ConditionExpression = $ConditionExpression;
         $this->IfTrueExpression = $IfTrueExpression;
         $this->IfFalseExpression = $IfFalseExpression;
+    }
+    
+    public function Traverse(ExpressionWalker $Walker) {
+        return $Walker->WalkIf($this);
     }
     
     public function GetConditionExpression() {
@@ -34,9 +38,9 @@ class IfExpression extends Expression {
      * @return self
      */
     public function Update(
-            CoreExpression $ConditionExpression,
-            CoreExpression $IfTrueExpression, 
-            CoreExpression $IfFalseExpression) {
+            Expression $ConditionExpression,
+            Expression $IfTrueExpression, 
+            Expression $IfFalseExpression) {
         if($this->ConditionExpression === $ConditionExpression
                 && $this->IfTrueExpression === $IfTrueExpression
                 && $this->IfFalseExpression === $IfFalseExpression) {

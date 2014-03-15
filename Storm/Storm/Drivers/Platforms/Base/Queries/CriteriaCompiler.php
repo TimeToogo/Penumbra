@@ -3,59 +3,35 @@
 namespace Storm\Drivers\Platforms\Base\Queries;
 
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
-abstract class CriteriaCompiler extends Queries\CriteriaCompiler {
-    public function __construct() {
-        $this->JoinTypes = $this->JoinTypes();
-    }
-    
-    protected function AppendWhereClause(QueryBuilder $QueryBuilder, array $PredicateExpressions) {
-        $QueryBuilder->Append(' WHERE (');
-        foreach($QueryBuilder->Delimit($PredicateExpressions, ' AND ') as $PredicateExpression) {
-            $QueryBuilder->AppendExpression($PredicateExpression);
-        }
-        $QueryBuilder->Append(')');
-    }
-    
-    protected function AppendGroupByClause(QueryBuilder $QueryBuilder, array $Expressions) {
-        $QueryBuilder->Append(' GROUP BY ');
-        foreach($QueryBuilder->Delimit($Expressions, ', ') as $Expression) {            
-            $QueryBuilder->AppendExpression($Expression);
-        }
-    }
-    
-    protected function AppendHavingClause(QueryBuilder $QueryBuilder, array $Expressions) {
-        $QueryBuilder->Append(' HAVING ');
-        foreach($QueryBuilder->Delimit($Expressions, ' AND ') as $Expression) {            
-            $QueryBuilder->AppendExpression($Expression);
+abstract class CriteriaCompiler implements ICriteriaCompiler {
+
+    final public function AppendWhere(QueryBuilder $QueryBuilder, array $Expressions) {
+        if(count($Expressions) > 0) {
+            $this->AppendWhereClause($QueryBuilder, $Expressions);
         }
     }
 
-    protected function AppendOrderByClause(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap) {
-        $QueryBuilder->Append(' ORDER BY ');
-        foreach($QueryBuilder->Delimit($ExpressionAscendingMap, ', ') as $Expression) {
-            $Ascending = $ExpressionAscendingMap[$Expression];
-            $Direction = $Ascending ? 'ASC' : 'DESC';
-            
-            $QueryBuilder->AppendExpression($Expression);
-            $QueryBuilder->Append(' ' . $Direction);
+    final public function AppendOrderBy(QueryBuilder $QueryBuilder, array $Expressions) {
+        if(count($Expressions) > 0) {
+            $this->AppendOrderByClause($QueryBuilder, $Expressions);
+        }
+    }
+    
+    final public function AppendRange(QueryBuilder $QueryBuilder, $RangeStart, $RangeAmount) {
+        if($RangeStart !== 0 && $RangeAmount !== null) {
+            $this->AppendGroupByClause($QueryBuilder, $RangeStart, $RangeAmount);
         }
     }
 
-    protected function AppendRangeClause(QueryBuilder $QueryBuilder, $Offset, $Limit) {
-        $QueryBuilder->Append(' ');
-        if($Limit === null) {
-            $QueryBuilder->Append('LIMIT 18446744073709551615');
-        }
-        else {
-            $QueryBuilder->AppendValue('LIMIT #', $Limit, Queries\ParameterType::Integer);
-        }
-
-        $QueryBuilder->Append(' ');
-        $QueryBuilder->AppendValue('OFFSET #', $Offset, Queries\ParameterType::Integer);
-    }
+    protected abstract function AppendTableDefinitionClause(QueryBuilder $QueryBuilder, Relational\ITable $Table, array $Joins = null);
+    
+    protected abstract function AppendWhereClause(QueryBuilder $QueryBuilder, array $PredicateExpressions);
+    
+    protected abstract function AppendOrderByClause(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap);
+    
+    protected abstract function AppendRangeClause(QueryBuilder $QueryBuilder, $Offset, $Limit);
 }
 
 ?>

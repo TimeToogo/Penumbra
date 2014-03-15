@@ -16,15 +16,7 @@ abstract class Connection implements IConnection {
     /**
      * @var ISelectCompiler 
      */
-    protected $RequestCompiler;
-    /**
-     * @var IUpdateCompiler 
-     */
-    protected $ProcedureCompiler;
-    /**
-     * @var ICriteriaCompiler 
-     */
-    protected $CriteriaCompiler;
+    protected $QueryCompiler;
     
     final public function SetExpressionCompiler(IExpressionCompiler $ExpressionCompiler) {
         $this->ExpressionCompiler = $ExpressionCompiler;
@@ -34,12 +26,8 @@ abstract class Connection implements IConnection {
         $this->IdentifierEscaper = $IdentifierEscaper;
     }
     
-    final public function SetCriteriaCompiler(ICriteriaCompiler $CriteriaCompiler) {
-        $this->CriteriaCompiler = $CriteriaCompiler;
-    }
-    
-    final public function SetRequestCompiler(ISelectCompiler $RequestCompiler) {
-        $this->RequestCompiler = $RequestCompiler;
+    final public function SetQueryCompiler(IQueryCompiler $QueryCompiler) {
+        $this->QueryCompiler = $QueryCompiler;
     }
     
     final public function SetProcedureCompiler(IUpdateCompiler $ProcedureCompiler) {

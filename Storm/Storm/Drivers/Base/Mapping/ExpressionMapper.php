@@ -92,6 +92,9 @@ final class ExpressionMapper {
             case $Expression instanceof O\TraversalExpression:
                 return $this->MapTraversal($Expression);
             
+            case $Expression instanceof O\AssignmentExpression:
+                return $this->MapAssignment($Expression);
+            
             case $Expression instanceof O\BinaryOperationExpression:
                 return $this->MapBinaryOperation($Expression);
             
@@ -194,10 +197,22 @@ final class ExpressionMapper {
     }
         
     private function MapFunctionCall(O\FunctionCallExpression $Expression, O\TraversalExpression $TraversalExpression = null) {
-        $FunctionName = $Expression->GetName();
+        $FunctionNameExpression = $Expression->GetNameExpression();
         $MappedArgumentExpressions = $this->MapExpressions($Expression->GetArgumentExpressions());
         
-        return $this->FunctionMapper->MapFunctionCall($FunctionName, $MappedArgumentExpressions, $TraversalExpression);
+        return $this->FunctionMapper->MapFunctionCall($FunctionNameExpression, $MappedArgumentExpressions, $TraversalExpression);
+    }
+        
+    private function MapAssignment(O\AssignmentExpression $Expression) {
+        $MappedAssignToValue = $this->MapExpression($Expression->GetAssignToExpression());
+        $Operator = $Expression->GetOperator();
+        $MappedAssignmentValueExpression = $this->MapExpression($Expression->GetAssignmentValueExpression());
+        
+        
+        return $this->OperationMapper->MapBinary(
+                $MappedAssignToValue, 
+                $Operator, 
+                $MappedAssignmentValueExpression);
     }
         
     private function MapBinaryOperation(O\BinaryOperationExpression $Expression) {
