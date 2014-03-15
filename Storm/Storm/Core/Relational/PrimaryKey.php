@@ -13,7 +13,7 @@ final class PrimaryKey extends TableColumnData {
     }
     
     protected function AddColumn(IColumn $Column, $Data) {
-        if(!$this->GetTable()->HasPrimaryKey($Column->GetName())) {
+        if(!$this->GetTable()->HasPrimaryKey($Column)) {
              throw new InvalidColumnException(
                      'The supplied column is not valid primary key of table %s: %s.%s given',
                      $this->GetTable()->GetName(),

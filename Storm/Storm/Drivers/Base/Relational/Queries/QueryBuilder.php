@@ -139,10 +139,6 @@ class QueryBuilder {
         $this->QueryCompiler->AppendUpdate($this, $Update);
     }
     
-    final public function AppendTableDefinition(Criteria $Criteria) {
-        $this->CriteriaCompiler->AppendTableDefinition($this, $Criteria);
-    }
-
     final public function AppendWhere(Criteria $Criteria) {
         $this->CriteriaCompiler->AppendWhere($this, $Criteria);
     }
@@ -185,8 +181,8 @@ class QueryBuilder {
     }
 
 
-    final public function AppendColumn($QueryStringFormat, Relational\Columns\Column $Column, $Alias = null, $ValuePlaceholder = self::DefaultPlaceholder) {
-        $EscapedIdentifier = $this->GetColumnIdentifier($Column, $Alias);
+    final public function AppendColumn($QueryStringFormat, \Storm\Core\Relational\IColumn $Column, $ValuePlaceholder = self::DefaultPlaceholder) {
+        $EscapedIdentifier = $this->GetColumnIdentifier($Column);
         
         $this->QueryString .= $this->ReplacePlaceholder($QueryStringFormat, $ValuePlaceholder, $EscapedIdentifier);
     }
@@ -200,7 +196,7 @@ class QueryBuilder {
     
     // <editor-fold defaultstate="collapsed" desc="Identifier Helpers">    
     
-    private function GetColumnIdentifier(Relational\Columns\Column $Column, $Alias = null) {
+    private function GetColumnIdentifier(\Storm\Core\Relational\IColumn $Column, $Alias = null) {
         $EscapedIdentifier = $this->IdentifierEscaper->Escape([$Column->GetTable()->GetName(), $Column->GetName()]);
         if($Alias !== null) {
             $EscapedIdentifier = $this->IdentifierEscaper->Alias($EscapedIdentifier, $Alias);

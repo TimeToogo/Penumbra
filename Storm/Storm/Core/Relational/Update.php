@@ -21,12 +21,33 @@ class Update {
     private $Expressions;
     
     /**
+     * @var ResultSetSources
+     */
+    private $Sources;
+    
+    /**
      * @var Criteria
      */
     private $Criteria;
     
-    public function __construct(Criteria $Criteria = null) {
-        $this->Criteria = $Criteria ?: $Criteria;
+    
+    public function __construct(ResultSetSources $Sources, Criteria $Criteria) {
+        $this->Sources = $Sources;
+        $this->Criteria = $Criteria;
+    }
+    
+    /**
+     * @return ResultSetSources
+     */
+    final public function GetSources() {
+        return $this->Sources;
+    }
+
+    /**
+     * @return Criteria
+     */
+    final public function GetCriteria() {
+        return $this->Criteria;
     }
     
     /**
@@ -42,22 +63,6 @@ class Update {
     
     final public function AddExpressions(array $Expressions) {
         array_walk($Expressions, [$this, 'AddExpression']);
-    }
-    
-    /**
-     * @return Criteria
-     */
-    final public function GetCriteria() {
-        return $this->Criteria;
-    }
-    
-    /**
-     * Set the procedure's criteria.
-     * 
-     * @param Criteria $Criteria The criteria to set
-     */
-    final public function SetCriteria(Criteria $Criteria) {
-        $this->Criteria = $Criteria;
     }
 }
 

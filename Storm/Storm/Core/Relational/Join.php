@@ -11,21 +11,21 @@ final class Join {
     private $JoinType;
     
     /**
-     * @var ITable 
+     * @var IResultSetSource 
      */
-    private $Table = [];
+    private $Source = [];
     
     /**
      * @var Expression 
      */
     private $JoinPredicateExpression;
     
-    public function __construct($JoinType, ITable $Table, Expression $JoinPredicateExpression) {
+    public function __construct($JoinType, IResultSetSource $Source, Expression $JoinPredicateExpression) {
         if(!JoinType::IsValid($JoinType)) {
             throw new RelationalException('The supplied join type is not valid: %s given', $JoinType);
         }
         $this->JoinType = $JoinType;
-        $this->Table = $Table;
+        $this->Source = $Source;
         $this->JoinPredicateExpression = $JoinPredicateExpression;
     }
     
@@ -34,10 +34,10 @@ final class Join {
     }
 
     /**
-     * @return ITable 
+     * @return IResultSetSource 
      */
-    public function GetTable() {
-        return $this->Table;
+    public function GetSource() {
+        return $this->Source;
     }
 
     /**

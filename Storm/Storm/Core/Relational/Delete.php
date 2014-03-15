@@ -17,12 +17,32 @@ class Delete {
     private $Tables = [];
     
     /**
+     * @var ResultSetSources
+     */
+    private $Sources;
+    
+    /**
      * @var Criteria
      */
     private $Criteria;
     
-    public function __construct(Criteria $Criteria) {
+    public function __construct(ResultSetSources $Sources, Criteria $Criteria) {
+        $this->Sources = $Sources;
         $this->Criteria = $Criteria;
+    }
+    
+    /**
+     * @return ResultSetSources
+     */
+    final public function GetSources() {
+        return $this->Sources;
+    }
+
+    /**
+     * @return Criteria
+     */
+    final public function GetCriteria() {
+        return $this->Criteria;
     }
     
     final public function HasTable($TableName) {
@@ -59,13 +79,6 @@ class Delete {
      */
     final public function GetTables() {
         return $this->Tables;
-    }
-    
-    /**
-     * @return Criteria
-     */
-    final public function GetCriteria() {
-        return $this->Criteria;
     }
 }
 

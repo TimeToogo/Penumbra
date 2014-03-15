@@ -11,41 +11,6 @@ abstract class CriteriaCompiler extends Queries\CriteriaCompiler {
         $this->JoinTypes = $this->JoinTypes();
     }
     
-    protected function AppendTableDefinitionClause(QueryBuilder $QueryBuilder, Relational\ITable $Table, array $Joins = null) {
-        $QueryBuilder->AppendIdentifier('#', [$Table->GetName()]);
-        
-        if($Joins !== null) {
-            foreach($QueryBuilder->Delimit($Joins, ' ') as $Join) {
-                $QueryBuilder->Append($this->GetJoinType($Join->GetJoinType()) . ' ');
-                $QueryBuilder->AppendIdentifier('#', [$Join->GetTable()->GetName()]);
-                $QueryBuilder->Append(' ON ');
-                $QueryBuilder->AppendExpression($Join->GetJoinPredicateExpression());
-            }
-        }
-    }
-    
-    private $JoinTypes;
-    protected function JoinTypes() {
-        return [
-            Relational\JoinType::Inner => 'INNER JOIN',
-            Relational\JoinType::Left => 'LEFT JOIN',
-            Relational\JoinType::Right => 'RIGHT JOIN',
-            Relational\JoinType::Full => 'FULL JOIN',
-            Relational\JoinType::Cross => 'CROSS JOIN',
-        ];
-    }
-    private function GetJoinType($JoinType) {
-        if (isset($this->JoinTypes[$JoinType])) {
-            return ' ' . $this->JoinTypes[$JoinType] . ' ';
-        }
-        else {
-            throw new \Storm\Drivers\Base\Relational\PlatformException(
-                    '%s does not support the supplied join type: %s', 
-                    get_class($this),
-                    $JoinType);
-        }
-    }
-    
     protected function AppendWhereClause(QueryBuilder $QueryBuilder, array $PredicateExpressions) {
         $QueryBuilder->Append(' WHERE (');
         foreach($QueryBuilder->Delimit($PredicateExpressions, ' AND ') as $PredicateExpression) {

@@ -118,12 +118,20 @@ interface IEntityRelationalMap {
     public function ResultRow($ColumnData = []);
     
     /**
-     * Get the criteria that must be included for every select/update.
+     * Gets the sources that must be included for every select/update/delete.
+     * 
+     * @param Relational\Database $Database The database of the criteria
+     * @return Relational\ResultSetSources
+     */
+    public function GetSelectSources(Relational\Database $Database);
+    
+    /**
+     * Get the criteria that must be included for every select/update/delete.
      * 
      * @param Relational\Database $Database The database of the criteria
      * @return Relational\Criteria
      */
-    public function GetCriteria(Relational\Database $Database);
+    public function GetSelectCriteria(Relational\Database $Database);
     
     /**
      * @param Object\IProperty $Property The mapped property

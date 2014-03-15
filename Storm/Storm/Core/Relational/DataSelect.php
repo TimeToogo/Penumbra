@@ -10,8 +10,8 @@ namespace Storm\Core\Relational;
 class DataSelect extends Select {
     private $AliasExpressionMap = [];
     
-    public function __construct(array $AliasExpressionMap, Criteria $Criteria) {
-        parent::__construct($Criteria);
+    public function __construct(array $AliasExpressionMap, ResultSetSources $SelectSources, Criteria $Criteria) {
+        parent::__construct($SelectSources, $Criteria);
         
         foreach ($AliasExpressionMap as $Alias => $DataExpression) {
             $this->AddData($Alias, $DataExpression);

@@ -8,6 +8,14 @@ use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Drivers\Base\Relational\Expressions\Expression;
 
 class StandardQueryCompiler implements Queries\IQueryCompiler {
+    /**
+     * @var IResultSetSourceCompiler 
+     */
+    private $ResultSetSourceCompiler;
+    
+    public function __construct(IResultSetSourceCompiler $ResultSetSourceCompiler = null) {
+        $this->ResultSetSourceCompiler = $ResultSetSourceCompiler ?: new StandardResultSetSourceCompiler();
+    }
     
     public function AppendSelect(QueryBuilder $QueryBuilder, Relational\Select $Select) {
         switch ($Select->GetSelectType()) {
@@ -57,7 +65,7 @@ class StandardQueryCompiler implements Queries\IQueryCompiler {
     
     protected function AppendSelectClauses(QueryBuilder $QueryBuilder, Relational\Select $Select) {
         $QueryBuilder->Append(' FROM ');
-        $QueryBuilder->AppendTableDefinition($Select->GetCriteria());
+        $this->ResultSetSourceCompiler->AppendResultSetSources($QueryBuilder, $Sources, $SourceAliasMap);
         $this->AppendSelectCriteria($QueryBuilder, $Select);
     }
     

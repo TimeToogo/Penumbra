@@ -7,7 +7,7 @@ namespace Storm\Core\Relational;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-abstract class Select {
+abstract class Select  {
     /**
      * @var Expression[] 
      */
@@ -21,21 +21,27 @@ abstract class Select {
     /**
      * @var Criteria
      */
-    private $Criteria;
+    protected $Criteria;
     
-    public function __construct(Criteria $Criteria) {
+    /**
+     * @var ResultSetSources
+     */
+    protected $Sources;
+    
+    public function __construct(ResultSetSources $Sources, Criteria $Criteria) {
+        $this->Sources = $Sources;
         $this->Criteria = $Criteria;
     }
     
     public abstract function GetSelectType();
         
     /**
-     * @return ITable[]
+     * @return ResultSetSources
      */
-    final public function GetTables() {
-        return $this->Criteria->GetAllTables();
+    final public function GetSources() {
+        return $this->Sources;
     }
-    
+
     /**
      * @return Criteria
      */

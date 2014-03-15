@@ -203,14 +203,19 @@ abstract class DomainDatabaseMap {
     }
     
     /**
-     * Gets the registered relational map for the given primary key table name.
-     * 
-     * @param string $TableName The name of primary key table.
-     * @return IEntityRelationalMap|null The relational map or null if not found
+     * @return Relational\Criteria
      */
-    final protected function GetRelationalCriteria($EntityType) {
+    final protected function GetSelectCriteria($EntityType) {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-        $EntityRelationalMap->GetCriteria($this->Database);
+        $EntityRelationalMap->GetSelectCriteria($this->Database);
+    }
+    
+    /**
+     * @return Relational\ResultSetSources
+     */
+    final protected function GetSelectSources($EntityType) {
+        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
+        $EntityRelationalMap->GetSelectSources($this->Database);
     }
     
     /**
@@ -352,7 +357,7 @@ abstract class DomainDatabaseMap {
         }
         
         foreach($UnitOfWork->GetDiscardedCriteria() as $DiscardedCriteria) {
-            $RelationalCriteria = $this->GetRelationalCriteria($DiscardedCriteria->GetEntityType());
+            $RelationalCriteria = $this->GetSelectCriteria($DiscardedCriteria->GetEntityType());
             $this->MapCriteria($DiscardedCriteria, $RelationalCriteria);
             $Transaction->AddDelete($RelationalCriteria);
         }

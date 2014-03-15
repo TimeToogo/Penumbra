@@ -8,20 +8,6 @@ namespace Storm\Core\Relational;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 final class Criteria {
-    /**
-     * @var ITable 
-     */
-    private $Table;
-    
-    /**
-     * @var Join[] 
-     */
-    private $Joins = [];
-    
-    /**
-     * @var ITable[] 
-     */
-    private $AllTables = [];
     
     /**
      * @var Expression[] 
@@ -46,76 +32,11 @@ final class Criteria {
      */
     private $RangeAmount;
     
-    public function __construct(ITable $Table) {
-        $this->Table = $Table;
-        $this->AllTables[$Table->GetName()] = $Table;
+    public function __construct() {
         $this->OrderByExpressionsAscendingMap = new \SplObjectStorage();
         $this->RangeOffset = 0;
         $this->RangeAmount = null;
     }
-    
-    
-    /**
-     * @return ITable
-     */
-    final public function GetTable() {
-        return $this->Table;
-    }
-    
-    /**
-     * @return ITable
-     */
-    final public function GetAllTables() {
-        return $this->AllTables;
-    }
-    
-    /**
-     * @return ITable
-     */
-    final public function HasTable($TableName) {
-        return isset($this->AllTables[$TableName]);
-    }
-    
-    // <editor-fold defaultstate="collapsed" desc="Joins">
-    
-    /**
-     * @return Join[]
-     */
-    final public function GetJoins() {
-        return $this->Joins;
-    }
-    
-    /**
-     * Add a joined table to the criteria.
-     * 
-     * @param Join $Join The join to add
-     * @return void
-     */
-    final public function AddJoin(Join $Join) {
-        $this->Joins[] = $Join;
-        $Table = $Join->GetTable();
-        $this->AllTables[$Table->GetName()] = $Table;
-    }
-    
-    /**
-     * Add multiple joined tables to the criteria.
-     * 
-     * @param array $Joins The joins to add
-     * @return void
-     */
-    final public function AddJoins(array $Joins) {
-        array_walk($Joins, [$this, 'AddJoin']);
-    }
-
-
-    /**
-     * @return boolean
-     */
-    final public function IsJoined() {
-        return count($this->Joins) > 0;
-    }
-
-    // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Constraints">
     

@@ -152,11 +152,7 @@ abstract class Database {
      * @param Select $Select The select to load
      * @return ResultRow[]|int|bool The loaded value from the select
      */
-    final public function Load(Select $Select) {
-        foreach($Select->GetTables() as $Table) {
-            $this->VerifyTable(__METHOD__, $Table);
-        }
-        
+    final public function Load(Select $Select) {        
         switch ($Select->GetSelectType()) {
             case SelectType::ResultSet:
                 return $this->LoadResultSet($Select);

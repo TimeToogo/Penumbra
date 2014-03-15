@@ -10,7 +10,7 @@ use \Storm\Core\Containers\Registrar;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-interface ITable {
+interface ITable extends IResultSetSource {
     const ITableType = __CLASS__;
     
     /**
@@ -43,16 +43,16 @@ interface ITable {
     public function GetName();
     
     /**
-     * @param string $Name The column name
+     * @param IColumn $Column
      * @return boolean
      */
-    public function HasColumn($Name);
+    public function HasColumn(IColumn $Column);
     
     /**
-     * @param string $Name The column name
+     * @param IColumn $Column
      * @return boolean
      */
-    public function HasPrimaryKey($Name);
+    public function HasPrimaryKey(IColumn $Column);
     
     /**
      * @param string $Name The column name

@@ -7,11 +7,11 @@ namespace Storm\Core\Relational;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class ResultSetSelect extends Select {
+class ResultSetSelect extends Select implements IResultSetSource {
     private $Columns = [];
     
-    public function __construct(Criteria $Criteria) {
-        parent::__construct($Criteria);
+    public function __construct(ResultSetSources $Sources, Criteria $Criteria) {
+        parent::__construct($Sources, $Criteria);
     }
     
     final public function GetSelectType() {
@@ -29,11 +29,10 @@ class ResultSetSelect extends Select {
      * @return void
      */
     final public function AddColumn(IColumn $Column) {
-        if(!$this->Criteria->HasTable($Column->GetTable()->GetName())) {
+        if(!$this->Sources->ColumnHasSource($Column)) {
             throw new RelationalException(
-                    'Cannot add column \'%s\' to relational select the parent table table \'%s\' has not part of the select',
-                    $Column->GetName(),
-                    $Column->GetTable()->GetName());
+                    'Cannot add column \'%s\' to select: there is no result set source for the column',
+                    $Column->GetName());
         }
         $this->Columns[$Column->GetIdentifier()] = $Column;
     }

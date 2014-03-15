@@ -73,7 +73,7 @@ abstract class ExpressionCompiler implements IExpressionCompiler {
     }
     
     protected function AppendColumn(QueryBuilder $QueryBuilder, CoreE\ColumnExpression $Expression) {
-        $QueryBuilder->AppendColumn('#', $Expression->GetColumn(), $Expression->GetAlias());
+        $QueryBuilder->AppendColumn('#', $Expression->GetColumn());
     }
     
     protected function AppendConstant(QueryBuilder $QueryBuilder, CoreE\ConstantExpression $Expression) {

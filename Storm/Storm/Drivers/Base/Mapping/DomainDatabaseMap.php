@@ -29,16 +29,10 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
      * @return Relational\ExistsSelect The exists relational select
      */
     final protected function MapToExistsSelect(Object\IRequest $Request) {
-        $this->VerifyEntityTypeIsMapped($Request->GetEntityType());
-        
-        $RelationalCriteria = $this->GetRelationalCriteria($Request->GetEntityType());
-        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriteria);
-        $this->MapCriteria($Request->GetCriteria(), $RelationalCriteria, $PropertyExpressionResolver);
-        
-        $Select = new Relational\ExistsSelect($RelationalCriteria);
-        $this->MapRequestAggregates($Request, $Select, $PropertyExpressionResolver);
-                
-        return $Select;
+        return $this->MapRequest($Request, 
+                function ($Request, $SelectSources, $SelectCriteria) {
+                    return new Relational\ExistsSelect($SelectSources, $SelectCriteria);
+                });
     }
     
     /**
@@ -48,17 +42,15 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
      * @return Relational\ResultSetSelect The equivalent relational select
      */
     final protected function MapEntityRequest(Object\IEntityRequest $EntityRequest) {
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityRequest->GetEntityType());
-        
-        $RelationalCriteria = $this->GetRelationalCriteria($EntityRequest->GetEntityType());
-        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriteria);
-        $this->MapCriteria($EntityRequest->GetCriteria(), $RelationalCriteria, $PropertyExpressionResolver);
-        
-        $Select = new Relational\ResultSetSelect($RelationalCriteria);
-        $this->MapRequestAggregates($EntityRequest, $Select, $PropertyExpressionResolver);
-        $EntityRelationalMap->MapPropetiesToSelect($Select, $EntityRequest->GetProperties());
-                
-        return $Select;
+        return $this->MapRequest($EntityRequest, 
+                function ($EntityRequest, $SelectSources, $SelectCriteria) {
+                    $EntityRelationalMap = $this->GetEntityRelationalMap($EntityRequest->GetEntityType());
+                    
+                    $Select = new Relational\ResultSetSelect($SelectSources, $SelectCriteria);
+                    $EntityRelationalMap->MapPropetiesToSelect($Select);
+                    
+                    return $Select;
+                });
     }
     
     /**
@@ -68,16 +60,28 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
      * @return Relational\DataSelect The data select
      */
     final protected function MapDataRequest(Object\IDataRequest $DataRequest) {
-        $this->VerifyEntityTypeIsMapped($DataRequest->GetEntityType());
+        return $this->MapRequest($DataRequest, 
+                
+                function ($DataRequest, $SelectSources, $SelectCriteria, $PropertyExpressionResolver) {
+                    $MappedAliasExpressionMap = 
+                            $this->MapExpressions($DataRequest->GetAliasExpressionMap(), $PropertyExpressionResolver);
+                    
+                    return new Relational\DataSelect($MappedAliasExpressionMap, $SelectSources, $SelectCriteria);
+                });
+    }
+    
+    private function MapRequest(Object\IRequest $Request, callable $SelectTypeFactory) {
+        $EntityType = $Request->GetEntityType();
+        $this->VerifyEntityTypeIsMapped($EntityType);
         
-        $RelationalCriteria = $this->GetRelationalCriteria($DataRequest->GetEntityType());
-        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriteria);
-        $this->MapCriteria($DataRequest->GetCriteria(), $RelationalCriteria, $PropertyExpressionResolver);
+        $SelectCriteria = $this->GetSelectCriteria($EntityType);
+        $SelectSources = $this->GetSelectSources($EntityType);
+        $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($SelectCriteria);
+        $this->MapCriteria($Request->GetCriteria(), $SelectCriteria, $PropertyExpressionResolver);
         
-        $MappedAliasExpressionMap = $this->MapExpressions($DataRequest->GetAliasExpressionMap(), $PropertyExpressionResolver);
+        $Select = $SelectTypeFactory($Request, $SelectSources, $SelectCriteria, $PropertyExpressionResolver);
         
-        $Select = new Relational\DataSelect($MappedAliasExpressionMap, $RelationalCriteria);
-        $this->MapRequestAggregates($DataRequest, $Select, $PropertyExpressionResolver);
+        $this->MapRequestAggregates($Request, $Select, $PropertyExpressionResolver);
         
         return $Select;
     }
@@ -138,7 +142,7 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
             Relational\Criteria $RelationalCriteria = null,
             Expressions\PropertyExpressionResolver $PropertyExpressionResolver = null) {
         if($RelationalCriteria === null) {
-            $RelationalCriteria = $this->GetRelationalCriteria($ObjectCriteria->GetEntityType());
+            $RelationalCriteria = $this->GetSelectCriteria($ObjectCriteria->GetEntityType());
         }
         if($PropertyExpressionResolver === null) {
             $PropertyExpressionResolver = $this->GetPropertyExpressionResolver($RelationalCriteria);

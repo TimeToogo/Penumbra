@@ -166,22 +166,22 @@ abstract class Table implements ITable {
     /**
      *{@inheritDoc}
      */
-    final public function HasColumn($Name) {
-        return isset($this->Columns[$Name]);
+    final public function HasColumn(IColumn $Column) {
+        return isset($this->ColumnsByIdentifiers[$Column->GetIdentifier()]);
     }
     
     /**
      *{@inheritDoc}
      */
-    final public function HasPrimaryKey($Name) {
-        return isset($this->PrimaryKeyColumns[$Name]);
+    final public function HasPrimaryKey(IColumn $Column) {
+        return isset($this->PrimaryKeyColumnByIdentifiers[$Column->GetIdentifier()]);
     }
     
     /**
      *{@inheritDoc}
      */
     final public function GetColumn($Name) {
-        return $this->HasColumn($Name) ? $this->Columns[$Name] : null;
+        return isset($this->Columns[$Name]) ? $this->Columns[$Name] : null;
     }
     
     /**
