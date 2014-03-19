@@ -4,10 +4,10 @@
 
 class FunctionCallExpression extends Expression {
     private $Name;
-    private $ArgumentValueListExpression;
-    public function __construct($Name, ValueListExpression $ArgumentValueListExpression) {
+    private $ArgumentExpressions;
+    public function __construct($Name, array $ArgumentExpressions) {
         $this->Name = $Name;
-        $this->ArgumentValueListExpression = $ArgumentValueListExpression;
+        $this->ArgumentExpressions = $ArgumentExpressions;
     }
     
     public function Traverse(ExpressionWalker $Walker) {
@@ -19,21 +19,21 @@ class FunctionCallExpression extends Expression {
     }
     
     /**
-     * @return ValueListExpression
+     * @return Expression[]
      */
-    public function GetArgumentValueListExpression() {
-        return $this->ArgumentValueListExpression;
+    public function GetArgumentExpressions() {
+        return $this->ArgumentExpressions;
     }
     
     /**
      * @return self
      */
-    public function Update($Name, ValueListExpression $ArgumentValueListExpression) {
-        if($this->Name === $Name && $this->ArgumentValueListExpression === $ArgumentValueListExpression) {
+    public function Update($Name, array $ArgumentExpressions) {
+        if($this->Name === $Name && $this->ArgumentExpressions === $ArgumentExpressions) {
             return $this;
         }
         
-        return new self($Name, $ArgumentValueListExpression);
+        return new self($Name, $ArgumentExpressions);
     }
 }
 

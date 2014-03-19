@@ -2,17 +2,17 @@
 
 namespace Storm\Drivers\Base\Relational\Queries;
 
-use \Storm\Core\Relational\Select;
+use \Storm\Core\Relational;
 
 interface IRowPersister {
     public function PersistRows(
             IConnection $Connection, 
-            Table $Table, 
+            Relational\ITable $Table, 
             array $RowsToPersist);
     
     public function DeleteRows(
             IConnection $Connection, 
-            Table $Table, 
+            Relational\ITable $Table, 
             array $PrimaryKeys);
 }
 

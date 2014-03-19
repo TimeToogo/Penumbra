@@ -14,19 +14,19 @@ abstract class Table extends Relational\Table {
     protected abstract function CreateRelationalStructure(CoreDatabase $Database);
     protected abstract function CreateRelations(CoreDatabase $Database);
     
-    final protected function OnInitializeStructure(CoreDatabase $Context) {
-        $this->CreateTableStructure($Context->GetPlatform()->GetColumnSet());
-        parent::OnInitializeStructure($Context);
+    final protected function OnInitializeStructure(CoreDatabase $Database) {
+        $this->CreateTableStructure($Database->GetPlatform()->GetColumnSet());
+        parent::OnInitializeStructure($Database);
     }
     
-    protected function OnInitializeRelatedStructure(CoreDatabase $Context) {
-        $this->CreateRelationalStructure($Context);
-        parent::OnInitializeRelatedStructure($Context);
+    protected function OnInitializeRelatedStructure(CoreDatabase $Database) {
+        $this->CreateRelationalStructure($Database);
+        parent::OnInitializeRelatedStructure($Database);
     }
     
-    final protected function OnInitializeRelations(CoreDatabase $Context) {
-        $this->CreateRelations($Context);
-        parent::OnInitializeRelations($Context);
+    final protected function OnInitializeRelations(CoreDatabase $Database) {
+        $this->CreateRelations($Database);
+        parent::OnInitializeRelations($Database);
     }
     
     final protected function RegisterColumnStructure(Registrar $Registrar, IColumnSet $Column) {
@@ -37,15 +37,15 @@ abstract class Table extends Relational\Table {
         $this->LoadRegistrarFromProperties($Registrar);
     }
     
-    final protected function RegisterRelationalTraits(Registrar $Registrar, CoreDatabase $Context) {
+    final protected function RegisterRelationalTraits(Registrar $Registrar, CoreDatabase $Database) {
         $this->LoadRegistrarFromProperties($Registrar);
     }
 
-    final protected function RegisterToOneRelations(Registrar $Registrar, CoreDatabase $Context) {
+    final protected function RegisterToOneRelations(Registrar $Registrar, CoreDatabase $Database) {
         $this->LoadRegistrarFromProperties($Registrar);
     }
     
-    final protected function RegisterToManyRelations(Registrar $Registrar, CoreDatabase $Context) {
+    final protected function RegisterToManyRelations(Registrar $Registrar, CoreDatabase $Database) {
         $this->LoadRegistrarFromProperties($Registrar);
     }
 }

@@ -13,7 +13,7 @@ final class PDOParameterType {
         ParameterType::Double => \PDO::PARAM_STR,
         ParameterType::Boolean => \PDO::PARAM_INT,
         ParameterType::Null => \PDO::PARAM_NULL,
-        ParameterType::Binary => \PDO::PARAM_LOB,
+        ParameterType::Stream => \PDO::PARAM_LOB,
     ];
     public static function MapParameterType($ParameterType) {
         if(isset(self::$ParameterTypesMap[$ParameterType])) {

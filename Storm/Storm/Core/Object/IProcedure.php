@@ -4,17 +4,12 @@ namespace Storm\Core\Object;
 
 /**
  * The procedure represents a set of assigments that should be carried out upon
- * a variable amount of entities defined by a criteria.
+ * a set entities defined by the criteria.
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-interface IProcedure {
+interface IProcedure extends IQuery {
     const IProcedureType = __CLASS__;
-    
-    /**
-     * @return string
-     */
-    public function GetEntityType();
     
     /**
      * @return Expressions\AssignmentExpression[]

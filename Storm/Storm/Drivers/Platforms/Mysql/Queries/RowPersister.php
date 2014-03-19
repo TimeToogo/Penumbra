@@ -4,10 +4,10 @@ namespace Storm\Drivers\Platforms\Mysql\Queries;
 
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Table;
-use \Storm\Drivers\Platforms\Base\Queries;
+use \Storm\Drivers\Platforms\Standard\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 
-class RowPersister extends Queries\StandardRowPersister {
+class RowPersister extends Queries\RowPersister {
     public function __construct($InsertBatchSize = 1000, $DeleteBatchSize = 2000) {
         parent::__construct($InsertBatchSize, $DeleteBatchSize);
     }
@@ -32,7 +32,7 @@ class RowPersister extends Queries\StandardRowPersister {
     
     protected function UpsertRowsQuery(
             QueryBuilder $QueryBuilder, 
-            Table $Table, 
+            Relational\ITable $Table, 
             array $Rows, 
             $ShouldReturnKeyData) {
         if($ShouldReturnKeyData) {

@@ -8,9 +8,9 @@ use \Storm\Drivers\Base\Relational;
 abstract class Database extends Relational\Database {
     use \Storm\Drivers\Constant\Helpers\PropertyReflection;
     
-    public function __construct(Relational\IPlatform $Platform) {
+    public function __construct() {
         $this->CreateTables();
-        parent::__construct($Platform);
+        parent::__construct();
     }
     protected abstract function CreateTables();
     

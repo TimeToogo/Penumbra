@@ -30,7 +30,7 @@ abstract class Database extends Relational\Database {
     }
     
     private function VerifyPlatform($Method) {
-        if(!$this->Platform === null) {
+        if($this->Platform === null) {
             throw new Relational\RelationalException(
                     'Call to %s requires the platform to be set',
                     $Method);

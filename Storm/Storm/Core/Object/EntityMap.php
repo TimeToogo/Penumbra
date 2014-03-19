@@ -59,20 +59,6 @@ abstract class EntityMap implements IEntityMap {
      */
     private $IdentityProperties = [];
     
-    /**
-     * The getter expressions of the properties.
-     * 
-     * @var Expressions\Expression[] 
-     */
-    private $GetterExpressionProperties = [];
-    
-    /**
-     * The setter expressions of the properties.
-     * 
-     * @var Expressions\Expression[] 
-     */
-    private $SetterExpressionProperties = [];
-    
     public function __construct() {
         $this->EntityType = $this->EntityType();
     }
@@ -144,8 +130,6 @@ abstract class EntityMap implements IEntityMap {
         }
         
         $this->Properties[$Identifier] = $Property;
-        $this->GetterExpressionProperties[$Identifier] = $Property->GetGetterExpression();
-        $this->SetterExpressionProperties[$Identifier] = $Property->GetSetterExpression();
     }
     
     final public function InitializeRelationshipProperties(Domain $Domain) {

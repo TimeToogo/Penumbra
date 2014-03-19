@@ -127,11 +127,11 @@ class Column implements Relational\IColumn {
     }
     
     public function GetReviveExpression(Relational\Expression $ValueExpression) {
-        return $this->DataType->GetReviveExpression($Expression);
+        return $this->DataType->GetReviveExpression($ValueExpression);
     }
     
     public function GetPersistExpression(Relational\Expression $ValueExpression) {
-        return $this->DataType->GetPersistExpression($Expression);
+        return $this->DataType->GetPersistExpression($ValueExpression);
     }
 }
 ?>

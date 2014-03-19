@@ -45,7 +45,7 @@ class PropertyExpression extends Expression {
     
     public function Simplify() {
         return $this->Update(
-                $this->ParentPropertyExpression, 
+                $this->Property, 
                 $this->ParentPropertyExpression !== null ? $this->ParentPropertyExpression->Simplify() : $this->ParentPropertyExpression);
     }
     

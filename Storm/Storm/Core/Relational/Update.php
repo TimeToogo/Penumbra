@@ -29,7 +29,7 @@ class Update extends Query {
     /**
      * @return IColumn[]
      */
-    final public function GetColumnd() {
+    final public function GetColumns() {
         return $this->Columns;
     }
     

@@ -3,16 +3,17 @@
 namespace Storm\Drivers\Base\Mapping\Expressions;
 
 use \Storm\Core\Object\Expressions as O;
-use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Relational\Expressions as R;
 
 interface IFunctionMapper {
+    
     /**
-     * @return Expression
+     * @return R\Expression
      */
     public function MapFunctionCall(
-            $FunctionName, 
+            O\Expression $NameExpresssion, 
             array $MappedArgumentExpressions,
-            O\TraversalExpression $FunctionTraversalExpression = null);
+            &$ReturnType);
 }
 
 ?>

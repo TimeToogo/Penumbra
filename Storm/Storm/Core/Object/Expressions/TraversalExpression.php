@@ -7,27 +7,47 @@ namespace Storm\Core\Object\Expressions;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-abstract class TraversalExpression extends Expression {    
+abstract class TraversalExpression extends Expression {
     /**
      * @var Expression
      */
     protected $ValueExpression;
     
+    /**
+     * @var Expression
+     */
+    protected $OriginExpression;
+    
+    /**
+     * @var int
+     */
+    protected $TraversalDepth;
+    
     public function __construct(Expression $ValueExpression) {
-        
         $this->ValueExpression = $ValueExpression;
+        
+        if($ValueExpression instanceof self) {
+            $this->OriginExpression = $ValueExpression->OriginExpression;
+            $this->TraversalDepth = $ValueExpression->TraversalDepth + 1;
+        }
+        else {
+            $this->OriginExpression = $ValueExpression;
+            $this->TraversalDepth = 1;
+        }
     }
     
     /**
      * @return boolean
      */
     final public function OriginatesFrom($ExpressionType) {
-        $TraversalExpression = $this;
-        while ($TraversalExpression instanceof self) {
-            $TraversalExpression = $TraversalExpression->GetValueExpression();
-        }
-        
-        return $TraversalExpression instanceof $ExpressionType;
+        return $this->OriginExpression instanceof $ExpressionType;
+    }
+    
+    /**
+     * @return int
+     */
+    final public function GetTraversalDepth() {
+        return $this->TraversalDepth;
     }
     
     /**

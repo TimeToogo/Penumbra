@@ -3,7 +3,7 @@
 namespace Storm\Drivers\Base\Relational\Columns;
 
 use \Storm\Drivers\Base\Relational\Queries\ParameterType;
-use \Storm\Core\Relational\Expression;
+use \Storm\Drivers\Base\Mapping\Expressions;
 
 abstract class ObjectDataType extends DataType {
     
@@ -44,43 +44,5 @@ abstract class ObjectDataType extends DataType {
     }
     protected abstract function PropertyValue($PersistedValue);
     
-    final public function MapMethodCallExpression(Expression $ObjectValueExpression = null, $Name, array $ArgumentValueExpressions = []) {
-        $MapperMethodName = $Name;
-        if(strpos($Name, '__') === 0) {
-            $MapperMethodName = $this->ClassType . $Name;
-        }
-        if(!method_exists($this, $MapperMethodName)) {
-            throw new \Storm\Core\NotSupportedException(
-                    'Data type does not support method %s::%s',
-                    $this->ClassType,
-                    $Name);
-        }
-
-        $IsStatic = $ObjectValueExpression === null;
-        if($IsStatic) {
-            return $this->$MapperMethodName($ArgumentValueExpressions);
-        }
-        else {
-            return $this->$MapperMethodName($ObjectValueExpression, $ArgumentValueExpressions);
-        }
-    }
-    
-    final public function MapPropertyFetchExpression(Expression $ObjectValueExpression = null, $Name) {
-        $MapperMethodName = 'Prop_' . $Name;
-        if(!method_exists($this, $MapperMethodName)) {
-            throw new \Storm\Core\NotSupportedException(
-                    'Data type does not support property %s::$%s',
-                    $this->ClassType,
-                    $Name);
-        }
-
-        $IsStatic = $ObjectValueExpression === null;
-        if($IsStatic) {
-            return $this->$MapperMethodName();
-        }
-        else {
-            return $this->$MapperMethodName($ObjectValueExpression);
-        }
-    }
 }
 ?>

@@ -7,28 +7,13 @@ namespace Storm\Core\Object;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-interface IRequest {
+interface IRequest extends IQuery {
     const IRequestType = __CLASS__;
-    
-    /**
-     * @return string
-     */
-    public function GetEntityType();
         
     /**
      * @return ICriteria
      */
     public function GetCriteria();
-    
-    /**
-     * @return boolean
-     */
-    public function HasSubEntityRequest();
-    
-    /**
-     * @return IEntityRequest|null
-     */
-    public function GetSubEntityRequest();
     
     /**
      * Whether or not the criteria contains any group by expressions.

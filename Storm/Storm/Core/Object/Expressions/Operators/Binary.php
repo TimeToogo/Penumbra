@@ -28,7 +28,7 @@ final class Binary {
     const Equality = '==';
     const Identity = '===';
     const Inequality = '!=';
-    const NotIdentitical = '!==';
+    const NotIdentical = '!==';
     const LessThan = '<';
     const LessThanOrEqualTo = '<=';
     const GreaterThan = '>';

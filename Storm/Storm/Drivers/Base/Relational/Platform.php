@@ -46,7 +46,7 @@ class Platform implements IPlatform {
     public function SetConnection(Queries\IConnection $Connection) {
         $this->Connection = $Connection;
         $this->Connection->SetExpressionCompiler($this->ExpressionCompiler);
-        $this->Connection->SetRequestCompiler($this->QueryCompiler);
+        $this->Connection->SetQueryCompiler($this->QueryCompiler);
         $this->Connection->SetIdentifierEscaper($this->IdentifierEscaper);
         $this->OnSetConnection($Connection);
     }
@@ -62,10 +62,6 @@ class Platform implements IPlatform {
     
     final public function __sleep() {
         return array_diff(array_keys((array)$this), ['Connection']);
-    }
-    
-    final public function GetExpressionConverter() {
-        return $this->ExpressionConverter;
     }
     
     final public function GetColumnSet() {

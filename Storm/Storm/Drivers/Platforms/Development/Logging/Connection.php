@@ -74,6 +74,8 @@ class Connection implements Queries\IConnection {
     }
     
     public function Prepare($QueryString, Queries\Bindings $Bindings = null) {
+        $this->Logger->Log('Preparing Query: ' .$QueryString);
+        
         $Start = microtime(true);
         $Query = new Query($this->Logger, $this->Connection->Prepare($QueryString, $Bindings), $this->TimeSpentQuerying);
         $this->TimeSpentQuerying += microtime(true) - $Start;
@@ -87,7 +89,7 @@ class Connection implements Queries\IConnection {
                 $QueryBuilder->GetParameterPlaceholder(), 
                 $QueryBuilder->GetBindings(),
                 $QueryBuilder->GetExpressionCompiler(),
-                $QueryBuilder->GetCriteriaCompiler(),
+                $QueryBuilder->GetQueryCompiler(),
                 $QueryBuilder->GetIdentifierEscaper());
     }
     
@@ -98,14 +100,14 @@ class Connection implements Queries\IConnection {
     public function SetIdentifierEscaper(Queries\IIdentifierEscaper $IdentifierEscaper) {
         return $this->Connection->SetIdentifierEscaper($IdentifierEscaper);
     }
-
-    public function SetCriteriaCompiler(Queries\ICriteriaCompiler $RequestCompiler) {
-        return $this->Connection->SetCriteriaCompiler($RequestCompiler);
-    }
-
     public function SetExpressionCompiler(Queries\IExpressionCompiler $ExpressionCompiler) {
         return $this->Connection->SetExpressionCompiler($ExpressionCompiler);
     }
+    
+    public function SetQueryCompiler(Queries\IQueryCompiler $QueryCompiler) {
+        return $this->Connection->SetQueryCompiler($QueryCompiler);
+    }
+
 }
 
 ?>

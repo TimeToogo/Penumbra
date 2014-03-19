@@ -29,6 +29,10 @@ abstract class Database {
     private $TablesOrderedByDiscardingDependency = [];
     
     public function __construct() {
+        
+    }
+    
+    final public function InitializeTables() {
         $Registrar = new Registrar(ITable::ITableType);
         $this->RegisterTables($Registrar);
         $this->AddTables($Registrar->GetRegistered());

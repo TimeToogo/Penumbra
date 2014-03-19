@@ -6,7 +6,6 @@ use Storm\Drivers\Base\Relational\Queries;
 
 class Query implements Queries\IQuery {
     private $Bindings;
-    private $HasBound = false;
     private $Statement;
     
     public function __construct(\PDOStatement $Statement, Queries\Bindings $Bindings = null) {
@@ -57,7 +56,6 @@ class Query implements Queries\IQuery {
             }
             $this->Bind($ParameterKey, $Binding->GetValue(), $Binding->GetParameterType());
         }
-        $this->HasBound = true;
     }
     
     private function Bind($To, $Value, $ParameterType) {

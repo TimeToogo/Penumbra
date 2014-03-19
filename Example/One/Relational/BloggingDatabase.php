@@ -5,10 +5,7 @@ namespace StormExamples\One\Relational;
 use \Storm\Drivers\Constant\Relational;
 
 class BloggingDatabase extends Relational\Database {
-    public function __construct() {
-        parent::__construct(\StormExamples\One\One::GetPlatform());
-    }
-    
+        
     public $Blogs;
     public $Authors;
     public $Posts;

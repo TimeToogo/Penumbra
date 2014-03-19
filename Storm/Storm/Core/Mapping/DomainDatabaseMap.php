@@ -8,8 +8,8 @@ use \Storm\Core\Containers\Registrar;
 use \Storm\Core\Containers\Map;
 
 /**
- * The DomainDatabaseMap class provides the nessecary data and api to map between a
- * entity instances and a relational database.
+ * The domain database map class provides the nessecary data and api to map between
+ * entity object graphs and a relational database.
  * 
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
@@ -47,7 +47,11 @@ abstract class DomainDatabaseMap {
     public function __construct() {
         $this->Domain = $this->Domain();
         $this->Database = $this->Database();
-
+        
+        $this->OnInitialize($this->Domain, $this->Database);
+        $this->Domain->InitializeEntityMaps();
+        $this->Database->InitializeTables();
+        
         $Registrar = new Registrar(IEntityRelationalMap::IEntityRelationalMapType);
         $this->RegisterEntityRelationalMaps($Registrar);
         foreach ($Registrar->GetRegistered() as $EntityRelationalMap) {
@@ -57,6 +61,8 @@ abstract class DomainDatabaseMap {
             $EntityRelationalMap->InitializeRelationshipMappings($this);
         }
     }
+    
+    protected function OnInitialize(Object\Domain $Domain, Relational\Database $Database) {}
     
     /**
      * This class can be very expensive to instantiate, so this 
@@ -142,8 +148,9 @@ abstract class DomainDatabaseMap {
      * @return IEntityRelationalMap|null The relational map or null if not found
      */
     final public function GetEntityRelationalMap($EntityType) {
-        if($this->HasEntityRelationalMap($EntityType))
+        if(isset($this->EntityRelationalMaps[$EntityType])) {
             return $this->EntityRelationalMaps[$EntityType];
+        }
         else {
             $ParentType = get_parent_class($EntityType);
             if($ParentType === false) {
@@ -167,26 +174,6 @@ abstract class DomainDatabaseMap {
     }
     
     /**
-     * Whether or not the property is mapped.
-     * 
-     * @param Object\IProperty $Property The property
-     * @return boolean
-     */
-    final public function HasPropertyMapping(Object\IProperty $Property) {
-        return $this->VerifyEntityTypeIsMapped($Property->GetEntityType())->HasPropertyMapping($Property->GetIdentifier());
-    }
-    
-    /**
-     * Gets the property mapping from the property identifier
-     * 
-     * @param Object\IProperty $Property The property
-     * @return IPropertyMapping|null
-     */
-    final public function GetPropertyMapping(Object\IProperty $Property) {
-        return $this->VerifyEntityTypeIsMapped($Property->GetEntityType())->GetPropertyMapping($Property->GetIdentifier());
-    }
-    
-    /**
      * Verifies that an entity type is mapped and returns the relational map if is found.
      * 
      * @param string $EntityType The entity type
@@ -200,22 +187,6 @@ abstract class DomainDatabaseMap {
         }
         
         return $EntityRelationalMap;
-    }
-    
-    /**
-     * @return Relational\Criteria
-     */
-    final protected function GetSelectCriteria($EntityType) {
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-        $EntityRelationalMap->GetSelectCriteria();
-    }
-    
-    /**
-     * @return Relational\ResultSetSources
-     */
-    final protected function GetSelectSources($EntityType) {
-        $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-        $EntityRelationalMap->GetSelectSources();
     }
     
     /**
@@ -291,7 +262,7 @@ abstract class DomainDatabaseMap {
      * @param Object\IRequest $Request The request
      * @return Relational\ExistsSelect The exists relational select
      */
-    final protected function MapToExistsSelect(Object\IRequest $Request);
+    protected abstract function MapToExistsSelect(Object\IRequest $Request);
     
     /**
      * Maps a given entity request to the relational equivalent.
@@ -299,7 +270,7 @@ abstract class DomainDatabaseMap {
      * @param Object\IEntityRequest $EntityRequest The entity request
      * @return Relational\ResultSetSelect The equivalent relational select
      */
-    final protected function MapEntityRequest(Object\IEntityRequest $EntityRequest);
+    protected abstract function MapEntityRequest(Object\IEntityRequest $EntityRequest);
     
     /**
      * Maps a given data request to the relational equivalent.
@@ -307,21 +278,13 @@ abstract class DomainDatabaseMap {
      * @param Object\IDataRequest $DataRequest The data request
      * @return Relational\DataSelect The data select
      */
-    final protected function MapDataRequest(Object\IDataRequest $DataRequest);
+    protected abstract function MapDataRequest(Object\IDataRequest $DataRequest);
     
     
     /**
      * @return Relational\Update
      */
     protected abstract function MapProcedure(Object\IProcedure $Procedure);
-    
-    /**
-     * Maps the supplied object criteria the supplied relational equivalent.
-     * 
-     * @param Object\ICriteria $Criteria The object criteria to map
-     * @return Relational\Criteria The relational equivalent
-     */
-    protected abstract function MapCriteria(Object\ICriteria $Criteria, Relational\Criteria $RelationalCriteria = null);
     
     /**
      * Maps the supplied object criteria to the equivalent delete

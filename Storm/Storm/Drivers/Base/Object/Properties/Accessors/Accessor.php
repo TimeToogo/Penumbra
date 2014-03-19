@@ -2,26 +2,22 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
-use \Storm\Core\Object\Expressions\TraversalExpression;
-use \Storm\Core\Object\Expressions\PropertyExpression;
+use \Storm\Core\Object\Expressions as O;
 
 abstract class Accessor {
     private $Identifier;
-    private $GetterExpression;
     private $EntityType = null;
     
     public function __construct() {
         $this->Identifier = '$Entity';
         $this->Identifier($this->Identifier);
-        
-        $this->GetterExpression = $this->GetterExpression(Expression::Entity());
     }
     
     final public function GetIdentifier() {
         return $this->Identifier;
     }
     
-    public abstract function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression);
+    public abstract function ResolveTraversalExpression(O\TraversalExpression $Expression, O\PropertyExpression $PropertyExpression);
     
     protected abstract function Identifier(&$Identifier);
         

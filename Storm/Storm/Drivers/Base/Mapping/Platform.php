@@ -2,14 +2,15 @@
 
 namespace Storm\Drivers\Base\Mapping;
 
-use \Storm\Core\Object\Expressions as O;
+use \Storm\Core\Mapping;
+use \Storm\Core\Object;
 use \Storm\Core\Relational;
-use \Storm\Core\Relational\Expressions as R;
+use \Storm\Drivers\Base\Relational\IPlatform as IRelationalPlatform;
 
 class Platform implements IPlatform {
     
     /**
-     * @var Relational\IPlatform
+     * @var IRelationalPlatform
      */
     private $RelationalPlatform;
     
@@ -34,37 +35,60 @@ class Platform implements IPlatform {
     private $FunctionMapper;
     
     /**
-     * @var Expressions\IObjectMapper
+     * @var Expressions\IAggregateMapper
      */
-    private $ObjectMapper;
+    private $AggregateMapper;
     
     /**
-     * @var Expressions\IResourceMapper
+     * @var Expressions\IObjectTypeMapper[]
      */
-    private $ResourceMapper;
+    private $ObjectTypeMappers;
     
     /**
      * @var Expressions\IControlFlowMapper
      */
     private $ControlFlowMapper;
     
+    /**
+     * @var Expressions\RequestMapper
+     */
+    private $RequestMapper;
+    
+    /**
+     * @var Queries\ProcedureMapper
+     */
+    private $ProcedureMapper;
+    
+    /**
+     * @var Queries\DeleteMapper
+     */
+    private $DeleteMapper;
+    
     public function __construct(
-            Relational\IPlatform $RelationalPlatform,
+            IRelationalPlatform $RelationalPlatform,
             Expressions\IValueMapper $ValueMapper, 
             Expressions\IArrayMapper $ArrayMapper, 
             Expressions\IOperationMapper $OperationMapper,
             Expressions\IFunctionMapper $FunctionMapper, 
-            Expressions\IObjectMapper $ObjectMapper, 
-            Expressions\IResourceMapper $ResourceMapper, 
+            Expressions\IAggregateMapper $AggregateMapper, 
+            array $ObjectTypeMappers,
             Expressions\IControlFlowMapper $ControlFlowMapper) {
         $this->RelationalPlatform = $RelationalPlatform;
         $this->ValueMapper = $ValueMapper;
         $this->ArrayMapper = $ArrayMapper;
         $this->OperationMapper = $OperationMapper;
         $this->FunctionMapper = $FunctionMapper;
-        $this->ObjectMapper = $ObjectMapper;
-        $this->ResourceMapper = $ResourceMapper;
+        $this->AggregateMapper = $AggregateMapper;
+        array_walk($ObjectTypeMappers, function ($I) { $this->AddObjectTypeMapper($I); });
         $this->ControlFlowMapper = $ControlFlowMapper;
+        
+        $this->RequestMapper = new Queries\RequestMapper();
+        $this->ProcedureMapper = new Queries\ProcedureMapper();
+        $this->DeleteMapper = new Queries\DeleteMapper();
+    }
+    
+    private function AddObjectTypeMapper(Expressions\IObjectTypeMapper $ObjectTypeMapper) {
+        $this->ObjectTypeMappers[$ObjectTypeMapper->GetClassType()] = $ObjectTypeMapper;
     }
     
     public function GetRelationalPlatform() {
@@ -86,36 +110,105 @@ class Platform implements IPlatform {
     final public function GetFunctionMapper() {
         return $this->FunctionMapper;
     }
-
-    final public function GetObjectMapper() {
-        return $this->ObjectMapper;
-    }
     
-    final public function GetResourceMapper() {
-        return $this->ResourceMapper;
+    final public function GetAggregateMapper() {
+        return $this->AggregateMapper;
+    }
+
+    final public function GetObjectTypeMappers() {
+        return $this->ObjectTypeMappers;
     }
     
     final public function GetControlFlowMapper() {
         return $this->ControlFlowMapper;
     }
-    
-    final public function MapExpressions(array $Expressions, Expressions\PropertyExpressionResolver $PropertyExpressionResolver) {
-        return $this->GetExpressionMapper($PropertyExpressionResolver)->MapExpressions($Expressions);
+
+    final public function MapToExistsSelect(Object\IRequest $Request, Mapping\IEntityRelationalMap $EntityRelationalMap) {
+        $ExistsSelect = new Relational\ExistsSelect($this->GetResultSetSpecification($Request, $EntityRelationalMap));
+        
+        $this->RequestMapper->MapRequestToExistsSelect(
+                $Request, 
+                $ExistsSelect,
+                $this->GetExpressionMapper($EntityRelationalMap, $ExistsSelect));
+        
+        return $ExistsSelect;
+    }
+
+    final public function MapEntityRequest(Object\IEntityRequest $EntityRequest, Mapping\IEntityRelationalMap $EntityRelationalMap) {
+        $ResultSetSelect = new Relational\ResultSetSelect($this->GetResultSetSpecification($EntityRequest, $EntityRelationalMap));
+        
+        $this->RequestMapper->MapEntityRequest(
+                $EntityRequest, 
+                $ResultSetSelect, 
+                $EntityRelationalMap, 
+                $this->GetExpressionMapper($EntityRelationalMap, $ResultSetSelect));
+        
+        return $ResultSetSelect;
     }
     
-    final public function MapExpression(O\Expression $Expression, Expressions\PropertyExpressionResolver $PropertyExpressionResolver) {
-        return $this->GetExpressionMapper($PropertyExpressionResolver)->MapExpression($Expression);
+    final public function MapDataRequest(Object\IDataRequest $DataRequest, Mapping\IEntityRelationalMap $EntityRelationalMap) {
+        $DataSelect = new Relational\DataSelect([], $this->GetResultSetSpecification($DataRequest, $EntityRelationalMap));
+        
+        $this->RequestMapper->MapDataRequest(
+                $DataRequest, 
+                $DataSelect, 
+                $this->GetExpressionMapper($EntityRelationalMap, $DataSelect));
+        
+        return $DataSelect;
+    }
+
+    final public function MapProcedure(Object\IProcedure $Procedure, Mapping\IEntityRelationalMap $EntityRelationalMap) {
+        $Update = new Relational\Update($this->GetResultSetSpecification($Procedure, $EntityRelationalMap));
+        
+        $this->ProcedureMapper->MapProcedure(
+                $Procedure, 
+                $Update, 
+                $this->GetExpressionMapper($EntityRelationalMap, $Update));
+        
+        return $Update;
     }
     
-    private function GetExpressionMapper(Expressions\PropertyExpressionResolver $PropertyExpressionResolver) {
+    final public function MapCriteriaToDelete(Object\ICriteria $ObjectCriteria, Mapping\IEntityRelationalMap $EntityRelationalMap) {
+        $Delete = new Relational\Delete(new Relational\ResultSetSpecification(
+                    $EntityRelationalMap->GetSelectSources(),
+                    $EntityRelationalMap->GetSelectCriteria()));
+        
+        $this->DeleteMapper->MapCriteriaToDelete(
+                $ObjectCriteria, 
+                $Delete, 
+                $EntityRelationalMap, 
+                $this->GetExpressionMapper($EntityRelationalMap, $Delete));
+        
+        return $Delete;
+    }
+
+    
+    private function GetResultSetSpecification(
+            Object\IQuery $Query, 
+            Mapping\IEntityRelationalMap $EntityRelationalMap) {
+        
+        if($Query->IsFromEntityRequest()) {
+            $SubEntitySelect = $this->MapEntityRequest($Query->GetFromEntityRequest());
+            return new Relational\ResultSetSpecification(
+                    new Relational\ResultSetSources($SubEntitySelect),
+                    new Relational\Criteria());
+        }
+        else {
+            return new Relational\ResultSetSpecification(
+                    $EntityRelationalMap->GetSelectSources(),
+                    $EntityRelationalMap->GetSelectCriteria());
+        }
+    }    
+    
+    private function GetExpressionMapper(Mapping\IEntityRelationalMap $EntityRelationalMap, Relational\Query $Query) {
         return new ExpressionMapper(
-                $PropertyExpressionResolver, 
+                new PropertyExpressionResolver($Query->GetResultSetSpecification(), $EntityRelationalMap), 
                 $this->ValueMapper, 
                 $this->ArrayMapper, 
                 $this->OperationMapper, 
                 $this->FunctionMapper, 
-                $this->ObjectMapper, 
-                $this->ResourceMapper, 
+                $this->AggregateMapper,
+                $this->ObjectTypeMappers, 
                 $this->ControlFlowMapper);
     }
 }

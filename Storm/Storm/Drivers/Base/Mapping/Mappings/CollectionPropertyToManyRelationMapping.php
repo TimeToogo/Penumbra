@@ -81,13 +81,9 @@ class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelati
             $this->ToManyRelation->Persist($Transaction, $ParentData, $RelationshipChanges);
         }
     }
-
-    public function MapFunctionCall(Relational\Criteria $Criteria, Expressions\FunctionCallExpression $FunctionCallExpression) {
-        $this->ToManyRelation->AddRelationToCriteria($Criteria);
-    }
     
-    public function MapPropertyExpression(Object\Expressions\TraversalExpression $TraversalExpression = null) {
-        throw new \Exception();
+    public function MapPropertyExpression(Relational\ResultSetSources $Sources, &$ReturnType) {
+        throw new \Storm\Core\Mapping\MappingException();
     }
 }
 

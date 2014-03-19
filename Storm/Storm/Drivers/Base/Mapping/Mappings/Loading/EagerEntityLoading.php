@@ -18,6 +18,7 @@ class EagerEntityLoading extends EntityLoading {
 
     public function Load(
             Mapping\IEntityRelationalMap $EntityRelationalMap, 
+            Relational\Database $Database, 
             Relational\IToOneRelation $ToOneRelation, 
             array $ParentAndRelatedRowArray) {
         $this->UnsetNullRows($EntityRelationalMap, $ParentAndRelatedRowArray);

@@ -13,9 +13,9 @@ abstract class CriteriaCompiler implements ICriteriaCompiler {
         }
     }
 
-    final public function AppendOrderBy(QueryBuilder $QueryBuilder, array $Expressions) {
-        if(count($Expressions) > 0) {
-            $this->AppendOrderByClause($QueryBuilder, $Expressions);
+    final public function AppendOrderBy(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap) {
+        if(count($ExpressionAscendingMap) > 0) {
+            $this->AppendOrderByClause($QueryBuilder, $ExpressionAscendingMap);
         }
     }
     
@@ -25,8 +25,6 @@ abstract class CriteriaCompiler implements ICriteriaCompiler {
         }
     }
 
-    protected abstract function AppendTableDefinitionClause(QueryBuilder $QueryBuilder, Relational\ITable $Table, array $Joins = null);
-    
     protected abstract function AppendWhereClause(QueryBuilder $QueryBuilder, array $PredicateExpressions);
     
     protected abstract function AppendOrderByClause(QueryBuilder $QueryBuilder, \SplObjectStorage $ExpressionAscendingMap);

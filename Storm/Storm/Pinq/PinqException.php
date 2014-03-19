@@ -26,7 +26,7 @@ class PinqException extends Object\ObjectException {
                 count($ParameterTypeHints),
                 implode(', ', $ParameterTypeHints),
                 $Reflection->getNumberOfParameters(),
-                array_map(function($I) { return $I->getClass() ? $I->getClass()->name : '{NONE}'; }, $Reflection->getParameters()));
+                implode(', ', array_map(function($I) { return $I->getClass() ? $I->getClass()->name : '{NONE}'; }, $Reflection->getParameters())));
     }
     
     public static function InvalidFunctionMessage($MessageFormat, \ReflectionFunctionAbstract $Reflection) {

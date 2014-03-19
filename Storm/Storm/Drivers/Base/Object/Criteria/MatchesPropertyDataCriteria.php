@@ -8,7 +8,13 @@ use \Storm\Core\Object\Expressions\Expression;
 use \Storm\Core\Object\Expressions\Operators;
 
 class MatchesPropertyDataCriteria extends Criteria {
-    public function __construct(Object\PropertyData $PropertyData) {
+    public function __construct(
+            $EntityType,
+            Object\PropertyData $PropertyData, 
+            \SplObjectStorage $OrderByExpressionsAscendingMap = null, 
+            $RangeOffset = 0, 
+            $RangeAmount = null) {
+        
         $PredicateExpressions = [];
         foreach($PropertyData as $PropertyIdentifier => $Value) {
             $Property = $PropertyData->GetProperty($PropertyIdentifier);
@@ -22,6 +28,12 @@ class MatchesPropertyDataCriteria extends Criteria {
         parent::__construct(
                 $PropertyData->GetEntityType(),
                 $PredicateExpressions);
+        parent::__construct(
+                $EntityType, 
+                $PredicateExpressions, 
+                $OrderByExpressionsAscendingMap, 
+                $RangeOffset, 
+                $RangeAmount);
     }
 }
 

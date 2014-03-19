@@ -24,9 +24,11 @@ class ParentScopeLazyEntityLoading extends EntityLoading {
         $LoadingValues = array();
         foreach($ParentRowArray as $Key => $ParentRow) {
             $RelatedRevivalDataLoader = function () use (&$EntityRelationalMap, &$Database, &$ToOneRelation, $ParentRow) {
-                $RelatedRows = $this->LoadRelatedRows($ToOneRelation, $Database, [$ParentRow]);
-                
-                return $EntityRelationalMap->MapResultRowsToRevivalData($RelatedRows)[0];
+                return $this->LoadRelatedRevivalDataMap(
+                        $EntityRelationalMap,
+                        $Database,
+                        $ToOneRelation,
+                        [$ParentRow])[0];
             };
             
             $LoadingValues[$Key] = $this->MakeLazyRevivalData(

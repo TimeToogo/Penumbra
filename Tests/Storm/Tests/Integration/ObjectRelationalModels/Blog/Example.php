@@ -5,7 +5,7 @@ namespace Storm\Tests\Integration\ObjectRelationalModels\Blog;
 use \Storm\Tests\Integration\ObjectRelationalModels\Blog\Entities;
 use \Storm\Api;
 use \Storm\Api\Base\Storm;
-use \Storm\Api\Base\Repository;
+use \Storm\Api\Base\EntityManager;
 use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 use \Storm\Drivers\Base\Object\Properties\Proxies;
@@ -24,9 +24,9 @@ class One implements \Storm\Tests\Integration\ObjectRelationalModels\Blog\IStorm
     const Procedure = 5;
     
     public function Run(Storm $BloggingStorm) {
-        $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
-        $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
-        $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
+        $BlogRepository = $BloggingStorm->GetEntityManger(Entities\Blog::GetType());
+        $TagRepository = $BloggingStorm->GetEntityManger(Entities\Tag::GetType());
+        $AuthorRepository = $BloggingStorm->GetEntityManger(Entities\Author::GetType());
         
         $Action = self::Retreive;
         
@@ -39,7 +39,7 @@ class One implements \Storm\Tests\Integration\ObjectRelationalModels\Blog\IStorm
         return $Last;
     }
 
-    private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository, Repository $AuthorRepository, Repository $TagRepository) {
+    private function Act($Action, Storm $BloggingStorm, EntityManager $BlogRepository, EntityManager $AuthorRepository, EntityManager $TagRepository) {
         $Id = self::Id;
         switch ($Action) {
             case self::Persist:
@@ -71,9 +71,9 @@ class One implements \Storm\Tests\Integration\ObjectRelationalModels\Blog\IStorm
     }
     
     private function Persist($Id, Storm $BloggingStorm, 
-            Repository $BlogRepository, 
-            Repository $AuthorRepository,
-            Repository $TagRepository) {
+            EntityManager $BlogRepository, 
+            EntityManager $AuthorRepository,
+            EntityManager $TagRepository) {
         
         $Blog = $this->CreateBlog();
         foreach ($Blog->Posts as $Post) {
@@ -88,7 +88,7 @@ class One implements \Storm\Tests\Integration\ObjectRelationalModels\Blog\IStorm
         return $Blog;
     }
     
-    private function Retreive($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+    private function Retreive($Id, Storm $BloggingStorm, EntityManager $BlogRepository, EntityManager $TagRepository) {
         $RevivedBlog = $BlogRepository->LoadById($Id);
         if($RevivedBlog === null) {
             throw new \Exception("Entity with id: $Id does not exist");
@@ -105,7 +105,7 @@ class One implements \Storm\Tests\Integration\ObjectRelationalModels\Blog\IStorm
         return null;
     }
     
-    private function RetreiveComplex($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+    private function RetreiveComplex($Id, Storm $BloggingStorm, EntityManager $BlogRepository, EntityManager $TagRepository) {
         $Outside = new \DateTime();
         $Outside->sub(new \DateInterval('P1D'));
 
@@ -147,7 +147,7 @@ class One implements \Storm\Tests\Integration\ObjectRelationalModels\Blog\IStorm
         return null;
     }
     
-    private function PersistExisting($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+    private function PersistExisting($Id, Storm $BloggingStorm, EntityManager $BlogRepository, EntityManager $TagRepository) {
         
         $Blog = $BlogRepository->LoadById($Id);
         $Blog->Posts[0]->Content = 'foobar';
@@ -160,7 +160,7 @@ class One implements \Storm\Tests\Integration\ObjectRelationalModels\Blog\IStorm
         return $Blog;
     }
     
-    private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+    private function Procedure($Id, Storm $BloggingStorm, EntityManager $BlogRepository, EntityManager $TagRepository) {
         $Procedure = $BlogRepository->Procedure([$this, 'UpdateBlog'])
                 ->Where(function ($Blog) use ($Id) {
                     return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
@@ -180,7 +180,7 @@ class One implements \Storm\Tests\Integration\ObjectRelationalModels\Blog\IStorm
         $Blog->CreatedDate = (new \DateTime())->add((new \DateTime())->diff($Blog->CreatedDate, true));
     }
     
-    private function Discard($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+    private function Discard($Id, Storm $BloggingStorm, EntityManager $BlogRepository, EntityManager $TagRepository) {
 
         $BlogRepository->Discard($BlogRepository->LoadById($Id));
 

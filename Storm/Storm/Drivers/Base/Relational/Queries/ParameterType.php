@@ -8,7 +8,7 @@ final class ParameterType {
     const Double = 2;
     const Boolean = 3;
     const Null = 4;
-    const Binary = 5;
+    const Stream = 5;
 }
 
 ?>

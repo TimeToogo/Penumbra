@@ -3,25 +3,24 @@
 namespace Storm\Pinq;
 
 use \Storm\Core\Object\IEntityMap;
-use \Storm\Api\Base\Repository;
+use \Storm\Api\IEntityManager;
 
 class Removal extends Criteria  {
     /**
-     * @var Repository
+     * @var IEntityManager
      */
-    private $Repository;
+    private $EntityManager;
     
     public function __construct(
-            Repository $Repository,
-            IEntityMap $EntityMap, 
+            IEntityManager $EntityManager,
             IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
-        parent::__construct($EntityMap, $FunctionToExpressionTreeConverter);
+        parent::__construct($EntityManager->GetEntityMap(), $FunctionToExpressionTreeConverter);
         
-        $this->Repository = $Repository;
+        $this->EntityManager = $EntityManager;
     }
     
     public function Execute() {
-        $this->Repository->Discard($this->BuildCriteria());
+        $this->EntityManager->DiscardBy($this->BuildCriteria());
     }
 }
 

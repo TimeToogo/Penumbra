@@ -42,7 +42,7 @@ final class FunctionConverter extends Converters\FunctionConverter {
     
     private function TrimDefaultCharacters(array &$ArgumentExpressions) {
         if(!isset($ArgumentExpressions[1])) {
-            $ArgumentExpressions[1] = Expression::Constant(" \t\n\r\0\x0B");
+            $ArgumentExpressions[1] = Expression::BoundValue(" \t\n\r\0\x0B");
         }
     }
 }

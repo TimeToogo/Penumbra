@@ -5,7 +5,7 @@ namespace Storm\Drivers\Base\Mapping\Mappings;
 use \Storm\Core\Mapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
-use \Storm\Core\Object\Expressions;
+use \Storm\Drivers\Base\Relational\Expressions as R;
 use \Storm\Drivers\Base\Relational\Columns;
 
 class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IDataPropertyColumnMapping {
@@ -82,15 +82,18 @@ class DataPropertyColumnMapping extends PropertyMapping implements Mapping\IData
     
     public function MapPropertyExpression(
             Relational\ResultSetSources $Sources,
-            Object\Expressions\TraversalExpression $TraversalExpression = null) {
-        if($TraversalExpression !== null) {
-            throw new \Exception();
+            &$ReturnType) {
+        
+        if($this->Column instanceof Columns\Column) {
+            $DataType = $this->Column->GetDataType();
+            if($DataType instanceof Columns\ObjectDataType) {
+                $ReturnType = $DataType->GetClassType();
+            }
         }
         
-        return $this->Column->GetReviveExpression(
-                \Storm\Drivers\Base\Relational\Expressions\Expression::Column(
+        return R\Expression::Column(
                         $Sources->GetColumnSource($this->Column),
-                        $this->Column));
+                        $this->Column);
     }
 }
 

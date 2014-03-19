@@ -17,10 +17,10 @@ class MatchesColumnDataExpression extends CompoundBooleanExpression {
                     Expression::BinaryOperation(
                             Expression::Column($Column->GetTable(), $Column), 
                             Operators\Binary::Equality,
-                            $Column->GetPersistExpression(Expression::Constant($Value)));
+                            $Column->GetPersistExpression(Expression::BoundValue($Value)));
         }
         
-        parent::__construct($ConstraintExpressions, Binary::LogicalAnd);
+        parent::__construct($ConstraintExpressions, Operators\Binary::LogicalAnd);
     }
 }
 

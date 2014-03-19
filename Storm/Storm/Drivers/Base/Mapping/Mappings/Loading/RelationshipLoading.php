@@ -8,21 +8,15 @@ use \Storm\Core\Relational;
 
 abstract class RelationshipLoading {
     
-    public function AddLoadingRequirementsToSelect(
-            Mapping\IEntityRelationalMap $EntityRelationalMap, 
-            Relational\IToOneRelation $ToOneRelation, 
-            Relational\ResultSetSelect $Select) {
-        $Select->AddColumns($ToOneRelation->GetParentColumns());
-    }    
-    
     final protected function LoadRelatedRows(
+            Mapping\IEntityRelationalMap $EntityRelationalMap,
             Relational\IRelation $Relation,
             Relational\Database $Database, 
             array $ParentRows, 
             Object\RevivalData $AlreadyKnownRevivalData = null) {
-        $RelatedRowRequest = $Relation->RelationResultSetSelect($ParentRows);
-        $this->MapEntityToSelect($RelatedRowRequest, $AlreadyKnownRevivalData);
-        return $Database->Load($RelatedRowRequest);
+        $RelatedRowSelect = $Relation->RelationResultSetSelect($ParentRows);
+        $this->MapEntityToSelect($EntityRelationalMap, $RelatedRowSelect, $AlreadyKnownRevivalData);
+        return $Database->Load($RelatedRowSelect);
     }
     
     final protected function MapEntityToSelect(
@@ -32,10 +26,10 @@ abstract class RelationshipLoading {
         if($AlreadyKnownRevivalData !== null) {
             $AlreadyKnownPropertyIdentifiers = array_keys($AlreadyKnownRevivalData->GetPropertyData());
             $AlreadyKnownProperties = $AlreadyKnownRevivalData->GetProperties($AlreadyKnownPropertyIdentifiers);
-            $EntityRelationalMap->MapPropetiesToSelect($Select, $AlreadyKnownProperties);
+            $EntityRelationalMap->MapPropertiesToSelect($Select, $AlreadyKnownProperties);
         }
         else {
-            $EntityRelationalMap->MapPropetiesToSelect($Select);
+            $EntityRelationalMap->MapPropertiesToSelect($Select);
         }
     }
 }

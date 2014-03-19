@@ -5,14 +5,14 @@ namespace StormExamples\One;
 use \StormExamples\One\Entities;
 use \Storm\Api;
 use \Storm\Api\Base\Storm;
-use \Storm\Api\Base\Repository;
+use \Storm\Api\Base\EntityManager;
 use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Platforms\Development\Logging;
 use \Storm\Drivers\Base\Object\Properties\Proxies;
 
-class One implements \StormExamples\IStormExample {
+class Example implements \StormExamples\IStormExample {
     const DevelopmentMode = 1;
-    const UseCache = false;
+    const UseCache = true;
     
     public static function GetPlatform() {
         return new Platforms\Mysql\Platform(self::DevelopmentMode > 1);
@@ -44,56 +44,61 @@ class One implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
     
-    const Id = 500;
+    const Id = 650;
     
     const Persist = 0;
     const Retreive = 1;
-    const RetreiveComplex = 2;
-    const PersistExisting = 3;
-    const Discard = 4;
-    const Procedure = 5;
+    const RetreiveSimple = 2;
+    const RetreiveComplex = 3;
+    const PersistExisting = 4;
+    const Discard = 5;
+    const Procedure = 6;
     
     public function Run(Storm $BloggingStorm) {
-        $BlogRepository = $BloggingStorm->GetRepository(Entities\Blog::GetType());
-        $TagRepository = $BloggingStorm->GetRepository(Entities\Tag::GetType());
-        $AuthorRepository = $BloggingStorm->GetRepository(Entities\Author::GetType());
+        $BlogManger = $BloggingStorm->GetEntityManger(Entities\Blog::GetType());
+        $TagManger = $BloggingStorm->GetEntityManger(Entities\Tag::GetType());
+        $AuthorManger = $BloggingStorm->GetEntityManger(Entities\Author::GetType());
         
-        $Action = self::RetreiveComplex;
+        $Action = self::RetreiveSimple;
         
         $Amount = 1;        
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
-            $Last = $this->Act($Action, $BloggingStorm, $BlogRepository, $AuthorRepository, $TagRepository);
+            $Last = $this->Act($Action, $BloggingStorm, $BlogManger, $AuthorManger, $TagManger);
         }
 
         return $Last;
     }
 
-    private function Act($Action, Storm $BloggingStorm, Repository $BlogRepository, Repository $AuthorRepository, Repository $TagRepository) {
+    private function Act($Action, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $AuthorManger, EntityManager $TagManger) {
         $Id = self::Id;
         switch ($Action) {
             case self::Persist:
-                return $this->Persist($Id, $BloggingStorm, $BlogRepository, $AuthorRepository, $TagRepository);
+                return $this->Persist($Id, $BloggingStorm, $BlogManger, $AuthorManger, $TagManger);
 
 
             case self::Retreive:
-                return $this->Retreive($Id, $BloggingStorm, $BlogRepository, $TagRepository);
+                return $this->Retreive($Id, $BloggingStorm, $BlogManger, $TagManger);
+
+
+            case self::RetreiveSimple:
+                return $this->RetreiveSimple($Id, $BloggingStorm, $BlogManger, $TagManger);
 
 
             case self::RetreiveComplex:
-                return $this->RetreiveComplex($Id, $BloggingStorm, $BlogRepository, $TagRepository);
+                return $this->RetreiveComplex($Id, $BloggingStorm, $BlogManger, $TagManger);
 
                 
             case self::PersistExisting:
-                return $this->PersistExisting($Id, $BloggingStorm, $BlogRepository, $TagRepository);
+                return $this->PersistExisting($Id, $BloggingStorm, $BlogManger, $TagManger);
 
                 
             case self::Procedure:
-                return $this->Procedure($Id, $BloggingStorm, $BlogRepository, $TagRepository);
+                return $this->Procedure($Id, $BloggingStorm, $BlogManger, $TagManger);
 
 
             case self::Discard:
-                return $this->Discard($Id, $BloggingStorm, $BlogRepository, $TagRepository);
+                return $this->Discard($Id, $BloggingStorm, $BlogManger, $TagManger);
 
             default:
                 return null;
@@ -101,25 +106,25 @@ class One implements \StormExamples\IStormExample {
     }
     
     private function Persist($Id, Storm $BloggingStorm, 
-            Repository $BlogRepository, 
-            Repository $AuthorRepository,
-            Repository $TagRepository) {
+            EntityManager $BlogManger, 
+            EntityManager $AuthorManger,
+            EntityManager $TagManger) {
         
         $Blog = $this->CreateBlog();
         foreach ($Blog->Posts as $Post) {
-            $TagRepository->PersistAll($Post->Tags->getArrayCopy());
-            $AuthorRepository->Persist($Post->Author);
+            $TagManger->PersistAll($Post->Tags->getArrayCopy());
+            $AuthorManger->Persist($Post->Author);
         }
         $BloggingStorm->SaveChanges();
 
-        $BlogRepository->Persist($Blog);
-        $BlogRepository->SaveChanges();
+        $BlogManger->Persist($Blog);
+        $BlogManger->SaveChanges();
 
         return $Blog;
     }
     
-    private function Retreive($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $RevivedBlog = $BlogRepository->LoadById($Id);
+    private function Retreive($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
+        $RevivedBlog = $BlogManger->LoadById($Id);
         if($RevivedBlog === null) {
             throw new \Exception("Entity with id: $Id does not exist");
         }
@@ -129,20 +134,39 @@ class One implements \StormExamples\IStormExample {
         $Post = $RevivedBlog->Posts[0];
         $Author = $Post->Author;
         $Test = $Author->FirstName;
-        $Foo = $RevivedBlog->Posts[1]->Tags->getArrayCopy();
-        $BlogRepository->GetIdentityMap()->Clear();
+        $Foo = $RevivedBlog->Posts[0]->Tags->getArrayCopy();
+        //$Foo = $RevivedBlog->Posts[1]->Tags->getArrayCopy();
+        $BlogManger->GetIdentityMap()->Clear();
         
         return null;
     }
     
-    private function RetreiveComplex($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+    private function RetreiveSimple($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
+        $RevivedBlog = 
+                $BlogManger->Request()
+                ->Where(function (Entities\Blog $Blog) use($Id) {
+                    return $Blog->Id === $Id && true;
+                })
+                ->OrderByDescending(function (Entities\Blog $Blog) { return $Blog->Id . $Blog->CreatedDate; })
+                ->First();
+        if($RevivedBlog === null) {
+            throw new \Exception("Entity with id: $Id does not exist");
+        }
+        if(extension_loaded('xdebug')) {
+            var_dump($RevivedBlog);
+        }
+        
+        return null;
+    }
+    
+    private function RetreiveComplex($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
         $Outside = new \DateTime();
         $Outside->sub(new \DateInterval('P1D'));
 
         $Array = [1,2,3,4,5,6];
         $RevivedBlog = 
-                $BlogRepository->Request()
-                ->Where(function ($Blog) use($Id, $Outside, $Array) {
+                $BlogManger->Request()
+                ->Where(function (Entities\Blog $Blog) use($Id, $Outside, $Array) {
                     $Foo = $Id;
                     $Sandy = 40;
                     $Sandy += $Id;
@@ -160,9 +184,9 @@ class One implements \StormExamples\IStormExample {
                     
                     return (~1 - 500 ^ 2) && $Foo === $Blog->Id && (true || mt_rand(1, 10) > 10 || $Blog->Id === $Foo  || $Blog->CreatedDate < new \DateTime() && $Maybe || $Possibly);
                 })
-                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
-                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
-                ->GroupBy(function ($Blog) { return $Blog->Id; })
+                ->OrderBy(function (Entities\Blog $Blog) { return $Blog->Id . $Blog->CreatedDate; })
+                ->OrderByDescending(function (Entities\Blog $Blog) { return $Blog->Id; })
+                ->GroupBy(function (Entities\Blog $Blog) { return $Blog->Id; })
                 ->First();
         
         if($RevivedBlog === null) {
@@ -173,14 +197,14 @@ class One implements \StormExamples\IStormExample {
         }
         $RevivedBlog->Posts[0]->Tags->getArrayCopy();
         $RevivedBlog->Posts[1]->Tags->getArrayCopy();
-        $BlogRepository->GetIdentityMap()->Clear();
+        $BlogManger->GetIdentityMap()->Clear();
 
         return null;
     }
     
-    private function AggregationOptions(Repository $BlogRepository) {
+    private function AggregationOptions(EntityManager $BlogManger) {
         //#1 ----------------------------------------------------- Yes
-        $Request = $BlogRepository->Request();
+        $Request = $BlogManger->Request();
         
         $Request->Where(function ($Blog) use($Id) {
                     return $Blog->Id === $Id;
@@ -202,7 +226,7 @@ class One implements \StormExamples\IStormExample {
                 });
                 
         //#1 ----------------------------------------------------- Yes
-        $Sums = $BlogRepository->Request()
+        $Sums = $BlogManger->Request()
                 ->Where(function ($Blog) use($Id) {
                     return $Blog->Id === $Id;
                 })
@@ -215,7 +239,7 @@ class One implements \StormExamples\IStormExample {
                 
                 
         //#2 -----------------------------------------------------NO
-        $BlogRepository->Request()
+        $BlogManger->Request()
                 ->Where(function ($Blog) use($Id) {
                     return $Blog->Id === $Id;
                 })
@@ -232,7 +256,7 @@ class One implements \StormExamples\IStormExample {
                 ]);
         
         //#3 ----------------------------------------------------- Possibly
-        $BlogRepository->RequestData()
+        $BlogManger->RequestData()
                 
                 ->Value(function ($Blog) { return $Blog->Name; })->As('Name')
                 ->Maximum(function ($Blog) { return $Blog->GetHits(); })->As('MaxHits')
@@ -283,27 +307,27 @@ class One implements \StormExamples\IStormExample {
          */
     }
     
-    private function PersistExisting($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+    private function PersistExisting($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
         
-        $Blog = $BlogRepository->LoadById($Id);
+        $Blog = $BlogManger->LoadById($Id);
         $Blog->Posts[0]->Content = 'foobar';
         $Blog->Posts[0]->Author->FirstName .= 'a';
         $Blog->Posts[1]->Content = 'BarBar---------------!';
         
-        $BlogRepository->Persist($Blog);
-        $BlogRepository->SaveChanges();
+        $BlogManger->Persist($Blog);
+        $BlogManger->SaveChanges();
 
         return $Blog;
     }
     
-    private function Procedure($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
-        $BlogRepository->Procedure()
-                ->Where(function ($Blog) use ($Id) {
+    private function Procedure($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
+        $BlogManger->Procedure()
+                ->Where(function (Entities\Blog $Blog) use ($Id) {
                     return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
                 })
                 ->Execute([$this, 'UpdateBlog']);
 
-        $BlogRepository->SaveChanges();
+        $BlogManger->SaveChanges();
     }
     
     public function UpdateBlog(Entities\Blog $Blog) {
@@ -315,17 +339,17 @@ class One implements \StormExamples\IStormExample {
         $Blog->CreatedDate = (new \DateTime())->add((new \DateTime())->diff($Blog->CreatedDate, true));
     }
     
-    private function Discard($Id, Storm $BloggingStorm, Repository $BlogRepository, Repository $TagRepository) {
+    private function Discard($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
 
-        $BlogRepository->Discard($BlogRepository->LoadById($Id));
-        $BlogRepository->Remove()
+        $BlogManger->Discard($BlogManger->LoadById($Id));
+        $BlogManger->Remove()
                 ->Where(function (Entities\Blog $Blog) use ($Id) { return $Blog->Id === $Id; })
                 ->Skip(0)
                 ->Limit(1)
                 ->OrderByDescending(function (Entities\Blog $Blog) { return mt_rand(); })
                 ->Execute();
                 
-        $BlogRepository->SaveChanges();
+        $BlogManger->SaveChanges();
     }
     
     
@@ -387,5 +411,5 @@ class One implements \StormExamples\IStormExample {
 
 }
 
-return new One();
+return new Example();
 ?>

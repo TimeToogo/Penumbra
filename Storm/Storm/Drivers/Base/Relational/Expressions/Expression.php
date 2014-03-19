@@ -16,10 +16,17 @@ abstract class Expression extends Relational\Expression {
     }
     
     /**
-     * @return ConstantExpression
+     * @return BoundValueExpression
      */
-    public static function Constant($Value) {
-        return new ConstantExpression($Value);
+    public static function BoundValue($Value) {
+        return new BoundValueExpression($Value);
+    }
+    
+    /**
+     * @return BoundValueExpression
+     */
+    public static function EscapedValue($Value) {
+        return new EscapedValueExpression($Value);
     }
     
     /**
@@ -67,9 +74,8 @@ abstract class Expression extends Relational\Expression {
     /**
      * @return FunctionCallExpression
      */
-    public static function FunctionCall($Name, ValueListExpression $ArgumentValueListExpression = null) {
-        $ArgumentValueListExpression = $ArgumentValueListExpression ?: new ValueListExpression([]);
-        return new FunctionCallExpression($Name, $ArgumentValueListExpression);
+    public static function FunctionCall($Name, array $ArgumentExpressions = []) {
+        return new FunctionCallExpression($Name, $ArgumentExpressions);
     }
     
     /**

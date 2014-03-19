@@ -2,9 +2,10 @@
 
 namespace Storm\Drivers\Base\Mapping;
 
-use \Storm\Core\Object\Expressions as O;
-use \Storm\Drivers\Base\Relational;
-use \Storm\Core\Relational\Expressions as R;
+use \Storm\Core\Mapping;
+use \Storm\Core\Object;
+use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Relational\IPlatform as IRelationalPlatform;
 
 /**
  * The mapping platform contains all specific implementaion
@@ -15,7 +16,7 @@ use \Storm\Core\Relational\Expressions as R;
 interface IPlatform {
     
     /**
-     * @return Relational\IPlatform
+     * @return IRelationalPlatform
      */
     public function GetRelationalPlatform();
     
@@ -35,34 +36,61 @@ interface IPlatform {
     public function GetOperationMapper();
     
     /**
+     * @return Expressions\IAggregateMapper
+     */
+    public function GetAggregateMapper();
+    
+    /**
      * @return Expressions\IFunctionMapper
      */
     public function GetFunctionMapper();
     
     /**
-     * @return Expressions\IObjectMapper
+     * @return Expressions\IObjectTypeMapper[]
      */
-    public function GetObjectMapper();
-    
-    /**
-     * @return Expressions\IResourceMapper
-     */
-    public function GetResourceMapper();
+    public function GetObjectTypeMappers();
     
     /**
      * @return Expressions\IControlFlowMapper
      */
     public function GetControlFlowMapper();
     
-    /**
-     * @return R\Expression[]
-     */
-    public function MapExpressions(O\Expression $Expression, Expressions\PropertyExpressionResolver $PropertyExpressionResolver);
+    // <editor-fold defaultstate="collapsed" desc="Request  mappers">
     
     /**
-     * @return R\Expression
+     * Maps a given object request to the equivalent select..
+     * 
+     * @return Relational\ExistsSelect The exists relational select
      */
-    public function MapExpression(O\Expression $Expression, Expressions\PropertyExpressionResolver $PropertyExpressionResolver);
+    public function MapToExistsSelect(Object\IRequest $Request, Mapping\IEntityRelationalMap $EntityRelationalMap);
+    
+    /**
+     * Maps a given entity request to the equivalent select.
+     * 
+     * @return Relational\ResultSetSelect The equivalent relational select
+     */
+    public function MapEntityRequest(Object\IEntityRequest $EntityRequest, Mapping\IEntityRelationalMap $EntityRelationalMap);
+    
+    /**
+     * Maps a given data request to the equivalent select.
+     * 
+     * @return Relational\DataSelect The data select
+     */
+    public function MapDataRequest(Object\IDataRequest $DataRequest, Mapping\IEntityRelationalMap $EntityRelationalMap);
+    
+    /**
+     * Maps a supplied object procedure to the equivalent update.
+     * 
+     * @return Relational\Update The equivalent update
+     */
+    public function MapProcedure(Object\IProcedure $Procedure, Mapping\IEntityRelationalMap $EntityRelationalMap);
+    
+    /**
+     * Maps a supplied object criteria to the equivalent delete.
+     * 
+     * @return Relational\Delete The equivalent relational update
+     */
+    public function MapCriteriaToDelete(Object\ICriteria $Criteria, Mapping\IEntityRelationalMap $EntityRelationalMap);
 }
 
 ?>

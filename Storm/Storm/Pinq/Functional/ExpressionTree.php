@@ -77,8 +77,8 @@ class ExpressionTree {
         $this->LoadReturnExpression();
     }
     
-    final public function IsResolved() {
-        return $this->VariableResolverWalker->HasAnyUnresolvedValues();
+    final public function HasUnresolvedVariables() {
+        return $this->VariableResolverWalker->HasUnresolvedVariables();
     }
     
     final public function GetUnresolvedVariables() {
@@ -90,7 +90,7 @@ class ExpressionTree {
             $VariableValueMap[$VariableName] = O\Expression::Value($Value);
         }
         
-        $this->ResolveVariablesToExpressions($VariableExpressionMap + $Value);
+        $this->ResolveVariablesToExpressions($VariableExpressionMap + $VariableValueMap);
     }
     
     final public function ResolveVariablesToExpressions(array $VariableExpressionMap) {

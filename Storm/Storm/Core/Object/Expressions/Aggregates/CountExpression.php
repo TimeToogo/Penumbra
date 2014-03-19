@@ -24,21 +24,17 @@ class CountExpression extends AggregateExpression {
                 $Walker->Walk($this->UniqueValueExpressions));
     }
     
-    final public function UniqueValuesOnly() {
-        return $this->UniqueValuesOnly;
-    }
-    
     /**
      * @return boolean
      */
-    final public function HasValueExpressions() {
+    final public function HasUniqueValueExpressions() {
         return $this->UniqueValueExpressions != null;
     }
     
     /**
      * @return Expression[]|null
      */
-    final public function GetValueExpressions() {
+    final public function GetUniqueValueExpressions() {
         return $this->UniqueValueExpressions;
     }
     

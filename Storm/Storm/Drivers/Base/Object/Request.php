@@ -57,11 +57,11 @@ abstract class Request implements Object\IRequest {
         return $this->EntityType;
     }
     
-    public function HasSubEntityRequest() {
+    public function IsFromEntityRequest() {
         return $this->SubEntityRequest !== null;
     }
     
-    public function GetSubEntityRequest() {
+    public function GetFromEntityRequest() {
         return $this->SubEntityRequest;
     }
         

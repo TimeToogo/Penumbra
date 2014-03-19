@@ -14,9 +14,9 @@ class QueryBuilder {
     private $ParameterPlaceholder;
     private $Bindings;
     private $QueryString = '';
+    
     private $ExpressionCompiler;
     private $QueryCompiler;
-    private $ProcedureCompiler;
     private $IdentifierEscaper;
     
     public function __construct(
@@ -25,14 +25,13 @@ class QueryBuilder {
             Bindings $Bindings,
             IExpressionCompiler $ExpressionCompiler,
             IQueryCompiler $QueryCompiler,
-            IUpdateCompiler $ProcedureCompiler,
             IIdentifierEscaper $IdentifierEscaper) {
         $this->Connection = $Connection;
         $this->ParameterPlaceholder = $ParameterPlaceholder;
         $this->Bindings = $Bindings;
+        
         $this->ExpressionCompiler = $ExpressionCompiler;
         $this->QueryCompiler = $QueryCompiler;
-        $this->ProcedureCompiler = $ProcedureCompiler;
         $this->IdentifierEscaper = $IdentifierEscaper;
     }
     
@@ -213,6 +212,13 @@ class QueryBuilder {
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Escaped Value Appenders">
+    
+    final public function AppendSingleEscapedValue($Value, $ParameterType = null) {
+        $this->Bindings->DefaultParameterType($ParameterType, $Value);
+        $EscapedValue = $this->Connection->Escape($Value, $ParameterType);
+        
+        $this->QueryString .= $EscapedValue;
+    }
     
     final public function AppendEscaped($QueryStringFormat, $Value, $ParameterType = null, $ValuePlaceholder = self::DefaultPlaceholder) {
         $this->Bindings->DefaultParameterType($ParameterType, $Value);

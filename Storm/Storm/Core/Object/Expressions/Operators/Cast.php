@@ -8,12 +8,12 @@ namespace Storm\Core\Object\Expressions\Operators;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 final class Cast {
-    const ArrayCast = 'array';
-    const Boolean = 'bool';
-    const Double = 'double';
-    const Integer = 'int';
-    const Object = 'object';
-    const String = 'string';
+    const ArrayCast = '(array)';
+    const Boolean = '(bool)';
+    const Double = '(double)';
+    const Integer = '(int)';
+    const Object = '(object)';
+    const String = '(string)';
 }
 
 ?>

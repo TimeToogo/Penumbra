@@ -3,7 +3,7 @@
 namespace StormExamples;
 
 use \Storm\Api\Base\Storm;
-use \Storm\Api\Base\Repository;
+use \Storm\Api\Base\EntityManager;
 
 interface IStormExample {
     /**

@@ -26,7 +26,11 @@ class ExpressionWalker {
         return $WalkedExpressions;
     }
     
-    public function WalkConstant(ConstantExpression $Expression) {
+    public function WalkBoundValue(BoundValueExpression $Expression) {
+        return $Expression;
+    }
+    
+    public function WalkEscapedValue(EscapedValueExpression $Expression) {
         return $Expression;
     }
     
@@ -52,7 +56,7 @@ class ExpressionWalker {
     public function WalkFunctionCall(FunctionCallExpression $Expression) {
         return $Expression->Update(
                 $Expression->GetName(),
-                $this->WalkValueList($Expression->GetArgumentValueListExpression()));
+                $this->WalkAll($Expression->GetArgumentExpressions()));
     }
     
     public function WalkValueList(ValueListExpression $Expression) {

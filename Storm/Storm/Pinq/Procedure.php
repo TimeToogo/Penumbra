@@ -2,29 +2,26 @@
 
 namespace Storm\Pinq;
 
-use \Storm\Core\Object;
 use \Storm\Core\Object\IEntityMap;
-use \Storm\Api\Base\Repository;
-use \Storm\Drivers\Base\Object\Procedure;
-use \Storm\Drivers\Base\Object\DataRequest;
+use \Storm\Api\IEntityManager;
+use \Storm\Drivers\Base\Object;
 use \Storm\Core\Object\Expressions as O;
-use \Storm\Core\Object\Expressions\Aggregates as A;
 
 class Procedure extends Criteria  {
     /**
-     * @var Repository
+     * @var IEntityManager
      */
-    private $Repository;
+    private $EntityManager;
     
     private $ExecutionFunctions = [];
     
     public function __construct(
-            Repository $Repository,
+            IEntityManager $EntityManager,
             IEntityMap $EntityMap, 
             IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
-        parent::__construct($EntityMap, $FunctionToExpressionTreeConverter);
+        parent::__construct($EntityManager->GetEntityMap(), $FunctionToExpressionTreeConverter);
         
-        $this->Repository = $Repository;
+        $this->EntityManager = $EntityManager;
     }
     
     /**
@@ -36,7 +33,7 @@ class Procedure extends Criteria  {
     }
     
     private function BuildProcedure() {
-        return new Procedure(
+        return new Object\Procedure(
                 $this->EntityType, 
                 $this->GetAssignmentExpressions($this->ExecutionFunctions), 
                 $this->BuildCriteria());
@@ -55,7 +52,7 @@ class Procedure extends Criteria  {
             $this->ExecutionFunctions[] = $Function;
         }
         
-        $this->Repository->Execute($this->BuildProcedure());
+        $this->EntityManager->Execute($this->BuildProcedure());
     }
     
     private function GetAssignmentExpressions(array $ExecutionFunctions) {
@@ -72,13 +69,45 @@ class Procedure extends Criteria  {
         $Expressions = $ExpressionTree->GetExpressions();
         
         foreach ($Expressions as $Key => $Expression) {
-            if($Expression instanceof O\AssignmentExpression
-                    && $Expression->GetAssignToExpression() instanceof O\PropertyExpression) {
-                $AssignmentExpressions[] = $Expressions[$Key];
-            }
-            else if($Expression instanceof O\ReturnExpression) {
+            if($Expression instanceof O\ReturnExpression) {
                 break;
             }
+            
+            $AssignmentExpression = $this->ParseAssignmentExpression($Expression);
+            if($AssignmentExpression !== null) {
+                $AssignmentExpressions[] = $AssignmentExpression;
+            }
+        }
+    }
+    
+    protected function ParseAssignmentExpression(O\Expression $Expression) {
+        switch ($Expression) {
+            
+            case $Expression instanceof O\AssignmentExpression 
+                    && $Expression->GetAssignToExpression() instanceof O\PropertyExpression:
+                return $Expression;
+            
+            case $Expression instanceof O\UnaryOperationExpression 
+                    && $Expression->GetOperandExpression() instanceof O\PropertyExpression:
+                
+                switch ($Expression->GetOperator()) {
+                    case O\Operators\Unary::Increment:
+                    case O\Operators\Unary::PreIncrement:
+                        return O\Expression::Assign(
+                                $Expression->GetOperandExpression(), 
+                                O\Operators\Assignment::Addition, 
+                                O\Expression::Value(1));
+                        
+                    case O\Operators\Unary::Decrement:
+                    case O\Operators\Unary::PreDecrement:
+                        return O\Expression::Assign(
+                                $Expression->GetOperandExpression(), 
+                                O\Operators\Assignment::Subtraction,
+                                O\Expression::Value(1));
+                }
+                
+            default:
+                return;
         }
     }
 }

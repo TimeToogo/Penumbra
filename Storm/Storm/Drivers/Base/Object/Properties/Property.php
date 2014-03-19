@@ -4,9 +4,7 @@ namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
 use \Storm\Core\Object\IProperty;
-use \Storm\Core\Object\Expressions\Expression;
-use \Storm\Core\Object\Expressions\PropertyExpression;
-use \Storm\Core\Object\Expressions\TraversalExpression;
+use \Storm\Core\Object\Expressions as O;
 
 abstract class Property implements IProperty {
     private $Identifier;
@@ -36,11 +34,11 @@ abstract class Property implements IProperty {
         return $this->Accessor;
     }
     
-    final public function ResolveTraversalExpression(TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null) {
+    final public function ResolveTraversalExpression(O\TraversalExpression $Expression, O\PropertyExpression $ParentPropertyExpression = null) {
         $OriginalTraversalExpression = $Expression;
-        $ResolvedExpression = $ParentPropertyExpression ?: Expressions\Expression::Property($this);
+        $ResolvedExpression = $ParentPropertyExpression ?: O\Expression::Property($this);
         $ExcessDepth = 0;
-        while (!($Expression instanceof Expressions\EntityExpression)) {
+        while ($Expression instanceof O\TraversalExpression) {
             /**
              * Accessors are allowed to return and type of expression, but if there is still
              * excess traversal, it must return the property expression.
@@ -62,7 +60,7 @@ abstract class Property implements IProperty {
         }
     }
     
-    protected function ResolveExcessTraversal(PropertyExpression $ResolvedExpression, $ExcessDepth, TraversalExpression $ExcessTraversalExpression) {
+    protected function ResolveExcessTraversal(O\PropertyExpression $ResolvedExpression, $ExcessDepth, O\TraversalExpression $ExcessTraversalExpression) {
         if($ExcessDepth === 0) {
             return $ExcessTraversalExpression->UpdateValue($ResolvedExpression);
         }

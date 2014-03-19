@@ -40,7 +40,7 @@ interface IPropertyMapping {
     /**
      * @return Relational\Expression
      */
-    public function MapPropertyExpression(Relational\ResultSetSources $Sources, O\TraversalExpression $TraversalExpression = null);
+    public function MapPropertyExpression(Relational\ResultSetSources $Sources, &$ReturnType);
 }
 
 ?>

@@ -23,7 +23,7 @@ class ResultRow extends ColumnData {
      */
     private $PrimaryKeys = [];
     
-    public function __construct(array &$Columns, array $ColumnData = []) {
+    public function __construct(array $Columns, array $ColumnData = []) {
         foreach($Columns as $Column) {
             $Table = $Column->GetTable();
             $TableName = $Table->GetName();

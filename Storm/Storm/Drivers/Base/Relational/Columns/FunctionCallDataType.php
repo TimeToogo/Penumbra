@@ -25,13 +25,13 @@ class FunctionCallDataType extends DataType {
     public function GetReviveExpression(CoreExpression $Expression) {
         return Expression::FunctionCall(
                 $this->ReviveFunctionName, 
-                Expression::ValueList([$Expression]));
+                [$Expression]);
     }
     
     public function GetPersistExpression(CoreExpression $Expression) {
         return Expression::FunctionCall(
                 $this->PersistFunctionName, 
-                Expression::ValueList([$Expression]));
+                [$Expression]);
     }
 }
 ?>

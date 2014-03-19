@@ -16,11 +16,11 @@ class TimeDataType extends Columns\FunctionCallDataType {
     }
     
     public function GetReviveExpression(CoreExpression $Expression) {
-        return Expression::FunctionCall('TIME_TO_SEC', Expression::ValueList([$Expression]));
+        return Expression::FunctionCall('TIME_TO_SEC', [$Expression]);
     }
     
     public function GetPersistExpression(CoreExpression $Expression) {
-        return Expression::FunctionCall('SEC_TO_TIME', Expression::ValueList([$Expression]));
+        return Expression::FunctionCall('SEC_TO_TIME', [$Expression]);
     }
 }
 

@@ -14,7 +14,7 @@ class Query implements Queries\IQuery {
         $this->Query = $Query;
         $this->TimeSpentQuerying =& $TimeSpentQuerying;
     }
-
+    
     public function Execute() {
         $Bindings = $this->GetBindings();
         
@@ -51,8 +51,8 @@ class Query implements Queries\IQuery {
                case Queries\ParameterType::Integer:
                    $Value = (string)$Value;
                    break;
-               case Queries\ParameterType::Binary:
-                   $Value = "'" . $Value . "'";
+               case Queries\ParameterType::Stream:
+                   $Value = 'Rescource: ' . get_resource_type($Value);
                    break;
                case Queries\ParameterType::Boolean:
                    $Value = $Value ? 'TRUE' : 'FALSE';
@@ -85,6 +85,13 @@ class Query implements Queries\IQuery {
     public function FetchRow() {
         $Start = microtime(true);
         $Result = $this->Query->FetchRow();
+        $this->TimeSpentQuerying += microtime(true) - $Start;
+        return $Result;
+    }
+
+    public function FetchValue() {
+        $Start = microtime(true);
+        $Result = $this->Query->FetchValue();
         $this->TimeSpentQuerying += microtime(true) - $Start;
         return $Result;
     }

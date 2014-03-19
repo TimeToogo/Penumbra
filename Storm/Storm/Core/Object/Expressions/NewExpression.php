@@ -8,16 +8,19 @@ namespace Storm\Core\Object\Expressions;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class NewExpression extends Expression {
-    private $ClassType;
+    private $ClassTypeExpression;
     private $ArgumentExpressions;
     
-    public function __construct($ClassType, array $ArgumentExpressions = []) {
-        $this->ClassType = $ClassType;
+    public function __construct(Expression $ClassTypeExpression, array $ArgumentExpressions = []) {
+        $this->ClassTypeExpression = $ClassTypeExpression;
         $this->ArgumentExpressions = $ArgumentExpressions;
     }
     
-    public function GetClassType() {
-        return $this->ClassType;
+    /**
+     * @return Expression
+     */
+    public function GetClassTypeExpression() {
+        return $this->ClassTypeExpression;
     }
     
     /**
@@ -34,20 +37,20 @@ class NewExpression extends Expression {
     public function Simplify() {
         //TODO: white list of deterministic classes to instanstiate
         return $this->Update(
-                $this->ClassType,
+                $this->ClassTypeExpression->Simplify(),
                 self::SimplifyAll($this->ArgumentExpressions));
     }
     
     /**
      * @return self
      */
-    public function Update($ClassType, array $ArgumentExpressions = []) {
-        if($this->ClassType === $ClassType
+    public function Update(Expression $ClassTypeExpression, array $ArgumentExpressions = []) {
+        if($this->ClassTypeExpression === $ClassTypeExpression
                 && $this->ArgumentExpressions === $ArgumentExpressions) {
             return $this;
         }
         
-        return new self($ClassType, $ArgumentExpressions);
+        return new self($ClassTypeExpression, $ArgumentExpressions);
     }
 }
 

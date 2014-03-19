@@ -35,7 +35,7 @@ class FunctionToExpressionTreeConverter implements IFunctionToExpressionTreeConv
         //ReflectionFunction::getStaticVariables() returns the used variables for closures
         $this->Resolve($ExpressionTree, $EntityMap, $Reflection->getStaticVariables(), $ParameterNameExpressionMap);
         
-        if(!$ExpressionTree->IsResolved()) {
+        if($ExpressionTree->HasUnresolvedVariables()) {
             throw PinqException::ContainsUnresolvableVariables($Reflection, $ExpressionTree->GetUnresolvedVariables());
         }
         

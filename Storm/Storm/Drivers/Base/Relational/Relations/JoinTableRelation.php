@@ -52,9 +52,17 @@ class JoinTableRelation extends ToManyRelationBase {
         return $this->ParentForeignKey->GetReferencedColumns();
     }
     
-    protected function NewRelationSelect() {
-        $Select = new Relational\ResultSetSelect(new Relational\ResultSetSources($this->JoinTable), new Relational\Criteria($this->JoinTable));
-        $Select->GetCriteria()->AddJoins(parent::GetRelationJoins($this->GetTable()));
+    protected function NewRelationSelect($AmountOfParentRows) {
+        $Sources = new Relational\ResultSetSources($this->JoinTable);
+        $Sources->AddJoins(parent::GetRelationJoins($this->GetTable()));
+        $Select = new Relational\ResultSetSelect(
+                new Relational\ResultSetSpecification(
+                        $Sources, 
+                        new Relational\Criteria($this->JoinTable)));
+        
+        if($AmountOfParentRows > 1) {
+            $Select->AddColumns($this->ParentForeignKey->GetParentColumns());
+        }
         
         return $Select;
     }

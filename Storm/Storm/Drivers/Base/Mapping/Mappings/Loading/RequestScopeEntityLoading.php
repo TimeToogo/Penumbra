@@ -26,13 +26,11 @@ class RequestScopeEntityLoading extends EntityLoading {
             static $ParentKeyRelatedRevivalDataMap = null;
             
             if($ParentKeyRelatedRevivalDataMap === null) {
-                $RelatedRows = $this->LoadRelatedRows($ToOneRelation, $Database, $ParentRowArray);
-                
-                $ParentKeyRelatedRevivalDataMap = $this->MapParentRowKeysToRelatedRevivalData(
-                                $EntityRelationalMap, 
-                                $ToOneRelation, 
-                                $ParentRowArray, 
-                                $RelatedRows);
+                $ParentKeyRelatedRevivalDataMap = $this->LoadRelatedRevivalDataMap(
+                        $EntityRelationalMap, 
+                        $Database, 
+                        $ToOneRelation, 
+                        $ParentRowArray);
             }
             
             return $ParentKeyRelatedRevivalDataMap[$ParentRowKey];

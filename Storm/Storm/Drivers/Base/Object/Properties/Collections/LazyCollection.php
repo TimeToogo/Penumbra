@@ -42,7 +42,8 @@ class LazyCollection extends Collection {
         $this->SetIsAltered(false);
         $this->OriginalEntities = $this->LoadEntities($RevivalData);
     }
-    private function LoadEntities(array $RevivalData) {
+    
+    private function LoadEntities(array $RevivalDataArray) {
         if($this->ProxyGenerator !== null) {
             $LoaderFunctions = array_map(
                     function (Object\RevivalData $RevivalData) {
@@ -50,7 +51,7 @@ class LazyCollection extends Collection {
                             return $RevivalData;
                         };
                     }, 
-                    $RevivalData);
+                    $RevivalDataArray);
             
             return $this->ProxyGenerator->GenerateProxies(
                     $this->EntityMap,
@@ -58,7 +59,7 @@ class LazyCollection extends Collection {
                     $LoaderFunctions);
         }
         else {
-            return $this->EntityMap->ReviveEntities($RevivalData);
+            return $this->EntityMap->ReviveEntities($RevivalDataArray);
         }
     }
     

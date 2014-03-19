@@ -59,7 +59,11 @@ class GlobalScopeLazyEntityLoading extends EntityLoading {
         if(count($this->ParentRowArrays) > 0 && !isset($this->RelatedRowArrays[$LoadIndex])) {
             $AllParentRows = call_user_func_array('array_merge', $this->ParentRowArrays);
             
-            $this->RelatedRowArrays[$this->CurrentLoadIndex] =& $this->LoadRelatedRows($ToOneRelation, $Database, $AllParentRows);
+            $this->RelatedRowArrays[$this->CurrentLoadIndex] =& $this->LoadRelatedRows(
+                    $EntityRelationalMap,
+                    $ToOneRelation,
+                    $Database,
+                    $AllParentRows);
             $this->ParentRowArrays = [];
             $this->CurrentLoadIndex++;
         }

@@ -3,7 +3,7 @@
 namespace Storm\Pinq;
 
 use \Storm\Core\Object\IEntityMap;
-use \Storm\Drivers\Base\Object\Criteria;
+use \Storm\Drivers\Base\Object;
 
 class Criteria implements IPredicated, IOrdered, IRanged  {
     /**
@@ -91,7 +91,7 @@ class Criteria implements IPredicated, IOrdered, IRanged  {
     }
     
     final protected function BuildCriteria() {
-        return new Criteria(
+        return new Object\Criteria(
                 $this->EntityType, 
                 $this->GetPredicateExpressions($this->WhereFunctions), 
                 $this->GetOrderByAscendingMap($this->OrderByFunctionAscendingTuples), 
@@ -181,13 +181,13 @@ class Criteria implements IPredicated, IOrdered, IRanged  {
             throw PinqException::InvalidFunctionSignature($Reflection, [$this->EntityType, IAggregate::IAggregateType]);
         }
 
-        $TypeHintNameMap = $this->FunctionParameterParser->GetFunctionParameterNames($Reflection, $TypeHints);
+        $TypeHintParameterMap = $this->FunctionParameterParser->GetFunctionParameterNames($Reflection, $TypeHints);
 
         $ParameterExpressions = [];
-        if (isset($TypeHintNameMap[$this->EntityType])) {
+        if (isset($TypeHintParameterMap[$this->EntityType])) {
             $ParameterExpressions[$TypeHintParameterMap[$this->EntityType]] = new Expressions\EntityVariableExpression();
         }         
-        else if (isset($TypeHintNameMap[IAggregate::IAggregateType])) {
+        if (isset($TypeHintParameterMap[IAggregate::IAggregateType])) {
             $ParameterExpressions[$TypeHintParameterMap[IAggregate::IAggregateType]] = new Expressions\AggregateVariableExpression();
         }
 

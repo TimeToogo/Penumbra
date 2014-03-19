@@ -83,8 +83,8 @@ final class ExpressionConverter extends Converters\ExpressionConverter {
             case O\Cast::Boolean:
                 return Expression::Conditional(
                         $CastValueExpression, 
-                        Expression::Constant(1), 
-                        Expression::Constant(0));
+                        Expression::BoundValue(1), 
+                        Expression::BoundValue(0));
             
             default:
                 return Expression::Cast($CastType, $CastValueExpression);

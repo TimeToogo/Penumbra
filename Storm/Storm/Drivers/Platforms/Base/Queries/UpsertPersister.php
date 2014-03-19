@@ -3,7 +3,6 @@
 namespace Storm\Drivers\Platforms\Base\Queries;
 
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Relational\Table;
 use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
@@ -14,7 +13,7 @@ abstract class UpsertPersister extends Queries\RowPersister {
     
     final protected function PersistRowBatch(
             IConnection $Connection, 
-            Table $Table, 
+            Relational\ITable $Table, 
             array $RowsWithoutPrimaryKey, 
             array $RowsWithPrimaryKeys, 
             ReturningDataKeyGenerator $ReturningDataKeyGenerator = null,
@@ -56,7 +55,7 @@ abstract class UpsertPersister extends Queries\RowPersister {
     
     protected abstract function InsertRowsIndividually(
             IConnection $Connection, 
-            Table $Table, 
+            Relational\ITable $Table, 
             array $Rows,
             callable $PostIndividualInsertCallback);
     
@@ -65,7 +64,7 @@ abstract class UpsertPersister extends Queries\RowPersister {
      */
     protected abstract function UpsertRows(
             IConnection $Connection, 
-            Table $Table, 
+            Relational\ITable $Table, 
             array $Rows,
             $ShouldReturnKeyData);
 }

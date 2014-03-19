@@ -40,26 +40,6 @@ interface IProperty {
      * @return Expression
      */
     public function ResolveTraversalExpression(O\TraversalExpression $Expression, O\PropertyExpression $ParentPropertyExpression = null);
-    
-    /**
-     * @return O\Expression[]
-     */
-    public function ResolveAssignmentExpression(O\PropertyExpression $PropertyExpression, $Operator, O\Expression $AssignmentValueExpression);
-    
-    /**
-     * @return O\Expression
-     */
-    public function ResolveBinaryOperationExpression(O\PropertyExpression $PropertyExpression, $Operator, O\Expression $OtherOperandExpression);
-    
-    /**
-     * @return O\Expression
-     */
-    public function ResolveUnaryOperationExpression($Operator, O\PropertyExpression $PropertyExpression);
-    
-    /**
-     * @return O\Expression
-     */
-    public function ResolveCastExpression($CastType, O\PropertyExpression $PropertyExpression);
 }
 
 ?>

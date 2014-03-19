@@ -24,7 +24,7 @@ abstract class RowPersister implements IRowPersister {
     
     final public function PersistRows(
             IConnection $Connection, 
-            Table $Table, 
+            Relational\ITable $Table, 
             array $RowsToPersist) {
         
         $KeyedRows = [];
@@ -107,7 +107,7 @@ abstract class RowPersister implements IRowPersister {
     
     protected abstract function PersistRowBatch(
             IConnection $Connection, 
-            Table $Table, 
+            Relational\ITable $Table, 
             array $RowsWithoutPrimaryKey, 
             array $RowsWithPrimaryKeys,
             PrimaryKeys\ReturningDataKeyGenerator $ReturningDataKeyGenerator = null,
@@ -115,7 +115,7 @@ abstract class RowPersister implements IRowPersister {
     
     final public function DeleteRows(
             IConnection $Connection, 
-            Table $Table, array 
+            Relational\ITable $Table, array 
             $PrimaryKeys) {
         $Batches = [];
         if($this->DeleteBatchSize !== null) {
@@ -132,7 +132,7 @@ abstract class RowPersister implements IRowPersister {
     
     protected abstract function DeleteRowBatch(
             IConnection $Connection, 
-            Table $Table, 
+            Relational\ITable $Table, 
             array $PrimaryKeys);
 }
 

@@ -10,24 +10,18 @@ use \Storm\Drivers\Base\Relational;
 class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
     private $Domain;
     private $Database;
-    private $MappingConfiguration;
-    private $EntityMaps;
+    private $EntityRelationalMaps;
     
     public function __construct(
             Object\Domain $Domain, 
             Relational\Database $Database, 
-            Mapping\IMappingConfiguration $MappingConfiguration,
-            array $EntityMaps) {
+            Mapping\IPlatform $Platform,
+            array $EntityReltaionalMaps) {
         $this->Domain = $Domain;
         $this->Database = $Database;
-        $this->MappingConfiguration = $MappingConfiguration;
-        $this->EntityMaps = $EntityMaps;
+        $this->EntityRelationalMaps = $EntityReltaionalMaps;
         
-        parent::__construct();
-    }
-    
-    final protected function MappingConfiguration() {
-        return $this->MappingConfiguration;
+        parent::__construct($Platform);
     }
     
     final protected function Domain() {
@@ -39,7 +33,7 @@ class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
     }
 
     final protected function RegisterEntityRelationalMaps(Registrar $Regisrar) {
-        $Regisrar->RegisterAll($this->EntityMaps);
+        $Regisrar->RegisterAll($this->EntityRelationalMaps);
     }
 
 }

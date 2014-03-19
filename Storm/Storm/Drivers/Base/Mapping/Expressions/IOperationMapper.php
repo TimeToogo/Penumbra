@@ -2,23 +2,27 @@
 
 namespace Storm\Drivers\Base\Mapping\Expressions;
 
-use \Storm\Core\Relational\Expression;
+use \Storm\Drivers\Base\Relational\Expressions as R;
 
 interface IOperationMapper {
     
-    public function MapAssignmentToBinary(
-            Expression $AssignToExpression,
-            $Operator,
-            Expression $AssignmentValueExpression);
-    
+    /**
+     * @return R\Expression
+     */
     public function MapBinary(
-            Expression $MappedLeftOperandExpression,
+            R\Expression $MappedLeftOperandExpression,
             $Operator,
-            Expression $MappedRightOperandExpression);
+            R\Expression $MappedRightOperandExpression);
         
-    public function MapUnary($Operator, Expression $MappedOperandExpression);
-        
-    public function MapCast($CastType, Expression $MappedCastValueExpression);
+    /**
+     * @return R\Expression
+     */
+    public function MapUnary($Operator, R\Expression $MappedOperandExpression);
+    
+    /**
+     * @return R\Expression
+     */
+    public function MapCast($CastType, R\Expression $MappedCastValueExpression);
 }
 
 ?>

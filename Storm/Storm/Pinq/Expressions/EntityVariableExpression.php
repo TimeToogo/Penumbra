@@ -17,7 +17,7 @@ class EntityVariableExpression extends Expressions\Expression {
     }
 
     public function Traverse(Expressions\ExpressionWalker $Walker) {
-        
+        return $this;
     }
 
 }

@@ -16,23 +16,23 @@ class BinaryGuidDataType extends Columns\DataType {
     }
     
     public function GetReviveExpression(CoreExpression $Expression) {
-        $HexedGuid = Expression::FunctionCall('HEX', Expression::ValueList([$Expression]));
+        $HexedGuid = Expression::FunctionCall('HEX', [$Expression]);
         $Substring = function ($Expression, $Index, $Length = null) {
             //Mysql substring index is 1 based
-            $Arguments = [$Expression, Expression::Constant($Index + 1)];
+            $Arguments = [$Expression, Expression::BoundValue($Index + 1)];
             if($Length !== null) {
-                $Arguments[] = Expression::Constant($Length);
+                $Arguments[] = Expression::BoundValue($Length);
             }
-            return Expression::FunctionCall('SUBSTR', Expression::ValueList($Arguments));
+            return Expression::FunctionCall('SUBSTR', $Arguments);
         };
         
-        return Expression::FunctionCall('CONCAT_WS', Expression::ValueList([
+        return Expression::FunctionCall('CONCAT_WS', [
                 '-', 
                 $Substring($HexedGuid, 12, 8),
                 $Substring($HexedGuid, 4, 4),
                 $Substring($HexedGuid, 0, 4),
                 $Substring($HexedGuid, 8, 4),
-                $Substring($HexedGuid, 20)]));
+                $Substring($HexedGuid, 20)]);
     }
     
     public function ToPersistedValue($FormattedGuid) {
@@ -45,7 +45,7 @@ class BinaryGuidDataType extends Columns\DataType {
     }
     
     public function GetPersistExpression(CoreExpression $Expression) {
-        return Expression::FunctionCall('UNHEX', Expression::ValueList([$Expression]));
+        return Expression::FunctionCall('UNHEX', [$Expression]);
     }
 }
 

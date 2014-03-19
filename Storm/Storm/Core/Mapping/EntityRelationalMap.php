@@ -273,11 +273,12 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         return $this->PropertyMappings;
     }
     
-    final public function HasPropertyMapping($PropertyIdentifier) {
-        return isset($this->PropertyMappings[$PropertyIdentifier]);
+    final public function HasPropertyMapping(Object\IProperty $Property) {
+        return isset($this->PropertyMappings[$Property->GetIdentifier()]);
     }
     
-    final public function GetPropertyMapping($PropertyIdentifier) {
+    final public function GetPropertyMapping(Object\IProperty $Property) {
+        $PropertyIdentifier = $Property->GetIdentifier();
         return isset($this->PropertyMappings[$PropertyIdentifier]) ?
                 $this->PropertyMappings[$PropertyIdentifier] : null;
     }
@@ -407,7 +408,10 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
      * {@inheritDoc}
      */
     final public function GetEntitySelect() {
-        return new Relational\ResultSetSelect($this->GetSelectSource(), $this->GetSelectCriteria());
+        return new Relational\ResultSetSelect(
+                new Relational\ResultSetSpecification(
+                        $this->GetSelectSource(), 
+                        $this->GetSelectCriteria()));
     }
     
     /**
@@ -421,8 +425,8 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * {@inheritDoc}
      */
-    final public function MapPropetiesToSelect(Relational\ResultSetSelect $Select, array $AlreadyKnownProperties = []) {
-        $Properties = $this->MappedProperties;
+    final public function MapPropertiesToSelect(Relational\ResultSetSelect $Select, array $AlreadyKnownProperties = [], array $Properties = null) {
+        $Properties = $Properties ?: $this->MappedProperties;
         
         if(count($AlreadyKnownProperties) > 0) {
             foreach($AlreadyKnownProperties as $AlreadyKnownProperty) {

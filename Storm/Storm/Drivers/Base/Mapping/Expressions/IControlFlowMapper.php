@@ -4,14 +4,17 @@ namespace Storm\Drivers\Base\Mapping\Expressions;
 
 use \Storm\Core\Relational;
 use \Storm\Core\Object\Expressions as O;
-use \Storm\Core\Relational\Expression;
+use \Storm\Drivers\Base\Relational\Expressions as R;
 
 interface IControlFlowMapper {
     
+    /**
+     * @return R\Expression
+     */
     public function MapTernary(
-            Expression $MappedConditionExpression,
-            Expression $MappedIfTrueExpression,
-            Expression $MappedIfFalseExpression);
+            R\Expression $MappedConditionExpression,
+            R\Expression $MappedIfTrueExpression,
+            R\Expression $MappedIfFalseExpression);
 }
 
 ?>

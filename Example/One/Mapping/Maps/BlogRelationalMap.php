@@ -28,7 +28,7 @@ final class BlogRelationalMap extends Mapping\EntityRelationalMap {
     }
     
     protected function SelectSources(Relational\ResultSetSources $SelectSources, Relational\Database $Database) {
-        $SelectSources->AddJoin(new Relational\Join(Relational\JoinType::Left, $Database->Authors));
+        //$SelectSources->AddJoin(new Relational\Join(Relational\JoinType::Left, $Database->Authors));
     }
 }
 

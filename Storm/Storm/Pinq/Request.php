@@ -4,7 +4,7 @@ namespace Storm\Pinq;
 
 use \Storm\Core\Object;
 use \Storm\Core\Object\IEntityMap;
-use \Storm\Api\Base\Repository;
+use \Storm\Api\IEntityManager;
 use \Storm\Drivers\Base\Object\EntityRequest;
 use \Storm\Drivers\Base\Object\DataRequest;
 use \Storm\Core\Object\Expressions as O;
@@ -12,9 +12,9 @@ use \Storm\Core\Object\Expressions\Aggregates as A;
 
 class Request extends Criteria implements IQueryable  {
     /**
-     * @var Repository
+     * @var IEntityManager
      */
-    private $Repository;
+    protected $EntityManager;
     
     private $GroupByFunctions = [];
     private $HavingFunctions = [];
@@ -25,12 +25,11 @@ class Request extends Criteria implements IQueryable  {
     private $SubEntityRequest;
     
     public function __construct(
-            Repository $Repository, 
-            IEntityMap $EntityMap, 
+            IEntityManager $EntityManager, 
             IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
-        parent::__construct($EntityMap, $FunctionToExpressionTreeConverter);
+        parent::__construct($EntityManager->GetEntityMap(), $FunctionToExpressionTreeConverter);
         
-        $this->Repository = $Repository;
+        $this->EntityManager = $EntityManager;
     }
     
     /**
@@ -40,9 +39,26 @@ class Request extends Criteria implements IQueryable  {
         $this->GroupByFunctions = [];
         $this->HavingFunctions = [];
         $this->SubEntityRequest = null;
-        return parent::ClearQuery();;
+        return parent::ClearQuery();
     }
-
+    
+    public function From(IQueryable $Query) {
+        if(!($Query instanceof self)) {
+            throw new PinqException(
+                    'Cannot set from queryable: supplied queryable of type %s, expecting %s',
+                    get_class($Query),
+                    __CLASS__);
+        }
+        if($Query->EntityType !== $this->EntityType) {
+            throw new PinqException(
+                    'Cannot set from queryable: supplied request of entity type %s, expecting %s',
+                    $Query->EntityTyp,
+                    $this->EntityType);
+        }
+        
+        $this->SubEntityRequest = $Query;
+    }
+    
     /**
      * @return static
      */
@@ -100,8 +116,11 @@ class Request extends Criteria implements IQueryable  {
     }
     
     public function AsArray() {
-        return $this->Repository->LoadEntities(
+        $Entities = $this->EntityManager->LoadEntities(
                 $this->BuildEntityRequest($this->EntityMap->GetProperties()));
+        $this->ClearQuery();
+        
+        return $Entities;
     }
 
     public function getIterator() {
@@ -115,7 +134,7 @@ class Request extends Criteria implements IQueryable  {
     }
     
     public function Exists() {
-        return $this->Repository->LoadExists($this->BuildDataRequest(['E' => O\Expression::Value(1)]));
+        return $this->EntityManager->LoadExists($this->BuildDataRequest(['E' => O\Expression::Value(1)]));
     }
     
     public function Select(callable $Function) {
@@ -126,7 +145,7 @@ class Request extends Criteria implements IQueryable  {
         else {
             $AliasExpressionMap = $this->ParseDataExpression($ReturnExpression);
             
-            return $this->Repository->LoadData($this->BuildDataRequest($AliasExpressionMap));
+            return $this->EntityManager->LoadData($this->BuildDataRequest($AliasExpressionMap));
         }
     }
 
@@ -164,7 +183,7 @@ class Request extends Criteria implements IQueryable  {
     }
     
     private function LoadArrayOfValues(O\Expression $ValueExpression) {
-        $ValueSet = $this->Repository->LoadData($this->BuildDataRequest(['E' => $ValueExpression]));
+        $ValueSet = $this->EntityManager->LoadData($this->BuildDataRequest(['E' => $ValueExpression]));
         
         $Values = [];
         foreach($ValueSet as $ValueRow) {

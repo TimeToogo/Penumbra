@@ -2,28 +2,28 @@
 
 namespace Storm\Drivers\Platforms\Mysql;
 
-use \Storm\Drivers\Platforms;
 use \Storm\Drivers\Base\Relational;
-use \Storm\Drivers\Platforms\Base;
+use \Storm\Drivers\Platforms\Standard;
 
-final class Platform extends Base\Platform {
+final class Platform extends Standard\Platform {
     public function __construct($DevelopmentMode = false) {
+        
         parent::__construct(
-                $DevelopmentMode, 
-                new Converters\ExpressionConverter(new Converters\FunctionConverter(), new Converters\ObjectConverter()),
-                new Columns\ColumnSet(),
-                new PrimaryKeys\KeyGeneratorSet(),
-                new Queries\ExpressionCompiler(new Queries\ExpressionOptimizer()),
-                new Queries\CriteriaCompiler(),
-                new Base\Queries\StandardQueryCompiler(),
-                new Queries\IdentifierEscaper(),
-                new Syncing\DatabaseBuilder(), 
-                new Syncing\DatabaseModifier(), 
-                new Queries\QueryExecutor());
+                new RelationalPlatform($DevelopmentMode),
+                new Mapping\ValueMapper(),
+                new Mapping\ArrayMapper(),
+                new Mapping\OperationMapper(),
+                new Mapping\FunctionMapper(),
+                new Mapping\AggregateMapper(),
+                new Standard\Mapping\ControlFlowMapper());
     }
     
-    protected function IdentifiersAreCaseSensitive(Relational\Queries\IConnection $Connection) {
-        return ((int)$Connection->FetchValue('SELECT @@lower_case_table_names')) === 0;
+    protected function TypeMappers() {
+        return [
+            new Mapping\Types\DateTimeMapper(),
+            new Mapping\Types\DateTimeZoneMapper(),
+            new Mapping\Types\DateIntervalMapper(),
+        ];
     }
 }
 

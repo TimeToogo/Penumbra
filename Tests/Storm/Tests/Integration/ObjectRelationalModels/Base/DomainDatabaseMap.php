@@ -3,20 +3,19 @@
 namespace Storm\Tests\Integration\ObjectRelationalModels\Base;
 
 use \Storm\Drivers\Constant\Mapping;
-use \Storm\Drivers\Base\Relational\IPlatform;
+use \Storm\Drivers\Base\Mapping\IPlatform;
 
 abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
-    private $Platform;
+    
     public function __construct(IPlatform $Platform) {
-        $this->Platform = $Platform;
-        parent::__construct();
+        parent::__construct($Platform);
     }
     
     final protected function Database() {
-        return $this->LoadDatabase($this->Platform);
+        return $this->LoadDatabase();
     }
         
-    protected abstract function LoadDatabase(IPlatform $Platform);
+    protected abstract function LoadDatabase();
 }
 
 ?>

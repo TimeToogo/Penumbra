@@ -93,10 +93,10 @@ abstract class ORMTestCase extends StormTestCase {
     }
     
     /**
-     * @return Api\Base\Repository
+     * @return Api\Base\EntityManager
      */
     final protected function GetRepository($EntityType) {
-        return $this->GetStorm()->GetRepository($EntityType);
+        return $this->GetStorm()->GetEntityManger($EntityType);
     }
 }
 

@@ -88,12 +88,12 @@ interface IEntityRelationalMap {
     /**
      * @return boolean
      */
-    public function HasPropertyMapping($PropertyIdentifier);
+    public function HasPropertyMapping(Object\IProperty $Property);
     
     /**
      * @return IPropertyMapping|null
      */
-    public function GetPropertyMapping($PropertyIdentifier);
+    public function GetPropertyMapping(Object\IProperty $Property);
     
     /**
      * @return IDataPropertyColumnMapping[]
@@ -187,7 +187,7 @@ interface IEntityRelationalMap {
      * @param Object\IProperty[] $AlreadyKnownProperties The array of properties to not map
      * @return void
      */
-    public function MapPropetiesToSelect(Relational\ResultSetSelect $Select, array $AlreadyKnownProperties = []);
+    public function MapPropertiesToSelect(Relational\ResultSetSelect $Select, array $AlreadyKnownProperties = [], array $Properties = null);
     
     /**
      * Maps an identity to the equivalent primary key.

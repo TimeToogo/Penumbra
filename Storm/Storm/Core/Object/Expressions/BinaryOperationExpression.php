@@ -45,7 +45,7 @@ class BinaryOperationExpression extends Expression {
         $Right = $this->RightOperandExpression->Simplify();
         
         if($Left instanceof ValueExpression && $Right instanceof ValueExpression) {
-            return Expression::Value(self::BinaryOperation($Left->GetValue(), $this->Operator, $Right->GetValue()));
+            return Expression::Value(self::DoBinaryOperation($Left->GetValue(), $this->Operator, $Right->GetValue()));
         }
         else if($Left instanceof ValueExpression || $Right instanceof ValueExpression) {
             $ValueExpression = $Left instanceof ValueExpression ?
@@ -67,7 +67,7 @@ class BinaryOperationExpression extends Expression {
     }
     
     private static $BinaryOperations;
-    private static function BinaryOperation($Left, $Operator, $Right) {
+    private static function DoBinaryOperation($Left, $Operator, $Right) {
         if(self::$BinaryOperations === null) {
             self::$BinaryOperations = [
                 Operators\Binary::BitwiseAnd =>             function ($L, $R) { return $L & $R; },
@@ -87,7 +87,7 @@ class BinaryOperationExpression extends Expression {
                 Operators\Binary::Equality =>               function ($L, $R) { return $L == $R; },
                 Operators\Binary::Identity =>               function ($L, $R) { return $L === $R; },
                 Operators\Binary::Inequality =>             function ($L, $R) { return $L != $R; },
-                Operators\Binary::NotIdentitical =>         function ($L, $R) { return $L !== $R; },
+                Operators\Binary::NotIdentical =>         function ($L, $R) { return $L !== $R; },
                 Operators\Binary::LessThan =>               function ($L, $R) { return $L < $R; },
                 Operators\Binary::LessThanOrEqualTo =>      function ($L, $R) { return $L <= $R; },
                 Operators\Binary::GreaterThan =>            function ($L, $R) { return $L > $R; },

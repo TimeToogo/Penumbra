@@ -14,14 +14,11 @@ class EagerCollectionLoading extends CollectionLoading {
             Relational\IToManyRelation $ToManyRelation, 
             array $ParentRowArray) {
         
-        $RelatedRowArray = $this->LoadRelatedRows($Database, $ParentRowArray);
-        
-        //Groups by parent row key
-        $RelatedRevivalDataArrays = $this->MapParentRowKeysToRelatedRevivalDataArray(
+        $RelatedRevivalDataArrays = $this->LoadRelatedRevivalDataArrayMap(
                 $EntityRelationalMap, 
+                $Database, 
                 $ToManyRelation, 
-                $ParentRowArray, 
-                $RelatedRowArray);
+                $ParentRowArray);
         
         return $RelatedRevivalDataArrays;
     }

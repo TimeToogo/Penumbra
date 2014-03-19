@@ -44,7 +44,7 @@ class OperatorMapper {
         ObjectOperators\Binary::Equality => RelationalOperators\Binary::NullSafeEquality,
         ObjectOperators\Binary::Identity => RelationalOperators\Binary::NullSafeEquality,
         ObjectOperators\Binary::Inequality => RelationalOperators\Binary::NullSafeInequality,
-        ObjectOperators\Binary::NotIdentitical => RelationalOperators\Binary::NullSafeInequality,
+        ObjectOperators\Binary::NotIdentical => RelationalOperators\Binary::NullSafeInequality,
         ObjectOperators\Binary::LessThan => RelationalOperators\Binary::LessThan,
         ObjectOperators\Binary::LessThanOrEqualTo => RelationalOperators\Binary::LessThanOrEqualTo,
         ObjectOperators\Binary::GreaterThan => RelationalOperators\Binary::GreaterThan,

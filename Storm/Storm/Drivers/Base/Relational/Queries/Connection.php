@@ -2,8 +2,6 @@
 
 namespace Storm\Drivers\Base\Relational\Queries;
 
-use \Storm\Core\Relational;
-
 abstract class Connection implements IConnection {
     /**
      * @var IIdentifierEscaper 
@@ -14,7 +12,7 @@ abstract class Connection implements IConnection {
      */
     protected $ExpressionCompiler;
     /**
-     * @var ISelectCompiler 
+     * @var IQueryCompiler 
      */
     protected $QueryCompiler;
     
@@ -28,10 +26,6 @@ abstract class Connection implements IConnection {
     
     final public function SetQueryCompiler(IQueryCompiler $QueryCompiler) {
         $this->QueryCompiler = $QueryCompiler;
-    }
-    
-    final public function SetProcedureCompiler(IUpdateCompiler $ProcedureCompiler) {
-        $this->ProcedureCompiler = $ProcedureCompiler;
     }
 }
 

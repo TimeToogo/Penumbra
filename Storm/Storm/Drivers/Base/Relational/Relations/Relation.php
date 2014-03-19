@@ -50,7 +50,7 @@ abstract class Relation implements Relational\IRelation {
     }
     
     final public function RelationResultSetSelect(array $ParentRows = null) {
-        $Request = $this->NewRelationSelect();
+        $Request = $this->NewRelationSelect($ParentRows === null ? 0 : count($ParentRows));
         $this->AddParentPredicate($Request->GetCriteria(), $ParentRows);
         
         return $Request;
@@ -58,8 +58,11 @@ abstract class Relation implements Relational\IRelation {
     /**
      * @return Relational\Select
      */
-    protected function NewRelationSelect() {
-        return new Relational\ResultSetSelect(new Relational\ResultSetSources($this->Table), new Relational\Criteria());
+    protected function NewRelationSelect($AmountOfParentRows) {
+        return new Relational\ResultSetSelect(
+                new Relational\ResultSetSpecification(
+                        new Relational\ResultSetSources($this->Table), 
+                        new Relational\Criteria()));
     }
 }
 

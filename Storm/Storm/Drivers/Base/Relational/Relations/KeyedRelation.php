@@ -35,10 +35,6 @@ abstract class KeyedRelation extends Relation {
         return $this->IsInversed;
     }
     
-    public function GetParentColumns() {
-        return $this->GetParentColumns();
-    }
-    
     protected function GetRelationJoins(Relational\ITable $Table) {
         return [new Relational\Join($this->JoinType(), $Table, $this->ForeignKey->GetConstraintPredicate())];
     }
@@ -67,7 +63,7 @@ abstract class KeyedRelation extends Relation {
     /**
      * @return Relational\IColumn[]
      */
-    protected function GetParentColumns() {
+    public function GetParentColumns() {
         return $this->IsInversed ? 
                 $this->ForeignKey->GetReferencedColumns() : $this->ForeignKey->GetParentColumns();
     }
@@ -75,7 +71,7 @@ abstract class KeyedRelation extends Relation {
     /**
      * @return Relational\IColumn[]
      */
-    protected function GetReferencedColumns() {
+    public function GetReferencedColumns() {
         return $this->IsInversed ? 
                 $this->ForeignKey->GetParentColumns() : $this->ForeignKey->GetReferencedColumns();
     }

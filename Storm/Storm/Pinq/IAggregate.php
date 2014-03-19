@@ -72,14 +72,6 @@ interface IAggregate {
     public function Any(callable $Function);
     
     /**
-     * Returns a boolean of if the aggregate contains a value
-     * 
-     * @param callable $Function The function which will return the values
-     * @return boolean|null
-     */
-    public function Contains($Value);
-    
-    /**
      * Returns a string of all the values concatented with the separator
      * 
      * @param string $Delimiter The string to delimit the values by

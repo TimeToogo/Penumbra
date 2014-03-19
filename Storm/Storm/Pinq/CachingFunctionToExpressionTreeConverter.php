@@ -3,6 +3,7 @@
 namespace Storm\Pinq;
 
 use \Storm\Core\Object;
+use \Storm\Utilities\Cache\ICache;
 
 class CachingFunctionToExpressionTreeConverter extends FunctionToExpressionTreeConverter {
     private $Cache;
@@ -30,22 +31,22 @@ class CachingFunctionToExpressionTreeConverter extends FunctionToExpressionTreeC
             $ExpressionTree = new Functional\ExpressionTree($this->Parser->Parse($Reflection)->GetExpressions());
             
             /*
-             * Resolve all that can be currently resolved and save the expression tree 
+             * Resolve all that can be currently resolved and save the expression tree (entity/aggregate expressions)
              * with all the unresolvable variables so it can be resolved with different values later
              */
             $this->Resolve($ExpressionTree, $EntityMap, [], $ParameterNameExpressionMap);
             $this->Cache->Save($FunctionHash, $ExpressionTree);
         }
         
-        if(!$ExpressionTree->IsResolved()) {
+        if($ExpressionTree->HasUnresolvedVariables()) {
             /*
              * Simplify and resolve any remaining expressions that could not be resolved due 
              * to unresolved variables
              */
-            $this->Resolve($ExpressionTree, $EntityMap, $Reflection->getStaticVariables());
+            $this->Resolve($ExpressionTree, $EntityMap, $Reflection->getStaticVariables(), []);
         }
         
-        if(!$ExpressionTree->IsResolved()) {
+        if($ExpressionTree->HasUnresolvedVariables()) {
             throw PinqException::ContainsUnresolvableVariables($Reflection, $ExpressionTree->GetUnresolvedVariables());
         }
         

@@ -19,7 +19,7 @@ class RequestScopeCollectionLoading extends CollectionLoading {
             static $ParentRowRelatedRevivalDataArrayMap = null;
             
             if($ParentRowRelatedRevivalDataArrayMap === null) {
-                $ParentRowRelatedRevivalDataArrayMap = $this->Load(
+                $ParentRowRelatedRevivalDataArrayMap = $this->LoadRelatedRevivalDataArrayMap(
                         $EntityRelationalMap, 
                         $Database, 
                         $ToManyRelation, 

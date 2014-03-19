@@ -3,7 +3,7 @@
 namespace Storm\Drivers\Platforms\SQLite\PrimaryKeys;
 
 use \Storm\Drivers\Base\Relational\PrimaryKeys;
-use \Storm\Drivers\Platforms\Base\PrimaryKeys\IndividualAutoIncrementGenerator;
+use \Storm\Drivers\Platforms\Standard\PrimaryKeys\IndividualAutoIncrementGenerator;
 
 class KeyGeneratorSet implements PrimaryKeys\IKeyGeneratorSet {
     

@@ -12,7 +12,7 @@ use \Storm\Drivers\Base\Relational\Queries\IConnection;
  * are guaranteed to be sequential.
  */
 class MultiAutoIncrementGenerator extends PrimaryKeys\PostMultiInsertKeyGenerator {
-    use \Storm\Drivers\Platforms\Base\PrimaryKeys\AutoIncrementColumnGenerator;
+    use \Storm\Drivers\Platforms\Standard\PrimaryKeys\AutoIncrementColumnGenerator;
     
     
     public function FillPrimaryKeys(IConnection $Connection, array $UnkeyedRows) {

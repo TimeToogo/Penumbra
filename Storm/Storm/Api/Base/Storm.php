@@ -2,6 +2,8 @@
 
 namespace Storm\Api\Base;
 
+use \Storm\Api\IEntityManager;
+use \Storm\Api\IRepository;
 use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
@@ -15,11 +17,18 @@ use \Storm\Pinq\FunctionToExpressionTreeConverter;
  */
 class Storm {
     /**
+     * The entity managers.
+     * 
+     * @var IEntityManager[]
+     */
+    protected $EntityManagers = [];
+    
+    /**
      * The entity repositories.
      * 
-     * @var Repository[]
+     * @var IEntityManager[]
      */
-    protected $Repositories;
+    protected $Repositories = [];
     
     /**
      * The supplied DomainDatabaseMap.
@@ -56,12 +65,30 @@ class Storm {
     }
     
     /**
+     * Get the entity manager instance for a type of entity.
+     * 
+     * @param string|object $EntityType The entity of which the entity manager represents
+     * @return IEntityManager
+     */
+    final public function GetEntityManger($EntityType) {
+        if(is_object($EntityType)) {
+            $EntityType = get_class($EntityType);
+        }
+        
+        if(!isset($this->EntityManagers[$EntityType])) {
+            $this->EntityManagers[$EntityType] = $this->ConstructEntityManager($EntityType);
+        }
+        
+        return $this->EntityManagers[$EntityType];
+    }
+    
+    /**
      * Get the repository instance for a type of entity.
      * 
      * @param string|object $EntityType The entity of which the repository represents
-     * @return Repository
+     * @return IRepository
      */
-    public function GetRepository($EntityType) {
+    final public function GetRepository($EntityType) {
         if(is_object($EntityType)) {
             $EntityType = get_class($EntityType);
         }
@@ -74,13 +101,23 @@ class Storm {
     }
     
     /**
+     * Instantiates a new entity manager for the specified entity type.
+     * 
+     * @param string $EntityType The entity of which the entity manager represents
+     * @return IEntityManager The instantiated entity manager
+     */
+    protected function ConstructEntityManager($EntityType) {
+        return new EntityManager($this->DomainDatabaseMap, $this->FunctionToExpressionTreeConverter, $EntityType);
+    }
+    
+    /**
      * Instantiates a new repository for the specified entity type.
      * 
      * @param string $EntityType The entity of which the repository represents
-     * @return Repository The instantiated repository
+     * @return IRepository The instantiated repository
      */
     protected function ConstructRepository($EntityType) {
-        return new Repository($this->DomainDatabaseMap, $this->FunctionToExpressionTreeConverter, $EntityType);
+        return new Repository($this->GetEntityManger($EntityType), $this->FunctionToExpressionTreeConverter);
     }
     
     /**
@@ -95,11 +132,12 @@ class Storm {
         $DiscardedQueues = [];
         $DiscardedCriteriaQueues = [];
         
-        foreach($this->Repositories as $Repository) {
+        foreach($this->EntityManagers as $Repository) {
             list($PersistedQueue,
-            $ExecutionQueue,
-            $DiscardedQueue,
-            $DiscardedCriteriaQueue) = $Repository->GetChanges();
+                    $ExecutionQueue,
+                    $DiscardedQueue,
+                    $DiscardedCriteriaQueue) = $Repository->GetChanges();
+            
             $PersistedQueues[] = $PersistedQueue;
             $ExecutionQueues[] = $ExecutionQueue;
             $DiscardedQueues[] = $DiscardedQueue;
@@ -127,8 +165,8 @@ class Storm {
      * @return void
      */
     final public function ClearChanges() {
-        foreach($this->Repositories as $Repository) {
-            $Repository->ClearChanges();
+        foreach($this->EntityManagers as $EntityManager) {
+            $EntityManager->ClearChanges();
         }
     }
 }

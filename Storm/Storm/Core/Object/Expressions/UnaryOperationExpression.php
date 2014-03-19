@@ -35,7 +35,7 @@ class UnaryOperationExpression extends Expression {
         $OperandExpression = $this->OperandExpression->Simplify();
         
         if($OperandExpression instanceof ValueExpression) {
-            return Expression::Value($this->UnaryOperation($this->Operator, $OperandExpression->GetValue()));
+            return Expression::Value(self::DoUnaryOperation($this->Operator, $OperandExpression->GetValue()));
         }
         
         return $this->Update(
@@ -44,7 +44,7 @@ class UnaryOperationExpression extends Expression {
     }
     
     private static $UnaryOperations;
-    private static function UnaryOperation($Operator, $Value) {
+    private static function DoUnaryOperation($Operator, $Value) {
         if(self::$UnaryOperations === null) {
             self::$UnaryOperations = [
                 Operators\Unary::BitwiseNot =>      function ($I) { return ~$I; },

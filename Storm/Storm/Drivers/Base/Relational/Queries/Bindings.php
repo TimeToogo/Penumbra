@@ -53,6 +53,7 @@ final class Bindings implements \ArrayAccess {
         'boolean' => ParameterType::Boolean,
         'double' => ParameterType::Double,
         'integer' => ParameterType::Integer,
+        'resource' => ParameterType::Stream,
         'NULL' => ParameterType::Null,
     ];
     private function GetDefaultParameterType($Value) {
@@ -61,7 +62,7 @@ final class Bindings implements \ArrayAccess {
             return self::$ParameterTypeMap[$Type];
         }
         else {
-            return ParameterType::Binary;
+            return ParameterType::String;
         }
     }
 }

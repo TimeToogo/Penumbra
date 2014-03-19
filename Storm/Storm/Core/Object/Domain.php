@@ -23,6 +23,9 @@ abstract class Domain {
     private $EntityMaps = [];
     
     public function __construct() {
+    }
+    
+    final public function InitializeEntityMaps() {
         $Registrar = new Registrar(IEntityMap::IEntityMapType);
         $this->RegisterEntityMaps($Registrar);
         foreach($Registrar->GetRegistered() as $EntityMap) {

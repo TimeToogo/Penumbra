@@ -12,7 +12,7 @@ class ParameterParser {
         
         foreach($Parameters as $Parameter) {
             $Class = $Parameter->getClass();
-            if($Class !== null && isset($ParameterTypeHints[$Class->name])) {
+            if($Class !== null && array_key_exists($Class->name, $ParameterTypeHints)) {
                 $TypeHintNameMap[$Class->name] = $Parameter->name;
                 unset($ParameterTypeHints[$Class->name]);
             }

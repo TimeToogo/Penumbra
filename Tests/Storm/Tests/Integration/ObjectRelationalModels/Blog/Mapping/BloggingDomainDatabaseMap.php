@@ -5,6 +5,10 @@ namespace Storm\Tests\Integration\ObjectRelationalModels\Blog\Mapping;
 use \Storm\Tests\Integration\ObjectRelationalModels\Base;
 
 class BloggingDomainDatabaseMap extends Base\DomainDatabaseMap {
+    public function __construct() {
+        parent::__construct(\StormExamples\One\Example::GetPlatform());
+    }
+    
     protected function Domain() {
         return new \Storm\Tests\Integration\ObjectRelationalModels\Blog\Domain\BloggingDomain();
     }

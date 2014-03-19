@@ -101,7 +101,7 @@ class ExpressionWalker {
     
     public function WalkNew(NewExpression $Expression) {
         return $Expression->Update(
-                $this->Walk($Expression->GetClassType()),
+                $this->Walk($Expression->GetClassTypeExpression()),
                 $this->WalkAll($Expression->GetArgumentExpressions()));
     }
     

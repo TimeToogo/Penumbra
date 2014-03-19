@@ -8,11 +8,6 @@ use \Storm\Core\Object\Expressions\Expression;
 class EntityRequest extends Request implements Object\IEntityRequest {
     private $Properties = [];
     
-    /**
-     * @var Object\ICriteria 
-     */
-    private $Criteria;
-    
     public function __construct(
             $EntityOrType, 
             array $Properties, 

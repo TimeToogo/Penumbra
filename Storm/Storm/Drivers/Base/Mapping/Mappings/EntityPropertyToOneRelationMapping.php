@@ -80,10 +80,9 @@ class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMap
         }
     }
 
-    public function MapPropertyExpression(Object\Expressions\TraversalExpression $TraversalExpression = null) {
-        
+    public function MapPropertyExpression(Relational\ResultSetSources $Sources, &$ReturnType) {
+        throw new \Storm\Core\Mapping\MappingException();
     }
-
 }
 
 ?>

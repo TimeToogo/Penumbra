@@ -5,10 +5,39 @@ namespace Storm\Drivers\Base\Mapping\Mappings\Loading;
 use \Storm\Core\Mapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
+use \Storm\Drivers\Base\Object\LazyRevivalData;
 
 abstract class EntityLoading extends RelationshipLoading implements IEntityLoading {
     public function VerifyCompatibility(Object\IEntityProperty $Property) {
         
+    }
+    
+    public function AddLoadingRequirementsToSelect(
+            Mapping\IEntityRelationalMap $EntityRelationalMap, 
+            Relational\IToOneRelation $ToOneRelation, 
+            Relational\ResultSetSelect $Select) {
+        $Select->AddColumns($ToOneRelation->GetParentColumns());
+    }
+    
+    final protected function LoadRelatedRevivalDataMap(
+            Mapping\IEntityRelationalMap $EntityRelationalMap,
+            Relational\Database $Database, 
+            Relational\IToOneRelation $ToOneRelation, 
+            array $ParentRowArray,
+            Object\RevivalData $AlreadyKnownRevivalData = null) {
+        
+        $RelatedRows = $this->LoadRelatedRows(
+                $EntityRelationalMap,
+                $ToOneRelation, 
+                $Database, 
+                $ParentRowArray, 
+                $AlreadyKnownRevivalData);
+        
+        return $this->MapParentRowKeysToRelatedRevivalData(
+                $EntityRelationalMap, 
+                $ToOneRelation, 
+                $ParentRowArray, 
+                $RelatedRows);
     }
     
     final protected function MapParentRowKeysToRelatedRevivalData(

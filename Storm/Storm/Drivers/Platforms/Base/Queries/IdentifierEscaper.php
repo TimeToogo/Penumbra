@@ -4,18 +4,16 @@ namespace Storm\Drivers\Platforms\Base\Queries;
 
 use \Storm\Drivers\Base\Relational\Queries;
 
-abstract class IdentifierEscaper implements Queries\IIdentifierEscaper {
+class IdentifierEscaper implements Queries\IIdentifierEscaper {
     private $IdentifierCharacter;
     private $EscapeCharacter;
     private $IdentifierSeparator;
-    private $AliasKeyword;
     private $EscapedIdentifier;
     
-    public function __construct($IdentifierCharacter, $EscapeCharacter, $IdentifierSeparator, $AliasKeyword) {
+    public function __construct($IdentifierCharacter, $EscapeCharacter, $IdentifierSeparator) {
         $this->IdentifierCharacter = $IdentifierCharacter;
         $this->EscapeCharacter = $EscapeCharacter;
         $this->IdentifierSeparator = $IdentifierSeparator;
-        $this->AliasKeyword = $AliasKeyword;
         $this->EscapedIdentifier = $EscapeCharacter . $IdentifierCharacter;
     }
     
@@ -44,30 +42,6 @@ abstract class IdentifierEscaper implements Queries\IIdentifierEscaper {
     
     public function EscapeAll(array $IdentifierSegmentsArray) {
         return array_map([$this, 'Escape'], $IdentifierSegmentsArray);
-    }
-
-    public function Alias($EscapedIdentifier, $Alias) {
-        return $EscapedIdentifier . ' ' . $this->AliasKeyword . ' ' . $this->Qualify($Alias);
-    }
-    
-    public function AliasAll(array $EscapedIdentifierAliasMap) {
-        $EscapedIdentifierEscapedAliasMap = $this->QualifyAll($EscapedIdentifierAliasMap);
-        $AliasedValues = [];
-        foreach($EscapedIdentifierEscapedAliasMap as $EscapedIdentifier => $EscapedAlias) {
-            $AliasedValues[] = $EscapedIdentifier . ' ' . $this->AliasKeyword . ' ' . $EscapedAlias;
-        }
-        
-        return $AliasedValues;
-    }
-    
-    public function EscapeAndAliasAll(array $AliasIdentifierSegmentsMap) {
-        $EscapedIdentifiers = array_combine($this->AliasAll(array_keys($AliasIdentifierSegmentsMap)), $this->EscapeAll($AliasIdentifierSegmentsMap));
-        $AliasedValues = [];
-        foreach($EscapedIdentifiers as $EscapedIdentifier => $EscapedAlias) {
-            $AliasedValues[] = $EscapedIdentifier . ' ' . $this->AliasKeyword . ' ' . $EscapedAlias;
-        }
-        
-        return $AliasedValues;
     }
 }
 

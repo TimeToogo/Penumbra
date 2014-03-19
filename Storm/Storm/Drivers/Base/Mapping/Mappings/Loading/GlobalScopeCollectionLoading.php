@@ -52,7 +52,11 @@ class GlobalScopeCollectionLoading extends CollectionLoading {
         if(count($this->ParentRowArrays) > 0 && !isset($this->RelatedRowArrays[$LoadIndex])) {
             $AllParentRows = call_user_func_array('array_merge', $this->ParentRowArrays);
             
-            $this->RelatedRowArrays[$this->CurrentLoadIndex] =& $this->LoadRelatedRows($ToManyRelation, $Database, $AllParentRows);
+            $this->RelatedRowArrays[$this->CurrentLoadIndex] =& $this->LoadRelatedRows(
+                    $EntityRelationalMap,
+                    $ToManyRelation,
+                    $Database,
+                    $AllParentRows);
             $this->ParentRowArrays = [];
             $this->CurrentLoadIndex++;
         }

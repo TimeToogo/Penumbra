@@ -5,6 +5,14 @@ namespace Storm\Pinq;
 interface IQueryable extends IAggregate, IGroupable, IPredicated, IOrdered, IRanged, \IteratorAggregate {
     
     /**
+     * Returns the requested data from supplied query
+     * 
+     * @param IQueryable $Query
+     * @return static
+     */
+    public function From(IQueryable $Query);
+    
+    /**
      * Specifies the function return the data.
      * 
      * You can take the aggregate for aggregate functionality:

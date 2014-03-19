@@ -2,17 +2,17 @@
 
 namespace Storm\Drivers\Base\Mapping\Expressions;
 
-use \Storm\Core\Relational;
 use \Storm\Core\Object\Expressions as O;
-use \Storm\Core\Relational\Expression;
+use \Storm\Drivers\Base\Relational\Expressions as R;
 
 interface IArrayMapper {
-    public function MapArray(array $Array);
     
+    /**
+     * @return R\Expression
+     */
     public function MapArrayExpression(
             array $MappedKeyExpressions, 
-            array $MappedValueExpressions,
-            O\TraversalExpression $TraversalExpression = null);
+            array $MappedValueExpressions);
 }
 
 ?>

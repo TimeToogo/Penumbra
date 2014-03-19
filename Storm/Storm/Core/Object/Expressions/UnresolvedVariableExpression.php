@@ -30,7 +30,7 @@ class UnresolvedVariableExpression extends Expression {
     
     public function Update(Expression $NameExpression) {
         if($this->NameExpression === $NameExpression) {
-            return $NameExpression;
+            return $this;
         }
         
         return new self($NameExpression);
