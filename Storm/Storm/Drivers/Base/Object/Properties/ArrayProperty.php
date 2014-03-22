@@ -15,8 +15,12 @@ class ArrayProperty extends MultipleEntityProperty {
         return $this->RelatedEntityMap->ReviveEntities($RevivalDataArray);
     }
     
-    protected function PersistRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,
-            $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
+    protected function PersistRelationshipChanges(
+            Object\Domain $Domain, 
+            Object\UnitOfWork $UnitOfWork,
+            $CurrentValue, 
+            $HasOriginalValue, 
+            $OriginalValue) {
         $RelationshipChanges = [];
         
         $OriginalEntities = [];
@@ -45,32 +49,30 @@ class ArrayProperty extends MultipleEntityProperty {
         
         foreach($NewEntities as $NewEntity) {
             $RelationshipChanges[] = new Object\RelationshipChange(
-                    $this->RelationshipType->GetPersistedRelationship(
-                            $Domain, $UnitOfWork, 
-                            $ParentEntity, $NewEntity), 
+                    $this->RelationshipType->GetPersistedEntityData($Domain, $UnitOfWork, $NewEntity), 
                     null);
         }
         foreach($RemovedEntities as $RemovedEntity) {
             $RelationshipChanges[] = new Object\RelationshipChange(
                     null, 
-                    $this->RelationshipType->GetDiscardedRelationship(
-                            $Domain, $UnitOfWork, 
-                            $ParentEntity, $RemovedEntity));
+                    $this->RelationshipType->GetDiscardedIdentity($Domain, $UnitOfWork, $RemovedEntity));
         }
         
         return $RelationshipChanges;
     }
-    protected function DiscardRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
-            $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
+    protected function DiscardRelationshipChanges(
+            Object\Domain $Domain, 
+            Object\UnitOfWork $UnitOfWork, 
+            $CurrentValue, 
+            $HasOriginalValue, 
+            $OriginalValue) {
         
         $DiscarededRelationships = [];
         if($HasOriginalValue) {
             foreach($OriginalValue as $RemovedEntity) {
                 $DiscarededRelationships[] = new Object\RelationshipChange(
                         null, 
-                        $this->RelationshipType->GetDiscardedRelationship(
-                                $Domain, $UnitOfWork, 
-                                $ParentEntity, $RemovedEntity));
+                        $this->RelationshipType->GetDiscardedIdentity($Domain, $UnitOfWork, $RemovedEntity));
             }
         }
         

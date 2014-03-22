@@ -24,7 +24,8 @@ class EntityTraversalResolverWalker extends O\ExpressionWalker {
     }
     
     public function WalkMethodCall(O\MethodCallExpression $Expression) {
-        return $this->WalkTraversal($Expression) ?: parent::WalkMethodCall($Expression);
+        $Expression = parent::WalkMethodCall($Expression);
+        return $this->WalkTraversal($Expression) ?: $Expression;
     }
     
     public function WalkIndex(O\IndexExpression $Expression) {
@@ -32,12 +33,22 @@ class EntityTraversalResolverWalker extends O\ExpressionWalker {
     }
     
     public function WalkInvocation(O\InvocationExpression $Expression) {
-        return $this->WalkTraversal($Expression) ?: parent::WalkInvocation($Expression);
+        $Expression = parent::WalkInvocation($Expression);
+        return $this->WalkTraversal($Expression) ?: $Expression;
     }
     
     private function WalkTraversal(O\TraversalExpression $Expression) {
         if($Expression->OriginatesFrom(EntityVariableExpression::GetType())) {
             return $this->EntityMap->ResolveTraversalExpression($Expression);
+        }
+        if($Expression->OriginatesFrom(O\PropertyExpression::GetType())) {
+            $Property = $Expression->GetOriginExpression()->GetProperty();
+            if($Property instanceof Object\IRelationshipProperty) {
+                return $Property->GetRelatedEntityMap()->ResolveTraversalExpression($Expression);
+            }
+            else {
+                return $this->EntityMap->ResolveTraversalExpression($Expression);
+            }
         }
         
         return null;

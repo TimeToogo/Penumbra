@@ -2,19 +2,21 @@
 
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
-use \Storm\Core\Object\Expressions\Expression;
-use \Storm\Core\Object\Expressions\TraversalExpression;
-use \Storm\Core\Object\Expressions\PropertyExpression;
+use \Storm\Core\Object\Expressions as O;
 
 class GetterSetter extends Accessor {
     private $PropertyGetter;
+    private $PropertyGetterTraversalDepth;
     private $PropertySetter;
+    private $PropertySetterTraversalDepth;
     
     public function __construct(
             IPropertyGetter $PropertyGetter, 
             IPropertySetter $PropertySetter) {
         $this->PropertyGetter = $PropertyGetter;
+        $this->PropertyGetterTraversalDepth = $PropertyGetter->GetTraversalDepth();
         $this->PropertySetter = $PropertySetter;
+        $this->PropertySetterTraversalDepth = $PropertySetter->GetTraversalDepth();
         parent::__construct();
     }
 
@@ -32,13 +34,23 @@ class GetterSetter extends Accessor {
         }
     }
     
-    public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
-        $GetterExpression = $this->PropertyGetter->ResolveTraversalExpression($Expression, $PropertyExpression);
-        if($GetterExpression !== null) {
-            return $GetterExpression;
-        } 
-        else {
-            return $this->PropertySetter->ResolveTraversalExpression($Expression, $PropertyExpression);
+    public function ResolveTraversalExpression(array $TraversalExpressions, O\PropertyExpression $PropertyExpression, &$ResolutionDepth) {
+        $TraversalDepth = count($TraversalExpressions);
+        
+        if($TraversalDepth >= $this->PropertyGetterTraversalDepth) {
+            $ResolvedExpression = $this->PropertyGetter->ResolveTraversalExpression($TraversalExpressions, $PropertyExpression);
+            if($ResolvedExpression !== null) {
+                $ResolutionDepth = $this->PropertyGetterTraversalDepth;
+                return $ResolvedExpression;
+            }
+        }
+        
+        if($TraversalDepth >= $this->PropertySetterTraversalDepth) {
+            $ResolvedExpression = $this->PropertySetter->ResolveTraversalExpression($TraversalExpressions, $PropertyExpression);
+            if($ResolvedExpression !== null) {
+                $ResolutionDepth = $this->PropertySetterTraversalDepth;
+                return $ResolvedExpression;
+            }
         }
     }
     

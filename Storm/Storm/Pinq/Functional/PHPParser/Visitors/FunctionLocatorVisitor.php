@@ -24,10 +24,14 @@ class FunctionLocatorVisitor extends \PHPParser_NodeVisitorAbstract {
     
     public function __construct(\ReflectionFunctionAbstract $Reflection) {
         $this->Reflection = $Reflection;
-        $this->NamespaceName = $Reflection->getNamespaceName();
+        $this->NamespaceName = $this->GetNamespace($Reflection);
         $this->FunctionName = $Reflection->getShortName();
         $this->StartLine = $Reflection->getStartLine();
         $this->EndLine = $Reflection->getEndLine();
+    }
+    
+    private function GetNamespace(\ReflectionFunctionAbstract $Reflection) {
+        return $Reflection instanceof \ReflectionMethod ? $Reflection->getDeclaringClass()->getNamespaceName() : $Reflection->getNamespaceName();
     }
     
     /**

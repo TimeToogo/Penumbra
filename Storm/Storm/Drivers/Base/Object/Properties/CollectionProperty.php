@@ -22,8 +22,12 @@ class CollectionProperty extends MultipleEntityProperty {
         return new Collections\Collection($this->GetEntityType(), $this->RelatedEntityMap->ReviveEntities($RevivalDataArray));
     }
     
-    protected function PersistRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,
-            $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
+    protected function PersistRelationshipChanges(
+            Object\Domain $Domain, 
+            Object\UnitOfWork $UnitOfWork,
+            $CurrentValue, 
+            $HasOriginalValue, 
+            $OriginalValue) {
         $RelationshipChanges = [];
         
         $OriginalEntities = [];
@@ -32,7 +36,7 @@ class CollectionProperty extends MultipleEntityProperty {
         if(!($CurrentValue instanceof Collections\ICollection)) {
             if(!($CurrentValue instanceof \Traversable)) {
             throw new Object\ObjectException(
-                    'Invalid value for collection property on entity %s, Traversable expected, %s given',
+                    'Invalid value for collection property on entity %s: \Traversable expected, %s given',
                     $this->GetEntityType(),
                     \Storm\Core\Utilities::GetTypeOrClass($CurrentValue));
             }
@@ -66,32 +70,31 @@ class CollectionProperty extends MultipleEntityProperty {
         
         foreach($NewOrAlteredEntities as $NewEntity) {
             $RelationshipChanges[] = new Object\RelationshipChange(
-                    $this->RelationshipType->GetPersistedRelationship(
-                            $Domain, $UnitOfWork, 
-                            $ParentEntity, $NewEntity), 
+                    $this->RelationshipType->GetPersistedEntityData($Domain, $UnitOfWork, $NewEntity), 
                     null);
         }
         foreach($RemovedEntities as $RemovedEntity) {
             $RelationshipChanges[] = new Object\RelationshipChange(
                     null, 
-                    $this->RelationshipType->GetDiscardedRelationship(
-                            $Domain, $UnitOfWork, 
-                            $ParentEntity, $RemovedEntity));
+                    $this->RelationshipType->GetDiscardedIdentity($Domain, $UnitOfWork, $RemovedEntity));
         }
         
         return $RelationshipChanges;
     }
-    protected function DiscardRelationshipChanges(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
-            $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue) {
+    
+    protected function DiscardRelationshipChanges(
+            Object\Domain $Domain, 
+            Object\UnitOfWork $UnitOfWork, 
+            $CurrentValue, 
+            $HasOriginalValue, 
+            $OriginalValue) {
         
         $DiscardedRelationships = [];
         if($HasOriginalValue) {
             foreach($OriginalValue->ToArray() as $RemovedEntity) {
                 $DiscardedRelationships[] = new Object\RelationshipChange(
                         null, 
-                        $this->RelationshipType->GetDiscardedRelationship(
-                                $Domain, $UnitOfWork, 
-                                $ParentEntity, $RemovedEntity));
+                        $this->RelationshipType->GetDiscardedIdentity($Domain, $UnitOfWork, $RemovedEntity));
             }
         }
         
@@ -118,7 +121,7 @@ class CollectionProperty extends MultipleEntityProperty {
     
     private function IndexEntitiesByIdentity(Object\Domain $Domain, array &$Entities) {
         $IndexedEntities = [];
-        foreach($Entities as $Key => $Entity) {
+        foreach($Entities as $Entity) {
             $IndexedEntities[$Domain->Identity($Entity)->Hash()] = $Entity;
         }
         

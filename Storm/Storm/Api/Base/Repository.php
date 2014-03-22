@@ -26,9 +26,10 @@ class Repository extends Pinq\Request implements IRepository {
     }
 
     public function Get($_) {
-        $Entity = $this->EntityManager->LoadByIdValues(func_get_args());
+        $IdentityValues = func_get_args();
+        $Entity = $this->EntityManager->LoadByIdValues($IdentityValues);
         if($Entity === null) {
-            throw new \Storm\Core\StormException('The request entity could not be found');
+            throw new \Storm\Api\EntityNotFoundException($this->EntityType, $IdentityValues);
         }
         
         return $Entity;

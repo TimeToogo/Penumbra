@@ -56,7 +56,9 @@ class Request extends Criteria implements IQueryable  {
                     $this->EntityType);
         }
         
-        $this->SubEntityRequest = $Query;
+        $this->SubEntityRequest = $Query->BuildEntityRequest($this->EntityMap->GetProperties());
+        
+        return $this;
     }
     
     /**

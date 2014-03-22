@@ -32,11 +32,12 @@ class RequestMapper extends CriteriaMapper {
     
     public function MapDataRequest(
             Object\IDataRequest $DataRequest, 
-            Relational\DataSelect $DataSelect,
+            Relational\DataSelect $DataSelect, 
+            array &$AliasReturnTypes,
             ExpressionMapper $ExpressionMapper) {
         $this->MapRequestToSelect($DataRequest, $DataSelect, $ExpressionMapper);
         
-        $RelationalAliasExpressionMap = $ExpressionMapper->MapAll($DataRequest->GetAliasExpressionMap());
+        $RelationalAliasExpressionMap = $ExpressionMapper->MapAll($DataRequest->GetAliasExpressionMap(), $AliasReturnTypes);
         $DataSelect->AddAllDataExpressions($RelationalAliasExpressionMap);
         
         return $DataSelect;

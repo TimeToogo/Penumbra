@@ -4,6 +4,7 @@ namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
 use \Storm\Drivers\Base\Object\LazyRevivalData;
+use \Storm\Core\Object\Expressions as O;
 
 class EntityProperty extends RelationshipProperty implements Object\IEntityProperty {
     private $IsOptional;
@@ -23,6 +24,10 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
     
     public function IsOptional() {
         return $this->IsOptional;
+    }
+    
+    protected function ResolveExcessTraversal(O\TraversalExpression $ExcessTraversalExpression) {
+        return $this->RelatedEntityMap->ResolveTraversalExpression($ExcessTraversalExpression);
     }
         
     protected function ReviveNull() {
@@ -75,11 +80,12 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
                 $CurrentValue, 
                 $HasOriginalValue, 
                 $OriginalValue) = $this->GetEntityRelationshipData($ParentEntity);
+        
         $OriginalIsValidEntity = $this->IsValidEntity($OriginalValue);
         $CurrentIsValidEntity = $this->IsValidEntity($CurrentValue);
         
-        $PersistedRelationship = null;
-        $DiscardedRelationship = null;
+        $PersistedEntityData = null;
+        $DiscardedIdentity = null;
         
         if(!$CurrentIsValidEntity && !$this->IsOptional) {
             throw $this->InvalidEntityAndIsRequired($CurrentValue);
@@ -88,29 +94,25 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
             
         }
         else if($CurrentValue == $OriginalValue) {
-            $PersistedRelationship = $this->RelationshipType->GetPersistedRelationship(
-                    $Domain, $UnitOfWork, 
-                    $ParentEntity, $CurrentValue);
+            $PersistedEntityData = $this->RelationshipType->GetPersistedEntityData(
+                    $Domain, $UnitOfWork, $CurrentValue);
         }
         else if($Domain->DoShareIdentity($CurrentValue, $OriginalValue)) {
-            $PersistedRelationship = $this->RelationshipType->GetPersistedRelationship(
-                    $Domain, $UnitOfWork, 
-                    $ParentEntity, $CurrentValue);
+            $PersistedEntityData = $this->RelationshipType->GetPersistedEntityData(
+                    $Domain, $UnitOfWork, $CurrentValue);
         }
         else {
             if($OriginalIsValidEntity) {
-                $DiscardedRelationship = $this->RelationshipType->GetDiscardedRelationship(
-                        $Domain, $UnitOfWork, 
-                        $ParentEntity, $OriginalValue);
+                $DiscardedIdentity = $this->RelationshipType->GetDiscardedIdentity(
+                        $Domain, $UnitOfWork, $OriginalValue);
             }
             if($CurrentIsValidEntity) {
-                $PersistedRelationship = $this->RelationshipType->GetPersistedRelationship(
-                        $Domain, $UnitOfWork, 
-                        $ParentEntity, $CurrentValue);
+                $PersistedEntityData = $this->RelationshipType->GetPersistedEntityData(
+                        $Domain, $UnitOfWork, $CurrentValue);
             }
         }
         
-        return new Object\RelationshipChange($PersistedRelationship, $DiscardedRelationship);
+        return new Object\RelationshipChange($PersistedEntityData, $DiscardedIdentity);
     }
     
     public function Discard(Object\UnitOfWork $UnitOfWork, $ParentEntity) {
@@ -128,9 +130,7 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
             throw $this->InvalidEntityAndIsRequired($CurrentValue);
         }
         if($OriginalIsValidEntity) {
-            $DiscardedRelationship = $this->RelationshipType->GetDiscardedRelationship(
-                    $Domain, $UnitOfWork, 
-                    $ParentEntity, $OriginalValue);
+            $DiscardedRelationship = $this->RelationshipType->GetDiscardedIdentity($Domain, $UnitOfWork, $OriginalValue);
         }
         
         return new Object\RelationshipChange(null, $DiscardedRelationship);

@@ -12,8 +12,16 @@ class Procedure implements Object\IProcedure {
      * @var Object\ICriteria
      */
     private $Criteria;
+    /**
+     * @var Object\IEntityRequest
+     */
+    private $SubEntityRequest;
     
-    public function __construct($EntityOrType, array $AssignmentExpressions, Object\ICriteria $Criteria = null) {
+    public function __construct(
+            $EntityOrType, 
+            array $AssignmentExpressions, 
+            Object\ICriteria $Criteria = null,
+            Object\IEntityRequest $SubEntityRequest = null) {
         if(count($AssignmentExpressions) === 0) {
             throw new Object\ObjectException(
                     'Procedure must contain atleast one assignment expression: none given');
@@ -29,6 +37,8 @@ class Procedure implements Object\IProcedure {
                     $this->EntityType,
                     $this->Criteria->GetEntityType());
         }
+        
+        $this->SubEntityRequest = $SubEntityRequest;
     }
     
     final public function GetEntityType() {
@@ -42,6 +52,15 @@ class Procedure implements Object\IProcedure {
     public function GetCriteria() {
         return $this->Criteria;
     }
+
+    public function GetFromEntityRequest() {
+        return $this->SubEntityRequest;
+    }
+
+    public function IsFromEntityRequest() {
+        return $this->SubEntityRequest !== null;
+    }
+
 }
 
 ?>

@@ -12,7 +12,7 @@ class RowPersister extends Queries\RowPersister {
         parent::__construct($InsertBatchSize, $DeleteBatchSize);
     }
     
-    private function AppendInlineData(
+    protected function AppendInlineData(
             QueryBuilder $QueryBuilder , 
             array $Columns,
             $DerivedTableName,
@@ -97,10 +97,6 @@ class RowPersister extends Queries\RowPersister {
                 $QueryBuilder->AppendIdentifier('# = VALUES(#)', $ColumnIdentifier);
             }
         }
-    }
-    
-    protected function AppendDeletePrimaryKeyData(QueryBuilder $QueryBuilder, array $PrimaryKeysColumns, $DerivedTableName, array $PrimaryKeys) {
-        $this->AppendInlineData($QueryBuilder, $PrimaryKeysColumns, $DerivedTableName, $PrimaryKeys);
     }
 }
 

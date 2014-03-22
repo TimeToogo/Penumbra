@@ -76,7 +76,7 @@ interface IPlatform {
      * 
      * @return Relational\DataSelect The data select
      */
-    public function MapDataRequest(Object\IDataRequest $DataRequest, Mapping\IEntityRelationalMap $EntityRelationalMap);
+    public function MapDataRequest(Object\IDataRequest $DataRequest, array &$AliasReviveFuncionMap, Mapping\IEntityRelationalMap $EntityRelationalMap);
     
     /**
      * Maps a supplied object procedure to the equivalent update.

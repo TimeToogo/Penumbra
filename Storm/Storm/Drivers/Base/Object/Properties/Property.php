@@ -34,39 +34,58 @@ abstract class Property implements IProperty {
         return $this->Accessor;
     }
     
-    final public function ResolveTraversalExpression(O\TraversalExpression $Expression, O\PropertyExpression $ParentPropertyExpression = null) {
-        $OriginalTraversalExpression = $Expression;
-        $ResolvedExpression = $ParentPropertyExpression ?: O\Expression::Property($this);
-        $ExcessDepth = 0;
+    final public function ResolveTraversalExpression(O\TraversalExpression $TraversalExpression) {
+        $ParentPropertyExpression = 
+                $TraversalExpression->OriginatesFrom(O\PropertyExpression::GetType()) ?
+                        $TraversalExpression->GetOriginExpression() : null;
+        
+        $PropertyExpression = O\Expression::Property($this, $ParentPropertyExpression);
+        
+        $TraversalExpressionArray = [];
+        $Expression = $TraversalExpression;
         while ($Expression instanceof O\TraversalExpression) {
-            /**
-             * Accessors are allowed to return and type of expression, but if there is still
-             * excess traversal, it must return the property expression.
-             * This is ok as it should only return other than the property expression if it
-             * is a setter (e.g. assignment expression) and no traversal should occur after
-             * a setter.
-             */
-            $ResolvedExpression = $this->Accessor->ResolveTraversalExpression($Expression, $ResolvedExpression);
-            if($ResolvedExpression !== null) {
-                if($ExcessDepth === 0) {
-                    return $ResolvedExpression;
-                }
-                else {
-                    return $this->ResolveExcessTraversal($ResolvedExpression, $ExcessDepth, $OriginalTraversalExpression);
-                }
-            }
-            $ExcessDepth++;
+            $TraversalExpressionArray[] = $Expression;
             $Expression = $Expression->GetValueExpression();
+        }
+        
+        $ResolvedTraversalDepth = 0;
+        $ResolvedExpression = $this->Accessor->ResolveTraversalExpression(
+                array_reverse($TraversalExpressionArray), 
+                $PropertyExpression, 
+                $ResolvedTraversalDepth);
+        
+        if($ResolvedExpression !== null) {
+            if($ResolvedTraversalDepth === count($TraversalExpressionArray)) {
+                return $ResolvedExpression;
+            }
+            else {
+                $ResolvedTraversalExpression = $this->RemoveResolvedTraversal(
+                        $ResolvedTraversalDepth, 
+                        $TraversalExpression, 
+                        $ResolvedExpression);
+
+                return $this->ResolveExcessTraversal($ResolvedTraversalExpression);
+            }
         }
     }
     
-    protected function ResolveExcessTraversal(O\PropertyExpression $ResolvedExpression, $ExcessDepth, O\TraversalExpression $ExcessTraversalExpression) {
-        if($ExcessDepth === 0) {
-            return $ExcessTraversalExpression->UpdateValue($ResolvedExpression);
+    private function RemoveResolvedTraversal(
+            $ResolvedTraversalDepth, 
+            O\TraversalExpression $TraversalExpression,
+            O\Expression $NewOriginExpression) {
+        if($TraversalExpression->GetTraversalDepth() - 1 === $ResolvedTraversalDepth) {
+            return $TraversalExpression->UpdateValue($NewOriginExpression);
         }
         
-        return $ExcessTraversalExpression->UpdateValue(
-                $this->ResolveExcessTraversal($ResolvedExpression, --$ExcessDepth, $ExcessTraversalExpression->GetValueExpression()));
+        return $TraversalExpression->UpdateValue(
+                $this->RemoveResolvedTraversal(
+                        $ResolvedTraversalDepth, 
+                        $TraversalExpression->GetValueExpression(), 
+                        $NewOriginExpression));
+    }
+    
+    protected function ResolveExcessTraversal(O\TraversalExpression $ExcessTraversalExpression) {
+        return $ExcessTraversalExpression;
     }
 
 

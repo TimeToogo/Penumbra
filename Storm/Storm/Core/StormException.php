@@ -15,7 +15,7 @@ class StormException extends \Exception {
      * @param type $MessageFormat
      * @param mixed ... The values to interpole the message with
      */
-    public function __construct($MessageFormat, $_ = null) {
+    public function __construct($MessageFormat = '', $_ = null) {
         if(func_num_args() === 1) {
             $Message = $MessageFormat;
         }

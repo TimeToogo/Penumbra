@@ -48,13 +48,13 @@ class OperationMapper extends Mapping\OperationMapper {
 
     protected function MapCastOperation($CastType, R\Expression $ValueExpression) {
         switch ($CastType) {
-            case O\Cast::Boolean:
+            case O\Operators\Cast::Boolean:
                 return R\Expression::BinaryOperation(
                         $ValueExpression, 
                         R\Operators\Binary::LogicalAnd,
                         R\Expression::BoundValue(1));
             
-            case O\Cast::Double:
+            case O\Operators\Cast::Double:
                 return R\Expression::BinaryOperation(
                         $ValueExpression, 
                         O\Binary::Addition, 

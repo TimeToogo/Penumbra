@@ -6,6 +6,7 @@ use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
 use \Storm\Drivers\Platforms\Base\Queries\IResultSetSourceCompiler;
+use \Storm\Drivers\Platforms\Base\Queries\ColumnResolverWalker;
 
 class ResultSetSourceCompiler implements IResultSetSourceCompiler {
     
@@ -16,8 +17,9 @@ class ResultSetSourceCompiler implements IResultSetSourceCompiler {
     public function AppendResultSetSources(
             QueryBuilder $QueryBuilder, 
             Relational\ResultSetSources $Sources,
-            \SplObjectStorage $SourceAliasMap) {
+            ColumnResolverWalker $ColumnResolverWalker) {
         $FirstSource = $Sources->GetSource();
+        $SourceAliasMap = $ColumnResolverWalker->GetSourceAliasMap();
         $this->AppendSource($QueryBuilder, $FirstSource, $SourceAliasMap[$FirstSource]);
         
         if($Sources->IsJoined()) {
@@ -25,11 +27,11 @@ class ResultSetSourceCompiler implements IResultSetSourceCompiler {
                 $QueryBuilder->Append($this->GetJoinType($Join->GetJoinType()) . ' ');
                 
                 $Source = $Join->GetSource();
-                $this->AppendSource($QueryBuilder, $Source, $SourceAliasMap[$Source]);
+                $this->AppendSource($QueryBuilder, $Source, $SourceAliasMap[$Source], $ColumnResolverWalker);
                 
                 $QueryBuilder->Append(' ON ');
                 
-                $QueryBuilder->AppendExpression($Join->GetJoinPredicateExpression());
+                $QueryBuilder->AppendExpression($ColumnResolverWalker->Walk($Join->GetJoinPredicateExpression()));
             }
         }
     }
@@ -41,7 +43,7 @@ class ResultSetSourceCompiler implements IResultSetSourceCompiler {
         else if ($Source instanceof Relational\ResultSetSelect) {
             $QueryBuilder->Append('(');
             $QueryBuilder->AppendSelect($Source);
-            $QueryBuilder->AppendIdentifier(')');
+            $QueryBuilder->Append(')');
         }
         else {
             throw new Relational\RelationalException(

@@ -107,38 +107,11 @@ class QueryBuilder {
     
     // <editor-fold defaultstate="collapsed" desc="Expresion appenders">
     
-    /**
-     * @var Relational\Expressions\ExpressionWalker[]
-     */
-    private $ExpressionWalkers = [];
-    
-    final public function AddExpressionWalker(Relational\Expressions\ExpressionWalker $Walker) {
-        if(!in_array($Walker, $this->ExpressionWalkers, true)) {
-            $this->ExpressionWalkers[] = $Walker;
-        }
-    }
-    
-    final public function RemoveExpressionWalker(Relational\Expressions\ExpressionWalker $Walker) {
-        foreach ($this->ExpressionWalkers as $Key => $OtherWalker) {
-            if($Walker === $OtherWalker) {
-                unset($this->ExpressionWalkers[$Key]);
-                return;
-            }
-        }
-    }
-    
     final public function AppendExpression(Expression $Expression) {
-        foreach($this->ExpressionWalkers as $Walker) {
-            $Expression = $Walker->Walk($Expression);
-        }
         $this->ExpressionCompiler->Append($this, $Expression);
     }
     
     final public function AppendExpressions(array $Expressions, $Delimiter) {
-        foreach($this->ExpressionWalkers as $Walker) {
-            $Expressions = $Walker->WalkAll($Expressions);
-        }
-        
         $First = true;
         foreach ($Expressions as $Expression) {
             if ($First)

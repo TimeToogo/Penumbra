@@ -13,6 +13,9 @@ interface IRepository extends Pinq\IQueryable {
     
     public function GetEntityType();
     
+    /**
+     * @throws EntityNotFoundException
+     */
     public function Get($_);
     public function GetOrNull($_);
     

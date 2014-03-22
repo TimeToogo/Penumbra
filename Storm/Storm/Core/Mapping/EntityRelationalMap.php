@@ -178,7 +178,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
             $this->MappedReviveColumns = array_merge($this->MappedReviveColumns, $PropertyMapping->GetReviveColumns());
             $this->MappedPersistColumns = array_merge($this->MappedPersistColumns, $PropertyMapping->GetPersistColumns());
             if($PropertyMapping->IsIdentityPrimaryKeyMapping()) {
-                $this->AddIdentityPrimaryKeyMapping($PropertyMapping);
+                $this->AddIdentityPrimaryKeyMapping($ProperyIdentifier, $PropertyMapping);
             }
         }
         else if($PropertyMapping instanceof IEntityPropertyToOneRelationMapping) {
@@ -199,7 +199,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
         $this->PropertyMappings[$ProperyIdentifier] = $PropertyMapping;
     }
     
-    private function AddIdentityPrimaryKeyMapping(IDataPropertyColumnMapping $PropertyMapping) {
+    private function AddIdentityPrimaryKeyMapping($ProperyIdentifier, IDataPropertyColumnMapping $PropertyMapping) {
         //Infer primary key table
         $AllColumns = array_merge($PropertyMapping->GetPersistColumns(), $PropertyMapping->GetReviveColumns());
         if($this->PrimaryKeyTable === null) {
@@ -214,7 +214,7 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
                         $this->PrimaryKeyTable->GetName());
             }
         }
-        $this->IdentityPropertyPrimaryKeyMappings[] = $PropertyMapping;
+        $this->IdentityPropertyPrimaryKeyMappings[$ProperyIdentifier] = $PropertyMapping;
     }
     
     /**
@@ -434,8 +434,11 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
             } 
         }
         
-        foreach($Properties as $PropertyIdentifier => $Property) {
-            $this->PropertyMappings[$PropertyIdentifier]->AddLoadingRequirementsToSelect($Select);
+        foreach($Properties as $Property) {
+            $PropertyIdentifier = $Property->GetIdentifier();
+            if(isset($this->PropertyMappings[$PropertyIdentifier])) {
+                $this->PropertyMappings[$PropertyIdentifier]->AddLoadingRequirementsToSelect($Select);
+            }
         }
     }
         
@@ -490,6 +493,92 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
     /**
      * {@inheritDoc}
      */
+    public function MapPersistenceDataToResultRows(Relational\Transaction $Transaction, array $PersistenceDataArray) {
+        $ResultRowArray = [];
+        foreach($PersistenceDataArray as $Key => $PersistenceData) {
+            $ResultRowArray[$Key] = $this->ResultRow();
+        }
+        
+        $this->MapEntityDataToColumnData(
+                $Transaction, 
+                $PersistenceDataArray, 
+                $ResultRowArray, 
+                $this->DataPropertyColumnMappings);
+        
+        $RowsWithoutPrimaryKeys = [];
+        foreach($ResultRowArray as $Key => $ResultRow) {
+            if(!$ResultRow->GetRow($this->PrimaryKeyTable)->HasPrimaryKey()) {
+                $RowsWithoutPrimaryKeys[] = $ResultRow;
+            }
+        }
+        
+        //Adds a callback to supply the unit of work the generated identity after persistence.
+        $Transaction->SubscribeToPostPersistEvent(
+                $this->PrimaryKeyTable, 
+                function () use (&$RowsWithoutPrimaryKeys, &$PersistenceDataArray) {
+                    $PersistenceDataWithoutIdenties = array_intersect_key($PersistenceDataArray, $RowsWithoutPrimaryKeys);
+                    $this->MapColumnDataToPropertyData(
+                            $RowsWithoutPrimaryKeys, 
+                            $PersistenceDataWithoutIdenties, 
+                            $this->IdentityPropertyPrimaryKeyMappings);
+                    
+                    foreach($PersistenceDataArray as $Key => $PersistenceData) {
+                        $PersistenceData->ReviveIdentity();
+                    }
+                });
+        
+        return $ResultRowArray;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public function MapDiscardenceDataToPrimaryKeys(Relational\Transaction $Transaction, array $DiscardenceDataArray) {
+        $ResultRowArray = [];
+        foreach($DiscardenceDataArray as $Key => $DiscardenceData) {
+            $ResultRowArray[$Key] = $this->ResultRow();
+        }
+        
+        $this->MapEntityDataToColumnData(
+                $Transaction, 
+                $DiscardenceDataArray, 
+                $ResultRowArray, 
+                $this->IdentityPropertyPrimaryKeyMappings);
+        
+        $PrimaryKeyArray = [];
+        foreach($ResultRowArray as $Key => $ResultRow) {
+            $PrimaryKeyArray[$Key] = $ResultRow->GetPrimaryKey($this->PrimaryKeyTable);
+        }
+        
+        return $PrimaryKeyArray;
+    }
+    
+    private function MapEntityDataToColumnData(
+            Relational\Transaction $Transaction, 
+            array $EntityDataArray, 
+            array $ColumnDataArray, 
+            array $DataPropertyMappings) {
+        foreach($DataPropertyMappings as $PropertyMapping) {
+            $PropertyMapping->Persist($EntityDataArray, $ColumnDataArray);
+        }
+        
+        foreach($EntityDataArray as $Key => $EntityData) {
+            $ColumnData = $ColumnDataArray[$Key];
+            $PropertyData = $EntityData->GetData();
+            
+            foreach($this->EntityPropertyToOneRelationMappings as $PropertyIdentifier => $PropertyMapping) {
+                $PropertyMapping->Persist($Transaction, $ColumnData, $PropertyData[$PropertyIdentifier]);
+            }
+            
+            foreach($this->CollectionPropertyToManyRelationMappings as $PropertyIdentifier => $PropertyMapping) {
+                $PropertyMapping->Persist($Transaction, $ColumnData, $PropertyData[$PropertyIdentifier]);
+            }
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
     final public function MapResultRowsToRevivalData(array $ResultRowArray) {
         return $this->MapResultRowsToRevivalDataByMappings($ResultRowArray, $this->PropertyMappings);
     }
@@ -507,17 +596,20 @@ abstract class EntityRelationalMap implements IEntityRelationalMap {
             $RevivalData = $this->EntityMap->RevivalData();
             $RevivalDataArray[$Key] = $RevivalData;
         }
-        
-        foreach($PropertyMappings as $PropertyIdentifier => $PropertyMapping) {
-            if($PropertyMapping instanceof IRelationshipPropertyRelationMapping) {
-                $PropertyMapping->Revive($this->Database, $ResultRowArray, $RevivalDataArray);
-            }
-            else {
-                $PropertyMapping->Revive($ResultRowArray, $RevivalDataArray);
-            }
-        }
+        $this->MapColumnDataToPropertyData($ResultRowArray, $RevivalDataArray, $PropertyMappings);
         
         return $RevivalDataArray;
+    }
+    
+    private function MapColumnDataToPropertyData(array $ColumnDataArray, array $PropertyDataArray, array $PropertyMappings) {
+        foreach($PropertyMappings as $PropertyIdentifier => $PropertyMapping) {
+            if($PropertyMapping instanceof IRelationshipPropertyRelationMapping) {
+                $PropertyMapping->Revive($this->Database, $ColumnDataArray, $PropertyDataArray);
+            }
+            else {
+                $PropertyMapping->Revive($ColumnDataArray, $PropertyDataArray);
+            }
+        }
     }
 }
 

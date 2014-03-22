@@ -28,6 +28,7 @@ use \Storm\Core\Object\Expressions\Operators;
  * @author Elliot Levin <elliot@aanet.com.au>
  */
 class VariableResolverWalker extends O\ExpressionWalker {
+    private $ScopeUnresolvedVariablesStack = [];
     private $UnresolvedVariables = [];
     private $ScopeVariableExpressionMapStack = [];
     private $VariableExpressionMap = [];
@@ -74,13 +75,22 @@ class VariableResolverWalker extends O\ExpressionWalker {
      * Convert any assignments to the equivalent binary expression and stores resolved value.
      */
     public function WalkAssignment(O\AssignmentExpression $Expression) {
-        $AssignToExpression = $this->Walk($Expression->GetAssignToExpression())->Simplify();
+        $AssignToExpression = $Expression->GetAssignToExpression();
+        if($AssignToExpression instanceof O\UnresolvedVariableExpression) {
+            $AssignToExpression = $AssignToExpression->Update(
+                    $this->Walk($AssignToExpression->GetNameExpression()));
+        }
+        else {
+            $AssignToExpression = $this->Walk($AssignToExpression);
+        }
+        $AssignToExpression = $AssignToExpression->Simplify();
+        
         $AssignmentOperator = $Expression->GetOperator();
         $AssignmentValueExpression = $this->Walk($Expression->GetAssignmentValueExpression());
         
         if($AssignToExpression instanceof O\UnresolvedVariableExpression
                 && $AssignToExpression->GetNameExpression() instanceof O\ValueExpression) {
-            $AssignmentName = $AssignToExpression->GetValue();
+            $AssignmentName = $AssignToExpression->GetNameExpression()->GetValue();
             $BinaryOperator = $this->AssignmentToBinaryOperator($AssignmentOperator);
             
             if($BinaryOperator !== null) {
@@ -109,13 +119,20 @@ class VariableResolverWalker extends O\ExpressionWalker {
     }
     
     private function Scope(array $UsedVariableNames) {
-        array_push($this->ScopeVariableExpressionMapStack, $this->VariableExpressionMap);
+        array_push($this->ScopeUnresolvedVariablesStack, $this->UnresolvedVariables);
+        $this->UnresolvedVariables = [];
         
+        array_push($this->ScopeVariableExpressionMapStack, $this->VariableExpressionMap);
         $this->VariableExpressionMap = array_intersect_key(
                 $this->VariableExpressionMap, 
                 array_flip(array_values($UsedVariableNames)));
+        
     }
-    private function Unscope() {
+    private function Unscope(array $ParameterNames) {
+        $this->UnresolvedVariables = array_merge(
+                array_pop($this->ScopeUnresolvedVariablesStack), 
+                array_diff($this->UnresolvedVariables, $ParameterNames));
+        
         $this->VariableExpressionMap = array_pop($this->ScopeVariableExpressionMapStack);
     }
     
@@ -131,7 +148,7 @@ class VariableResolverWalker extends O\ExpressionWalker {
                 $UsedVariableNames, 
                 $this->WalkAll($Expression->GetBodyExpressions()));
         
-        $this->Unscope();
+        $this->Unscope($Expression->GetParameterNames());
         
         return $Expression;
     }
@@ -146,13 +163,19 @@ class VariableResolverWalker extends O\ExpressionWalker {
             if(isset($this->VariableExpressionMap[$Name])) {
                 return $this->VariableExpressionMap[$Name];
             }
-            $this->UnresolvedVariables[] = $Name;
+            $this->AddUnresolvedVariable($Name);
         }
         else {
-            $this->UnresolvedVariables[] = $this->GetUnresolvedName($NameExpression);
+            $this->AddUnresolvedVariable($this->GetUnresolvedName($NameExpression));
         }
         
         return $Expression;
+    }
+    
+    private function AddUnresolvedVariable($Name) {
+        if(!in_array($Name, $this->UnresolvedVariables)) {
+            $this->UnresolvedVariables[] = $Name;
+        }
     }
     
     private function GetUnresolvedName(O\Expression $NameExpression) {

@@ -61,7 +61,7 @@ abstract class OperationMapper implements Expressions\IOperationMapper {
      */
     final public function MapUnary($Operator, R\Expression $MappedOperandExpression) {
         if(isset($this->MatchingUnaryOperators[$Operator])) {
-            return R\Expression::BinaryOperation(
+            return R\Expression::UnaryOperation(
                     $this->MatchingUnaryOperators[$Operator], 
                     $MappedOperandExpression);
         }
@@ -85,10 +85,10 @@ abstract class OperationMapper implements Expressions\IOperationMapper {
     
     final public function MapCast($CastType, R\Expression $MappedCastValueExpression) {
         if(isset($this->MatchingCastTypes[$CastType])) {
-            return $this->CastAsTypeExpression($CastType, $MappedCastValueExpression);
+            return $this->CastAsTypeExpression($this->MatchingCastTypes[$CastType], $MappedCastValueExpression);
         }
         
-        $Expression = $this->MapCast($CastType, $MappedCastValueExpression);
+        $Expression = $this->MapCastOperation($CastType, $MappedCastValueExpression);
         
         if($Expression === null) {
             throw new \Storm\Core\Mapping\MappingException(

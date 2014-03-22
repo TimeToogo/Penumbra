@@ -10,30 +10,30 @@ class RelationshipChangeTest extends StormTestCase {
     private $DiscardedRelationship;
     
     protected function setUp() {
-        $this->PersistedRelationship = $this->getMockWithoutConstructor(self::CoreObjectNamespace . 'PersistedRelationship');
-        $this->DiscardedRelationship = $this->getMockWithoutConstructor(self::CoreObjectNamespace . 'DiscardedRelationship');
+        $this->PersistedRelationship = $this->getMockWithoutConstructor(self::CoreObjectNamespace . 'Identity');
+        $this->DiscardedRelationship = $this->getMockWithoutConstructor(self::CoreObjectNamespace . 'Identity');
     }
     
     public function testSuppliedParametersAreEqualToGetterMethods() {
         
         $RelationshipChange = new RelationshipChange($this->PersistedRelationship, $this->DiscardedRelationship);
         
-        $this->assertEquals($RelationshipChange->GetPersistedRelationship(), $this->PersistedRelationship);
-        $this->assertEquals($RelationshipChange->GetDiscardedRelationship(), $this->DiscardedRelationship);
+        $this->assertEquals($RelationshipChange->GetPersistedEntityData(), $this->PersistedRelationship);
+        $this->assertEquals($RelationshipChange->GetDiscardedIdentity(), $this->DiscardedRelationship);
     }
     
     public function testOnlyHasPersistedRelationship() {
         $RelationshipChange = new RelationshipChange($this->PersistedRelationship, null);
         
-        $this->assertTrue($RelationshipChange->HasPersistedRelationship());
-        $this->assertFalse($RelationshipChange->HasDiscardedRelationship());
+        $this->assertTrue($RelationshipChange->HasPersistedEntityData());
+        $this->assertFalse($RelationshipChange->HasDiscardedIdentity());
     }
     
     public function testOnlyHasDiscardedRelationship() {
         $RelationshipChange = new RelationshipChange(null, $this->DiscardedRelationship);
         
-        $this->assertTrue($RelationshipChange->HasDiscardedRelationship());
-        $this->assertFalse($RelationshipChange->HasPersistedRelationship());
+        $this->assertTrue($RelationshipChange->HasDiscardedIdentity());
+        $this->assertFalse($RelationshipChange->HasPersistedEntityData());
     }
 }
 

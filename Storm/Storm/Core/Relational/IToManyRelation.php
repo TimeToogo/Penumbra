@@ -20,15 +20,21 @@ interface IToManyRelation extends IRelation {
      */
     public function MapParentKeysToRelatedRows(array $ParentRows, array $RelatedRows);
     
+    
     /**
-     * Sync the supplied relationship changes by persisting to/discarding from the transaction
+     * Sync the supplied relationship change by persisting/discarding from the transaction
      * 
      * @param Transaction $Transaction The transaction to persist to
-     * @param ResultRow $ParentData The parent result row
-     * @param RelationshipChange[] $RelationshipChanges The mapped relationship changes
+     * @param ResultRow $ParentData The parent row data
+     * @param PrimaryKey|null[] $DiscardedPrimaryKey The primary key of the old related rows
+     * @param ColumnData|null[] $PersistedPrimaryKey The persisted data of the new related rows
      * @return void
      */
-    public function Persist(Transaction $Transaction, ResultRow $ParentData, array $RelationshipChanges);
+    public function Persist(
+            Transaction $Transaction, 
+            ResultRow $ParentData, 
+            array $DiscardedPrimaryKeys, 
+            array $PersistedRelatedDataArray);
 }
 
 ?>

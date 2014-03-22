@@ -39,21 +39,31 @@ class Traversing extends Accessor {
             $NestedAccessor->Identifier($Identifier);
         }
     }
-    public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
-        $ReturnExpression = $this->FinalAccessor->ResolveTraversalExpression($Expression, $PropertyExpression);
-        if(!$ReturnExpression) {
-            return null;
-        }
-        
+    
+    public function ResolveTraversalExpression(array $TraversalExpressions, O\PropertyExpression $PropertyExpression, &$ReturnTotalResolutionDepth) {
+        $TotalResolutionDepth = 0;
+                
         $Expression = $Expression->GetValueExpression();
-        foreach(array_reverse($this->TraversingAccessors) as $NestedAccessor) {
-            if(!$NestedAccessor->ResolveTraversalExpression($Expression, $PropertyExpression)) {
-                return null;
+        foreach($this->TraversingAccessors as $TraversingAccessor) {
+            $ResolutionDepth = 0;
+            
+            if($TraversingAccessor->ResolveTraversalExpression($TraversalExpressions, $PropertyExpression, $ResolutionDepth) !== null) {
+                $TraversalExpressions = array_slice($TraversalExpressions, $ResolutionDepth);
+                $TotalResolutionDepth += $ResolutionDepth;
             }
-            $Expression = $Expression->GetValueExpression();
+            else {
+                return;
+            }
         }
         
-        return $ReturnExpression;
+        $ResolutionDepth = 0;
+        $ResolvedExpression = $this->FinalAccessor->ResolveTraversalExpression($TraversalExpressions, $PropertyExpression, $ResolutionDepth);
+        if($ResolvedExpression === null) {
+            return;
+        }
+                
+        $ReturnTotalResolutionDepth = $TotalResolutionDepth;
+        return $ResolvedExpression;
     }
     
     public function __clone() {
@@ -63,7 +73,12 @@ class Traversing extends Accessor {
     }
     
     private function Add(Accessor $Accessor) {
-        $this->NestedAccessors[] = $Accessor;
+        if($Accessor instanceof self) {
+            $this->NestedAccessors = array_merge($this->NestedAccessors, $Accessor->NestedAccessors);
+        }
+        else {
+            $this->NestedAccessors[] = $Accessor;
+        }
     }
     
     /**

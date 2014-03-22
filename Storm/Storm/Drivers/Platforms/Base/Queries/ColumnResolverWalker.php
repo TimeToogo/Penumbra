@@ -2,6 +2,7 @@
 
 namespace Storm\Drivers\Platforms\Base\Queries;
 
+use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Expressions as R;
 
 class ColumnResolverWalker extends R\ExpressionWalker {
@@ -23,10 +24,16 @@ class ColumnResolverWalker extends R\ExpressionWalker {
         
         if(isset($this->SourceAliasMap[$Source])) {
             $SourceAlias = $this->SourceAliasMap[$Source];
-            return R\Expression::Identifier([$SourceAlias, $Expression->GetColumn()->GetName()]);
+            return R\EscapedValueExpression::Identifier([$SourceAlias, $this->GetColumnName($Expression)]);
         }
         
         return parent::WalkColumn($Expression);
+    }
+    
+    private function GetColumnName(R\ColumnExpression $Expression) {
+        $Column = $Expression->GetColumn();
+        
+        return $Expression->GetSource() instanceof Relational\ITable ? $Column->GetName() : $Column->GetIdentifier();
     }
 }
 

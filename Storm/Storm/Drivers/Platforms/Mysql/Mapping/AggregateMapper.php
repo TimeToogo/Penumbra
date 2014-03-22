@@ -9,11 +9,29 @@ use \Storm\Drivers\Base\Relational\Expressions as R;
 class AggregateMapper extends Mapping\AggregateMapper {
     protected function MatchingAggregateFunctions() {
         return [
-            self::Maximum => 'AVERAGE',
+            self::Average => 'AVG',
             self::Maximum => 'MAX',
             self::Minimum => 'MIN',
             self::Sum => 'SUM',
         ];
+    }
+    
+    public function MapAll(R\Expression $MappedValueExpression) {
+        return R\Expression::FunctionCall('BIT_AND', [
+                R\Expression::BinaryOperation(
+                        $MappedValueExpression, 
+                        R\Operators\Binary::LogicalAnd, 
+                        R\Expression::BoundValue(1))
+        ]);
+    }
+    
+    public function MapAny(R\Expression $MappedValueExpression) {
+        return R\Expression::FunctionCall('BIT_OR', [
+                R\Expression::BinaryOperation(
+                        $MappedValueExpression, 
+                        R\Operators\Binary::LogicalAnd, 
+                        R\Expression::BoundValue(1))
+        ]);
     }
 
     public function MapCount(array $UniqueValueExpressions = null) {
@@ -42,7 +60,7 @@ class AggregateMapper extends Mapping\AggregateMapper {
             $ArgumentExpressions[] = $this->DistinctKeyword;
         }
         $ArgumentExpressions[] = $MappedValueExpression;
-        $ArgumentExpressions[] = R\Expression::Keyword('SEPERATOR');
+        $ArgumentExpressions[] = R\Expression::Keyword('SEPARATOR');
         $ArgumentExpressions[] = R\Expression::EscapedValue($Delimiter);
         
         return R\Expression::FunctionCall('GROUP_CONCAT', [R\Expression::Multiple($ArgumentExpressions)]);

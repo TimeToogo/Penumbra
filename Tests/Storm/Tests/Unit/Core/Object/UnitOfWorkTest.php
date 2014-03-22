@@ -131,7 +131,7 @@ class UnitOfWorkTest extends StormTestCase {
                 ->method('GetEntityType')
                 ->will($this->returnValue(self::EntityType));
         
-        $this->UnitOfWork->DiscardWhere($Criteria);
+        $this->UnitOfWork->DiscardBy($Criteria);
         
         $this->assertContains($Criteria, $this->UnitOfWork->GetDiscardedCriteria());
     }
@@ -145,7 +145,7 @@ class UnitOfWorkTest extends StormTestCase {
                 ->method('GetEntityType')
                 ->will($this->returnValue(__CLASS__));
         
-        $this->UnitOfWork->DiscardWhere($Criteria);
+        $this->UnitOfWork->DiscardBy($Criteria);
     }
 }
 

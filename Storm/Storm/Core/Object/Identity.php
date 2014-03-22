@@ -7,7 +7,7 @@ namespace Storm\Core\Object;
  * 
  * @author Elliot Levin <elliot@aanet.com.au>
  */
-class Identity extends EntityData {
+class Identity extends EntityPropertyData {
     public function __construct(EntityMap $EntityMap, array $IdentityData = []) {
         parent::__construct($EntityMap, $EntityMap->GetIdentityProperties(), $IdentityData);
     }
@@ -18,7 +18,7 @@ class Identity extends EntityData {
      * @return string The hash of the entity
      */
     final public function Hash() {
-        $PropertyData = $this->GetPropertyData();
+        $PropertyData = $this->GetData();
         ksort($PropertyData);
         return md5(json_encode($PropertyData));
     }

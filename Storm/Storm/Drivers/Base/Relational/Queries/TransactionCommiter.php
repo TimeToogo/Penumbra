@@ -34,12 +34,12 @@ class TransactionCommiter implements ITransactionCommiter {
                 }
             }
             
-            foreach($Transaction->GetDeletes() as $Criteria) {
-                $this->DeleteWhereQuery($Connection, $Criteria);
+            foreach($Transaction->GetDeletes() as $Delete) {
+                $this->ExecuteDelete($Connection, $Delete);
             }
             
-            foreach($Transaction->GetUpdates() as $Procedure) {
-                $this->ExecuteUpdate($Connection, $Procedure);
+            foreach($Transaction->GetUpdates() as $Update) {
+                $this->ExecuteUpdate($Connection, $Update);
             }
             
             $GroupedPersistedRows = $Transaction->GetPersistedRowGroups();

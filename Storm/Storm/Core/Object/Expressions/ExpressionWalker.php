@@ -73,8 +73,9 @@ class ExpressionWalker {
     
     public function WalkMethodCall(MethodCallExpression $Expression) {
         return $Expression->Update(
-                $this->WalkAll($Expression->GetArgumentExpressions()),
-                $this->Walk($Expression->GetNameExpression()));
+                $this->Walk($Expression->GetValueExpression()),
+                $this->Walk($Expression->GetNameExpression()),
+                $this->WalkAll($Expression->GetArgumentExpressions()));
     }
     
     public function WalkIndex(IndexExpression $Expression) {

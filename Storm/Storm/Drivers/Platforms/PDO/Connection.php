@@ -18,6 +18,13 @@ class Connection extends Queries\Connection {
     }
     
     /**
+     * @return \PDO
+     */
+    public function GetPDO() {
+        return $this->PDO;
+    }
+    
+    /**
      * @return Connection
      */
     public static function Connect($DSN, $Username = null, $Password = null, array $DriverOptions = null) {

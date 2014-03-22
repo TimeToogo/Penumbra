@@ -6,10 +6,22 @@ use \Storm\Core\Object;
 
 interface IRelationshipType {
     public function IsIdentifying();
-    public function GetPersistedRelationship(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,
-            $ParentEntity, $RelatedEntity);
-    public function GetDiscardedRelationship(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,
-            $ParentEntity, $RelatedEntity);
+    
+    /**
+     * @return Object\EntityPropertyData
+     */
+    public function GetPersistedEntityData(
+            Object\Domain $Domain, 
+            Object\UnitOfWork $UnitOfWork, 
+            $RelatedEntity);
+    
+    /**
+     * @return Object\Identity
+     */
+    public function GetDiscardedIdentity(
+            Object\Domain $Domain, 
+            Object\UnitOfWork $UnitOfWork,
+            $RelatedEntity);
 }
 
 

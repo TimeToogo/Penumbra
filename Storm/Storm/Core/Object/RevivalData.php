@@ -12,6 +12,13 @@ final class RevivalData extends EntityPropertyData {
     public function __construct(EntityMap $EntityMap, array $EntityData = []) {
         parent::__construct($EntityMap, $EntityMap->GetProperties(), $EntityData);
     }
+    
+    public function ReviveEntity() {
+        $Entity = $this->EntityMap->ConstructEntity($this);
+        $this->EntityMap->LoadEntity($this, $Entity);
+        
+        return $Entity;
+    }
 }
 
 ?>

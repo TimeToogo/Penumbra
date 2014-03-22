@@ -163,18 +163,18 @@ class FunctionMapper extends Mapping\FunctionMapper {
         $HashNameExpression = $ArgumentExpressions[0];
         unset($ArgumentExpressions[0]);
         
-        if(!($HashNameExpression instanceof EE\ConstantExpression)) {
-            throw new PlatformException('Hash algorithm must be a constant value');
+        if(!($HashNameExpression instanceof R\ValueExpression)) {
+            throw new \Storm\Drivers\Base\Relational\PlatformException('Hash algorithm must be a constant value');
         }
         $HashName = $HashNameExpression->GetValue();
         $DataExpression = $ArgumentExpressions[1];
         
         switch ($HashName) {
             case 'md5':
-                return $this->MapFunctionCallExpression('md5', $ArgumentExpressions);
+                return R\Expression::FunctionCall('MD5', $ArgumentExpressions);
                 
             case 'sha1':
-                return $this->MapFunctionCallExpression('sha1', $ArgumentExpressions);
+                return R\Expression::FunctionCall('SHA1', $ArgumentExpressions);
                 
             case 'sha224':
             case 'sha256':
@@ -207,11 +207,11 @@ class FunctionMapper extends Mapping\FunctionMapper {
     
     
     public function ParseMcryptArguments(array &$ArgumentExpressions) {
-        if(!($ArgumentExpressions[0] instanceof EE\ConstantExpression)) {
+        if(!($ArgumentExpressions[0] instanceof R\ValueExpression)) {
             throw new PlatformException('Cipher algorithm must be constant');
         }
         
-        if(!($ArgumentExpressions[3] instanceof EE\ConstantExpression)) {
+        if(!($ArgumentExpressions[3] instanceof R\ValueExpression)) {
             throw new PlatformException('Cipher mode must be constant');
         }
         
@@ -286,7 +286,7 @@ class FunctionMapper extends Mapping\FunctionMapper {
         }
     }
     
-    private function RandomInt(CoreExpression $Minimum, CoreExpression $Maximum) {
+    private function RandomInt(R\Expression $Minimum, R\Expression $Maximum) {
         //Add one due to flooring the random value
         $Maximum = $this->Add($Maximum, 1);
                 
@@ -295,21 +295,22 @@ class FunctionMapper extends Mapping\FunctionMapper {
                 R\Operators\Binary::Subtraction, 
                 $Minimum);
 
-        return $this->MapFunctionCallExpression('floor', 
-                [R\Expression::BinaryOperation(
+        return R\Expression::FunctionCall('FLOOR', [
+                R\Expression::BinaryOperation(
                         $Minimum, 
                         R\Operators\Binary::Addition, 
                         R\Expression::BinaryOperation(
                                 R\Expression::FunctionCall('RAND'), 
                                 R\Operators\Binary::Multiplication, 
-                                $DifferenceExpression))]);
+                                $DifferenceExpression))
+        ]);
     }
     public function RandomIntFromArguments(array &$ArgumentExpressions, $DefaultMinimum, $DefaultMaximum) {
         $Minimum = null;
         $Maximum = null;
         if(count($ArgumentExpressions) === 0) {
-            $Minimum = new EE\ConstantExpression($DefaultMinimum);
-            $Maximum = new EE\ConstantExpression($DefaultMaximum);
+            $Minimum = R\Expression::BoundValue($DefaultMinimum);
+            $Maximum = R\Expression::BoundValue($DefaultMaximum);
         }
         else {
             $Minimum = $ArgumentExpressions[0];
@@ -341,21 +342,21 @@ class FunctionMapper extends Mapping\FunctionMapper {
     
     // <editor-fold defaultstate="collapsed" desc="Helpers">
     
-    private function Add(CoreExpression $Expression, $Value) {
+    private function Add(R\Expression $Expression, $Value) {
         return R\Expression::BinaryOperation(
                 $Expression, 
                 R\Operators\Binary::Addition, 
                 R\Expression::BoundValue($Value));
     }
 
-    private function Subtract(CoreExpression $Expression, $Value) {
+    private function Subtract(R\Expression $Expression, $Value) {
         return R\Expression::BinaryOperation(
                 $Expression, 
                 R\Operators\Binary::Subtraction, 
                 R\Expression::BoundValue($Value));
     }
 
-    private function Binary(CoreExpression $Expression) {
+    private function Binary(R\Expression $Expression) {
         return R\Expression::Multiple([R\Expression::Keyword('BINARY'), $Expression]);
     }
 

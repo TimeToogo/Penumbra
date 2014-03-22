@@ -44,6 +44,13 @@ abstract class TraversalExpression extends Expression {
     }
     
     /**
+     * @return Expression
+     */
+    final public function GetOriginExpression() {
+        return $this->OriginExpression;
+    }
+    
+    /**
      * @return int
      */
     final public function GetTraversalDepth() {

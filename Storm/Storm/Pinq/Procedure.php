@@ -17,7 +17,6 @@ class Procedure extends Criteria  {
     
     public function __construct(
             IEntityManager $EntityManager,
-            IEntityMap $EntityMap, 
             IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
         parent::__construct($EntityManager->GetEntityMap(), $FunctionToExpressionTreeConverter);
         

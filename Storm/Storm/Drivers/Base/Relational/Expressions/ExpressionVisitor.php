@@ -32,7 +32,7 @@ class ExpressionVisitor extends ExpressionWalker {
     protected function VisitBinaryOperation(BinaryOperationExpression $Expression) {}
     
     final public function WalkUnaryOperation(UnaryOperationExpression $Expression) {
-        $this->VisitBinaryOperation($Expression);
+        $this->VisitUnaryOperation($Expression);
         return $Expression;
     }
     protected function VisitUnaryOperation(UnaryOperationExpression $Expression) {}

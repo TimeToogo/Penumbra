@@ -11,7 +11,7 @@ interface IResultSetSourceCompiler {
     public function AppendResultSetSources(
             QueryBuilder $QueryBuilder, 
             Relational\ResultSetSources $Sources,
-            \SplObjectStorage $SourceAliasMap);
+            ColumnResolverWalker $ColumnResolverWalker);
 }
 
 ?>

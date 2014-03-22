@@ -18,6 +18,11 @@ interface IObjectTypeMapper {
     public function MapInstance($Instance);
     
     /**
+     * @return object|null
+     */
+    public function ReviveInstance($MappedValue);
+    
+    /**
      * @return R\Expression
      */
     public function MapValue(R\Expression $ValueExpression);

@@ -26,6 +26,18 @@ class ExpressionWalker {
         return $WalkedExpressions;
     }
     
+    /**
+     * @return Expression[]
+     */
+    final public function WalkObjectMap(\SplObjectStorage $Expressions) {
+        $WalkedExpressions = new \SplObjectStorage();
+        foreach ($Expressions as $Expression) {
+            $WalkedExpressions[$this->Walk($Expression)] = $Expressions[$Expression];
+        }
+        
+        return $WalkedExpressions;
+    }
+    
     public function WalkBoundValue(BoundValueExpression $Expression) {
         return $Expression;
     }

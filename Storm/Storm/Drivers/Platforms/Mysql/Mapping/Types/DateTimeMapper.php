@@ -8,6 +8,18 @@ use \Storm\Drivers\Base\Relational\Expressions as R;
 
 class DateTimeMapper extends Mapping\ObjectTypeMapper {
     const DateTimeFormat = 'Y-m-d H:i:s';
+    private static $UTC;
+    
+    public function __construct() {
+        parent::__construct();
+        $this->__wakeup();
+    }
+    
+    public function __wakeup() {
+        if(self::$UTC === null) {
+            self::$UTC = new \DateTimeZone('UTC');
+        }
+    }
     
     public function GetClass() {
         return 'DateTime';
@@ -18,13 +30,19 @@ class DateTimeMapper extends Mapping\ObjectTypeMapper {
     }
 
     protected function MapClassInstance($Instance) {
+        $Instance = clone $Instance;
+        $Instance->setTimezone(self::$UTC);
         return R\Expression::BoundValue($Instance->format(self::DateTimeFormat));
+    }
+    
+    protected function ReviveClassInstance($MappedValue) {
+        return \DateTime::createFromFormat(self::DateTimeFormat, $MappedValue, self::$UTC);
     }
 
     protected function MapNewClass(array $MappedArgumentExpressions) {
         switch (count($MappedArgumentExpressions)) {
             case 0:
-                return R\Expression::FunctionCall('NOW');
+                return R\Expression::FunctionCall('UTC_TIMESTAMP');
             
             case 1:
                 if($MappedArgumentExpressions[0] instanceof R\ValueExpression) {
@@ -94,7 +112,7 @@ class DateTimeMapper extends Mapping\ObjectTypeMapper {
 
     private function AddConstantDateTimeInterval(R\Expression &$ValueExpression, $Value, $Unit) {
         if($Value !== 0) {
-            $this->AddDateTimeInterval($ValueExpression, Expression::BoundValue($Value), $Unit);
+            $this->AddDateTimeInterval($ValueExpression, R\Expression::BoundValue($Value), $Unit);
         }
     }
 
@@ -137,10 +155,10 @@ class DateTimeMapper extends Mapping\ObjectTypeMapper {
             $IntervalValue->invert = $IntervalValue->invert === 1 ? 0 : 1;
         }         
         else {
-            $ArgumentExpressions[0] = Expression::UnaryOperation(Operators\Unary::Negation, $IntervalExpression);
+            $ArgumentExpressions[0] = R\Expression::UnaryOperation(Operators\Unary::Negation, $IntervalExpression);
         }
         
-        return $this->MapAdd($ValueExpression, $ArgumentExpressions);
+        return $this->MapAdd($ValueExpression, $ArgumentExpressions, $ReturnType);
     }
     
     public function MapSetDate(R\Expression $ValueExpression, array $ArgumentExpressions, &$ReturnType) {

@@ -136,66 +136,6 @@ abstract class Domain {
     }
     
     /**
-     * Constructs a discarded non-identifying relationship between the two supplied entities.
-     * 
-     * @param object $Entity 
-     * @param object $RelatedEntity
-     * @return DiscardedRelationship The discarded relationship
-     */
-    final public function DiscardedRelationship($Entity, $RelatedEntity) {
-        $ParentIdentity = $this->VerifyEntity(__METHOD__, $Entity)->Identity($Entity);
-        $RelatedIdentity = $this->VerifyEntity(__METHOD__, $RelatedEntity)->Identity($RelatedEntity);
-        
-        return new DiscardedRelationship(false, $ParentIdentity, $RelatedIdentity);
-    }
-    
-    /**
-     * Constructs a discarded identifying relationship between the parent and child entity.
-     * NOTE: The child entity relationships will be discarded in the supplied unit of work.
-     * 
-     * @param object $Entity 
-     * @param object $ChildEntity
-     * @param UnitOfWork $UnitOfWork 
-     * @return DiscardedRelationship The discarded relationship
-     */
-    final public function DiscardedIdentifyingRelationship($ParentEntity, $ChildEntity, UnitOfWork $UnitOfWork) {
-        $ParentIdentity = $this->VerifyEntity(__METHOD__, $ParentEntity)->Identity($ParentEntity);
-        $ChildIdentity = $this->VerifyEntity(__METHOD__, $ChildEntity)->Discard($UnitOfWork, $ChildEntity)->GetIdentity();
-        
-        return new DiscardedRelationship(true, $ParentIdentity, $ChildIdentity);
-    }
-    
-    /**
-     * Constructs a discarded non-identifying relationship between the two supplied entities.
-     * 
-     * @param object $Entity
-     * @param object $RelatedEntity
-     * @return PersistedRelationship The persisted relationship
-     */
-    final public function PersistedRelationship($ParentEntity, $RelatedEntity) {
-        $ParentIdentity = $this->VerifyEntity(__METHOD__, $ParentEntity)->Identity($ParentEntity);
-        $RelatedIdentity = $this->VerifyEntity(__METHOD__, $RelatedEntity)->Identity($RelatedEntity);
-        
-        return new PersistedRelationship($ParentIdentity, $RelatedIdentity);
-    }
-    
-    /**
-     * Constructs a persisted identifying relationship between the parent and child entity.
-     * NOTE: The child entity relationships will be persisted in the supplied unit of work.
-     * 
-     * @param object $Entity 
-     * @param object $ChildEntity
-     * @param UnitOfWork $UnitOfWork 
-     * @return PersistedRelationship The persisted relationship
-     */
-    final public function PersistedIdentifyingRelationship($ParentEntity, $ChildEntity, UnitOfWork $UnitOfWork) {
-        $ParentIdentity = $this->VerifyEntity(__METHOD__, $ParentEntity)->Identity($ParentEntity);
-        $RelatedPersistenceData = $this->VerifyEntity(__METHOD__, $ChildEntity)->Persist($UnitOfWork, $ChildEntity);
-        
-        return new PersistedRelationship($ParentIdentity, null, $RelatedPersistenceData);
-    }
-    
-    /**
      * Persists an entity relationships to the supplied unit of work and returns the entity's
      * persistence data.
      * 
@@ -311,7 +251,7 @@ abstract class Domain {
             $UnitOfWork->Discard($Entity);
         }
         foreach($CriteriaToDiscard as $Criteria) {
-            $UnitOfWork->DiscardWhere($Criteria);
+            $UnitOfWork->DiscardBy($Criteria);
         }
         
         return $UnitOfWork;

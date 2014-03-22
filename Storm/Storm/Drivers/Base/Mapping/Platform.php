@@ -146,13 +146,21 @@ class Platform implements IPlatform {
         return $ResultSetSelect;
     }
     
-    final public function MapDataRequest(Object\IDataRequest $DataRequest, Mapping\IEntityRelationalMap $EntityRelationalMap) {
+    final public function MapDataRequest(Object\IDataRequest $DataRequest, array &$AliasReviveFuncionMap, Mapping\IEntityRelationalMap $EntityRelationalMap) {
         $DataSelect = new Relational\DataSelect([], $this->GetResultSetSpecification($DataRequest, $EntityRelationalMap));
         
+        $AliasReturnTypes = [];
         $this->RequestMapper->MapDataRequest(
                 $DataRequest, 
                 $DataSelect, 
+                $AliasReturnTypes,
                 $this->GetExpressionMapper($EntityRelationalMap, $DataSelect));
+        
+        foreach ($AliasReturnTypes as $Alias => $ReturnType) {
+            if($ReturnType !== null) {
+                $AliasReviveFuncionMap[$Alias] = [$this->ObjectTypeMappers[$ReturnType], 'ReviveInstance'];
+            }
+        }
         
         return $DataSelect;
     }
@@ -188,7 +196,7 @@ class Platform implements IPlatform {
             Mapping\IEntityRelationalMap $EntityRelationalMap) {
         
         if($Query->IsFromEntityRequest()) {
-            $SubEntitySelect = $this->MapEntityRequest($Query->GetFromEntityRequest());
+            $SubEntitySelect = $this->MapEntityRequest($Query->GetFromEntityRequest(), $EntityRelationalMap);
             return new Relational\ResultSetSpecification(
                     new Relational\ResultSetSources($SubEntitySelect),
                     new Relational\Criteria());

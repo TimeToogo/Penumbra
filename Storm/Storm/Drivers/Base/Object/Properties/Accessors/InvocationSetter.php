@@ -7,7 +7,8 @@ use \Storm\Core\Object\Expressions\TraversalExpression;
 
 class InvocationSetter extends InvocationBase implements IPropertySetter {
     
-    public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+    public function ResolveTraversalExpression(array $TraversalExpressions, PropertyExpression $PropertyExpression) {
+        $Expression = $TraversalExpressions[0];
         if($Expression instanceof Expressions\InvocationExpression
                 || $this->MatchesInvokeMethodCall($Expression)) {
             

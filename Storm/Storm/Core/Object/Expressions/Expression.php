@@ -28,7 +28,7 @@ abstract class Expression {
     final protected static function SimplifyAll(array $Expressions) {
         $ReducedExpressions = [];
         foreach($Expressions as $Key => $Expression) {
-            $ReducedExpressions[$Key] = $Expression->Simplify();
+            $ReducedExpressions[$Key] = $Expression === null ? null : $Expression->Simplify();
         }
         
         return $ReducedExpressions;
@@ -151,8 +151,8 @@ abstract class Expression {
     /**
      * @return PropertyExpression
      */
-    final public static function Property(IProperty $Property) {
-        return new PropertyExpression($Property);
+    final public static function Property(IProperty $Property, PropertyExpression $ParentPropertyExpression = null) {
+        return new PropertyExpression($Property, $ParentPropertyExpression);
     }
     
     /**

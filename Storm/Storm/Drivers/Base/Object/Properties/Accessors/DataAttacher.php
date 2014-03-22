@@ -17,11 +17,8 @@ class DataAttacher extends Accessor {
         $Identifier .= '->' . $this->PropertyKey;
     }
     
-    public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
-        if($Expression instanceof \Storm\Core\Object\Expressions\FieldExpression
-                && $Expression->GetName() === $this->PropertyKey) {
-            return $PropertyExpression;
-        }
+    public function ResolveTraversalExpression(array $TraversalExpressions, PropertyExpression $PropertyExpression, &$ResolutionDepth) {
+        
     }
     
     final public function GetValue($Entity) {

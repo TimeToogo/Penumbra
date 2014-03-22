@@ -13,12 +13,14 @@ class DataRequest extends Request implements Object\IDataRequest {
             array $AliasExpressionMap, 
             array $GroupByExpressions,
             array $AggregatePredicateExpressions,
-            Object\ICriteria $Criteria = null) {
+            Object\ICriteria $Criteria = null,
+            Object\IEntityRequest $SubEntityRequest = null) {
         parent::__construct(
                 $EntityOrType, 
                 $GroupByExpressions, 
                 $AggregatePredicateExpressions, 
-                $Criteria);
+                $Criteria,
+                $SubEntityRequest);
         
         foreach($AliasExpressionMap as $Alias => $Expression) {
             $this->AddDataExpression($Alias, $Expression);

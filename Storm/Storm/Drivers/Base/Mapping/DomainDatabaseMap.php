@@ -30,10 +30,10 @@ abstract class DomainDatabaseMap extends Mapping\DomainDatabaseMap {
         return $this->Platform->MapEntityRequest($EntityRequest, $EntityRelationalMap);
     }
     
-    final protected function MapDataRequest(Object\IDataRequest $DataRequest) {
+    protected function MapDataRequest(Object\IDataRequest $DataRequest, array &$AliasReviveFuncionMap) {
         $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($DataRequest->GetEntityType());
         
-        return $this->Platform->MapDataRequest($DataRequest, $EntityRelationalMap);
+        return $this->Platform->MapDataRequest($DataRequest, $AliasReviveFuncionMap, $EntityRelationalMap);
     }
     
     final protected function MapProcedure(Object\IProcedure $Procedure) {

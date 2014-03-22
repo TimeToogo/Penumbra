@@ -29,26 +29,26 @@ interface IEntityMap {
     /**
      * Whether or not this map contains a property withthe supplied identifier
      * 
-     * @param string $Identifier The property identifier
+     * @param IProperty $Property The property
      * @return boolean
      */
-    public function HasProperty($Identifier);
+    public function HasProperty(IProperty $Property);
     
     /**
      * Whether or not this map contains a property with the supplied identifier
      * 
-     * @param string $Identifier The property identifier
+     * @param IProperty $Property The property
      * @return boolean
      */
-    public function HasIdentityProperty($Identifier);
+    public function HasIdentityProperty(IProperty $Property);
     
     /**
      * Whether or not this map contains a relationship property with the supplied identifier
      * 
-     * @param string $Identifier The property identifier
+     * @param IProperty $Property The property
      * @return void
      */
-    public function HasRelationshipProperty($Identifier);
+    public function HasRelationshipProperty(IProperty $Property);
     
     /**
      * Gets a property by its identifier
@@ -62,10 +62,9 @@ interface IEntityMap {
      * Parses the entity traversal tree to the resolved property expression tree
      * 
      * @param Expressions\TraversalExpression $Expression The entity traversal expression tree
-     * @param Expressions\PropertyExpression $ParentPropertyExpression The parent property
      * @return Expression The property expression
      */
-    public function ResolveTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null);
+    public function ResolveTraversalExpression(Expressions\TraversalExpression $Expression);
     
     /**
      * @return IProperty[]
@@ -134,7 +133,7 @@ interface IEntityMap {
     /**
      * @return PersistenceData
      */
-    public function PersistanceData(array $PersistanceData = []);
+    public function PersistanceData($Entity, array $PersistanceData = []);
     
     /**
      * @return DiscardenceData

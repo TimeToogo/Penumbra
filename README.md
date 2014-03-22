@@ -58,29 +58,49 @@ The goals of Storm
  - Abstract yourself from the underlying database.
  - Maintain full IDE auto-completion.
  - Remove the hassle of magic strings and prevent SQL injection.
- - Use any type of [callable (function, method, closure)](#http://www.php.net/manual/en/language.types.callable.php).
  - Powerful aggregation api, `Count, Maximum, Minimum, Average, Sum, Implode, All, Any`
- - Supports used variables for anonymous function `function ($_) use ($Value) {...`
+ - Supports used variables for parameterized queries `function ($_) use ($Value) {...`
  - Supports dynamic fields, method calls, function calls etc.
- - Even supports relationship properties for seamless joins and subqueries!
+ - Even supports relationship properties for seamless joins!
 
-**Requests (`SELECT`) - Example:**
+**Entity Request (`SELECT`) - Example:**
 ```php
 $MiddleAgedUsersRequest = $UserRepository->Request()
         ->Where(function (User $User) {
-            return $User->GetAge() > 20 && $User->GetAge() < 50 && $User->IsActive();
+            return $User->GetAge() > 20 && $User->GetAge() < 50 ;
         })
-        ->OrderByDescending(function (User $User) { return $User->GetLastLoginDate(); })
-        ->Limit(20);
+        ->OrderByDescending(function (User $User) { return $User->GetLastLoginDate(); });
         
 $SomeActiveMiddleAgedUsers = $MiddleAgedUsersRequest->AsArray();
 ```
 Will map to something along the lines of:
 ```sql
 SELECT Users.* FROM Users 
-WHERE Users.Age > 20 AND Users.Age < 50 AND Users.IsActive
-ORDER BY Users.LastLoginDate DESC
-LIMIT 20;
+WHERE Users.Age > 20 AND Users.Age < 50
+ORDER BY Users.LastLoginDate DESC;
+```
+**Complex Data Request (`SELECT`) - Example:**
+```php
+$UserStatistics = $UserRepository->Request()
+        ->From($MiddleAgedUsersRequest)
+        ->Where(function (User $User) { return  $User->IsActive(); })
+        ->GroupBy(function (User $User) { return $User->GetAge(); })
+        ->Select(function (User $User, IAggregate $Users) {
+            return [
+                'Age' => $User->GetAge(),
+                'Amount' => $Users->Count(),
+                'AverageVisits' => $Users->Average(function (User $User) { return $User->GetVisitsPerDay(); })),
+            ];
+        });
+```
+Will map to something along the lines of:
+```sql
+SELECT Users.Age AS Age, COUNT(*) AS Amount, AVG(Users.VisitsPerDay) AS AverageVisits FROM 
+    (SELECT Users.* FROM Users 
+    WHERE Users.Age > 20 AND Users.Age < 50
+    ORDER BY Users.LastLoginDate DESC) AS Users
+WHERE Users.IsActive
+GROUP BY Users.Age;
 ```
 
 

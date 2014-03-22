@@ -133,21 +133,21 @@ abstract class ExpressionCompilerVisitor extends Queries\ExpressionCompilerVisit
     }
 
     public function VisitIf(R\IfExpression $Expression) {
-        $this->QueryBuilder->Append('CASE ');
+        $this->QueryBuilder->Append(' CASE ');
         
-        $this->AppendBinaryOperation($this->QueryBuilder, 
+        $this->VisitBinaryOperation(
                 R\Expression::BinaryOperation(
                         $Expression->GetConditionExpression(), 
                         R\Operators\Binary::LogicalAnd, 
                         R\Expression::BoundValue(1)));
         
-        $this->QueryBuilder->Append('WHEN 1 THEN');
+        $this->QueryBuilder->Append(' WHEN 1 THEN ');
         $this->Walk($Expression->GetIfTrueExpression());
         
-        $this->QueryBuilder->Append('ELSE');
+        $this->QueryBuilder->Append(' ELSE ');
         $this->Walk($Expression->GetIfFalseExpression());
         
-        $this->QueryBuilder->Append('END');
+        $this->QueryBuilder->Append(' END ');
     }
 }
 

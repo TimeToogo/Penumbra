@@ -19,6 +19,10 @@ class DateTimeZoneMapper extends Mapping\ObjectTypeMapper {
     protected function MapClassInstance($Instance) {
         return R\Expression::BoundValue($Instance->getName());
     }
+    
+    protected function ReviveClassInstance($MappedValue) {
+        return new \DateTimeZone($MappedValue);
+    }
 
     protected function MapNewClass(array $MappedArgumentExpressions) {
         return $MappedArgumentExpressions[0];

@@ -74,12 +74,22 @@ class Connection implements Queries\IConnection {
     }
     
     public function Prepare($QueryString, Queries\Bindings $Bindings = null) {
-        $this->Logger->Log('Preparing Query: ' .$QueryString);
+        if($this->ShouldLogPreparedQuery()) {
+            $this->Logger->Log('Preparing Query: ' .$QueryString);
+        }
         
         $Start = microtime(true);
         $Query = new Query($this->Logger, $this->Connection->Prepare($QueryString, $Bindings), $this->TimeSpentQuerying);
         $this->TimeSpentQuerying += microtime(true) - $Start;
         return $Query;
+    }
+    
+    private function ShouldLogPreparedQuery() {
+        if($this instanceof \Storm\Drivers\Platforms\PDO\Connection) {
+            return $this->GetPDO()->setAttribute(\PDO::ATTR_EMULATE_PREPARES) === false;
+        }
+        
+        return true;
     }
 
     public function QueryBuilder(Queries\Bindings $Bindings = null) {

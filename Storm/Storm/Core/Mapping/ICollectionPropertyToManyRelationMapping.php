@@ -33,8 +33,8 @@ interface ICollectionPropertyToManyRelationMapping extends IRelationshipProperty
      * with the appropriate data to revive the related entities.
      * 
      * @param Relational\Database $Database The database to load the related rows from
-     * @param Map $ResultRowRevivalDataMap The map containing the parent loaded result rows and 
-     * respective revival data
+     * @param Relational\ResultRow[] $ResultRowArray The loaded result rows
+     * @param Relational\RevivalData[] $RevivalDataArray The revival data array
      * @return void
      */
     public function Revive(Relational\Database $Database, array $ResultRowArray, array $RevivalDataArray);
@@ -45,7 +45,7 @@ interface ICollectionPropertyToManyRelationMapping extends IRelationshipProperty
      * 
      * @param Relational\Transaction $Transaction The transaction context
      * @param array $ParentData The column data of the parent
-     * @param Relational\RelationshipChange[] $RelationshipChanges The change in the relationship state
+     * @param Object\RelationshipChange[] $RelationshipChanges The change in the relationship state
      * @return void
      */
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges);

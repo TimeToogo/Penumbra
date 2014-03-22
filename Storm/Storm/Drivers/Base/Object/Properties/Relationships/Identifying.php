@@ -11,14 +11,14 @@ class Identifying implements IRelationshipType {
         return true;
     }
 
-    public function GetPersistedRelationship(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
-            $ParentEntity, $ChildEntity) {
-        return $Domain->PersistedIdentifyingRelationship($ParentEntity, $ChildEntity, $UnitOfWork);
+    public function GetPersistedEntityData(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
+            $ChildEntity) {
+        return $Domain->Persist($UnitOfWork, $ChildEntity);
     }
     
-    public function GetDiscardedRelationship(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
-            $ParentEntity, $ChildEntity) {
-        return $Domain->DiscardedIdentifyingRelationship($ParentEntity, $ChildEntity, $UnitOfWork);
+    public function GetDiscardedIdentity(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
+            $RelatedEntity) {
+        return $UnitOfWork->Discard($RelatedEntity);
     }
 }
 

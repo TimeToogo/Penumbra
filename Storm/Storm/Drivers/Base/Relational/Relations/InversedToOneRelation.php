@@ -14,6 +14,11 @@ class InversedToOneRelation extends ToOneRelationBase {
                 Relational\DependencyOrder::Before, 
                 Relational\DependencyOrder::After);
     }
+    
+    public function MapRelationalParentDataToRelatedData(
+            Relational\ColumnData $ParentData, Relational\ColumnData $RelatedData) {
+        $this->ForeignKey->MapReferencedToParentKey($ParentData, $RelatedData);
+    }
 }
 
 ?>

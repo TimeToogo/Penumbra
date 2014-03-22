@@ -105,58 +105,59 @@ class JoinTableRelation extends ToManyRelationBase {
         
     }
     
-    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges) {
-         /* @var $RelationshipChanges Relational\RelationshipChange[] */
-        $JoinRowsWithoutPrimaryKeys = [];
-        foreach($RelationshipChanges as $RelationshipChange) {
-            if($RelationshipChange->HasPersistedRelationship()) {
-                $JoinRow = $this->MapPersistedRelationshipToJoinRow($RelationshipChange->GetPersistedRelationship());
+    public function Persist(
+            Relational\Transaction $Transaction, 
+            Relational\ResultRow $ParentData, 
+            array $DiscardedPrimaryKeys, 
+            array $PersistedRelatedDataArray) {
+        
+        $ParentHasForeignKey = $this->ParentForeignKey->HasReferencedKey($ParentData);
+        $JoinRows = [];
+        $JoinRowsWithoutRelatedForeignKey = [];
+        
+        foreach($DiscardedPrimaryKeys as $Key => $DiscardedPrimaryKey) {
+            $RelatedData = $PersistedRelatedDataArray[$Key];
+            
+            if($RelatedData !== null) {
+                $RelatedHasForiegnKey = $this->ForeignKey->HasReferencedKey($RelatedData);
+                $JoinRow = $this->MapRelationshipToJoinRow($ParentData, $RelatedData);
                 $Transaction->Persist($JoinRow);
-                if(!$JoinRow->HasPrimaryKey()) {
-                    $JoinRowsWithoutPrimaryKeys[] = $JoinRow;
+                $JoinRows[] = $JoinRow;
+                if(!$RelatedHasForiegnKey) {
+                    $JoinRowsWithoutRelatedForeignKey[$Key] = $JoinRow;
                 }
             }
-            if($RelationshipChange->HasDiscardedRelationship()) {
-                $JoinRow = $this->MapDiscardedRelationshipToJoinRow($RelationshipChange->GetDiscardedRelationship());
+            
+            if($DiscardedPrimaryKey !== null) {
+                $JoinRow = $this->MapRelationshipToJoinRow($ParentData, $DiscardedPrimaryKey);
                 $Transaction->Discard($JoinRow->GetPrimaryKey());
             }
         }
-        if(count($JoinRowsWithoutPrimaryKeys) > 0) {
-            $ParentRow = $ParentData->GetRow($this->ParentForeignKey->GetReferencedTable());
-            $Transaction->SubscribeToPrePersistEvent(
-                    $this->JoinTable, 
-                    function() use (&$ParentRow, &$JoinRowsWithoutPrimaryKeys) {
-                        foreach($JoinRowsWithoutPrimaryKeys as $JoinRowWithoutPrimaryKey) {
-                            $this->ParentForeignKey->MapReferencedToParentKey(
-                                $ParentRow, 
-                                $JoinRowWithoutPrimaryKey);
-                        }
-                    });
-        }
-    }
-    protected function PersistIdentifyingRelationship(Relational\Transaction $Transaction, Relational\ResultRow $ParentRow, array $ChildRows) { }
-    
-    private function MapDiscardedRelationshipToJoinRow (Relational\DiscardedRelationship $Relationship) {
-        return $this->MapRelationshipToJoinRow($Relationship);
-    }
-    private function MapPersistedRelationshipToJoinRow (Relational\PersistedRelationship $Relationship) {
-        if($Relationship->IsIdentifying()) {
-            throw new RelationException(
-                    'JoinTableRelation cannot persist identifying relationships');
-        }
-        return $this->MapRelationshipToJoinRow($Relationship);        
+        
+        $MapForeignKeys = function () use ($ParentHasForeignKey, $ParentData, $JoinRows, $PersistedRelatedDataArray, $JoinRowsWithoutRelatedForeignKey) {
+            if(!$ParentHasForeignKey) {
+                foreach($JoinRows as $JoinRow) {
+                    $this->ParentForeignKey->MapReferencedToParentKey($ParentData, $JoinRow);
+                }
+            }
+            
+            foreach($JoinRowsWithoutRelatedForeignKey as $Key => $JoinRowsWithoutRelatedForeignKey) {
+                $RelatedData = $PersistedRelatedDataArray[$Key];
+                $this->ForeignKey->MapReferencedToParentKey($RelatedData, $JoinRowsWithoutRelatedForeignKey);
+            }
+        };
+        
+        $Transaction->SubscribeToPrePersistEvent(
+                $this->JoinTable, 
+                $MapForeignKeys);
     }
     
-    private function MapRelationshipToJoinRow($Relationship) {
+    private function MapRelationshipToJoinRow(Relational\ColumnData $ParentData, Relational\ColumnData $RelatedData) {
         if($this->RelatesToTableTwo) {
-            return $this->JoinTable->JoinRow(
-                    $Relationship->GetParentPrimaryKey(), 
-                    $Relationship->GetRelatedPrimaryKey());
+            return $this->JoinTable->JoinRow($ParentData, $RelatedData);
         }
         else {
-            return $this->JoinTable->JoinRow(
-                    $Relationship->GetRelatedPrimaryKey(), 
-                    $Relationship->GetParentPrimaryKey());               
+            return $this->JoinTable->JoinRow($RelatedData, $ParentData);               
         }
     }
 }

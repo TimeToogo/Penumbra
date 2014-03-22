@@ -2,12 +2,9 @@
 
 namespace Storm\Drivers\Base\Mapping\Mappings;
 
-use \Storm\Core\Containers\Map;
 use \Storm\Core\Mapping\IEntityPropertyToOneRelationMapping;
-use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Object\LazyRevivalData;
 
 class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMapping implements IEntityPropertyToOneRelationMapping {
     private $EntityProperty;
@@ -74,9 +71,28 @@ class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMap
         }
     }
     
-    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, Relational\RelationshipChange $RelationshipChange) {
-        if($RelationshipChange->HasDiscardedRelationship() || $RelationshipChange->HasPersistedRelationship()) {
-            $this->ToOneRelation->Persist($Transaction, $ParentData, $RelationshipChange);
+    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, Object\RelationshipChange $RelationshipChange) {
+        if($RelationshipChange->HasDiscardedIdentity() || $RelationshipChange->HasPersistedEntityData()) {
+            
+            $DiscardedPrimaryKey = null;
+            if($RelationshipChange->HasDiscardedIdentity()) {
+                $DiscardedPrimaryKey = $this->EntityRelationalMap->MapIdentityToPrimaryKey($RelationshipChange->GetDiscardedIdentity());
+            }
+            
+            $RelatedData = null;
+            if($RelationshipChange->IsDependent()) {
+                $RelatedData = $this->EntityRelationalMap->MapPersistenceDataToResultRows($Transaction, [$RelationshipChange->GetPersistedEntityData()])[0];
+                $Transaction->PersistAll($RelatedData->GetRows());
+            }
+            else if($RelationshipChange->HasPersistedEntityData()) {
+                $RelatedData = $this->EntityRelationalMap->MapIdentityToPrimaryKey($RelationshipChange->GetPersistedEntityData());
+            }
+            
+            $this->ToOneRelation->Persist(
+                    $Transaction, 
+                    $ParentData, 
+                    $DiscardedPrimaryKey, 
+                    $RelatedData);
         }
     }
 

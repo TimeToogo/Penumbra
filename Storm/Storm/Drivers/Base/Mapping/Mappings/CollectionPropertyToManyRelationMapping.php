@@ -2,14 +2,9 @@
 
 namespace Storm\Drivers\Base\Mapping\Mappings;
 
-use \Storm\Core\Containers\Map;
-use \Storm\Core\Mapping\DomainDatabaseMap;
 use \Storm\Core\Mapping\ICollectionPropertyToManyRelationMapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Object\LazyRevivalData;
-use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
-use \Storm\Core\Mapping\Expressions;
 
 class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelationMapping implements ICollectionPropertyToManyRelationMapping {
     private $CollectionProperty;
@@ -77,9 +72,37 @@ class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelati
     }
     
     public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges) {
-        if(count($RelationshipChanges) > 0) {
-            $this->ToManyRelation->Persist($Transaction, $ParentData, $RelationshipChanges);
+        if(count($RelationshipChanges) === 0) {
+            return;
+        } 
+        
+        $DiscardedPrimaryKeys = [];
+        $PersistedRelatedDataArray = [];
+        
+        foreach ($RelationshipChanges as $Key => $RelationshipChange) {
+            
+            if($RelationshipChange->HasDiscardedIdentity() || $RelationshipChange->HasPersistedEntityData()) {
+                $DiscardedPrimaryKeys[$Key] = null;
+                if($RelationshipChange->HasDiscardedIdentity()) {
+                    $DiscardedPrimaryKeys[$Key] = $this->EntityRelationalMap->MapIdentityToPrimaryKey($RelationshipChange->GetDiscardedIdentity());
+                }
+                
+                $PersistedRelatedDataArray[$Key] = null;
+                if($RelationshipChange->IsDependent()) {
+                    $PersistedRelatedDataArray[$Key] = $this->EntityRelationalMap->MapPersistenceDataToResultRows($Transaction, [$RelationshipChange->GetPersistedEntityData()])[0];
+                    $Transaction->PersistAll($PersistedRelatedDataArray[$Key]->GetRows());
+                }
+                else if($RelationshipChange->HasPersistedEntityData()) {
+                    $PersistedRelatedDataArray[$Key] = $this->EntityRelationalMap->MapIdentityToPrimaryKey($RelationshipChange->GetPersistedEntityData());
+                }
+            }
         }
+        
+        $this->ToManyRelation->Persist(
+                $Transaction, 
+                $ParentData, 
+                $DiscardedPrimaryKeys, 
+                $PersistedRelatedDataArray);
     }
     
     public function MapPropertyExpression(Relational\ResultSetSources $Sources, &$ReturnType) {

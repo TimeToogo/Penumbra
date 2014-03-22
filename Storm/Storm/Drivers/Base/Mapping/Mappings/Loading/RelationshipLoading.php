@@ -24,7 +24,7 @@ abstract class RelationshipLoading {
             Relational\ResultSetSelect $Select, 
             Object\RevivalData $AlreadyKnownRevivalData = null) {
         if($AlreadyKnownRevivalData !== null) {
-            $AlreadyKnownPropertyIdentifiers = array_keys($AlreadyKnownRevivalData->GetPropertyData());
+            $AlreadyKnownPropertyIdentifiers = array_keys($AlreadyKnownRevivalData->GetData());
             $AlreadyKnownProperties = $AlreadyKnownRevivalData->GetProperties($AlreadyKnownPropertyIdentifiers);
             $EntityRelationalMap->MapPropertiesToSelect($Select, $AlreadyKnownProperties);
         }

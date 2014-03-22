@@ -27,6 +27,10 @@ abstract class MethodBase extends ReflectionBase {
                 implode(', ', array_map(function ($I) { return var_export($I, true); }, $this->ConstantArguments)));
     }
     
+    public function GetTraversalDepth() {
+        return 1;
+    }
+    
     final protected function MatchesName(Expressions\Expression $Expression) {
         if(!($Expression instanceof Expressions\ValueExpression)) {
             return false;
@@ -44,7 +48,7 @@ abstract class MethodBase extends ReflectionBase {
     }
     
     final protected function AreConstants(array $Expressions) {
-        return count(array_filter($Expressions, function ($I) { return !($I instanceof Expressions\ValueExpression); })) > 0;
+        return count($Expressions) === 0 || count(array_filter($Expressions, function ($I) { return !($I instanceof Expressions\ValueExpression); })) > 0;
     }
     
     final protected function Values(array $Constants) {

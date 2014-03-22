@@ -25,20 +25,24 @@ class NonIdentifying extends RelationshipType {
         return false;
     }
 
-    public function GetPersistedRelationship(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
-            $ParentEntity, $RelatedEntity) {
-        if($this->CascadePersist && $this->IsEntityAltered($RelatedEntity)) {
-            $UnitOfWork->Persist($RelatedEntity);
+    public function GetPersistedEntityData(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
+            $RelatedEntity) {
+        if($this->CascadePersist) {
+            return $Domain->Persist($UnitOfWork, $RelatedEntity);
         }
-        return $Domain->PersistedRelationship($ParentEntity, $RelatedEntity);
+        else {
+            return $Domain->Identity($RelatedEntity);
+        }
     }
     
-    public function GetDiscardedRelationship(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
-            $ParentEntity, $RelatedEntity) {
+    public function GetDiscardedIdentity(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork,
+            $RelatedEntity) {
         if($this->CascadeDiscard) {
-            $UnitOfWork->Discard($RelatedEntity);
+            return $UnitOfWork->Discard($RelatedEntity);
         }
-        return $Domain->DiscardedRelationship($ParentEntity, $RelatedEntity);
+        else {
+            return $Domain->Identity($RelatedEntity);
+        }
     }
 }
 

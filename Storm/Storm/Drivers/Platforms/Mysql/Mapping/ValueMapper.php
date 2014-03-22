@@ -7,7 +7,9 @@ use \Storm\Core\Object\Expressions as O;
 use \Storm\Drivers\Base\Relational\Expressions as R;
 
 class ValueMapper extends Mapping\ValueMapper {
-    
+    public function MapScalar($Scalar) {
+        return parent::MapScalar($Scalar);
+    }
 }
 
 ?>

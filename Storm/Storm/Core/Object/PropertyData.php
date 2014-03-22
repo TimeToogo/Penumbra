@@ -37,15 +37,22 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
     /**
      * @return array<string, mixed>
      */
-    final public function GetPropertyData() {
+    public function GetData() {
         return $this->PropertyData;
+    }
+    
+    /**
+     * @return void
+     */
+    public function SetData(array $Data) {
+        $this->Data = array_intersect_key($Data, $this->Properties);
     }
     
     /**
      * Get another property data instance with new data.
      * 
      * @param array $PropertyData
-     * @return PropertyData
+     * @return static
      */
     final public function Another(array $PropertyData = []) {
         $ClonedPropertyData = clone $this;
@@ -54,48 +61,49 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
         return $ClonedPropertyData;
     }
     
+    protected function GetPropertyData(IProperty $Property) {
+        return $this->PropertyData[$Property->GetIdentifier()];
+    }
     
-    /**
-     * Sets a value for the supplied property
-     * 
-     * @param IProperty $Property The property to set the value for
-     * @param mixed $Data The value to set for the property
-     * @throws InvalidPropertyException
-     */
-    final public function SetProperty(IProperty $Property, $Data) {
-        $Identifier = $Property->GetIdentifier();
+    protected function SetPropertyData(IProperty $Property, $Data) {
+        $PropertyIdentifier = $Property->GetIdentifier();
         
-        if(!isset($this->Properties[$Identifier])) {
+        if(!isset($this->Properties[$PropertyIdentifier])) {
             throw new InvalidPropertyException(
                     'The supplied property of entity %s is not part of this %s.',
                     $Property->GetEntityType() ?: '<Undefined>',
                     get_class($this));
         }
         
-        $this->VerifyProperty($Property, $Identifier);
-        $this->PropertyData[$Identifier] = $Data;
+        $this->PropertyData[$PropertyIdentifier] = $Data;
     }
     
-    protected function VerifyProperty(IProperty $Property, $Identifier) {}
-
+    protected function HasPropertyData(IProperty $Property) {
+        return isset($this->PropertyData[$Property->GetIdentifier()]);
+    }
+    
+    protected function RemovePropertyData(IProperty $Property) {
+        unset($this->PropertyData[$Property->GetIdentifier()]);
+    }
+    
     final public function getIterator() {
         return new \ArrayIterator($this->PropertyData);
     }
 
     final public function offsetExists($Property) {
-        return isset($this->PropertyData[$Property->GetIdentifier()]);
+        return $this->HasPropertyData($Property);
     }
     
     final public function offsetGet($Property) {
-        return $this->PropertyData[$Property->GetIdentifier()];
+        return $this->GetPropertyData($Property);
     }
 
     final public function offsetSet($Property, $Data) {
-        $this->SetProperty($Property, $Data);
+        $this->SetPropertyData($Property, $Data);
     }
 
     final public function offsetUnset($Property) {
-        unset($this->PropertyData[$Property->GetIdentifier()]);
+        $this->RemovePropertyData($Property);
     }
     
     final public function GetProperty($Identifier) {

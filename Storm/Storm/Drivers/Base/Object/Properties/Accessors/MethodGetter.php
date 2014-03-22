@@ -8,7 +8,8 @@ use \Storm\Core\Object\Expressions\PropertyExpression;
 
 class MethodGetter extends MethodBase implements IPropertyGetter {
     
-    public function ResolveTraversalExpression(TraversalExpression $Expression, PropertyExpression $PropertyExpression) {
+    public function ResolveTraversalExpression(array $TraversalExpressions, PropertyExpression $PropertyExpression) {
+        $Expression = $TraversalExpressions[0];
         if($Expression instanceof Expressions\MethodCallExpression
                 && $this->MatchesName($Expression->GetNameExpression())
                 && $this->MatchesContantArguments($Expression->GetArgumentExpressions())) {

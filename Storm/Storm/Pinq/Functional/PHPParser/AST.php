@@ -67,7 +67,7 @@ class AST implements IAST {
         return Expression::Value($Value);
     }
     
-    final public static function ParseNameNode($Node) {
+    final public function ParseNameNode($Node) {
         if($Node instanceof \PHPParser_Node_Name || is_string($Node)) {
             $NameValue = is_string($Node) ? $Node : $Node->toString();
             return Expression::Value($NameValue);
@@ -224,7 +224,7 @@ class AST implements IAST {
         switch (true) {
             case isset(self::$AssignOperatorsMap[$NodeType]):
                 return Expression::Assign(
-                        $this->ParseNode($Node), 
+                        $this->ParseNode($Node->var), 
                         self::$AssignOperatorsMap[$NodeType], 
                         $this->ParseNode($Node->expr));
                 

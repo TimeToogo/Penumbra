@@ -158,29 +158,29 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    final public function HasProperty($Identifier) {
-        return isset($this->Properties[$Identifier]);
+    final public function HasProperty(IProperty $Property) {
+        return isset($this->Properties[$Property->GetIdentifier()]);
     }
     
     /**
      * {@inheritDoc}
      */
-    final public function HasIdentityProperty($Identifier) {
-        return isset($this->IdentityProperties[$Identifier]);
+    final public function HasIdentityProperty(IProperty $Property) {
+        return isset($this->IdentityProperties[$Property->GetIdentifier()]);
     }
     
     /**
      * {@inheritDoc}
      */
-    final public function HasRelationshipProperty($Identifier) {
-        return isset($this->EntityProperties[$Identifier]) || isset($this->CollectionProperties[$Identifier]);
+    final public function HasRelationshipProperty(IProperty $Property) {
+        return isset($this->RelationshipProperties[$Property->GetIdentifier()]);
     }
     
     /**
      * {@inheritDoc}
      */
     final public function GetProperty($Identifier) {
-        return $this->HasProperty($Identifier) ? $this->Properties[$Identifier] : null;
+        return isset($this->Properties[$Identifier]) ? $this->Properties[$Identifier] : null;
     }
     
     /**
@@ -242,9 +242,9 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    public function ResolveTraversalExpression(Expressions\TraversalExpression $Expression, Expressions\PropertyExpression $ParentPropertyExpression = null) {
+    public function ResolveTraversalExpression(Expressions\TraversalExpression $Expression) {
         foreach ($this->Properties as $Property) {
-            $ResolvedPropertyExpression = $Property->ResolveTraversalExpression($Expression, $ParentPropertyExpression);
+            $ResolvedPropertyExpression = $Property->ResolveTraversalExpression($Expression);
             if($ResolvedPropertyExpression !== null) {
                 return $ResolvedPropertyExpression;
             }
@@ -260,7 +260,7 @@ abstract class EntityMap implements IEntityMap {
      * {@inheritDoc}
      */
     final public function HasIdentity($Entity) {
-        foreach($this->Identity($Entity) as $Value) {
+        foreach($this->Identity($Entity)->GetData() as $Value) {
             if($Value === null) {
                 return false;
             }
@@ -309,11 +309,11 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    final public function PersistanceData(array $PersistanceData = []) {
+    final public function PersistanceData($Entity, array $PersistanceData = []) {
         if($this->PersistenceData === null) {
-            $this->PersistenceData = new PersistenceData($this);
+            $this->PersistenceData = new PersistenceData($this, null);
         }
-        return $this->PersistenceData->Another($PersistanceData);
+        return $this->PersistenceData->AnotherPersistenceData($Entity, $PersistanceData);
     }
     
     /**
@@ -347,7 +347,7 @@ abstract class EntityMap implements IEntityMap {
             $PersistenceData[$Identifier] = $CollectionProperty->Persist($UnitOfWork, $Entity);
         }
         
-        return $this->PersistanceData($PersistenceData);
+        return new PersistenceData($this, $Entity, $PersistenceData);
     }
     
     /**

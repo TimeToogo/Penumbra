@@ -73,12 +73,6 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         $this->RelatedEntityMap = $EntityMap;
     }
     
-    protected function ResolveExcessTraversal(
-            Expressions\PropertyExpression $ResolvedExpression, 
-            $ExcessDepth, 
-            Expressions\TraversalExpression $ExcessTraversalExpression) {
-        return $this->RelatedEntityMap->ResolveTraversalExpression($ExcessTraversalExpression, $ResolvedExpression);
-    }
     /**
      * @return Object\IProperty
      */
@@ -211,6 +205,15 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
     
     final protected function HasOriginalValue($Entity) {
         return property_exists($Entity, $this->OriginalValueStorageKey);
+    }
+    
+    final protected function IsEntityAltered($Entity) {
+        if($Entity instanceof IProxy) {
+            return $Entity->__IsAltered();
+        }
+        else {
+            return true;
+        }
     }
 }
 

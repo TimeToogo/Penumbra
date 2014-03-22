@@ -17,7 +17,7 @@ abstract class Accessor {
         return $this->Identifier;
     }
     
-    public abstract function ResolveTraversalExpression(O\TraversalExpression $Expression, O\PropertyExpression $PropertyExpression);
+    public abstract function ResolveTraversalExpression(array $TraversalExpressions, O\PropertyExpression $PropertyExpression, &$ResolutionDepth);
     
     protected abstract function Identifier(&$Identifier);
         
@@ -30,14 +30,6 @@ abstract class Accessor {
     
     final public function Is(Accessor $OtherAccessor) {
         return $this->Identifier === $OtherAccessor->Identifier;
-    }
-    
-    final public function IsGetter(Accessor $OtherAccessor) {
-        return $this->GetterIdentifier === $OtherAccessor->SetterIdentifier;
-    }
-    
-    final public function IsSetter(Accessor $OtherAccessor) {
-        return $this->SetterIdentifier === $OtherAccessor->SetterIdentifier;
     }
 }
 

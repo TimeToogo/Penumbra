@@ -28,7 +28,7 @@ abstract class FunctionMapper implements Expressions\IFunctionMapper {
         }
         $FunctionName = $NameExpression->GetValue();
         
-        $ArgumentExpressions = array_values($ArgumentExpressions);
+        $ArgumentExpressions = array_values($MappedArgumentExpressions);
         
         //OVERRIDE
         if(strpos($FunctionName, '__') === 0) {

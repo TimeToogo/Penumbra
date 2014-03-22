@@ -14,6 +14,11 @@ class ToOneRelation extends ToOneRelationBase {
                 Relational\DependencyOrder::After, 
                 Relational\DependencyOrder::Before);
     }
+    
+    public function MapRelationalParentDataToRelatedData(
+            Relational\ColumnData $ParentData, Relational\ColumnData $RelatedData) {
+        $this->ForeignKey->MapParentToReferencedKey($ParentData, $RelatedData);
+    }
 }
 
 ?>

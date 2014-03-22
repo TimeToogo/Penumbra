@@ -13,6 +13,7 @@ use \Storm\Drivers\Base\Object\Properties\Proxies;
 class Example implements \StormExamples\IStormExample {
     const DevelopmentMode = 1;
     const UseCache = true;
+    const ClearCache = false;
     
     public static function GetPlatform() {
         return new Platforms\Mysql\Platform(self::DevelopmentMode > 1);
@@ -34,7 +35,9 @@ class Example implements \StormExamples\IStormExample {
     
     public function GetStorm() {
         $Cache = self::UseCache && class_exists('Memcache', false) ? new \Storm\Utilities\Cache\MemcacheCache('localhost') : null;
-        
+        if($Cache && self::ClearCache) {
+            $Cache->Clear();
+        }
         $Configuration = new Api\DefaultConfiguration(
                 Mapping\BloggingDomainDatabaseMap::Factory(), 
                 self::GetConnection(),
@@ -44,7 +47,7 @@ class Example implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
     
-    const Id = 650;
+    const Id = 750;
     
     const Persist = 0;
     const Retreive = 1;
@@ -59,7 +62,7 @@ class Example implements \StormExamples\IStormExample {
         $TagManger = $BloggingStorm->GetEntityManger(Entities\Tag::GetType());
         $AuthorManger = $BloggingStorm->GetEntityManger(Entities\Author::GetType());
         
-        $Action = self::RetreiveSimple;
+        $Action = self::Retreive;
         
         $Amount = 1;        
         $Last;
@@ -111,12 +114,6 @@ class Example implements \StormExamples\IStormExample {
             EntityManager $TagManger) {
         
         $Blog = $this->CreateBlog();
-        foreach ($Blog->Posts as $Post) {
-            $TagManger->PersistAll($Post->Tags->getArrayCopy());
-            $AuthorManger->Persist($Post->Author);
-        }
-        $BloggingStorm->SaveChanges();
-
         $BlogManger->Persist($Blog);
         $BlogManger->SaveChanges();
 
@@ -135,25 +132,44 @@ class Example implements \StormExamples\IStormExample {
         $Author = $Post->Author;
         $Test = $Author->FirstName;
         $Foo = $RevivedBlog->Posts[0]->Tags->getArrayCopy();
-        //$Foo = $RevivedBlog->Posts[1]->Tags->getArrayCopy();
+        $Foo = $RevivedBlog->Posts[1]->Tags->getArrayCopy();
         $BlogManger->GetIdentityMap()->Clear();
         
         return null;
     }
     
     private function RetreiveSimple($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
-        $RevivedBlog = 
-                $BlogManger->Request()
-                ->Where(function (Entities\Blog $Blog) use($Id) {
-                    return $Blog->Id === $Id && true;
-                })
+        $PostManger = $BloggingStorm->GetEntityManger(Entities\Post::GetType());
+        
+        $SubRequest = $BlogManger->Request()
+                ->Where(function (Entities\Blog $Blog) { return $Blog->GetName() !== 'test' ; })
+                ->OrderBy(function (Entities\Blog $Blog) { return $Blog->CreatedDate; });
+        
+        $RevivedData = $BlogManger->Request()
+                ->From($SubRequest)
                 ->OrderByDescending(function (Entities\Blog $Blog) { return $Blog->Id . $Blog->CreatedDate; })
-                ->First();
-        if($RevivedBlog === null) {
-            throw new \Exception("Entity with id: $Id does not exist");
-        }
+                ->OrderBy(function (Entities\Blog $Blog) { return $Blog->Id; })
+                ->GroupBy(function (Entities\Blog $Blog) { return $Blog->Id % 20; })
+                ->Select(function (Entities\Blog $Blog, \Storm\Pinq\IAggregate $Blogs) {
+                    
+                    $Id = function (Entities\Blog $Blog) { return $Blog->Id; };
+                    
+                    return [
+                        'Key' => $Blog->Id,
+                        'CreatedDate' =>  $Blog->Id % 2 === 0 ? $Blog->CreatedDate->add(new \DateInterval('P1M3DT5H6M'))->sub(new \DateInterval('PT1S')) : $Blog->CreatedDate->sub(new \DateInterval('P5Y')),
+                        'Amount' => $Blogs->Count(),
+                        'AllEven' => $Blogs->All(function (Entities\Blog $Blog) { return $Blog->Id % 2 === 0; }),
+                        'AllOdd' => $Blogs->All(function (Entities\Blog $Blog) { return $Blog->Id % 2 === 1; }),
+                        'AllIds' => $Blogs->Implode(', ', function (Entities\Blog $Blog) { return $Blog->Id; }),
+                        'MaximumId' => $Blogs->Maximum($Id),
+                        'MinimumId' => $Blogs->Minimum($Id),
+                        'SumOfIds' => $Blogs->Sum($Id),
+                        'AverageId' => $Blogs->Average($Id),
+                    ];
+                });
+                
         if(extension_loaded('xdebug')) {
-            var_dump($RevivedBlog);
+            var_dump($RevivedData);
         }
         
         return null;

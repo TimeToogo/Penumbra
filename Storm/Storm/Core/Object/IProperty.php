@@ -39,7 +39,7 @@ interface IProperty {
      * 
      * @return Expression
      */
-    public function ResolveTraversalExpression(O\TraversalExpression $Expression, O\PropertyExpression $ParentPropertyExpression = null);
+    public function ResolveTraversalExpression(O\TraversalExpression $Expression);
 }
 
 ?>

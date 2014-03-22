@@ -17,8 +17,7 @@ interface IAggregate {
      * 
      * @return int
      */
-    public function Count();
-    
+    public function Count();    
     
     /**
      * Returns the maximum value.

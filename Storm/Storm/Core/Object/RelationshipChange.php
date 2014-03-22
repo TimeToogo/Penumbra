@@ -9,46 +9,53 @@ namespace Storm\Core\Object;
  */
 final class RelationshipChange {
     /**
-     * @var PersistedRelationship|null 
+     * @var Identity|PersistenceData|null 
      */
-    private $PersistedRelationship;
+    private $PersistedEntityData;
     
     /**
-     * @var DiscardedRelationship|null 
+     * @var Identity|null 
      */
-    private $DiscardedRelationship;
+    private $DiscardedIdentity;
     
-    public function __construct(PersistedRelationship $PersistedRelationship = null, DiscardedRelationship $DiscardedRelationship = null) {
-        $this->PersistedRelationship = $PersistedRelationship;
-        $this->DiscardedRelationship = $DiscardedRelationship;
+    public function __construct(EntityPropertyData $PersistedEntityData = null, Identity $DiscardedIdentity = null) {
+        $this->PersistedEntityData = $PersistedEntityData;
+        $this->DiscardedIdentity = $DiscardedIdentity;
     }
     
     /**
      * @return boolean
      */
-    public function HasPersistedRelationship() {
-        return $this->PersistedRelationship !== null;
-    }
-    
-    /**
-     * @return DiscardedRelationship
-     */
-    public function GetPersistedRelationship() {
-        return $this->PersistedRelationship;
+    public function HasPersistedEntityData() {
+        return $this->PersistedEntityData !== null;
     }
     
     /**
      * @return boolean
      */
-    public function HasDiscardedRelationship() {
-        return $this->DiscardedRelationship !== null;
+    public function IsDependent() {
+        return $this->PersistedEntityData instanceof PersistenceData;
+    }
+    
+    /**
+     * @return Identity|PersistenceData|null
+     */
+    public function GetPersistedEntityData() {
+        return $this->PersistedEntityData;
+    }
+    
+    /**
+     * @return boolean
+     */
+    public function HasDiscardedIdentity() {
+        return $this->DiscardedIdentity !== null;
     }
 
     /**
-     * @return PersistedRelationship
+     * @return Identity|null
      */
-    public function GetDiscardedRelationship() {
-        return $this->DiscardedRelationship;
+    public function GetDiscardedIdentity() {
+        return $this->DiscardedIdentity;
     }
 }
 

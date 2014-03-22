@@ -20,8 +20,8 @@ abstract class CriteriaCompiler implements ICriteriaCompiler {
     }
     
     final public function AppendRange(QueryBuilder $QueryBuilder, $RangeStart, $RangeAmount) {
-        if($RangeStart !== 0 && $RangeAmount !== null) {
-            $this->AppendGroupByClause($QueryBuilder, $RangeStart, $RangeAmount);
+        if($RangeStart !== 0 || $RangeAmount !== null) {
+            $this->AppendRangeClause($QueryBuilder, $RangeStart, $RangeAmount);
         }
     }
 

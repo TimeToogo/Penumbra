@@ -15,6 +15,10 @@ class DiscardenceData extends EntityPropertyData {
                 $EntityMap->GetIdentityProperties() + $EntityMap->GetRelationshipProperties(), 
                 $EntityData);
     }
+    
+    public function GetIdentity() {
+        return new Identity($this->EntityMap, $this->GetData());
+    }
 }
 
 ?>

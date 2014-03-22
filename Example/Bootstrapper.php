@@ -2,7 +2,18 @@
 
 namespace StormExamples;
 
-echo '<pre>';
+?>
+
+<style>
+    body, html {
+        width: calc(100% - 20px);
+        margin: 10px;
+        word-wrap:break-word;
+    }
+</style>
+<pre>
+
+<?php
             
 date_default_timezone_set('Australia/Melbourne');
 
@@ -96,10 +107,3 @@ if(!$Success)
     ShowTests();
 
 ?>
-<style>
-    body, html {
-        width: calc(100% - 20px);
-        margin: 10px;
-        word-wrap:break-word;
-    }
-</style>

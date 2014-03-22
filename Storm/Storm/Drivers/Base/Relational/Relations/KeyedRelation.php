@@ -6,11 +6,14 @@ use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Base\Relational\Constraints;
 use \Storm\Drivers\Base\Relational\Traits\ForeignKey;
-use \Storm\Drivers\Base\Relational\Expressions;
+use \Storm\Drivers\Base\Relational\Expressions as R;
 
 abstract class KeyedRelation extends Relation {
-    private $ForeignKey;
-    private $IsInversed;
+    /**
+     * @var ForeignKey 
+     */
+    protected $ForeignKey;
+    protected $IsInversed;
     
     public function __construct(
             ForeignKey $ForeignKey,
@@ -46,11 +49,11 @@ abstract class KeyedRelation extends Relation {
         foreach($ParentRows as $ParentRow) {
             $ReferencedKey = $this->MapParentRowToRelatedKey($this->ForeignKey, $ParentRow);
             
-            $MatchExpressions[] = new Expressions\MatchesColumnDataExpression($ReferencedKey);
+            $MatchExpressions[] = new R\MatchesColumnDataExpression($ReferencedKey);
         }
         
         $Criteria->AddPredicateExpression(
-                Expressions\Expression::CompoundBoolean($MatchExpressions, Expressions\Operators\Binary::LogicalOr));
+                R\Expression::CompoundBoolean($MatchExpressions, R\Operators\Binary::LogicalOr));
     }
     /**
      * @return Relational\Table

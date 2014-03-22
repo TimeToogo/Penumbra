@@ -19,6 +19,10 @@ abstract class ObjectTypeMapper implements Expressions\IObjectTypeMapper {
     protected abstract function GetClass();
     
     final public function MapInstance($Instance) {
+        if($Instance === null) {
+            return R\Expression::BoundValue(null);
+        }
+        
         $MappedExpresion = $this->MapClassInstance($Instance);
         if($MappedExpresion === null) {
             throw new \Storm\Core\Mapping\MappingException(
@@ -29,6 +33,15 @@ abstract class ObjectTypeMapper implements Expressions\IObjectTypeMapper {
         return $MappedExpresion;
     }
     protected abstract function MapClassInstance($Instance);
+    
+    final public function ReviveInstance($MappedValue) {
+        if($MappedValue === null) {
+            return null;
+        }
+        
+        return $this->ReviveClassInstance($MappedValue);
+    }
+    protected abstract function ReviveClassInstance($MappedValue);
 
     final public function MapNew(array $MappedArgumentExpressions) {
         $MappedExpresion = $this->MapNewClass($MappedArgumentExpressions);
@@ -53,7 +66,8 @@ abstract class ObjectTypeMapper implements Expressions\IObjectTypeMapper {
     }
     
     final public function MapField(R\Expression $ValueExpression, O\Expression $NameExpression, &$ReturnType) {
-        $MappedExpresion = $this->MapIndex(
+        
+        $MappedExpresion = $this->MapClassField(
                 $ValueExpression, 
                 $this->GetConstantValue($NameExpression), 
                 $ReturnType);
@@ -70,7 +84,8 @@ abstract class ObjectTypeMapper implements Expressions\IObjectTypeMapper {
     protected function MapClassField(R\Expression $ValueExpression, $Name, &$ReturnType) {}
     
     final public function MapIndex(R\Expression $ValueExpression, O\Expression $IndexExpression, &$ReturnType) {
-        $MappedExpresion = $this->MapIndex(
+        
+        $MappedExpresion = $this->MapClassIndex(
                 $ValueExpression, 
                 $this->GetConstantValue($IndexExpression), 
                 $ReturnType);
@@ -91,11 +106,13 @@ abstract class ObjectTypeMapper implements Expressions\IObjectTypeMapper {
             O\Expression $NameExpression, 
             array $MappedArgumentExpressions, 
             &$ReturnType) {
-        $MappedExpresion = $this->MapMethodCall(
+        
+        $MappedExpresion = $this->MapClassMethodCall(
                 $ValueExpression, 
                 $this->GetConstantValue($NameExpression), 
                 $MappedArgumentExpressions, 
                 $ReturnType);
+        
         if($MappedExpresion === null) {
             throw new \Storm\Core\Mapping\MappingException(
                     '%s cannot map method call expression for class %s',
@@ -108,7 +125,12 @@ abstract class ObjectTypeMapper implements Expressions\IObjectTypeMapper {
     protected function MapClassMethodCall(R\Expression $ValueExpression, $Name, array $MappedArgumentExpressions, &$ReturnType) {}
     
     final public function MapInvocation(R\Expression $ValueExpression, array $MappedArgumentExpressions, &$ReturnType) {
-        $MappedExpresion = $this->MapInvocation($ValueExpression, $MappedArgumentExpressions, $ReturnType);
+        
+        $MappedExpresion = $this->MapClassInvocation(
+                $ValueExpression, 
+                $MappedArgumentExpressions, 
+                $ReturnType);
+        
         if($MappedExpresion === null) {
             throw new \Storm\Core\Mapping\MappingException(
                     '%s cannot map invocation expression for class %s',

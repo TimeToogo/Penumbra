@@ -3,8 +3,6 @@
 namespace Storm\Core\Object\Expressions\Aggregates;
 
 use \Storm\Core\Object\Expressions\Expression;
-
-use \Storm\Core\Object\Expressions\Expression;
 use \Storm\Core\Object\Expressions\ExpressionWalker;
 
 /**
@@ -38,7 +36,7 @@ class ImplodeExpression extends AggregateExpression {
     }
     
     public function GetValueExpression() {
-        return $this->Delimiter;
+        return $this->ValueExpression;
     }
 
     public function Simplify() {

@@ -97,7 +97,7 @@ class AggregateTraversalResolverWalker extends O\ExpressionWalker {
             throw \Storm\Pinq\PinqException::UnresolvableAggregateTraversal();
         }
         
-        $ExpressionTree->ResolveVariablesToExpressions([$EntityVariableName, new EntityVariableExpression()]);
+        $ExpressionTree->ResolveVariablesToExpressions([$EntityVariableName => new EntityVariableExpression()]);
         
         return $ExpressionTree->GetReturnExpression()->GetValueExpression();
     }   

@@ -24,25 +24,36 @@ class ToManyRelation extends ToManyRelationBase {
     
     public function MapRelationalParentDataToRelatedData
             (Relational\ColumnData $ParentRow, Relational\ColumnData $RelatedRow) {
-        $ForeignKey = $this->GetForeignKey();
-        $ForeignKey->MapReferencedToParentKey($ParentRow, $RelatedRow);
+        $this->ForeignKey->MapReferencedToParentKey($ParentRow, $RelatedRow);
     }
     
-    protected function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
-            Relational\ResultRow $ParentData, array $ChildRows) {
-        $MapForeignKey = function () use (&$ParentData, &$ChildRows) {
-            foreach($ChildRows as $ChildRow) {
-                $this->MapRelationalParentDataToRelatedData($ParentData, $ChildRow);
+    public function Persist(
+            Relational\Transaction $Transaction, 
+            Relational\ResultRow $ParentData, 
+            array $DiscardedPrimaryKeys, 
+            array $PersistedRelatedDataArray) {
+        
+        $MapForeignKeys = function () use (&$ParentData, &$DiscardedPrimaryKeys, &$PersistedRelatedDataArray) {
+            foreach(array_merge($DiscardedPrimaryKeys, $PersistedRelatedDataArray) as $RelatedData) {
+                if($RelatedData !== null) {
+                    $this->ForeignKey->MapReferencedToParentKey($ParentData, $RelatedData);
+                }
             }
         };
         
-        if($this->GetForeignKey()->HasReferencedKey($ParentData)) {
-            $MapForeignKey();
+        $ParentHasForeignKey = $this->ForeignKey->HasReferencedKey($ParentData);
+        
+        /**
+         * In case the foreign key is part of the parent primary key and the row has
+         * not been persisted yet, defer mapping to before persistence
+         */
+        if($ParentHasForeignKey) {
+            $MapForeignKeys();
         }
         else {
             $Transaction->SubscribeToPrePersistEvent(
                     $this->GetTable(), 
-                    $MapForeignKey);
+                    $MapForeignKeys);
         }
     }
 }

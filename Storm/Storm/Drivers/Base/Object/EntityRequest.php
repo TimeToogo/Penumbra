@@ -13,12 +13,14 @@ class EntityRequest extends Request implements Object\IEntityRequest {
             array $Properties, 
             array $GroupByExpressions,
             array $AggregatePredicateExpressions,
-            Object\ICriteria $Criteria = null) {
+            Object\ICriteria $Criteria = null,
+            Object\IEntityRequest $SubEntityRequest = null) {
         parent::__construct(
                 $EntityOrType, 
                 $GroupByExpressions, 
                 $AggregatePredicateExpressions, 
-                $Criteria);
+                $Criteria,
+                $SubEntityRequest);
         
         foreach($Properties as $Property) {
             $this->AddProperty($Property);

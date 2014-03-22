@@ -118,7 +118,7 @@ abstract class RowPersister extends UpsertPersister {
             $First = false;
         }
 
-        $QueryBuilder->AppendIdentifier(') #', [$DerivedTableName]);
+        $QueryBuilder->AppendIdentifier(') AS #', [$DerivedTableName]);
     }
     
     protected function AppendDataAsInlineRow(
@@ -130,6 +130,7 @@ abstract class RowPersister extends UpsertPersister {
         foreach($QueryBuilder->Delimit($Columns, ', ') as $Column) {
             $QueryBuilder->AppendExpression(
                     $Column->GetPersistExpression(R\Expression::BoundValue($ColumnData[$Column])));
+            $QueryBuilder->AppendIdentifier(' AS #', [$Column->GetName()]);
         }
     }
     
@@ -156,9 +157,9 @@ abstract class RowPersister extends UpsertPersister {
         
         $QueryBuilder->AppendIdentifier('DELETE # FROM # INNER JOIN (', [$TableName]);
         
-        $this->AppendDataAsInlineTable($QueryBuilder, $PrimaryKeys, $DerivedTableName, $ColumnDataArray);
+        $this->AppendInlineData($QueryBuilder, $PrimaryKeysColumns, $DerivedTableName, $PrimaryKeys);
         
-        $QueryBuilder->AppendIdentifier(') #', [$TransformedDerivedTableName]);   
+        $QueryBuilder->AppendIdentifier(') AS #', [$TransformedDerivedTableName]);   
         
         $QueryBuilder->Append(' ON ');
         
@@ -170,16 +171,12 @@ abstract class RowPersister extends UpsertPersister {
         $QueryBuilder->Build()->Execute();
     }
     
-    protected function AppendDeletePrimaryKeyData(
-            QueryBuilder $QueryBuilder,
-            array $PrimaryKeysColumns, 
-            $DerivedTableName, 
-            array $PrimaryKeys) {
-        $this->AppendDataAsInlineTable(
-                $QueryBuilder,
-                $PrimaryKeysColumns, 
-                $DerivedTableName, 
-                $PrimaryKeys);
+    protected function AppendInlineData(
+            QueryBuilder $QueryBuilder , 
+            array $Columns,
+            $DerivedTableName,
+            array $Data) {
+        $this->AppendDataAsInlineTable($QueryBuilder, $Columns, $DerivedTableName, $Data);
     }
 }
 

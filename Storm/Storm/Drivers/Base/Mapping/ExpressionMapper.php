@@ -84,36 +84,38 @@ final class ExpressionMapper {
                 $ClassType);
     }
     
-    final public function MapAll(array $Expressions) {
+    final public function MapAll(array $Expressions, array &$ReturnTypes = []) {
         foreach($Expressions as $Key => $Expression) {
-            $Expressions[$Key] = $this->Map($Expression);
+            $ReturnType = null;
+            $Expressions[$Key] = $this->Map($Expression, $ReturnType);
+            $ReturnTypes[$Key] = $ReturnType;
         }
         
         return $Expressions;
     }
     
-    final public function Map(O\Expression $Expression) {
+    final public function Map(O\Expression $Expression = null, &$ReturnType = null) {
+        if($Expression === null) {
+            return null;
+        }
         switch (true) {
             case $Expression instanceof O\ValueExpression:
-                return $this->MapValue($Expression);
+                return $this->MapValue($Expression, $ReturnType);
            
             case $Expression instanceof O\NewExpression:
-                return $this->MapNew($Expression);
+                return $this->MapNew($Expression, $ReturnType);
             
             case $Expression instanceof O\ArrayExpression:
                 return $this->MapArray($Expression);
             
             case $Expression instanceof O\FunctionCallExpression:
-                return $this->MapFunctionCall($Expression);
+                return $this->MapFunctionCall($Expression, $ReturnType);
             
             case $Expression instanceof O\Aggregates\AggregateExpression:
                 return $this->MapAggregate($Expression);
             
             case $Expression instanceof O\TraversalExpression:
-                return $this->MapTraversal($Expression);
-            
-            case $Expression instanceof O\AssignmentExpression:
-                return $this->MapAssignment($Expression);
+                return $this->MapTraversal($Expression, $ReturnType);
             
             case $Expression instanceof O\BinaryOperationExpression:
                 return $this->MapBinaryOperation($Expression);
@@ -125,10 +127,10 @@ final class ExpressionMapper {
                 return $this->MapCast($Expression);
                 
             case $Expression instanceof O\TernaryExpression:
-                return $this->MapTernary($Expression);
+                return $this->MapTernary($Expression, $ReturnType);
                 
             case $Expression instanceof O\PropertyExpression:
-                return $this->MapProperty($Expression);
+                return $this->MapProperty($Expression, $ReturnType);
             
             default:
                 throw new Mapping\MappingException(
@@ -167,12 +169,15 @@ final class ExpressionMapper {
     }
         
     private function MapTraversal(O\TraversalExpression $TraversalExpression, &$ReturnType = null) {
+        $ReturnType = null;
+        
         if($TraversalExpression->GetTraversalDepth() === 1) {
-            return $this->MapTraversalOriginExpression($TraversalExpression->GetValueExpression(), $ReturnType);
+            $MappedValueExpression = $this->MapTraversalOriginExpression($TraversalExpression->GetValueExpression(), $ReturnType);
+        }
+        else {
+            $MappedValueExpression = $this->MapTraversal($TraversalExpression->GetValueExpression(), $ReturnType);
         }
         
-        $ReturnType = null;
-        $MappedValueExpression = $this->MapTraversal($TraversalExpression->GetValueExpression(), $ReturnType);
         if($ReturnType === null) {
             throw new Mapping\MappingException(
                     'Invalid traversal expression tree: unknown return type for %s',
@@ -317,18 +322,6 @@ final class ExpressionMapper {
         }
     }
         
-    private function MapAssignment(O\AssignmentExpression $Expression) {
-        $MappedAssignToValue = $this->Map($Expression->GetAssignToExpression());
-        $Operator = $Expression->GetOperator();
-        $MappedAssignmentValueExpression = $this->Map($Expression->GetAssignmentValueExpression());
-        
-        
-        return $this->OperationMapper->MapBinary(
-                $MappedAssignToValue, 
-                $Operator, 
-                $MappedAssignmentValueExpression);
-    }
-        
     private function MapBinaryOperation(O\BinaryOperationExpression $Expression) {
         $MappedLeftOperandExpression = $this->Map($Expression->GetLeftOperandExpression());
         $Operator = $Expression->GetOperator();
@@ -358,10 +351,16 @@ final class ExpressionMapper {
                 $MappedCastValueExpression);
     }
         
-    private function MapTernary(O\TernaryExpression $Expression) {
+    private function MapTernary(O\TernaryExpression $Expression, &$ReturnType = null) {
         $MappedConditionExpression = $this->Map($Expression->GetConditionExpression());
-        $MappedIfTrueExpression = $this->Map($Expression->GetIfTrueExpression());
-        $MappedIfFalseExpression = $this->Map($Expression->GetIfFalseExpression());
+        $IfTrueReturnType = null;
+        $MappedIfTrueExpression = $this->Map($Expression->GetIfTrueExpression(), $IfTrueReturnType);
+        $IfFalseReturnType = null;
+        $MappedIfFalseExpression = $this->Map($Expression->GetIfFalseExpression(), $IfFalseReturnType);
+        
+        if($IfTrueReturnType === $IfFalseReturnType && $IfTrueReturnType !== null) {
+            $ReturnType = $IfTrueReturnType;
+        }
         
         return $this->ControlFlowMapper->MapTernary(
                 $MappedConditionExpression, 

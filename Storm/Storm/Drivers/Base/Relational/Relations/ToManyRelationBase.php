@@ -50,45 +50,6 @@ abstract class ToManyRelationBase extends KeyedRelation implements Relational\IT
             }
         }
     }
-    
-    public function Persist(Relational\Transaction $Transaction, 
-            Relational\ResultRow $ParentData, array $RelationshipChanges) {
-        $IdentifyingChildRows = [];
-        $Table = $this->GetTable();
-        $ForeignKey = $this->GetForeignKey();
-        foreach($RelationshipChanges as $RelationshipChange) {
-            
-            if($RelationshipChange->HasPersistedRelationship()) {
-                $PersistedRelationship = $RelationshipChange->GetPersistedRelationship();
-                
-                if($PersistedRelationship->IsIdentifying()) {
-                    $IdentifyingChildRows[] = $PersistedRelationship->GetChildResultRow();
-                }
-            }
-            
-            if($RelationshipChange->HasDiscardedRelationship()) {
-                $DiscardedRelationship = $RelationshipChange->GetDiscardedRelationship();
-                
-                if($DiscardedRelationship->IsIdentifying()) {
-                    $PrimaryKeyToDiscard = $DiscardedRelationship->GetRelatedPrimaryKey();
-                    if($this->IsInversed()) {
-                        $ForeignKey->MapReferencedToParentKey($ParentData, $PrimaryKeyToDiscard);
-                    }
-                    else {
-                        $ForeignKey->MapReferencedToParentKey($ParentData, $PrimaryKeyToDiscard);
-                    }
-                    $Transaction->Discard($PrimaryKeyToDiscard);
-                }
-            }
-        }
-        
-        if(count($IdentifyingChildRows) > 0) {
-            $this->PersistIdentifyingRelationship($Transaction, $ParentData, $IdentifyingChildRows);
-        }
-    }
-    protected abstract function PersistIdentifyingRelationship(Relational\Transaction $Transaction, 
-            Relational\ResultRow $ParentRow, array $ChildRows);
-    
 }
 
 ?>

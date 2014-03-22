@@ -15,13 +15,17 @@ class DateIntervalMapper extends Mapping\ObjectTypeMapper {
     protected function MapClassInstance($Instance) {
         return new Mapping\ContextualObjectExpression($Instance);
     }
+    
+    protected function ReviveClassInstance($MappedValue) {
+        throw new \Storm\Core\NotSupportedException;
+    }
 
     protected function MapNewClass(array $MappedArgumentExpressions) {
         if(!isset($MappedArgumentExpressions[0])) {
             throw new \Storm\Drivers\Base\Relational\PlatformException('Date interval must have one constructor argument');
         }
-        if($MappedArgumentExpressions[0] instanceof R\ValueExpression) {
-            throw new \Storm\Drivers\Base\Relational\PlatformException('Date interval must have one constructor argument');
+        if(!($MappedArgumentExpressions[0] instanceof R\ValueExpression)) {
+            throw new \Storm\Drivers\Base\Relational\PlatformException('Date interval must have one constant constructor argument');
         }
         return new Mapping\ContextualObjectExpression(new \DateInterval($MappedArgumentExpressions[0]->GetValue()));
     }

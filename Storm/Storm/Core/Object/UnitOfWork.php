@@ -39,18 +39,23 @@ final class UnitOfWork {
     private $DiscardenceData = [];
     
     /**
-     * @var Identity[][] 
+     * @var DiscardenceData[][] 
      */
-    private $DiscardedIdentityGroups = [];
+    private $DiscardenceDataGroups = [];
     
     /**
      * @var ICriteria[] 
      */
     private $DiscardedCriteria = [];
     
+    /**
+     * @var \SplObjectStorage 
+     */
+    private $PersistedEntityIdentityMap;
+    
     public function __construct(Domain $Domain) {
-        $this->PersistenceDataEntityMap = new \Storm\Core\Containers\Map();
         $this->Domain = $Domain;
+        $this->PersistedEntityIdentityMap = new \SplObjectStorage();
     }
     
     /**
@@ -60,11 +65,19 @@ final class UnitOfWork {
         return $this->Domain;
     }
     
+    public function PersistedIdentity($Entity) {
+        if(!isset($this->PersistedEntityIdentityMap[$Entity])) {
+            return null;
+        }        
+        
+        return $this->PersistedEntityIdentityMap[$Entity];
+    }
+    
     /**
      * Persist an entities data and relationships to the unit of work.
      * 
      * @param object $Entity The entity to persist
-     * @return void 
+     * @return Identity 
      */
     public function Persist($Entity) {
         $Hash = spl_object_hash($Entity);
@@ -74,13 +87,15 @@ final class UnitOfWork {
         
         $PersistenceData = $this->Domain->Persist($this, $Entity);
         $this->PersistenceData[$Hash] = $PersistenceData;
-        $this->PersistenceDataEntityMap[$PersistenceData] = $Entity;
+        $this->PersistedEntityIdentityMap[$Entity] = $PersistenceData->GetIdentity();
         
         $EntityType = $PersistenceData->GetEntityType();
         if(!isset($this->PersistenceDataGroups[$EntityType])) {
             $this->PersistenceDataGroups[$EntityType] = [];
         }
         $this->PersistenceDataGroups[$EntityType][] = $PersistenceData;
+        
+        return $PersistenceData->GetIdentity();
     }
     
     /**
@@ -136,7 +151,7 @@ final class UnitOfWork {
      * Discards the supplied entity 
      * 
      * @param object $Entity The entity to discard
-     * @return void
+     * @return Identity
      */
     public function Discard($Entity) {
         $Hash = spl_object_hash($Entity);
@@ -151,10 +166,12 @@ final class UnitOfWork {
         $this->DiscardenceData[$Hash] = $DiscardenceData;
         
         $EntityType = $DiscardenceData->GetEntityType();
-        if(!isset($this->DiscardedIdentityGroups[$EntityType])) {
-            $this->DiscardedIdentityGroups[$EntityType] = [];
+        if(!isset($this->DiscardenceDataGroups[$EntityType])) {
+            $this->DiscardenceDataGroups[$EntityType] = [];
         }
-        $this->DiscardedIdentityGroups[$EntityType][] = $DiscardenceData;
+        $this->DiscardenceDataGroups[$EntityType][] = $DiscardenceData;
+        
+        return $DiscardenceData->GetIdentity();
     }
     
     /**
@@ -162,7 +179,7 @@ final class UnitOfWork {
      * 
      * @param ICriteria $Criteria The criteria to discard by
      */
-    public function DiscardWhere(ICriteria $Criteria) {
+    public function DiscardBy(ICriteria $Criteria) {
         if(!$this->Domain->HasEntityMap($Criteria->GetEntityType())) {
             throw $this->TypeMismatch('criteria', $Criteria->GetEntityType());
         }
@@ -191,17 +208,17 @@ final class UnitOfWork {
     }
     
     /**
-     * @return PersistenceData[]
+     * @return DiscardenceData[]
      */
     public function GetDiscardenceData() {
         return $this->DiscardenceData;
     }
     
     /**
-     * @return PersistenceData[][]
+     * @return DiscardenceData[][]
      */
     public function GetDiscardenceDataGroups() {
-        return $this->DiscardedIdentityGroups;
+        return $this->DiscardenceDataGroups;
     }
     
     /**

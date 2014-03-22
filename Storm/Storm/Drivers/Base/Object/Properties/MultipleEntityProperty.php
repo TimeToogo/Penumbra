@@ -55,10 +55,14 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
                 $HasOriginalValue, 
                 $OriginalValue) = $this->GetEntityRelationshipData($ParentEntity);
         
-        return $this->PersistRelationshipChanges($Domain, $UnitOfWork, $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue);
+        return $this->PersistRelationshipChanges($Domain, $UnitOfWork, $CurrentValue, $HasOriginalValue, $OriginalValue);
     }
     protected abstract function PersistRelationshipChanges(
-            Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue);
+            Object\Domain $Domain, 
+            Object\UnitOfWork $UnitOfWork,
+            $CurrentValue, 
+            $HasOriginalValue, 
+            $OriginalValue);
     
     final public function Discard(Object\UnitOfWork $UnitOfWork, $ParentEntity) {
         $Domain = $UnitOfWork->GetDomain();
@@ -67,10 +71,14 @@ abstract class MultipleEntityProperty extends RelationshipProperty implements Ob
                 $HasOriginalValue, 
                 $OriginalValue) = $this->GetEntityRelationshipData($ParentEntity);
         
-        return $this->DiscardRelationshipChanges($Domain, $UnitOfWork, $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue);
+        return $this->DiscardRelationshipChanges($Domain, $UnitOfWork, $CurrentValue, $HasOriginalValue, $OriginalValue);
     }
     protected abstract function DiscardRelationshipChanges(
-            Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, $ParentEntity, $CurrentValue, $HasOriginalValue, $OriginalValue);
+            Object\Domain $Domain, 
+            Object\UnitOfWork $UnitOfWork, 
+            $CurrentValue, 
+            $HasOriginalValue, 
+            $OriginalValue);
     
     
 }

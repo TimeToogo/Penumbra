@@ -5,6 +5,7 @@ namespace Storm\Drivers\Platforms\Standard\Queries;
 use \Storm\Core\Relational;
 use \Storm\Drivers\Platforms\Base\Queries;
 use \Storm\Drivers\Base\Relational\Queries\QueryBuilder;
+use \Storm\Drivers\Base\Relational\Queries\ParameterType;
 
 class CriteriaCompiler extends Queries\CriteriaCompiler {
     
@@ -33,11 +34,11 @@ class CriteriaCompiler extends Queries\CriteriaCompiler {
             $QueryBuilder->Append('LIMIT 18446744073709551615');
         }
         else {
-            $QueryBuilder->AppendValue('LIMIT #', $Limit, Queries\ParameterType::Integer);
+            $QueryBuilder->AppendValue('LIMIT #', $Limit, ParameterType::Integer);
         }
 
         $QueryBuilder->Append(' ');
-        $QueryBuilder->AppendValue('OFFSET #', $Offset, Queries\ParameterType::Integer);
+        $QueryBuilder->AppendValue('OFFSET #', $Offset, ParameterType::Integer);
     }
 }
 
