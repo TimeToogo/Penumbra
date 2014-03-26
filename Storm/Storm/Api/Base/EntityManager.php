@@ -3,12 +3,10 @@
 namespace Storm\Api\Base;
 
 use \Storm\Api\IEntityManager;
-use \Storm\Api\IConfiguration;
 use \Storm\Core\Object;
-use \Storm\Core\Mapping\DomainDatabaseMap;
+use \Storm\Core\Mapping;
 use \Storm\Drivers\Base;
 use \Storm\Pinq;
-use \Storm\Pinq\Functional;
 
 /**
  * The Repository provides the clean api for querying on a specific
@@ -18,16 +16,16 @@ use \Storm\Pinq\Functional;
  */
 class EntityManager implements IEntityManager {
     /**
-     * The DomainDatabaseMap to query.
+     * The domain database map to query.
      * 
-     * @var DomainDatabaseMap
+     * @var Mapping\DomainDatabaseMap
      */
     protected $DomainDatabaseMap;
     
     /**
-     * @var IFunctionToASTConverter
+     * @var Pinq\Functional\IFunctionToExpressionTreeConverter
      */
-    protected $FunctionToASTConverter;
+    protected $FunctionToExpressionTreeConverter;
     
     /**
      * The type of entity represented by this repository.
@@ -58,32 +56,11 @@ class EntityManager implements IEntityManager {
     private $AutoSave = false;
     
     /**
-     * Entities that are awaiting persistence
+     * The storage for all the pending changes
      * 
-     * @var array 
+     * @var Mapping\PendingChanges 
      */
-    private $PersistedQueue = [];
-    
-    /**
-     * Procedures that are awaiting execution
-     * 
-     * @var array 
-     */
-    private $ExecutionQueue = [];
-    
-    /**
-     * Entities that are awaiting to be discarded
-     * 
-     * @var array 
-     */
-    private $DiscardedQueue = [];
-    
-    /**
-     * Criteria of entities to discard
-     * 
-     * @var array 
-     */
-    private $DiscardedCriteriaQueue = [];    
+    private $PendingChanges;
     
     /**
      * The cache to use as the identity map for the repository
@@ -93,14 +70,15 @@ class EntityManager implements IEntityManager {
     private $IdentityMap;    
     
     public function __construct(
-            DomainDatabaseMap $DomainDatabaseMap,
-            Pinq\IFunctionToExpressionTreeConverter $FunctionToASTConverter,
+            Mapping\DomainDatabaseMap $DomainDatabaseMap,
+            Pinq\Functional\IFunctionToExpressionTreeConverter $FunctionToExpressionConverter,
             $EntityType) {
         $this->DomainDatabaseMap = $DomainDatabaseMap;
-        $this->EntityMap = $this->DomainDatabaseMap->GetDomain()->GetEntityMap($EntityType);
+        $this->EntityMap = $this->DomainDatabaseMap->GetDomain()->VerifyEntityMap($EntityType);
         $this->IdentityProperties = $this->EntityMap->GetIdentityProperties();
-        $this->FunctionToASTConverter = $FunctionToASTConverter;
+        $this->FunctionToExpressionTreeConverter = $FunctionToExpressionConverter;
         $this->EntityType = $EntityType;
+        $this->PendingChanges = new Mapping\PendingChanges();
         $this->IdentityMap = new IdentityMap($this->EntityMap, new \Storm\Utilities\Cache\MemoryCache());
     }
     
@@ -137,7 +115,7 @@ class EntityManager implements IEntityManager {
             throw new Object\TypeMismatchException('Call to method %s with invalid entity: %s expected, %s given', 
                     $Method, 
                     $this->EntityType,
-                    \Storm\Core\Utilities::GetTypeOrClass($Entity));
+                    \Storm\Utilities\Type::GetTypeOrClass($Entity));
         }
     }
     
@@ -154,7 +132,7 @@ class EntityManager implements IEntityManager {
     final public function Request() {
         return new Pinq\Request(
                 $this,
-                $this->FunctionToASTConverter);
+                $this->FunctionToExpressionTreeConverter);
     }
     
     /**
@@ -163,7 +141,7 @@ class EntityManager implements IEntityManager {
     final public function Procedure() {
         return new Pinq\Procedure(
                 $this,
-                $this->FunctionToASTConverter);
+                $this->FunctionToExpressionTreeConverter);
     }
     
     /**
@@ -172,7 +150,7 @@ class EntityManager implements IEntityManager {
     final public function Remove() {
         return new Pinq\Removal(
                 $this,
-                $this->FunctionToASTConverter);
+                $this->FunctionToExpressionTreeConverter);
     }
     
     /**
@@ -260,9 +238,10 @@ class EntityManager implements IEntityManager {
                         new Base\Object\Criteria\MatchesPropertyDataCriteria(
                                 $this->EntityType,
                                 $Identity,
-                                null,
-                                0,
-                                1)));
+                                null, //Order By
+                                0,//Range Offset
+                                1 //Range Limit
+                                )));
         
         $Entity = count($Entities) > 0 ? $Entities[0] : null;
         if($Entity instanceof $this->EntityType) {
@@ -279,7 +258,7 @@ class EntityManager implements IEntityManager {
         $this->VerifyEntity(__METHOD__, $Entity);
         $this->IdentityMap->CacheEntity($Entity);
         
-        $this->PersistedQueue[] = $Entity;
+        $this->PendingChanges->AddEntityToPersist($Entity);
         $this->AutoSave();
     }
     
@@ -289,7 +268,7 @@ class EntityManager implements IEntityManager {
     public function PersistAll(array $Entities) {
         $this->IdentityMap->CacheEntities($Entities);
         
-        $this->PersistedQueue = array_merge($this->PersistedQueue, $Entities);
+        $this->PendingChanges->AddEntitiesToPersist($Entities);
         $this->AutoSave();
     }
     
@@ -300,7 +279,8 @@ class EntityManager implements IEntityManager {
         if($Procedure->GetEntityType() !== $this->EntityType) {
             throw new Object\TypeMismatchException('The supplied procedure is of type %s, expecting: %s', $Procedure->GetEntityType(), $this->EntityType);
         }
-        $this->ExecutionQueue[] = $Procedure;
+        $this->PendingChanges->AddProcedureToExecute($Procedure);
+        
         $this->AutoSave();
     }
     
@@ -310,7 +290,7 @@ class EntityManager implements IEntityManager {
     public function Discard($Entity) {
         $this->VerifyEntity(__METHOD__, $Entity);
         $this->IdentityMap->RemoveFromCache($Entity);
-        $this->DiscardedQueue[] = $Entity;
+        $this->PendingChanges->AddEntityToDiscard($Entity);
         
         $this->AutoSave();
     }
@@ -319,7 +299,7 @@ class EntityManager implements IEntityManager {
      * {@inheritDoc}
      */
     public function DiscardBy(Object\ICriteria $Criteria) {
-        $this->DiscardedCriteriaQueue[] = $Criteria;
+        $this->PendingChanges->AddCriteriaToDiscardBy($Criteria);
         
         $this->AutoSave();
     }
@@ -346,40 +326,27 @@ class EntityManager implements IEntityManager {
      * {@inheritDoc}
      */
     public function SaveChanges() {
-        if(count($this->PersistedQueue) === 0 && 
-                count($this->ExecutionQueue) === 0 &&
-                count($this->DiscardedQueue) === 0 &&
-                count($this->DiscardedCriteriaQueue) === 0) {
+        if($this->PendingChanges->IsEmpty()) {
             return;
         }
         
-        $this->DomainDatabaseMap->Commit(
-                $this->PersistedQueue, 
-                $this->ExecutionQueue, 
-                $this->DiscardedQueue, 
-                $this->DiscardedCriteriaQueue);
+        $this->DomainDatabaseMap->Commit($this->PendingChanges);
         
-        $this->ClearChanges();
+        $this->PendingChanges->Reset();
     }
     
     /**
      * {@inheritDoc}
      */
     final public function GetChanges() {
-        return [$this->PersistedQueue, 
-                $this->ExecutionQueue, 
-                $this->DiscardedQueue, 
-                $this->DiscardedCriteriaQueue];
+        return $this->PendingChanges;
     }
     
     /**
      * {@inheritDoc}
      */
     final public function ClearChanges() {
-        $this->PersistedQueue = [];
-        $this->ExecutionQueue = [];
-        $this->DiscardedQueue = [];
-        $this->DiscardedCriteriaQueue = [];
+        $this->PendingChanges->Reset();
     }
 }
 

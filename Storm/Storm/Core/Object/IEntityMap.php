@@ -147,7 +147,7 @@ interface IEntityMap {
      * @param object $Entity The entity to persist
      * @return PersistenceData The persistence data of the entity
      */
-    public function Persist(UnitOfWork $UnitOfWork, $Entity);
+    public function Persist(UnitOfWork $UnitOfWork, $Entity, PersistenceData $PersistenceData = null);
     
     /**
      * Persists an entity's relationships to the supplied unit of work.
@@ -156,7 +156,7 @@ interface IEntityMap {
      * @param object $Entity The entity to persist
      * @return PersistenceData The persistence data of the entity
      */
-    public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity);
+    public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity, PersistenceData $PersistenceData = null);
     
     /**
      * Discards an entity's relationships to the supplied unit of work and returns the discardence data.
@@ -165,7 +165,7 @@ interface IEntityMap {
      * @param object $Entity The entity to discard
      * @return DiscardenceData The discardence data of the entity
      */
-    public function Discard(UnitOfWork $UnitOfWork, $Entity);
+    public function Discard(UnitOfWork $UnitOfWork, $Entity, DiscardenceData $DiscardenceData = null);
     
     /**
      * Applies the supplied property data to the supplied entity instance.

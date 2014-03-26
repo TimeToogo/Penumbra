@@ -3,6 +3,7 @@
 namespace Storm\Drivers\Base\Mapping\Mappings;
 
 use \Storm\Core\Mapping\IEntityPropertyToOneRelationMapping;
+use \Storm\Core\Mapping\UnitOfWorkTransactionMapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
@@ -71,7 +72,7 @@ class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMap
         }
     }
     
-    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, Object\RelationshipChange $RelationshipChange) {
+    public function Persist(UnitOfWorkTransactionMapping $Mapping, Relational\ResultRow $ParentData, Object\RelationshipChange $RelationshipChange) {
         if($RelationshipChange->HasDiscardedIdentity() || $RelationshipChange->HasPersistedEntityData()) {
             
             $DiscardedPrimaryKey = null;
@@ -81,15 +82,14 @@ class EntityPropertyToOneRelationMapping extends RelationshipPropertyRelationMap
             
             $RelatedData = null;
             if($RelationshipChange->IsDependent()) {
-                $RelatedData = $this->EntityRelationalMap->MapPersistenceDataToResultRows($Transaction, [$RelationshipChange->GetPersistedEntityData()])[0];
-                $Transaction->PersistAll($RelatedData->GetRows());
+                $RelatedData = $Mapping->MapPersistenceData($this->EntityRelationalMap, $RelationshipChange->GetPersistedEntityData());
             }
             else if($RelationshipChange->HasPersistedEntityData()) {
                 $RelatedData = $this->EntityRelationalMap->MapIdentityToPrimaryKey($RelationshipChange->GetPersistedEntityData());
             }
             
             $this->ToOneRelation->Persist(
-                    $Transaction, 
+                    $Mapping->GetTransaction(),
                     $ParentData, 
                     $DiscardedPrimaryKey, 
                     $RelatedData);

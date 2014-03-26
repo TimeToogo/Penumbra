@@ -33,8 +33,8 @@ trait EntityProxyFunctionality {
             unset($this->$PropertyName);
         };
         foreach(static::$__PropertiesToUnset as $DeclaringClass => $PropertyNames) {
-            \Closure::bind($Unsetter, $this, $DeclaringClass);
-            array_walk($PropertyNames, $Unsetter);
+            $BoundUnsetter = \Closure::bind($Unsetter, $this, $DeclaringClass);
+            array_walk($PropertyNames, $BoundUnsetter);
         }
         $EntityMap->LoadEntity($AlreadyKnownRevivalData, $this);
         $this->__IsConstructed = true;

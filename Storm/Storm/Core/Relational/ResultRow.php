@@ -75,7 +75,7 @@ class ResultRow extends ColumnData {
     }
     
     public function __clone() {
-        foreach($this->Rows as $TableName => $Rows) {
+        foreach($this->Rows as $TableName => $Row) {
             $this->Rows[$TableName] = clone $this->Rows[$TableName];
             $this->PrimaryKeys[$TableName] = $this->Rows[$TableName]->GetPrimaryKey();
         }

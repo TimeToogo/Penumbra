@@ -2,16 +2,13 @@
 
 namespace StormExamples\One\Relational\Tables;
 
-use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational\Database;
 use \Storm\Drivers\Constant\Relational;
 use \Storm\Drivers\Base\Relational\Columns\IColumnSet;
 use \Storm\Drivers\Base\Relational\PrimaryKeys\IKeyGeneratorSet;
-use \Storm\Drivers\Platforms\Mysql;
-use \Storm\Drivers\Base\Relational\Columns\Column;
-use \Storm\Drivers\Base\Relational\Columns\DataType;
 use \Storm\Drivers\Base\Relational\Traits;
 use \Storm\Drivers\Base\Relational\Relations;
+
 
 class Authors extends Relational\Table {
     protected function Name() {
@@ -32,13 +29,17 @@ class Authors extends Relational\Table {
         $this->FirstName = $Column->String('FirstName', 50);
         $this->LastName = $Column->String('LastName', 50);
     }
-
+    
     protected function CreateRelationalStructure(Database $Database) {
         
     }
-
+    
+    public $Profile;
+    public $Friends;
+    
     protected function CreateRelations(Database $Database) {
-        
+        $this->Profile = new Relations\InversedToOneRelation($Database->Profiles->AuthorForeignKey);
+        $this->Friends = new Relations\JoinTableRelation($Database->AuthorFriends);
     }
 }
 

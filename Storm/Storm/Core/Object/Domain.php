@@ -60,7 +60,7 @@ abstract class Domain {
      * @return bool
      */
     final public function HasEntityMap($EntityType) {
-        return isset($this->EntityMaps[$EntityType]);
+        return $this->GetEntityMap($EntityType) !== null;
     }
     
     /**
@@ -72,31 +72,47 @@ abstract class Domain {
     
     /**
      * @param string $EntityType The type of entity that the entity map represents
-     * @return IEntityMap|null The entity map or null if it is not registered
+     * @return IEntityMap|null The entity map or null if none is not registered
      */
-    final public function GetEntityMap($EntityType) {
-        return $this->HasEntityMap($EntityType) ? $this->EntityMaps[$EntityType] : null;
+    final public function GetEntityMap($EntityType) {        
+        if(isset($this->EntityMaps[$EntityType])) {
+            return $this->EntityMaps[$EntityType];
+        }
+        else {
+            $ParentType = get_parent_class($EntityType);
+            if($ParentType === false) {
+                return null;
+            }
+            else {
+                return $this->GetEntityMap($ParentType);
+            }
+        }
+    }
+    
+    /**
+     * @param string $EntityType The type of entity that the entity map represents
+     * @return IEntityMap The entity map
+     * @throws UnmappedEntityException
+     */
+    final public function VerifyEntityMap($EntityType) {
+        $EntityMap = $this->GetEntityMap($EntityType);
+        if($EntityMap === null) {
+            throw new UnmappedEntityException(
+                    'Cannot get entity map: %s does not have a registered entity map for type %s',
+                    get_class($this), 
+                    $EntityType);
+        }
+        return $EntityMap;
     }
     
     /**
      * Verifies that an entity is valid in this domain.
      * 
-     * @param string $Method __METHOD__
      * @param object $Entity The entity to verify
      * @return IEntityMap The matching entity map
-     * @throws UnmappedEntityException
      */
-    private function VerifyEntity($Method, $Entity) {
-        $EntityTypes = array_reverse(array_merge([get_class($Entity)], array_values(class_parents($Entity, false))));
-        foreach($EntityTypes as $EntityType) {
-            if(isset($this->EntityMaps[$EntityType])) {
-                return $this->EntityMaps[$EntityType];
-            }
-        }           
-        throw new UnmappedEntityException(
-                'Call to %s with supplied entity of type %s has not been mapped',
-                $Method, 
-                get_class($Entity));
+    final public function VerifyEntity($Entity) {
+        return $this->VerifyEntityMap(get_class($Entity));
     }
     
     /**
@@ -104,7 +120,7 @@ abstract class Domain {
      * @return boolean Whether or not the entity has an identity
      */
     final public function HasIdentity($Entity) {
-        return $this->VerifyEntity(__METHOD__, $Entity)->HasIdentity($Entity);
+        return $this->VerifyEntity($Entity)->HasIdentity($Entity);
     }
     
     /**
@@ -115,7 +131,7 @@ abstract class Domain {
      * @return boolean Whether or not that the entities have the same identity
      */
     final public function DoShareIdentity($Entity, $OtherEntity) {
-        $EntityMap = $this->VerifyEntity(__METHOD__, $Entity);
+        $EntityMap = $this->VerifyEntity($Entity);
         $EntityType = $EntityMap->GetEntityType();
         if(!($OtherEntity instanceof $EntityType)) {
             return false;
@@ -132,7 +148,7 @@ abstract class Domain {
      * @return Identity 
      */
     final public function Identity($Entity) {
-        return $this->VerifyEntity(__METHOD__, $Entity)->Identity($Entity);
+        return $this->VerifyEntity($Entity)->Identity($Entity);
     }
     
     /**
@@ -144,7 +160,7 @@ abstract class Domain {
      * @return PersistenceData The persistence data of the entity
      */
     final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
-        return $this->VerifyEntity(__METHOD__, $Entity)->Persist($UnitOfWork, $Entity);
+        return $this->VerifyEntity($Entity)->Persist($UnitOfWork, $Entity);
     }
     
     /**
@@ -155,7 +171,7 @@ abstract class Domain {
      * @return void The persistence data of the entity
      */
     final public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity) {
-        $this->VerifyEntity(__METHOD__, $Entity)->PersistRelationships($UnitOfWork, $Entity);
+        $this->VerifyEntity($Entity)->PersistRelationships($UnitOfWork, $Entity);
     }
     
     /**
@@ -167,7 +183,7 @@ abstract class Domain {
      * @return DiscardenceData The discardence data of the entity
      */
     final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
-        return $this->VerifyEntity(__METHOD__, $Entity)->Discard($UnitOfWork, $Entity);
+        return $this->VerifyEntity($Entity)->Discard($UnitOfWork, $Entity);
     }
     
     /**
@@ -178,7 +194,7 @@ abstract class Domain {
      * @return void
      */
     final public function Apply($Entity, PropertyData $PropertyData) {
-        return $this->VerifyEntity(__METHOD__, $Entity)->Apply($Entity, $PropertyData);
+        return $this->VerifyEntity($Entity)->Apply($Entity, $PropertyData);
     }
     
     /**
@@ -235,14 +251,14 @@ abstract class Domain {
      * @return UnitOfWork The constructed unit of work
      */
     final public function BuildUnitOfWork(
-            array $EntitiesToPersist = [],
-            array $ProceduresToExecute = [],
-            array $EntitiesToDiscard = [], 
-            array $CriteriaToDiscard = []) {
+            \Traversable $EntitiesToPersist,
+            \Traversable $ProceduresToExecute,
+            \Traversable $EntitiesToDiscard, 
+            \Traversable $CriteriaToDiscard) {
         $UnitOfWork = new UnitOfWork($this);
         
         foreach($EntitiesToPersist as $Entity) {
-            $UnitOfWork->Persist($Entity);
+            $UnitOfWork->PersistRoot($Entity);
         }
         foreach($ProceduresToExecute as $Procedure) {
             $UnitOfWork->Execute($Procedure);

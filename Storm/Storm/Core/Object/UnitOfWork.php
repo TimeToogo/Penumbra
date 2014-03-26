@@ -14,14 +14,14 @@ final class UnitOfWork {
     private $Domain;
     
     /**
-     * @var Map 
-     */
-    private $PersistenceDataEntityMap;
-    
-    /**
      * @var PersistenceData[] 
      */
     private $PersistenceData = [];
+    
+    /**
+     * @var \SplObjectStorage 
+     */
+    private $PersistedEntities;
     
     /**
      * @var PersistenceData[][]
@@ -48,14 +48,9 @@ final class UnitOfWork {
      */
     private $DiscardedCriteria = [];
     
-    /**
-     * @var \SplObjectStorage 
-     */
-    private $PersistedEntityIdentityMap;
-    
     public function __construct(Domain $Domain) {
         $this->Domain = $Domain;
-        $this->PersistedEntityIdentityMap = new \SplObjectStorage();
+        $this->PersistedEntities = new \SplObjectStorage();
     }
     
     /**
@@ -65,29 +60,38 @@ final class UnitOfWork {
         return $this->Domain;
     }
     
-    public function PersistedIdentity($Entity) {
-        if(!isset($this->PersistedEntityIdentityMap[$Entity])) {
-            return null;
-        }        
+    private function IsPersisted($Entity) {
+        return $this->PersistedEntities->contains($Entity);
+    }
+    
+    private function SetPersisted($Entity, PersistenceData $PersistenceData) {
+        $this->PersistedEntities->attach($Entity, $PersistenceData);
+    }
+    
+    private function PersistEntity($Entity) {
+        $EntityMap = $this->Domain->VerifyEntity($Entity);
+        $PersistenceData = $EntityMap->PersistanceData($Entity);
+        $this->SetPersisted($Entity, $PersistenceData);
         
-        return $this->PersistedEntityIdentityMap[$Entity];
+        $EntityMap->Persist($this, $Entity, $PersistenceData);
+        
+        return $PersistenceData;
     }
     
     /**
      * Persist an entities data and relationships to the unit of work.
      * 
      * @param object $Entity The entity to persist
-     * @return Identity 
+     * @return void 
      */
-    public function Persist($Entity) {
-        $Hash = spl_object_hash($Entity);
-        if(isset($this->PersistenceData[$Hash])) {
+    public function PersistRoot($Entity) {
+        if($this->IsPersisted($Entity)) {
              return;
         }
         
-        $PersistenceData = $this->Domain->Persist($this, $Entity);
-        $this->PersistenceData[$Hash] = $PersistenceData;
-        $this->PersistedEntityIdentityMap[$Entity] = $PersistenceData->GetIdentity();
+        $PersistenceData = $this->PersistEntity($Entity);
+        
+        $this->PersistenceData[] = $PersistenceData;
         
         $EntityType = $PersistenceData->GetEntityType();
         if(!isset($this->PersistenceDataGroups[$EntityType])) {
@@ -95,7 +99,22 @@ final class UnitOfWork {
         }
         $this->PersistenceDataGroups[$EntityType][] = $PersistenceData;
         
-        return $PersistenceData->GetIdentity();
+    }
+    
+    /**
+     * Persist an entities data and relationships to and returns the dependent persistence data.
+     * 
+     * @param object $Entity The entity to persist
+     * @return PersistenceData 
+     */
+    public function PersistDependent($Entity) {
+        if($this->IsPersisted($Entity)) {
+             return $this->PersistedEntities[$Entity];
+        }
+        
+        $PersistenceData = $this->PersistEntity($Entity);
+        
+        return $PersistenceData;
     }
     
     /**
@@ -110,20 +129,7 @@ final class UnitOfWork {
              return;
         }
         
-        $this->Domain->PersistRelationships($this, $Entity);
-    }
-    
-    /**
-     * Sets a generated identity to to the entity mapped with the supplied persistence data.
-     * 
-     * @param PersistenceData $PersistenceData The persistence data of the entity
-     * @param Identity $Identity The identity to supply the entity
-     */
-    public function SupplyIdentity(PersistenceData $PersistenceData, Identity $Identity) {
-        if(isset($this->PersistenceDataEntityMap[$PersistenceData])) {
-            $Entity = $this->PersistenceDataEntityMap[$PersistenceData];
-            $this->Domain->Apply($Entity, $Identity);
-        }
+        $this->Domain->VerifyEntity($Entity)->PersistRelationships($this, $Entity);
     }
     
     private function TypeMismatch($ObjectName, $EntityType) {
@@ -156,10 +162,10 @@ final class UnitOfWork {
     public function Discard($Entity) {
         $Hash = spl_object_hash($Entity);
         if(isset($this->DiscardenceData[$Hash])) {
-            return $this->DiscardenceData[$Hash];
+            return $this->DiscardenceData[$Hash]->GetIdentity();
         }
         if(!$this->Domain->HasIdentity($Entity)) {
-            return;
+            return null;
         }
         
         $DiscardenceData = $this->Domain->Discard($this, $Entity);

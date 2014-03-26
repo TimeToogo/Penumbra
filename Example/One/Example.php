@@ -47,7 +47,7 @@ class Example implements \StormExamples\IStormExample {
         return $Configuration->Storm();
     }
     
-    const Id = 750;
+    const Id = 1058;
     
     const Persist = 0;
     const Retreive = 1;
@@ -69,7 +69,7 @@ class Example implements \StormExamples\IStormExample {
         for ($Count = 0; $Count < $Amount; $Count++) {
             $Last = $this->Act($Action, $BloggingStorm, $BlogManger, $AuthorManger, $TagManger);
         }
-
+        
         return $Last;
     }
 
@@ -130,9 +130,14 @@ class Example implements \StormExamples\IStormExample {
         }
         $Post = $RevivedBlog->Posts[0];
         $Author = $Post->Author;
+        
+        $Profile = $Author->Profile;
+        $Friend = $Author->Friends[0];
+        $Profile->Location;
         $Test = $Author->FirstName;
         $Foo = $RevivedBlog->Posts[0]->Tags->getArrayCopy();
         $Foo = $RevivedBlog->Posts[1]->Tags->getArrayCopy();
+        \Storm\Utilities\Debug::Dump($RevivedBlog);
         $BlogManger->GetIdentityMap()->Clear();
         
         return null;
@@ -211,116 +216,11 @@ class Example implements \StormExamples\IStormExample {
         if(extension_loaded('xdebug')) {
             var_dump($RevivedBlog);
         }
+        $RevivedBlog->Posts[0]->Author->FirstName;
         $RevivedBlog->Posts[0]->Tags->getArrayCopy();
         $RevivedBlog->Posts[1]->Tags->getArrayCopy();
-        $BlogManger->GetIdentityMap()->Clear();
 
         return null;
-    }
-    
-    private function AggregationOptions(EntityManager $BlogManger) {
-        //#1 ----------------------------------------------------- Yes
-        $Request = $BlogManger->Request();
-        
-        $Request->Where(function ($Blog) use($Id) {
-                    return $Blog->Id === $Id;
-                })
-                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
-                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
-                ->GroupBy(function ($Blog) { return $Blog->Name; })
-                ->Select(function ($Blog, \Storm\Pinq\IAggregate $Blogs) {
-                    return [
-                        'Full Name' => $x,
-                        'Name' => $Blog->GetName(),
-                        'MaxHits' => $Hits->Maximum(),
-                        'MinHits' => $Hits->Minimum(),
-                        'Sum' => $Hits->Sum(),
-                        'Implode' => $Hits->Implode(', '),
-                        'Count' => $Hits->Count(),
-                        'AllBig' => $Blogs->All(function ($Blog) { return $Blog->Hits > 50; }),
-                    ];
-                });
-                
-        //#1 ----------------------------------------------------- Yes
-        $Sums = $BlogManger->Request()
-                ->Where(function ($Blog) use($Id) {
-                    return $Blog->Id === $Id;
-                })
-                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
-                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
-                ->GroupBy(function ($Blog) { return $Blog->Name; })
-                ->Sum(function ($Blog) { return $Blog->GetHits(); });
-                
-                
-                
-                
-        //#2 -----------------------------------------------------NO
-        $BlogManger->Request()
-                ->Where(function ($Blog) use($Id) {
-                    return $Blog->Id === $Id;
-                })
-                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
-                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
-                ->GroupBy(function ($Blog) { return $Blog->Name; })
-                ->Data([
-                    'MaxHits' => function ($Blog) { return $Blog->GetHits(); },
-                    'MaxHits' => function ($Blog) { return $Blog->GetHits(); },
-                    'MinHits' => function ($Blog) { return $Blog->GetHits(); },
-                    'Sum' => function ($Blog) { return $Blog->GetId(); },
-                    'Implode' => function ($Blog) { return $Blog->GetHits(); },
-                    'Count' => function ($Blog) { return $Blog; },
-                ]);
-        
-        //#3 ----------------------------------------------------- Possibly
-        $BlogManger->RequestData()
-                
-                ->Value(function ($Blog) { return $Blog->Name; })->As('Name')
-                ->Maximum(function ($Blog) { return $Blog->GetHits(); })->As('MaxHits')
-                ->Minimum(function ($Blog) { return $Blog->GetHits(); })->As('MinHits')
-                ->Sum(function ($Blog) { return $Blog->GetHits(); })->As('Sum')
-                ->Implode(', ', function ($Blog) { return $Blog->GetHits(); })->As('Implode')
-                ->Count()->As('Count')
-                
-                ->Where(function ($Blog) use($Id) {
-                    return $Blog->Id === $Id;
-                })
-                ->OrderBy(function ($Blog) { return $Blog->Id . $Blog->CreatedDate; })
-                ->OrderByDescending(function ($Blog) { return $Blog->Id; })
-                ->GroupBy(function ($Blog) { return $Blog->Name; })
-                
-                ->Load()
-                ;
-              
-        //THE GOAL:---
-        $Request->Where(function ($Blog) use ($Request) { return $Request->All(function ($Blog) { return $Blog->Id % 10 === 0; }); })
-                ->GroupBy(function ($Blog) { return $Blog->GetYear(); })
-                ->Select(function (\Storm\Pinq\IAggregate $Blogs) {
-                    $Hits = function ($Blog) { return $Blog->Hits; };
-                    $Blog = $Blogs->First();
-                    return [
-                        'Full Name' => $Blog->GetId(),
-                        'Name' => $Blog->GetName(),
-                        'MaxHits' => $Blogs->Maximum($Hits),
-                        'MinHits' => $Blogs->Minimum($Hits),
-                        'Sum' => $Blogs->Sum($Hits),
-                        'Implode' => $Blogs->Implode(', ', $Hits),
-                        'Count' => $Blogs->Count(),
-                        'AllBig' => $Blogs->All(function ($Blog) { return $Blog->Hits > 50; }),
-                    ];
-                });
-        /**
-         * SELECT 
-         *      Id AS `Full Name`,
-         *      Name AS `Name`,
-         *      MAX(Hits) AS `MaxHits`,
-         *      Min(Hits) AS `MinHits`,
-         *      SUM(Hits) AS `Sum`,
-         *      GROUP_CONCAT(Hits SEPARATOR ', ') AS `Implode`,
-         *      COUNT(*) AS `Count`,
-         *      BIT_AND(IF(Hits > 50, 1, 0)) AS `AllBig`
-         * FROM Blogs WHERE (SELECT BIT_AND(IF(Id, 1, 0)) FROM Blogs WHERE Id % 10 = 0) 
-         * GROUP BY Year
-         */
     }
     
     private function PersistExisting($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
@@ -380,15 +280,50 @@ class Example implements \StormExamples\IStormExample {
         return $Blog;
     }
 
-    private function CreateAuthor() {
+    private function CreateAuthor(Entities\Author $Friend = null) {
         $FirstNames = ['Joe', 'Jack', 'Bill', 'Tom', 'Sandy', 'Mat'];
         $LastNames = ['Runt', 'Paffy', 'Derka', 'Shammy', 'Tuple', 'White'];
         
         $Author = new Entities\Author();
+        $Author->Profile = $this->CreateProfile($Author);
         $Author->FirstName = $FirstNames[rand(0, count($FirstNames) - 1)];
         $Author->LastName = $LastNames[rand(0, count($LastNames) - 1)];
+        $Author->Friends = new \ArrayObject($Friend === null ? [] : [$Friend]);
+        if($Friend === null) {
+            $this->AddFriends($Author);
+        }
         
         return $Author;
+    }
+    
+    private function AddFriends(Entities\Author $Author) {
+        if(mt_rand(0, 1)) {
+            $Author->Friends[] = $Author;
+        }
+        
+        while (mt_rand(0, 5) > 1) {
+            $Author->Friends[] = $this->CreateAuthor($Author);
+        }
+    }
+
+    private function CreateProfile(Entities\Author $Author) {
+        $Descriptions = [
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 
+            'Ut laoreet lacus quis lacus blandit, eu tincidunt eros placerat.', 
+            'In hac habitasse platea dictumst. ', 
+            'Phasellus congue mi vel sollicitudin blandit. Integer vel egestas dolor.', 
+            'Aliquam sem dui, viverra nec lectus ac, aliquet sagittis metus. ', 
+            'Morbi iaculis tortor ultrices leo facilisis vestibulum id at dolor. Nam id blandit mauris. Donec sed congue enim. Donec porta gravida quam, sed vestibulum ante.'
+        ];
+        $Locations = ['Australia', 'USA', 'Canada', 'Europe', 'South Africa', 'Antarctica'];
+        
+        $Profile = new Entities\Profile();
+        $Profile->Author = $Author;
+        $Profile->DateOfBirth = (new \DateTime())->sub(new \DateInterval('P' . mt_rand(100, 10000) . 'D'));
+        $Profile->Description = $Descriptions[rand(0, count($Descriptions) - 1)];
+        $Profile->Location = $Locations[rand(0, count($Locations) - 1)];
+        
+        return $Profile;
     }
 
     private function CreatePosts(Entities\Blog $Blog) {

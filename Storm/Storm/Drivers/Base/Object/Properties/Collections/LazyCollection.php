@@ -40,7 +40,6 @@ class LazyCollection extends Collection {
         $RevivalData = $Loader();
         $this->exchangeArray($this->LoadEntities($RevivalData));
         $this->SetIsAltered(false);
-        $this->OriginalEntities = $this->LoadEntities($RevivalData);
     }
     
     private function LoadEntities(array $RevivalDataArray) {
@@ -141,7 +140,7 @@ class LazyCollection extends Collection {
         $this->Load();
         return parent::uksort($cmp_function);
     }
-
+    
 }
 
 ?>

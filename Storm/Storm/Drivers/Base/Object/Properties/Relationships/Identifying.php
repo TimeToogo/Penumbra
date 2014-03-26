@@ -13,7 +13,7 @@ class Identifying implements IRelationshipType {
 
     public function GetPersistedEntityData(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
             $ChildEntity) {
-        return $Domain->Persist($UnitOfWork, $ChildEntity);
+        return $UnitOfWork->PersistDependent($ChildEntity);
     }
     
     public function GetDiscardedIdentity(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 

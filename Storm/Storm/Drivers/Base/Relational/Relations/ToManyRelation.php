@@ -52,7 +52,7 @@ class ToManyRelation extends ToManyRelationBase {
         }
         else {
             $Transaction->SubscribeToPrePersistEvent(
-                    $this->GetTable(), 
+                    $this->GetRelatedTable(), 
                     $MapForeignKeys);
         }
     }

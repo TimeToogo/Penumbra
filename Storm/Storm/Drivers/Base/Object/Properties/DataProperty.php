@@ -23,6 +23,10 @@ class DataProperty extends Property implements Object\IDataProperty {
     public function GetValue($Entity) {
         return $this->Accessor->GetValue($Entity);
     }
+
+    protected function UpdateAccessor(Accessors\Accessor $Accessor) {
+        return new self($Accessor, $this->IsIdentity);
+    }
 }
 
 ?>

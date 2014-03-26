@@ -24,7 +24,7 @@ final class Registrar {
             if(!($Instance instanceof $this->RegistrableType)) {
                 throw new \Storm\Core\Object\TypeMismatchException
                         ('Registered type does not match, expecting %s, supplied %s', 
-                        $this->RegistrableType, \Storm\Core\Utilities::GetTypeOrClass($Instance));
+                        $this->RegistrableType, \Storm\Utilities\Type::GetTypeOrClass($Instance));
             }
         }
         

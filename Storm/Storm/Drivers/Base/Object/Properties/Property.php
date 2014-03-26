@@ -3,28 +3,18 @@
 namespace Storm\Drivers\Base\Object\Properties;
 
 use \Storm\Core\Object;
-use \Storm\Core\Object\IProperty;
 use \Storm\Core\Object\Expressions as O;
 
-abstract class Property implements IProperty {
-    private $Identifier;
+abstract class Property extends PropertyBase implements Object\IProperty {
+    
     /**
      * @var Accessors\Accessor 
      */
     protected $Accessor;
     
-    /**
-     * @var string 
-     */
-    private $EntityType;
-    
     public function __construct(Accessors\Accessor $Accessor) {
-        $this->Identifier = $Accessor->GetIdentifier();
+        parent::__construct($Accessor->GetIdentifier());
         $this->Accessor = $Accessor;
-    }
-    
-    final public function GetIdentifier() {
-        return $this->Identifier;
     }
     
     /**
@@ -32,6 +22,10 @@ abstract class Property implements IProperty {
      */
     final public function GetAccessor() {
         return $this->Accessor;
+    }
+    
+    protected function OnSetEntityType($EntityType) {
+        $this->Accessor->SetEntityType($EntityType);
     }
     
     final public function ResolveTraversalExpression(O\TraversalExpression $TraversalExpression) {
@@ -87,16 +81,17 @@ abstract class Property implements IProperty {
     protected function ResolveExcessTraversal(O\TraversalExpression $ExcessTraversalExpression) {
         return $ExcessTraversalExpression;
     }
-
-
-    final public function GetEntityType() {
-        return $this->EntityType;
-    }
     
-    final public function SetEntityType($EntityType) {
-        $this->EntityType = $EntityType;
-        $this->Accessor->SetEntityType($EntityType);
+    /**
+     * @param Accessors\Accessor $Accessor
+     * @return static
+     */
+    final public function UpdateProperty(Accessors\Accessor $Accessor) {
+        if($this->Accessor === $Accessor) {
+            return $this;
+        }
     }
+    protected abstract function UpdateAccessor(Accessors\Accessor $Accessor);
 }
 
 ?>

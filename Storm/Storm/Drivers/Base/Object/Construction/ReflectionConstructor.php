@@ -2,14 +2,19 @@
 
 namespace Storm\Drivers\Base\Object\Construction;
 
+use \Storm\Core\Object;
+
 abstract class ReflectionConstructor extends Constructor {
-    private $Reflection;
+    private $Reflections = [];
     protected function OnSetEntityType($EntityType) {
-        $this->Reflection = new \ReflectionClass($EntityType);
+        if(isset($this->Reflections[$EntityType])) {
+            return;
+        }
+        $this->Reflections[$EntityType] = new \ReflectionClass($EntityType);
     }
     
-    final public function Construct() {
-        $this->ConstructFrom($this->Reflection);
+    final public function Construct(Object\RevivalData $RevivalData) {
+        $this->ConstructFrom($this->Reflections[$this->EntityType]);
     }
     protected abstract function ConstructFrom(\ReflectionClass $Reflection);
 }

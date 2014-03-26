@@ -11,7 +11,7 @@ class EntityMap extends Object\EntityMap {
     private $EntityConstructor;
     
     public function __construct($EntityType, array $EntityProperties, 
-            Object\Construction\IEntityConstructor $EntityConstructor) {
+            Object\Construction\IConstructor $EntityConstructor) {
         $this->EntityType = $EntityType;
         $this->EntityProperties = $EntityProperties;
         $this->EntityConstructor = $EntityConstructor;

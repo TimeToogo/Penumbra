@@ -109,7 +109,7 @@ final class Criteria {
         if (!is_int($RangeOffset)) {
             throw new \Storm\Core\UnexpectedValueException(
                     'The supplied range offset must be a valid integer: %s given',
-                    \Storm\Core\Utilities::GetTypeOrClass($RangeOffset));
+                    \Storm\Utilities\Type::GetTypeOrClass($RangeOffset));
         }
         $this->RangeOffset = $RangeOffset;
     }
@@ -131,7 +131,7 @@ final class Criteria {
         if (!is_int($RangeAmount) && $RangeAmount !== null) {
             throw new \Storm\Core\UnexpectedValueException(
                     'The supplied range amount must be a valid integer or null: %s given',
-                    \Storm\Core\Utilities::GetTypeOrClass($RangeAmount));
+                    \Storm\Utilities\Type::GetTypeOrClass($RangeAmount));
         }
         $this->RangeAmount = $RangeAmount;
     }

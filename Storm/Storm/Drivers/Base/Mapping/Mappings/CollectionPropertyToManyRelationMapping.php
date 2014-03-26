@@ -3,6 +3,7 @@
 namespace Storm\Drivers\Base\Mapping\Mappings;
 
 use \Storm\Core\Mapping\ICollectionPropertyToManyRelationMapping;
+use \Storm\Core\Mapping\UnitOfWorkTransactionMapping;
 use \Storm\Core\Object;
 use \Storm\Core\Relational;
 
@@ -71,35 +72,40 @@ class CollectionPropertyToManyRelationMapping extends RelationshipPropertyRelati
         }
     }
     
-    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, array $RelationshipChanges) {
+    public function Persist(UnitOfWorkTransactionMapping $Mapping, Relational\ResultRow $ParentData, array $RelationshipChanges) {
         if(count($RelationshipChanges) === 0) {
             return;
         } 
         
-        $DiscardedPrimaryKeys = [];
-        $PersistedRelatedDataArray = [];
+        $DiscardedIdentities = [];
+        $DependentPersistenceDataArray = [];
+        $RelatedIdentities= [];
         
         foreach ($RelationshipChanges as $Key => $RelationshipChange) {
-            
-            if($RelationshipChange->HasDiscardedIdentity() || $RelationshipChange->HasPersistedEntityData()) {
-                $DiscardedPrimaryKeys[$Key] = null;
-                if($RelationshipChange->HasDiscardedIdentity()) {
-                    $DiscardedPrimaryKeys[$Key] = $this->EntityRelationalMap->MapIdentityToPrimaryKey($RelationshipChange->GetDiscardedIdentity());
-                }
-                
-                $PersistedRelatedDataArray[$Key] = null;
-                if($RelationshipChange->IsDependent()) {
-                    $PersistedRelatedDataArray[$Key] = $this->EntityRelationalMap->MapPersistenceDataToResultRows($Transaction, [$RelationshipChange->GetPersistedEntityData()])[0];
-                    $Transaction->PersistAll($PersistedRelatedDataArray[$Key]->GetRows());
-                }
-                else if($RelationshipChange->HasPersistedEntityData()) {
-                    $PersistedRelatedDataArray[$Key] = $this->EntityRelationalMap->MapIdentityToPrimaryKey($RelationshipChange->GetPersistedEntityData());
-                }
+            if($RelationshipChange->HasDiscardedIdentity()) {
+                $DiscardedIdentities[$Key] = $RelationshipChange->GetDiscardedIdentity();
+            }
+
+            if($RelationshipChange->IsDependent()) {
+                $DependentPersistenceDataArray[$Key] = $RelationshipChange->GetPersistedEntityData();
+            }
+            else if($RelationshipChange->HasPersistedEntityData()) {
+                $RelatedIdentities[$Key] = $RelationshipChange->GetPersistedEntityData();
             }
         }
         
+        $NullKeys = array_fill_keys(array_keys($RelationshipChanges), null);
+        $DiscardedPrimaryKeys = $this->EntityRelationalMap->MapIdentitiesToPrimaryKeys($DiscardedIdentities) + $NullKeys;
+        
+        $RelatedDepedenctResultRows = $Mapping->MapPersistenceDataArray($this->EntityRelationalMap, $DependentPersistenceDataArray);
+        
+        $PersistedRelatedDataArray = 
+                $RelatedDepedenctResultRows + 
+                $this->EntityRelationalMap->MapIdentitiesToPrimaryKeys($RelatedIdentities) +
+                $NullKeys;
+        
         $this->ToManyRelation->Persist(
-                $Transaction, 
+                $Mapping->GetTransaction(), 
                 $ParentData, 
                 $DiscardedPrimaryKeys, 
                 $PersistedRelatedDataArray);

@@ -29,8 +29,8 @@ abstract class JoinTable extends Base\Relational\Table {
     protected function OnInitializeRelatedStructure(Relational\Database $Context) {
         $this->Table1 = $this->Table1($Context);
         $this->Table2 = $this->Table2($Context);
-        $this->ForeignKey1 = $this->MakeForeignKey($this->Table1, $this->GetForeignKeyMap1($this->Table1));
-        $this->ForeignKey2 = $this->MakeForeignKey($this->Table2, $this->GetForeignKeyMap2($this->Table2));
+        $this->ForeignKey1 = $this->MakeForeignKey($this->Table1, 1, $this->GetForeignKeyMap1($this->Table1));
+        $this->ForeignKey2 = $this->MakeForeignKey($this->Table2, 2, $this->GetForeignKeyMap2($this->Table2));
     }
     
     /**
@@ -83,8 +83,8 @@ abstract class JoinTable extends Base\Relational\Table {
         return $this->ForeignKey2;
     }
     
-    private function MakeForeignKey(Relational\ITable $Table, Map $ReferencedColumnMap) {
-        return new ForeignKey($this->GetName() . '_' . $Table->GetName(), $ReferencedColumnMap,
+    private function MakeForeignKey(Relational\ITable $Table, $Number, Map $ReferencedColumnMap) {
+        return new ForeignKey($this->GetName() . '_' . $Table->GetName() . $Number, $ReferencedColumnMap,
                 ForeignKeyMode::Cascade, ForeignKeyMode::Cascade);
     }
     

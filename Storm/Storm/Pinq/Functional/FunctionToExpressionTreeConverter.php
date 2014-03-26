@@ -1,8 +1,9 @@
 <?php
 
-namespace Storm\Pinq;
+namespace Storm\Pinq\Functional;
 
 use \Storm\Core\Object;
+use \Storm\Pinq\PinqException;
 
 class FunctionToExpressionTreeConverter implements IFunctionToExpressionTreeConverter {
     /**
@@ -10,7 +11,7 @@ class FunctionToExpressionTreeConverter implements IFunctionToExpressionTreeConv
      */
     protected $Parser;
     
-    public function __construct(Functional\IParser $Parser) {
+    public function __construct(IParser $Parser) {
         $this->Parser = $Parser;
     }
     
@@ -30,7 +31,7 @@ class FunctionToExpressionTreeConverter implements IFunctionToExpressionTreeConv
             Object\IEntityMap $EntityMap, 
             array $ParameterNameExpressionMap = []) {
         
-        $ExpressionTree = new Functional\ExpressionTree($this->Parser->Parse($Reflection)->GetExpressions());
+        $ExpressionTree = new ExpressionTree($this->Parser->Parse($Reflection)->GetExpressions());
         
         //ReflectionFunction::getStaticVariables() returns the used variables for closures
         $this->Resolve($ExpressionTree, $EntityMap, $Reflection->getStaticVariables(), $ParameterNameExpressionMap);
@@ -42,7 +43,7 @@ class FunctionToExpressionTreeConverter implements IFunctionToExpressionTreeConv
         return $ExpressionTree;
     }
     
-    final protected function Resolve(Functional\ExpressionTree $ExpressionTree, Object\IEntityMap $EntityMap, 
+    final protected function Resolve(ExpressionTree $ExpressionTree, Object\IEntityMap $EntityMap, 
             array $VariableValueMap, array $VariableExpressionMap) {
         $ExpressionTree->ResolveVariables($VariableValueMap, $VariableExpressionMap);
         $ExpressionTree->Simplify();

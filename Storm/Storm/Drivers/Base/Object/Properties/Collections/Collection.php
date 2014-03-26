@@ -7,29 +7,15 @@ use \Storm\Core\Object;
 class Collection extends \ArrayObject implements ICollection {
     private $EntityType;
     private $IsAltered = false;
-    protected $OriginalEntities = [];
-    private $AddedEntities = [];
-    private $RemovedEntities = [];
     
     public function __construct($EntityType, array $Entities = []) {        
         parent::__construct($Entities);
         
         $this->EntityType = $EntityType;
-        $this->OriginalEntities = $Entities;
     }
     
     final public function GetEntityType() {
         return $this->EntityType;
-    }
-    
-    private function VerifyEntity($Method, $Entity) {
-        if(!($Entity instanceof $this->EntityType)) {
-            throw new Object\TypeMismatchException(
-                    'Supplied entity to %s must be of type %s: %s given',
-                    $Method,
-                    $this->EntityType,
-                    \Storm\Core\Utilities::GetTypeOrClass($Entity));
-        }
     }
 
     final public function __GetRemovedEntities() {
@@ -43,15 +29,7 @@ class Collection extends \ArrayObject implements ICollection {
         $this->IsAltered = $IsAltered;
     }
     
-    final public function __GetOriginalEntities() {
-        return $this->OriginalEntities;
-    }
-    final public function __GetNewEntities() {
-        return $this->AddedEntities;
-    }
-    
     public function append($Entity) {
-        $this->VerifyEntity(__METHOD__, $Entity);
         $this->IsAltered = true;
         return parent::append($Entity);
     }
@@ -62,8 +40,6 @@ class Collection extends \ArrayObject implements ICollection {
 
     public function exchangeArray($Input) {
         $this->IsAltered = true;
-        $this->RemovedEntities = array_merge($this->RemovedEntities, $this->getArrayCopy());
-        $this->AddedEntities = array_merge($this->AddedEntities, $Input);
         parent::exchangeArray($Input);
     }
     
@@ -79,7 +55,6 @@ class Collection extends \ArrayObject implements ICollection {
     }
 
     public function offsetSet($Index, $Entity) {
-        $this->VerifyEntity(__METHOD__, $Entity);
         if(isset($this[$Index])) {
             if($this[$Index] === $Entity) {
                 return;
@@ -94,7 +69,6 @@ class Collection extends \ArrayObject implements ICollection {
             return;
         
         $this->IsAltered = true;
-        $this->RemovedEntities[] = $this[$Index];
         return parent::offsetUnset($Index);
     }
 }

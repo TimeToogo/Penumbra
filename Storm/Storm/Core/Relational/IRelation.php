@@ -22,11 +22,18 @@ final class DependencyMode {
  */
 interface IRelation {
     /**
+     * Gets the parent table.
+     * 
+     * @return ITable
+     */
+    public function GetParentTable();
+    
+    /**
      * Gets the related table.
      * 
      * @return ITable
      */
-    public function GetTable();
+    public function GetRelatedTable();
     
     /**
      * @return int

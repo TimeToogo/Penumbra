@@ -44,12 +44,12 @@ interface IEntityPropertyToOneRelationMapping extends IRelationshipPropertyRelat
      * This method should be implemented such that it saves the relationship between
      * the parent data and related data to the supplied transaction.
      * 
-     * @param Relational\Transaction $Transaction The transaction context
+     * @param UnitOfWorkTransactionMapping $Mapping The transaction mapping context
      * @param Relational\ColumnData $ParentData The column data of the parent
      * @param Object\RelationshipChange $RelationshipChange The change in the relationship state
      * @return void
      */
-    public function Persist(Relational\Transaction $Transaction, Relational\ResultRow $ParentData, Object\RelationshipChange $RelationshipChange);
+    public function Persist(UnitOfWorkTransactionMapping $Mapping, Relational\ResultRow $ParentData, Object\RelationshipChange $RelationshipChange);
 }
 
 ?>

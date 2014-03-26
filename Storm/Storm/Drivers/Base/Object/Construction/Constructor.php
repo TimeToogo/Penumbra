@@ -2,8 +2,8 @@
 
 namespace Storm\Drivers\Base\Object\Construction;
 
- abstract class Constructor implements IEntityConstructor {
-    private $EntityType;
+ abstract class Constructor implements IConstructor {
+    protected $EntityType;
     
     final public function GetEntityType() {
         return $this->EntityType;
@@ -14,6 +14,9 @@ namespace Storm\Drivers\Base\Object\Construction;
     }
 
     public function SetEntityType($EntityType) {
+        if($this->EntityType === $EntityType) {
+            return $this->EntityType;
+        }
         $this->EntityType = $EntityType;
         $this->OnSetEntityType($EntityType);
     }

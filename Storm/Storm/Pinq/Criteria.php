@@ -17,7 +17,7 @@ class Criteria implements IPredicated, IOrdered, IRanged  {
     protected $EntityMap;
     
     /**
-     * @var IFunctionToExpressionTreeConverter 
+     * @var Functional\IFunctionToExpressionTreeConverter 
      */
     protected $FunctionToExpressionTreeConverter;
     
@@ -31,7 +31,7 @@ class Criteria implements IPredicated, IOrdered, IRanged  {
     protected $SkipAmount = 0;
     protected $LimitAmount = null;
     
-    public function __construct(IEntityMap $EntityMap, IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
+    public function __construct(IEntityMap $EntityMap, Functional\IFunctionToExpressionTreeConverter $FunctionToExpressionTreeConverter) {
         $this->EntityType = $EntityMap->GetEntityType();
         $this->EntityMap = $EntityMap;
         $this->FunctionToExpressionTreeConverter = $FunctionToExpressionTreeConverter;

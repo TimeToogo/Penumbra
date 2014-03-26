@@ -270,7 +270,7 @@ abstract class Table implements ITable {
     
     private function GetDepedencyOrderBetweenInternal($ForPersising, ITable $OtherTable, $Reversed = false) {
         foreach($this->AllRelations as $Relation) {
-            if($Relation->GetTable()->Is($OtherTable)) {
+            if($Relation->GetRelatedTable()->Is($OtherTable)) {
                 if($ForPersising)
                     return $Relation->GetPersistingDependencyOrder();
                 else

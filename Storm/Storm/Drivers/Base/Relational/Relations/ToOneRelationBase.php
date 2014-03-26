@@ -57,7 +57,7 @@ abstract class ToOneRelationBase extends KeyedRelation implements Relational\ITo
                     $this->ForeignKey->MapReferencedToParentKey($ParentData, $ParentData);
                 };
                 $HasForeignKey = $this->ForeignKey->HasReferencedKey($ParentData);
-                $BeforeTable = $this->GetTable();
+                $BeforeTable = $this->GetRelatedTable();
             }
             else {
                 $MapForeignKey = function () use (&$ParentData, &$RelatedData) {

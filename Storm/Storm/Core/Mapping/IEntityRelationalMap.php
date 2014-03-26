@@ -225,21 +225,22 @@ interface IEntityRelationalMap {
     
     /**
      * Maps the supplied persistence data array to an array of result rows.
-     * NOTE: Array keys are preserved.
      * 
      * @param Object\PersistenceData[] $PersistenceDataArray The persistence data
-     * @return Relational\ResultRows[] The mapped result rows
+     * @param Relational\ResultRows[] The result rows to map too
+     * @return void
      */
-    public function MapPersistenceDataToResultRows(Relational\Transaction $Transaction, array $PersistenceDataArray);
+    public function MapPersistenceDataToResultRows(UnitOfWorkTransactionMapping $Mapping, array $PersistenceDataArray, array $ResultRowArray);
     
     /**
      * Maps the supplied discardence data array to an array of result rows.
      * NOTE: Array keys are preserved.
      * 
      * @param Object\DiscardenceData[] $DiscardenceDataArray The result row to map
-     * @return Relational\PrimaryKey[] The mapped primary keys
+     * @param Relational\PrimaryKey[] The primary keys to map too
+     * @return void
      */
-    public function MapDiscardenceDataToPrimaryKeys(Relational\Transaction $Transaction, array $DiscardenceDataArray);
+    public function MapDiscardenceDataToPrimaryKeys(UnitOfWorkTransactionMapping $Mapping, array $DiscardenceDataArray, array $PrimaryKeys);
     
     /**
      * Maps the supplied result rows to an array of revival data.

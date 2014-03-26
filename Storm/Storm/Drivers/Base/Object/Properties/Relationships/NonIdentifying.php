@@ -28,7 +28,7 @@ class NonIdentifying extends RelationshipType {
     public function GetPersistedEntityData(Object\Domain $Domain, Object\UnitOfWork $UnitOfWork, 
             $RelatedEntity) {
         if($this->CascadePersist) {
-            return $Domain->Persist($UnitOfWork, $RelatedEntity);
+            return $UnitOfWork->PersistDependent($RelatedEntity);
         }
         else {
             return $Domain->Identity($RelatedEntity);

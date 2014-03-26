@@ -7,6 +7,16 @@ use \Storm\Drivers\Base\Object\LazyRevivalData;
 use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 
 class ArrayProperty extends MultipleEntityProperty {
+    
+    protected function UpdateAccessor(Accessors\Accessor $Accessor) {
+        return new self(
+                $Accessor, 
+                $this->RelatedEntityType,
+                $this->RelationshipType,
+                $this->BackReferenceProperty,
+                $this->ProxyGenerator);
+    }
+    
     protected function ReviveProxies(array $Proxies) {
         return $Proxies;
     }
@@ -37,7 +47,7 @@ class ArrayProperty extends MultipleEntityProperty {
             throw new Object\ObjectException(
                     'Invalid value for property on entity %s, array expected, %s given',
                     $this->GetEntityType(),
-                    \Storm\Core\Utilities::GetTypeOrClass($CurrentValue));
+                    \Storm\Utilities\Type::GetTypeOrClass($CurrentValue));
         }
         
         if($CurrentEntities === $OriginalEntities) {

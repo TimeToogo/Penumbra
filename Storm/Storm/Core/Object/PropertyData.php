@@ -45,7 +45,7 @@ abstract class PropertyData implements \IteratorAggregate, \ArrayAccess {
      * @return void
      */
     public function SetData(array $Data) {
-        $this->Data = array_intersect_key($Data, $this->Properties);
+        $this->PropertyData = array_intersect_key($Data, $this->Properties);
     }
     
     /**

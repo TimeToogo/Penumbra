@@ -15,8 +15,8 @@ abstract class Table extends Relational\Table {
     private $StructuralTraits = [];
     private $RelationalTraits = [];
     
-    final protected function RegisterColumns(Containers\Registrar $Registrar, Relational\Database $Context) {
-        $this->RegisterColumnStructure($Registrar, $Context->GetPlatform()->GetColumnSet());
+    final protected function RegisterColumns(Containers\Registrar $Registrar, Relational\Database $Database) {
+        $this->RegisterColumnStructure($Registrar, $Database->GetPlatform()->GetColumnSet());
     }
     protected abstract function RegisterColumnStructure(Containers\Registrar $Registrar, IColumnSet $Column);
     

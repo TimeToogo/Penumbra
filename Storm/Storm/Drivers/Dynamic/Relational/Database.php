@@ -10,6 +10,7 @@ class Database extends Relational\Database {
     
     public function __construct(array $Tables) {
         $this->Tables = $Tables;
+        parent::__construct();
     }
     
     final protected function RegisterTables(Registrar $Registrar) {

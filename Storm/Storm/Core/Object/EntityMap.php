@@ -151,7 +151,7 @@ abstract class EntityMap implements IEntityMap {
                     'The supplied entity to %s must be of the type %s: %s given',
                     $Method,
                     $this->EntityType,
-                    \Storm\Core\Utilities::GetTypeOrClass($Entity));
+                    \Storm\Utilities\Type::GetTypeOrClass($Entity));
         }
     }
     
@@ -333,58 +333,76 @@ abstract class EntityMap implements IEntityMap {
     /**
      * {@inheritDoc}
      */
-    final public function Persist(UnitOfWork $UnitOfWork, $Entity) {
+    final public function Persist(UnitOfWork $UnitOfWork, $Entity, PersistenceData $PersistenceData = null) {
         $this->VerifyEntity(__METHOD__, $Entity);
         
-        $PersistenceData = [];
+        $PersistenceDataArray = [];
         foreach($this->DataProperties as $Identifier => $DataProperty) {
-            $PersistenceData[$Identifier] = $DataProperty->GetValue($Entity);
+            $PersistenceDataArray[$Identifier] = $DataProperty->GetValue($Entity);
         }
         foreach($this->EntityProperties as $Identifier => $EntityProperty) {
-            $PersistenceData[$Identifier] = $EntityProperty->Persist($UnitOfWork, $Entity);
+            $PersistenceDataArray[$Identifier] = $EntityProperty->Persist($UnitOfWork, $Entity);
         }
         foreach($this->CollectionProperties as $Identifier => $CollectionProperty) {
-            $PersistenceData[$Identifier] = $CollectionProperty->Persist($UnitOfWork, $Entity);
+            $PersistenceDataArray[$Identifier] = $CollectionProperty->Persist($UnitOfWork, $Entity);
         }
         
-        return new PersistenceData($this, $Entity, $PersistenceData);
+        if($PersistenceData === null) {
+            return new PersistenceData($this, $Entity, $PersistenceDataArray);
+        }
+        else {
+            $PersistenceData->SetData($PersistenceDataArray);
+            return $PersistenceData;
+        }
     }
     
     /**
      * {@inheritDoc}
      */
-    final public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity) {
+    final public function PersistRelationships(UnitOfWork $UnitOfWork, $Entity, PersistenceData $PersistenceData = null) {
         $this->VerifyEntity(__METHOD__, $Entity);
         
-        $PersistenceData = [];
+        $PersistenceDataArray = [];
         foreach($this->EntityProperties as $Identifier => $EntityProperty) {
-            $PersistenceData[$Identifier] = $EntityProperty->Persist($UnitOfWork, $Entity);
+            $PersistenceDataArray[$Identifier] = $EntityProperty->Persist($UnitOfWork, $Entity);
         }
         foreach($this->CollectionProperties as $Identifier => $CollectionProperty) {
-            $PersistenceData[$Identifier] = $CollectionProperty->Persist($UnitOfWork, $Entity);
+            $PersistenceDataArray[$Identifier] = $CollectionProperty->Persist($UnitOfWork, $Entity);
         }
         
-        return $this->PersistanceData($PersistenceData);
+        if($PersistenceData === null) {
+            return new PersistenceData($this, $Entity, $PersistenceDataArray);
+        }
+        else {
+            $PersistenceData->SetData($PersistenceDataArray);
+            return $PersistenceData;
+        }
     }
     
     /**
      * {@inheritDoc}
      */
-    final public function Discard(UnitOfWork $UnitOfWork, $Entity) {
+    final public function Discard(UnitOfWork $UnitOfWork, $Entity, DiscardenceData $DiscardenceData = null) {
         $this->VerifyEntity(__METHOD__, $Entity);
         
-        $DiscardingData = [];
+        $DiscardenceDataArray = [];
         foreach($this->IdentityProperties as $Identifier => $IdentityProperty) {
-            $DiscardingData[$Identifier] = $IdentityProperty->GetValue($Entity);
+            $DiscardenceDataArray[$Identifier] = $IdentityProperty->GetValue($Entity);
         }
         foreach($this->EntityProperties as $Identifier => $EntityProperty) {
-            $DiscardingData[$Identifier] = $EntityProperty->Discard($UnitOfWork, $Entity);
+            $DiscardenceDataArray[$Identifier] = $EntityProperty->Discard($UnitOfWork, $Entity);
         }
         foreach($this->CollectionProperties as $Identifier => $CollectionProperty) {
-            $DiscardingData[$Identifier] = $CollectionProperty->Discard($UnitOfWork, $Entity);
+            $DiscardenceDataArray[$Identifier] = $CollectionProperty->Discard($UnitOfWork, $Entity);
         }
         
-        return $this->DiscardenceData($DiscardingData);
+        if($DiscardenceData === null) {
+            return new DiscardenceData($this, $DiscardenceDataArray);
+        }
+        else {
+            $DiscardenceData->SetData($DiscardenceDataArray);
+            return $DiscardenceData;
+        }
     }
     
     /**

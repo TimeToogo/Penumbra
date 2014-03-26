@@ -76,7 +76,7 @@ class UnitOfWorkTest extends StormTestCase {
     public function testEntityIsPersisted() {
         $Entity = $this->Entity(null);
         
-        $this->UnitOfWork->Persist($Entity);
+        $this->UnitOfWork->PersistRoot($Entity);
         
         $this->assertCount(1, $this->UnitOfWork->GetPersistenceData());
         $this->assertArrayHasKey(self::EntityType, $this->UnitOfWork->GetPersistenceDataGroups());

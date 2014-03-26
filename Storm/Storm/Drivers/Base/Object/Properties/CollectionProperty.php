@@ -7,8 +7,18 @@ use \Storm\Drivers\Base\Object\LazyRevivalData;
 use \Storm\Drivers\Base\Object\MultipleLazyRevivalData;
 
 class CollectionProperty extends MultipleEntityProperty {
+    
+    protected function UpdateAccessor(Accessors\Accessor $Accessor) {
+        return new self(
+                $Accessor, 
+                $this->RelatedEntityType,
+                $this->RelationshipType,
+                $this->BackReferenceProperty,
+                $this->ProxyGenerator);
+    }
+    
     protected function ReviveProxies(array $Proxies) {
-        return new Collections\Collection($this->GetEntityType(), $Proxies);
+        return new Collections\Collection($this->RelatedEntityType, $Proxies);
     }
     
     protected function ReviveMultipleLazyRevivalData(MultipleLazyRevivalData $LazyRevivalData) {
@@ -36,9 +46,10 @@ class CollectionProperty extends MultipleEntityProperty {
         if(!($CurrentValue instanceof Collections\ICollection)) {
             if(!($CurrentValue instanceof \Traversable)) {
             throw new Object\ObjectException(
-                    'Invalid value for collection property on entity %s: \Traversable expected, %s given',
+                    'Invalid value for collection property %s on entity %s: \Traversable expected, %s given',
+                    $this->GetIdentifier(),
                     $this->GetEntityType(),
-                    \Storm\Core\Utilities::GetTypeOrClass($CurrentValue));
+                    \Storm\Utilities\Type::GetTypeOrClass($CurrentValue));
             }
             foreach($CurrentValue as $Entity) {
                 if($this->IsValidEntity($Entity)) {
@@ -49,15 +60,6 @@ class CollectionProperty extends MultipleEntityProperty {
         else if($CurrentValue instanceof Collections\LazyCollection && !$CurrentValue->__IsLoaded()) {
             return [];
         }
-        else if(!$CurrentValue->__IsAltered()) {
-            foreach($CurrentValue->ToArray() as $Entity) {
-                if($Entity instanceof Proxies\IProxy && !$Entity->__IsAltered()) {
-                    continue;
-                }
-                $UnitOfWork->PersistRelationships($Entity);
-            }
-            return [];
-        }
         else {
             $CurrentEntities = $CurrentValue->ToArray();
         }
@@ -66,7 +68,7 @@ class CollectionProperty extends MultipleEntityProperty {
             $OriginalEntities = $OriginalValue->ToArray();
         }
         $NewOrAlteredEntities = $this->ComputeDifference($CurrentEntities, $OriginalEntities);
-        $RemovedEntities = $this->ComputeIdentityDifference($Domain, $OriginalEntities, $CurrentEntities);
+        $RemovedEntities = $this->ComputeIdentityDifference($OriginalEntities, $CurrentEntities);
         
         foreach($NewOrAlteredEntities as $NewEntity) {
             $RelationshipChanges[] = new Object\RelationshipChange(
@@ -112,17 +114,17 @@ class CollectionProperty extends MultipleEntityProperty {
         return $Difference;
     }
     
-    private function ComputeIdentityDifference(Object\Domain $Domain, array $Objects, array $OtherObjects) {
-        $this->IndexEntitiesByIdentity($Domain, $Objects);
-        $this->IndexEntitiesByIdentity($Domain, $OtherObjects);
+    private function ComputeIdentityDifference(array $Objects, array $OtherObjects) {
+        $this->IndexEntitiesByIdentity($Objects);
+        $this->IndexEntitiesByIdentity($OtherObjects);
         
         return array_diff_key($Objects, $OtherObjects);
     }
     
-    private function IndexEntitiesByIdentity(Object\Domain $Domain, array &$Entities) {
+    private function IndexEntitiesByIdentity(array &$Entities) {
         $IndexedEntities = [];
         foreach($Entities as $Entity) {
-            $IndexedEntities[$Domain->Identity($Entity)->Hash()] = $Entity;
+            $IndexedEntities[$this->RelatedEntityMap->Identity($Entity)->Hash()] = $Entity;
         }
         
         $Entities = $IndexedEntities;

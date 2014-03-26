@@ -3,12 +3,11 @@
 namespace Storm\Api\Caching;
 
 use \Storm\Api\Base;
-use \Storm\Core\Mapping\DomainDatabaseMap;
+use \Storm\Core\Mapping;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 use \Storm\Pinq\Functional;
 use \Storm\Utilities\Cache;
-use \Storm\Pinq\CachingFunctionToExpressionTreeConverter;
 
 /**
  * This class provides a caching to an instance of DomainDatabaseMap, which can be very
@@ -49,7 +48,7 @@ class Storm extends Base\Storm {
     }
     
     protected function GetFunctionToExpressionTreeConverter(Functional\IParser $FunctionParser) {
-        return new CachingFunctionToExpressionTreeConverter($this->Cache, $FunctionParser);
+        return new Functional\CachingFunctionToExpressionTreeConverter($this->Cache, $FunctionParser);
     }
 }
 

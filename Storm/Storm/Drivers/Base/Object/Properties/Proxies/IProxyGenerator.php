@@ -6,6 +6,8 @@ use \Storm\Core\Object\IEntityMap;
 use \Storm\Core\Object\RevivalData;
 
 interface IProxyGenerator {
+    const IProxyGeneratorType = __CLASS__;
+    
     public function GenerateProxy(
             IEntityMap $EntityMap, 
             RevivalData $AlreadyKnownRevivalData,

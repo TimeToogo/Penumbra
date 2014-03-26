@@ -3,9 +3,7 @@
 namespace Storm\Drivers\Base\Object\Properties\Accessors;
 
 use \Storm\Core\Object;
-use \Storm\Core\Object\Expressions\Expression;
-use \Storm\Core\Object\Expressions\TraversalExpression;
-use \Storm\Core\Object\Expressions\PropertyExpression;
+use \Storm\Core\Object\Expressions as O;
 
 class Traversing extends Accessor {
     /**

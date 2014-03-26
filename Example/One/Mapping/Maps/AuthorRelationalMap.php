@@ -21,6 +21,9 @@ final class AuthorRelationalMap extends Mapping\EntityRelationalMap {
         $this->Map($EntityMap->Id)->ToColumn($Table->Id);
         $this->Map($EntityMap->FirstName)->ToColumn($Table->FirstName);
         $this->Map($EntityMap->LastName)->ToColumn($Table->LastName);
+        
+        $this->Map($EntityMap->Profile)->ToEntity($Table->Profile);
+        $this->Map($EntityMap->Friends)->ToCollection($Table->Friends);
     }
 }
 

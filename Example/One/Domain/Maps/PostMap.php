@@ -30,7 +30,11 @@ class PostMap extends EntityMap {
         $this->Content = new Properties\DataProperty(new Accessors\Field('Content'));
         $this->CreatedDate = new Properties\DataProperty(new Accessors\Field('CreatedDate'));
         
-        $this->Blog = new Properties\DataProperty(new Accessors\Field('Blog'));
+        $this->Blog = new Properties\EntityProperty(new Accessors\Field('Blog'), 
+                \StormExamples\One\Entities\Blog::GetType(), 
+                new Properties\Relationships\NonIdentifying(),
+                false,
+                true);
         
         $this->Author = new Properties\EntityProperty(new Accessors\Field('Author'), 
                 \StormExamples\One\Entities\Author::GetType(), 

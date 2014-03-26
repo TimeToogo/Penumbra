@@ -29,7 +29,7 @@ abstract class ObjectDataType extends DataType {
                     'Invalid property value for %s: expecting %s, %s given',
                     get_class($this),
                     $this->ClassType,
-                    \Storm\Core\Utilities::GetTypeOrClass($PropertyValue));
+                    \Storm\Utilities\Type::GetTypeOrClass($PropertyValue));
         }
         
         return $this->PersistedValue($PropertyValue);

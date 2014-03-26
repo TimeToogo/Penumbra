@@ -14,9 +14,9 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
      * @var string
      */
     protected $RelatedEntityType;
-    private $IsIdentifying;
-    private $OriginalValueStorageKey;
-    private $BackReferenceProperty;
+    protected $IsIdentifying;
+    protected $OriginalValueStorageKey;
+    protected $BackReferenceProperty;
     /**
      * @var IEntityMap
      */
@@ -105,6 +105,9 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         if($PropertyRevivalValue === null) {
             return $this->ReviveNull();
         }
+        if($PropertyRevivalValue instanceof $this->RelatedEntityType) {
+            return $this->ReviveEntity($PropertyRevivalValue);
+        }
         if($PropertyRevivalValue instanceof Object\RevivalData) {
             $this->AddBackReference($PropertyRevivalValue, $Entity);
             return $this->ReviveRevivalData($PropertyRevivalValue);
@@ -133,7 +136,7 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
         throw new \Storm\Core\UnexpectedValueException(
                 '%s cannot revive supplied value: %s given',
                 __CLASS__,
-                \Storm\Core\Utilities::GetTypeOrClass($PropertyRevivalValue));
+                \Storm\Utilities\Type::GetTypeOrClass($PropertyRevivalValue));
     }
     
     private function IsAll(array $Values, callable $Filter) {
@@ -163,6 +166,10 @@ abstract class RelationshipProperty extends Property implements Object\IRelation
     }
     
     protected function ReviveNull() {
+        throw $this->Unimplemented(__METHOD__);
+    }
+    
+    protected function ReviveEntity($Entity) {
         throw $this->Unimplemented(__METHOD__);
     }
     

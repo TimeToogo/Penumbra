@@ -3,6 +3,7 @@
 namespace Storm\Api;
 
 use \Storm\Core\Object;
+use \Storm\Core\Mapping;
 use \Storm\Pinq;
 
 /**
@@ -149,7 +150,7 @@ interface IEntityManager {
     public function DiscardAll(array $Entities);
     
     /**
-     * Commits all specified changes to the underlying DomainDatabaseMap.
+     * Commits all specified changes to the underlying domain database map.
      * 
      * @return void
      */
@@ -158,7 +159,7 @@ interface IEntityManager {
     /**
      * Gets the pending changes.
      * 
-     * @return array An array containing all the operations queues
+     * @return Mapping\PendingChanges The object containing all the pending changes
      */
     public function GetChanges();
     

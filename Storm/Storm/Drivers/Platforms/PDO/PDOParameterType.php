@@ -22,7 +22,7 @@ final class PDOParameterType {
         else {
             throw new \Storm\Core\UnexpectedValueException(
                     'Cannot map the supplied parameter type: %s given',
-                    \Storm\Core\Utilities::GetTypeOrClass($ParameterType));
+                    \Storm\Utilities\Type::GetTypeOrClass($ParameterType));
         }
     }
 }

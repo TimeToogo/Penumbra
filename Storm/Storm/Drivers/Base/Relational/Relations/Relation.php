@@ -20,7 +20,7 @@ abstract class Relation implements Relational\IRelation {
     /**
      * @return Relational\ITable
      */
-    final public function GetTable() {
+    final public function GetRelatedTable() {
         return $this->Table;
     }
     

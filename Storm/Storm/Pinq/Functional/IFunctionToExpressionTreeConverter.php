@@ -1,6 +1,6 @@
 <?php
 
-namespace Storm\Pinq;
+namespace Storm\Pinq\Functional;
 
 use \Storm\Core\Object;
 
@@ -14,7 +14,7 @@ interface IFunctionToExpressionTreeConverter {
     public function GetReflection(callable $Function);
     
     /**
-     * @return Functional\ExpressionTree
+     * @return ExpressionTree
      */
     public function ConvertAndResolve(
             \ReflectionFunctionAbstract $Reflection,

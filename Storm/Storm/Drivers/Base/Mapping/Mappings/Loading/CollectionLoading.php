@@ -45,6 +45,7 @@ abstract class CollectionLoading extends RelationshipLoading implements ICollect
             Relational\IToManyRelation $ToManyRelation,
             array $ParentRows, 
             array $RelatedRows) {
+        $this->RemoveDuplicateRows($EntityRelationalMap->GetPrimaryKeyTable(), $RelatedRows);
         $ParentKeyRelatedRowsMap = $ToManyRelation->MapParentKeysToRelatedRows($ParentRows, $RelatedRows);
         
         $RelatedRevivalData = $EntityRelationalMap->MapResultRowsToRevivalData($RelatedRows);
@@ -57,6 +58,17 @@ abstract class CollectionLoading extends RelationshipLoading implements ICollect
         return $MappedRelatedRevivalData;
     }
     
+    private function RemoveDuplicateRows(Relational\ITable $PrimaryKeyTable, array &$RelatedRows) {
+        $Hashes = [];
+        foreach ($RelatedRows as $Key => $RelatedRow) {
+            $Hash = $RelatedRow->GetPrimaryKey($PrimaryKeyTable)->HashData();
+            if(isset($Hashes[$Hash])) {
+                unset($RelatedRows[$Key]);
+            }
+            $Hashes[$Hash] = true;
+        }
+    }
+
     final protected function MapParentRowKeysToMultipleLazyRevivalData(
             Mapping\IEntityRelationalMap $EntityRelationalMap,
             Relational\IToManyRelation $ToManyRelation,

@@ -138,7 +138,7 @@ abstract class DomainDatabaseMap {
      * @return boolean
      */
     final public function HasEntityRelationalMap($EntityType) {
-        return isset($this->EntityRelationalMaps[$EntityType]);
+        return $this->GetEntityRelationalMap($EntityType) !== null;
     }
     
     /**
@@ -246,17 +246,13 @@ abstract class DomainDatabaseMap {
      * @param array $CriteriaToDiscard The criteria of entities to discard
      * @return void
      */
-    final public function Commit(
-            array $EntitiesToPersist,
-            array $ProceduresToExecute,
-            array $EntitiesToDiscard,
-            array $CriteriaToDiscard) {
+    final public function Commit(PendingChanges $PendingChanges) {
         
         $UnitOfWork = $this->Domain->BuildUnitOfWork(
-                $EntitiesToPersist, 
-                $ProceduresToExecute, 
-                $EntitiesToDiscard, 
-                $CriteriaToDiscard);
+                $PendingChanges->GetEntitiesToPersist(), 
+                $PendingChanges->GetProceduresToExecute(), 
+                $PendingChanges->GetEntitiesToDiscard(), 
+                $PendingChanges->GetCriteriaToDiscardBy());
         
         $Transaction = new Relational\Transaction();
         $this->MapUnitOfWorkToTransaction($UnitOfWork, $Transaction);
@@ -314,13 +310,11 @@ abstract class DomainDatabaseMap {
     private function MapUnitOfWorkToTransaction(
             Object\UnitOfWork $UnitOfWork, 
             Relational\Transaction $Transaction) {
+        $Mapping = new UnitOfWorkTransactionMapping($Transaction);
         
         foreach($UnitOfWork->GetPersistenceDataGroups() as $EntityType => $PersistenceDataGroup) {
             $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-            $ResultRows = $EntityRelationalMap->MapPersistenceDataToResultRows($Transaction, $PersistenceDataGroup);
-            foreach($ResultRows as $ResultRow) {
-                $Transaction->PersistAll($ResultRow->GetRows());
-            }
+            $Mapping->MapPersistenceDataArray($EntityRelationalMap, $PersistenceDataGroup);
         }
         
         foreach($UnitOfWork->GetExecutedProcedures() as $Procedure) {
@@ -329,8 +323,7 @@ abstract class DomainDatabaseMap {
         
         foreach($UnitOfWork->GetDiscardenceDataGroups() as $EntityType => $DiscardenceDataGroup) {
             $EntityRelationalMap = $this->VerifyEntityTypeIsMapped($EntityType);
-            $PrimaryKeys = $EntityRelationalMap->MapDiscardenceDataToPrimaryKeys($Transaction, $DiscardenceDataGroup);
-            $Transaction->DiscardAll($PrimaryKeys);
+            $Mapping->MapDiscardenceDataArray($EntityRelationalMap, $DiscardenceDataGroup);
         }
         
         foreach($UnitOfWork->GetDiscardedCriteria() as $DiscardedCriteria) {

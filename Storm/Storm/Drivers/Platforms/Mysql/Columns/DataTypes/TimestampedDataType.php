@@ -19,7 +19,7 @@ abstract class TimestampedDataType extends Columns\FunctionCallDataType {
         if(!($PropertyValue instanceof \DateTime)) {
             throw new Columns\DataTypeException(
                     'The supplied property values must be an instance of \\DateTime: %s given',
-                    \Storm\Core\Utilities::GetTypeOrClass($PropertyValue));
+                    \Storm\Utilities\Type::GetTypeOrClass($PropertyValue));
         }
         
         return $PropertyValue->getTimestamp();

@@ -8,22 +8,38 @@ use \Storm\Core\Object\Expressions as O;
 
 class EntityProperty extends RelationshipProperty implements Object\IEntityProperty {
     private $IsOptional;
+    private $IsIdentity;
     private $RelationshipType;
     public function __construct(
             Accessors\Accessor $Accessor,
             $EntityType,
             IRelationshipType $RelationshipType,
             $IsOptional = false,
+            $IsIdentity = false,
             Object\IProperty $BackReferenceProperty = null,
             Proxies\IProxyGenerator $ProxyGenerator = null) {
         parent::__construct($Accessor, $EntityType, $RelationshipType->IsIdentifying(), $BackReferenceProperty, $ProxyGenerator);
         $this->IsOptional = $IsOptional;
+        $this->IsIdentity = $IsIdentity;
         $this->RelationshipType = $RelationshipType;
         $this->ProxyGenerator = $ProxyGenerator;
     }
     
+    public function IsIdentity() {
+        return $this->IsIdentity;
+    }
+    
     public function IsOptional() {
         return $this->IsOptional;
+    }
+    
+    protected function UpdateAccessor(Accessors\Accessor $Accessor) {
+        return new self(
+                $Accessor, 
+                $this->RelatedEntityType,
+                $this->RelationshipType,
+                $this->BackReferenceProperty,
+                $this->ProxyGenerator);
     }
     
     protected function ResolveExcessTraversal(O\TraversalExpression $ExcessTraversalExpression) {
@@ -40,6 +56,10 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
                     $this->GetEntityMap()->GetEntityType(),
                     $this->GetEntityType());
         }
+    }
+    
+    protected function ReviveEntity($Entity) {
+        return $Entity;
     }
     
     protected function ReviveRevivalData(Object\RevivalData $RevivalData) {
@@ -71,7 +91,7 @@ class EntityProperty extends RelationshipProperty implements Object\IEntityPrope
                 'Invalid value for required relationship property on entity %s, %s expected, %s given',
                 $this->GetEntityMap()->GetEntityType(),
                 $this->GetEntityType(),
-                \Storm\Core\Utilities::GetTypeOrClass($CurrentValue));
+                \Storm\Utilities\Type::GetTypeOrClass($CurrentValue));
     }
     
     public function Persist(Object\UnitOfWork $UnitOfWork, $ParentEntity) {

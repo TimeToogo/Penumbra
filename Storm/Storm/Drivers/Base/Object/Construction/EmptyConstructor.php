@@ -2,14 +2,14 @@
 
 namespace Storm\Drivers\Base\Object\Construction;
 
+use Storm\Core\Object;
+
 class EmptyConstructor extends Constructor {
-    private $EntityType;
-    
     protected function OnSetEntityType($EntityType) {
-        $this->EntityType = $EntityType;
+        
     }
     
-    public function Construct() {
+    public function Construct(Object\RevivalData $RevivalData) {
         return new $this->EntityType();
     }
 }

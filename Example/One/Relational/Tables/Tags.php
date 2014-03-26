@@ -2,16 +2,10 @@
 
 namespace StormExamples\One\Relational\Tables;
 
-use \Storm\Core\Containers\Map;
 use \Storm\Core\Relational\Database;
 use \Storm\Drivers\Constant\Relational;
 use \Storm\Drivers\Base\Relational\Columns\IColumnSet;
 use \Storm\Drivers\Base\Relational\PrimaryKeys\IKeyGeneratorSet;
-use \Storm\Drivers\Platforms\Mysql;
-use \Storm\Drivers\Base\Relational\Columns\Column;
-use \Storm\Drivers\Base\Relational\Columns\DataType;
-use \Storm\Drivers\Base\Relational\Traits;
-use \Storm\Drivers\Base\Relational\Relations;
 
 class Tags extends Relational\Table {
     protected function Name() {

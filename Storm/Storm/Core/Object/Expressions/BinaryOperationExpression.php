@@ -50,13 +50,21 @@ class BinaryOperationExpression extends Expression {
         else if($Left instanceof ValueExpression || $Right instanceof ValueExpression) {
             $ValueExpression = $Left instanceof ValueExpression ?
                     $Left : $Right;
+            $OtherExpression = $Left instanceof ValueExpression ?
+                    $Right : $Left;
             
             $Value = $ValueExpression->GetValue();
             if($this->Operator === Operators\Binary::LogicalOr && $Value == true) {
                 return Expression::Value(true);
             }
+            else if($this->Operator === Operators\Binary::LogicalOr && $Value == false) {
+                return $OtherExpression;
+            }
             else if($this->Operator === Operators\Binary::LogicalAnd && $Value == false) {
                 return Expression::Value(false);
+            }
+            else if($this->Operator === Operators\Binary::LogicalAnd && $Value == true) {
+                return $OtherExpression;
             }
         }
         

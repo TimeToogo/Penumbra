@@ -18,7 +18,7 @@ class ClonedInstance extends Constructor {
                     $EntityType);
         }
     }
-    public function Construct() {
+    public function Construct(Object\RevivalData $RevivalData) {
         return clone $this->Instance;
     }
 }

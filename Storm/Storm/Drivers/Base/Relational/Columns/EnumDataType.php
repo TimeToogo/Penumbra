@@ -18,7 +18,7 @@ class EnumDataType extends Columns\DataType {
             throw new DataTypeException(
                     'Cannot map stored enum value to property value: expecting %s, %s given',
                     implode(', ', array_keys($PersistedValue)),
-                    \Storm\Core\Utilities::GetTypeOrClass($PersistedValue));
+                    \Storm\Utilities\Type::GetTypeOrClass($PersistedValue));
         }
         $PropertyValue = $this->ValuesMap[$PersistedValue];
         
@@ -31,7 +31,7 @@ class EnumDataType extends Columns\DataType {
             throw new DataTypeException(
                     'Cannot map enum property value to persisted value: expecting %s, %s given',
                     implode(', ', array_map('strval', $PersistedValue)),
-                    \Storm\Core\Utilities::GetTypeOrClass($PropertyValue));
+                    \Storm\Utilities\Type::GetTypeOrClass($PropertyValue));
         }
         
         return $PersistedValue;

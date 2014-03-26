@@ -4,11 +4,10 @@ namespace Storm\Api\Base;
 
 use \Storm\Api\IEntityManager;
 use \Storm\Api\IRepository;
-use \Storm\Core\Mapping\DomainDatabaseMap;
+use \Storm\Core\Mapping;
 use \Storm\Drivers\Base\Relational\Queries\IConnection;
 use \Storm\Drivers\Base\Object\Properties\Proxies\IProxyGenerator;
 use \Storm\Pinq\Functional;
-use \Storm\Pinq\FunctionToExpressionTreeConverter;
 
 /**
  * The Storm class provides the api surrounding a DomainDatabaseMap.
@@ -31,9 +30,9 @@ class Storm {
     protected $Repositories = [];
     
     /**
-     * The supplied DomainDatabaseMap.
+     * The supplied domain database map.
      * 
-     * @var DomainDatabaseMap
+     * @var Mapping\DomainDatabaseMap
      */
     protected $DomainDatabaseMap;
     
@@ -42,8 +41,13 @@ class Storm {
      */
     protected $FunctionToExpressionTreeConverter;
     
+    /**
+     * @var Mapping\PendingChanges 
+     */
+    protected $PendingChanges;
+    
     public function __construct(
-            DomainDatabaseMap $DomainDatabaseMap,
+            Mapping\DomainDatabaseMap $DomainDatabaseMap,
             IConnection $Connection,
             IProxyGenerator $ProxyGenerator,
             Functional\IParser $FunctionParser) {
@@ -51,14 +55,15 @@ class Storm {
         $this->DomainDatabaseMap->GetDatabase()->SetConnection($Connection);
         $this->DomainDatabaseMap->GetDomain()->SetProxyGenerator($ProxyGenerator);
         $this->FunctionToExpressionTreeConverter = $this->GetFunctionToExpressionTreeConverter($FunctionParser);
+        $this->PendingChanges = new Mapping\PendingChanges();
     }
     
     protected function GetFunctionToExpressionTreeConverter(Functional\IParser $FunctionParser) {
-        return new FunctionToExpressionTreeConverter($FunctionParser);
+        return new Functional\FunctionToExpressionTreeConverter($FunctionParser);
     }
     
     /**
-     * @return DomainDatabaseMap 
+     * @return Mapping\DomainDatabaseMap 
      */
     final public function GetDomainDatabaseMap() {
         return $this->DomainDatabaseMap;
@@ -121,45 +126,22 @@ class Storm {
     }
     
     /**
-     * Saves all the changes from the repositories
+     * Saves all the changes from the entity managers
      * instantiated by this storm.
      * 
      * @return void
      */
     final public function SaveChanges() {
-        $PersistedQueues = [];
-        $ExecutionQueues = [];
-        $DiscardedQueues = [];
-        $DiscardedCriteriaQueues = [];
-        
-        foreach($this->EntityManagers as $Repository) {
-            list($PersistedQueue,
-                    $ExecutionQueue,
-                    $DiscardedQueue,
-                    $DiscardedCriteriaQueue) = $Repository->GetChanges();
-            
-            $PersistedQueues[] = $PersistedQueue;
-            $ExecutionQueues[] = $ExecutionQueue;
-            $DiscardedQueues[] = $DiscardedQueue;
-            $DiscardedCriteriaQueues[] = $DiscardedCriteriaQueue;
-            
-            $Repository->ClearChanges();
+        foreach($this->EntityManagers as $EntityManager) {
+            $this->PendingChanges->Merge($EntityManager->GetChanges());
         }
         
-        $PersistedQueue = call_user_func_array('array_merge', $PersistedQueues);
-        $ExecutionQueue = call_user_func_array('array_merge', $ExecutionQueues);
-        $DiscardedQueue = call_user_func_array('array_merge', $DiscardedQueues);
-        $DiscardedCriteriaQueue = call_user_func_array('array_merge', $DiscardedCriteriaQueues);
-        
-        $this->DomainDatabaseMap->Commit(
-                $PersistedQueue, 
-                $ExecutionQueue, 
-                $DiscardedQueue, 
-                $DiscardedCriteriaQueue);
+        $this->DomainDatabaseMap->Commit($this->PendingChanges);
+        $this->ClearChanges();
     }
     
     /**
-     * Clears all the changes from the repositories
+     * Clears all the changes from the entity managers
      * instantiated by this storm.
      * 
      * @return void
@@ -168,6 +150,7 @@ class Storm {
         foreach($this->EntityManagers as $EntityManager) {
             $EntityManager->ClearChanges();
         }
+        $this->PendingChanges->Reset();
     }
 }
 

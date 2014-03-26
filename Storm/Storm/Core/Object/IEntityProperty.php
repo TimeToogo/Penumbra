@@ -11,6 +11,14 @@ interface IEntityProperty extends IRelationshipProperty {
     const IEntityPropertyType = __CLASS__;
     
     /**
+     * Whether or not the parent entity is identified by the relationship
+     * represented by this property
+     * 
+     * @return boolean
+     */
+    public function IsIdentity();
+    
+    /**
      * @return boolean
      */
     public function IsOptional();

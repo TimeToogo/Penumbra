@@ -21,7 +21,7 @@ class DeepClonedInstance extends Constructor {
         }
     }
     
-    public function Construct() {
+    public function Construct(Object\RevivalData $RevivalData) {
         return unserialize($this->SerializedInstance);
     }
 }

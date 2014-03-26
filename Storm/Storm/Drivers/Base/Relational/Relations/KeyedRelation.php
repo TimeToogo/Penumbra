@@ -48,8 +48,10 @@ abstract class KeyedRelation extends Relation {
         $MatchExpressions = [];
         foreach($ParentRows as $ParentRow) {
             $ReferencedKey = $this->MapParentRowToRelatedKey($this->ForeignKey, $ParentRow);
-            
-            $MatchExpressions[] = new R\MatchesColumnDataExpression($ReferencedKey);
+            $Hash = $ReferencedKey->HashData();
+            if(!isset($MatchExpressions[$Hash])) {
+                $MatchExpressions[$Hash] = new R\MatchesColumnDataExpression($ReferencedKey);
+            }
         }
         
         $Criteria->AddPredicateExpression(
@@ -58,7 +60,7 @@ abstract class KeyedRelation extends Relation {
     /**
      * @return Relational\Table
      */
-    protected function GetParentTable() {
+    public function GetParentTable() {
         return $this->IsInversed ? 
                 $this->ForeignKey->GetReferencedTable() : $this->ForeignKey->GetParentTable();
     }

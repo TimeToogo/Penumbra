@@ -1,8 +1,9 @@
 <?php
 
-namespace Storm\Pinq;
+namespace Storm\Pinq\Functional;
 
 use \Storm\Core\Object;
+use \Storm\Pinq\PinqException;
 use \Storm\Utilities\Cache\ICache;
 
 class CachingFunctionToExpressionTreeConverter extends FunctionToExpressionTreeConverter {
@@ -10,7 +11,7 @@ class CachingFunctionToExpressionTreeConverter extends FunctionToExpressionTreeC
     
     public function __construct(
             ICache $Cache,
-            Functional\IParser $Parser) {
+            IParser $Parser) {
         parent::__construct($Parser);
         
         $this->Cache = $Cache;
@@ -27,8 +28,8 @@ class CachingFunctionToExpressionTreeConverter extends FunctionToExpressionTreeC
             $ExpressionTree = $this->Cache->Retrieve($FunctionHash);
         }
         
-        if(!($ExpressionTree instanceof Functional\ExpressionTree)) {
-            $ExpressionTree = new Functional\ExpressionTree($this->Parser->Parse($Reflection)->GetExpressions());
+        if(!($ExpressionTree instanceof ExpressionTree)) {
+            $ExpressionTree = new ExpressionTree($this->Parser->Parse($Reflection)->GetExpressions());
             
             /*
              * Resolve all that can be currently resolved and save the expression tree (entity/aggregate expressions)

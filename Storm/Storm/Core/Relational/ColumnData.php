@@ -119,6 +119,9 @@ abstract class ColumnData implements \IteratorAggregate, \ArrayAccess {
     }
     
     final public function HashData() {
+        if(count($this->Data) === 1) {
+            return (string)reset($this->Data);
+        }
         asort($this->Data);
         return md5(json_encode(array_values($this->Data)));
     }
