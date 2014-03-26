@@ -1,11 +1,11 @@
 <?php
 
-namespace StormExamples\One\Mapping\Maps;
+namespace PenumbraExamples\One\Mapping\Maps;
 
-use \Storm\Drivers\Constant\Mapping;
-use \StormExamples\One\Entities\Tag;
-use \Storm\Core\Object;
-use \Storm\Core\Relational;
+use \Penumbra\Drivers\Constant\Mapping;
+use \PenumbraExamples\One\Entities\Tag;
+use \Penumbra\Core\Object;
+use \Penumbra\Core\Relational;
 
 final class TagRelationalMap extends Mapping\EntityRelationalMap {
     
@@ -14,8 +14,8 @@ final class TagRelationalMap extends Mapping\EntityRelationalMap {
     }
     
     protected function InitializeMappings(Object\IEntityMap $EntityMap, Relational\Database $Database) {
-        /* @var $EntityMap \StormExamples\One\Domain\Maps\TagMap */
-        /* @var $Table \StormExamples\One\Relational\Tables\Tags */
+        /* @var $EntityMap \PenumbraExamples\One\Domain\Maps\TagMap */
+        /* @var $Table \PenumbraExamples\One\Relational\Tables\Tags */
         $Table = $Database->Tags;
         
         $this->Map($EntityMap->Id)->ToColumn($Table->Id);

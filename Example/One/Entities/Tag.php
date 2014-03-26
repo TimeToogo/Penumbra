@@ -1,6 +1,6 @@
 <?php
 
-namespace StormExamples\One\Entities;
+namespace PenumbraExamples\One\Entities;
 
 class Tag extends Entity {
     public $Id;

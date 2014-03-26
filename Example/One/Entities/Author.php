@@ -1,6 +1,6 @@
 <?php
 
-namespace StormExamples\One\Entities;
+namespace PenumbraExamples\One\Entities;
 
 class Author extends Entity {
     public $Id;

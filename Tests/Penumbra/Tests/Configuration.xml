@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phpunit 
+    bootstrap="TestBootstrapper.php"
+    colors="false"
+    stopOnFailure="true">
+    
+    <php>
+        <var name="DB_DSN" value="mysql:dbname=PenumbraTest;host=localhost" />
+        <var name="DB_DBNAME" value="PenumbraTest" />
+        <var name="DB_USER" value="root" />
+        <var name="DB_PASSWD" value="admin" />
+    </php>
+    
+    <testsuites>
+      <testsuite name="Penumbra - Entirety">
+        <directory>../</directory>
+      </testsuite>
+      <testsuite name="Penumbra - Unit">
+        <directory>Unit</directory>
+      </testsuite>
+      <testsuite name="Penumbra - Integration">
+        <directory>Integration</directory>
+      </testsuite>
+      <testsuite name="Penumbra - Functional">
+        <directory>Functional</directory>
+      </testsuite>
+      <testsuite name="Penumbra - Unit - Core">
+        <directory>Unit/Core</directory>
+      </testsuite>
+      <testsuite name="Penumbra - Unit - API">
+        <directory>Unit/API</directory>
+      </testsuite>
+      <testsuite name="Penumbra - Unit - Drivers">
+        <directory>Unit/Drivers</directory>
+        <exclude>Unit/Drivers/Platforms</exclude>
+      </testsuite>
+      <testsuite name="Penumbra - Unit - Drivers - Platforms">
+        <directory>Unit/Drivers/Platforms</directory>
+      </testsuite>
+    </testsuites>
+</phpunit>

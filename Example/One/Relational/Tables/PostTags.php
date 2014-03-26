@@ -1,12 +1,12 @@
 <?php
 
-namespace StormExamples\One\Relational\Tables;
+namespace PenumbraExamples\One\Relational\Tables;
 
-use \Storm\Core\Containers\Map;
-use \Storm\Core\Relational\Database;
-use \Storm\Drivers\Base\Relational\Columns\IColumnSet;
-use \Storm\Core\Relational\ITable;
-use \Storm\Drivers\Constant\Relational;
+use \Penumbra\Core\Containers\Map;
+use \Penumbra\Core\Relational\Database;
+use \Penumbra\Drivers\Base\Relational\Columns\IColumnSet;
+use \Penumbra\Core\Relational\ITable;
+use \Penumbra\Drivers\Constant\Relational;
 
 class PostTags extends Relational\Relations\JoinTable {
     protected function Name() {

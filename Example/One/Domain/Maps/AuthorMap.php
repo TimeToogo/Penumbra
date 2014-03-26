@@ -1,13 +1,13 @@
 <?php
 
-namespace StormExamples\One\Domain\Maps;
+namespace PenumbraExamples\One\Domain\Maps;
 
-use \Storm\Core\Object\Domain;
-use \Storm\Drivers\Base\Object;
-use \Storm\Drivers\Base\Object\Properties;
-use \Storm\Drivers\Base\Object\Properties\Accessors;
-use \Storm\Drivers\Constant\Object\EntityMap;
-use \StormExamples\One\Entities\Author;
+use \Penumbra\Core\Object\Domain;
+use \Penumbra\Drivers\Base\Object;
+use \Penumbra\Drivers\Base\Object\Properties;
+use \Penumbra\Drivers\Base\Object\Properties\Accessors;
+use \Penumbra\Drivers\Constant\Object\EntityMap;
+use \PenumbraExamples\One\Entities\Author;
 
 class AuthorMap extends EntityMap {
     protected function EntityType() {
@@ -30,14 +30,14 @@ class AuthorMap extends EntityMap {
         $this->LastName = new Properties\DataProperty(new Accessors\Field('LastName'));
         
         $this->Profile = new Properties\EntityProperty(new Accessors\Field('Profile'), 
-                \StormExamples\One\Entities\Profile::GetType(), 
+                \PenumbraExamples\One\Entities\Profile::GetType(), 
                 new Properties\Relationships\Identifying(),
                 false,
                 false,
                 $Domain->ProfileMap->Author);
         
         $this->Friends = new Properties\CollectionProperty(new Accessors\Field('Friends'), 
-                \StormExamples\One\Entities\Author::GetType(),
+                \PenumbraExamples\One\Entities\Author::GetType(),
                 new Properties\Relationships\CascadeNonIdentifying());
     }
 

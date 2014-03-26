@@ -1,10 +1,10 @@
-Storm - Still in development
+Penumbra - Still in development
 ============================
 
 Domain oriented ORM, crafted with passion for PHP 5.4+.
 
-Storm is not finished, the foundation and architecture is there, but the 
-codebase has almost no unit tests. Since storm was originally a learning exercise 
+Penumbra is not finished, the foundation and architecture is there, but the 
+codebase has almost no unit tests. Since penumbra was originally a learning exercise 
 with the goal of creating an orm that does not influence the domain model, this 
 project has maintained a good code quality, but it is quickly becoming apparent 
 that I cannot single handedly develop and maintain this project, especially with 
@@ -17,21 +17,21 @@ Please be aware that this is my first large open source project, so any tips/rec
 Another ORM for PHP?!
 =====================
 Yes! I built this to learn, but now I see that it offers features that no
-other ORM has. Storm is 100% data mapper and aims to stay [completely decoupled](#domainmodels)
+other ORM has. Penumbra is 100% data mapper and aims to stay [completely decoupled](#domainmodels)
 from your domain models while offering a [powerful OO query api](#pinq). 
 
-Summary of the current state of Storm
+Summary of the current state of Penumbra
 =====================================
- - ORM [functionality is running](https://github.com/TimeToogo/Storm/blob/master/Example/One/Example.php) but far from stable.
- - Overall, maintains a [good code quality](https://scrutinizer-ci.com/g/TimeToogo/Storm).
- - Plenty of work is required just [to set up](https://github.com/TimeToogo/Storm/tree/master/Example/One).
+ - ORM [functionality is running](https://github.com/TimeToogo/Penumbra/blob/master/Example/One/Example.php) but far from stable.
+ - Overall, maintains a [good code quality](https://scrutinizer-ci.com/g/TimeToogo/Penumbra).
+ - Plenty of work is required just [to set up](https://github.com/TimeToogo/Penumbra/tree/master/Example/One).
  - Decent size codebase (~15,000 LOC).
- - [API](https://github.com/TimeToogo/Storm/tree/master/Storm/Storm/Api) structure is not finialized.
- - Apalling [test suite](https://github.com/TimeToogo/Storm/tree/master/Tests/Storm/Tests).
+ - [API](https://github.com/TimeToogo/Penumbra/tree/master/Penumbra/Penumbra/Api) structure is not finialized.
+ - Apalling [test suite](https://github.com/TimeToogo/Penumbra/tree/master/Tests/Penumbra/Tests).
  - Lacking in documentation / code comments.
  - Serious contributors [are needed](mailto:elliot@aanet.com.au).
 
-The goals of Storm
+The goals of Penumbra
 ==================
  - To provide a maintainable and sensible approach to the complex ORM realm.
  - To reward the user with unpolluted and [flexible domain models](#domainmodels).
@@ -40,9 +40,9 @@ The goals of Storm
 
 <a name="domainmodels"></a>Flexible domain models
 ==================================================
-**Storm aims to provide as little restriction to domain models as possible**
- - Storm natively supports: fields, getters/setters and even indexors or innvocation as entity properties.
- - Your entities can remain completely unaware of Storm: no base class, no annotations and no persistence logic.
+**Penumbra aims to provide as little restriction to domain models as possible**
+ - Penumbra natively supports: fields, getters/setters and even indexors or innvocation as entity properties.
+ - Your entities can remain completely unaware of Penumbra: no base class, no annotations and no persistence logic.
  - Transparent relationship loading and persisting.
  - Seamless identifying and non-identifying relationships between entities:
      - Required child entity - A `User` has a `Profile`
@@ -103,7 +103,6 @@ WHERE Users.IsActive
 GROUP BY Users.Age;
 ```
 
-
 **Procedures (`UPDATE`) - Example:**
 ```php
 $InactiveUserProcedure = $UserRepository->Procedure(
@@ -130,9 +129,9 @@ WHERE Users.LastLoginDate < DATE_SUB(NOW(), INTERVAL 2 YEAR)
 
 <a name="queries"></a>Sensible queries
 ======================================
-**One main goal of Storm is to take advantage of the underlying database as much as possible.**
- - Storm will use batch inserts/upserts and deletes where possible.
- - Elimination of the dreaded N+1 query scenario introduced by excessive lazy loading. With storm, there are currenlty multiple relationship loading implementations:
+**One main goal of Penumbra is to take advantage of the underlying database as much as possible.**
+ - Penumbra will use batch inserts/upserts and deletes where possible.
+ - Elimination of the dreaded N+1 query scenario introduced by excessive lazy loading. With penumbra, there are currenlty multiple relationship loading implementations:
      - `Eager` - Relationships are loaded along with the parent and children are joined where appropriate.
      - `Global scope lazy` - Relationships are not loaded with the parent entity but when one is required, globally every unloaded relationship will be loaded.
      - `Request scope lazy` (Recommended) - Relationships are loaded when required for all entities in the request object graph.

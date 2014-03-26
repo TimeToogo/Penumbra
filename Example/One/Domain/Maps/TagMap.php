@@ -1,13 +1,13 @@
 <?php
 
-namespace StormExamples\One\Domain\Maps;
+namespace PenumbraExamples\One\Domain\Maps;
 
-use \Storm\Core\Object\Domain;
-use \Storm\Drivers\Base\Object;
-use \Storm\Drivers\Base\Object\Properties;
-use \Storm\Drivers\Base\Object\Properties\Accessors;
-use \Storm\Drivers\Constant\Object\EntityMap;
-use \StormExamples\One\Entities\Tag;
+use \Penumbra\Core\Object\Domain;
+use \Penumbra\Drivers\Base\Object;
+use \Penumbra\Drivers\Base\Object\Properties;
+use \Penumbra\Drivers\Base\Object\Properties\Accessors;
+use \Penumbra\Drivers\Constant\Object\EntityMap;
+use \PenumbraExamples\One\Entities\Tag;
 
 class TagMap extends EntityMap {
     protected function EntityType() {

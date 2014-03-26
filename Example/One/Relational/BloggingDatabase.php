@@ -1,8 +1,8 @@
 <?php
 
-namespace StormExamples\One\Relational;
+namespace PenumbraExamples\One\Relational;
 
-use \Storm\Drivers\Constant\Relational;
+use \Penumbra\Drivers\Constant\Relational;
 
 class BloggingDatabase extends Relational\Database {
         

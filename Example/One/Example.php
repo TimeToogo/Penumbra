@@ -1,16 +1,16 @@
 <?php 
 
-namespace StormExamples\One;
+namespace PenumbraExamples\One;
 
-use \StormExamples\One\Entities;
-use \Storm\Api;
-use \Storm\Api\Base\Storm;
-use \Storm\Api\Base\EntityManager;
-use \Storm\Drivers\Platforms;
-use \Storm\Drivers\Platforms\Development\Logging;
-use \Storm\Drivers\Base\Object\Properties\Proxies;
+use \PenumbraExamples\One\Entities;
+use \Penumbra\Api;
+use \Penumbra\Api\Base\ORM;
+use \Penumbra\Api\IEntityManager;
+use \Penumbra\Drivers\Platforms;
+use \Penumbra\Drivers\Platforms\Development\Logging;
+use \Penumbra\Drivers\Base\Object\Properties\Proxies;
 
-class Example implements \StormExamples\IStormExample {
+class Example implements \PenumbraExamples\IPenumbraExample {
     const DevelopmentMode = 1;
     const UseCache = true;
     const ClearCache = false;
@@ -20,7 +20,7 @@ class Example implements \StormExamples\IStormExample {
     }
     
     private static function GetConnection() {
-        $PDOConnection = Platforms\PDO\Connection::Connect('mysql:host=localhost;dbname=StormTest', 'root', 'admin');
+        $PDOConnection = Platforms\PDO\Connection::Connect('mysql:host=localhost;dbname=PenumbraTest', 'root', 'admin');
               
         return new Logging\Connection(self::DevelopmentMode > 0 ? new Logging\DumpLogger() : new Logging\NullLogger(), 
                 $PDOConnection);
@@ -33,8 +33,8 @@ class Example implements \StormExamples\IStormExample {
                 __DIR__ . DIRECTORY_SEPARATOR . 'Proxies');
     }
     
-    public function GetStorm() {
-        $Cache = self::UseCache && class_exists('Memcache', false) ? new \Storm\Utilities\Cache\MemcacheCache('localhost') : null;
+    public function GetPenumbra() {
+        $Cache = self::UseCache && class_exists('Memcache', false) ? new \Penumbra\Utilities\Cache\MemcacheCache('localhost') : null;
         if($Cache && self::ClearCache) {
             $Cache->Clear();
         }
@@ -44,10 +44,10 @@ class Example implements \StormExamples\IStormExample {
                 self::GetProxyGenerator(),
                 $Cache);
         
-        return $Configuration->Storm();
+        return $Configuration->BuildORM();
     }
     
-    const Id = 1058;
+    const Id = 1080;
     
     const Persist = 0;
     const Retreive = 1;
@@ -57,61 +57,61 @@ class Example implements \StormExamples\IStormExample {
     const Discard = 5;
     const Procedure = 6;
     
-    public function Run(Storm $BloggingStorm) {
-        $BlogManger = $BloggingStorm->GetEntityManger(Entities\Blog::GetType());
-        $TagManger = $BloggingStorm->GetEntityManger(Entities\Tag::GetType());
-        $AuthorManger = $BloggingStorm->GetEntityManger(Entities\Author::GetType());
+    public function Run(ORM $BloggingORM) {
+        $BlogManger = $BloggingORM->GetEntityManger(Entities\Blog::GetType());
+        $TagManger = $BloggingORM->GetEntityManger(Entities\Tag::GetType());
+        $AuthorManger = $BloggingORM->GetEntityManger(Entities\Author::GetType());
         
         $Action = self::Retreive;
         
         $Amount = 1;        
         $Last;
         for ($Count = 0; $Count < $Amount; $Count++) {
-            $Last = $this->Act($Action, $BloggingStorm, $BlogManger, $AuthorManger, $TagManger);
+            $Last = $this->Act($Action, $BloggingORM, $BlogManger, $AuthorManger, $TagManger);
         }
         
         return $Last;
     }
 
-    private function Act($Action, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $AuthorManger, EntityManager $TagManger) {
+    private function Act($Action, ORM $BloggingORM, IEntityManager $BlogManger, IEntityManager $AuthorManger, IEntityManager $TagManger) {
         $Id = self::Id;
         switch ($Action) {
             case self::Persist:
-                return $this->Persist($Id, $BloggingStorm, $BlogManger, $AuthorManger, $TagManger);
+                return $this->Persist($Id, $BloggingORM, $BlogManger, $AuthorManger, $TagManger);
 
 
             case self::Retreive:
-                return $this->Retreive($Id, $BloggingStorm, $BlogManger, $TagManger);
+                return $this->Retreive($Id, $BloggingORM, $BlogManger, $TagManger);
 
 
             case self::RetreiveSimple:
-                return $this->RetreiveSimple($Id, $BloggingStorm, $BlogManger, $TagManger);
+                return $this->RetreiveSimple($Id, $BloggingORM, $BlogManger, $TagManger);
 
 
             case self::RetreiveComplex:
-                return $this->RetreiveComplex($Id, $BloggingStorm, $BlogManger, $TagManger);
+                return $this->RetreiveComplex($Id, $BloggingORM, $BlogManger, $TagManger);
 
                 
             case self::PersistExisting:
-                return $this->PersistExisting($Id, $BloggingStorm, $BlogManger, $TagManger);
+                return $this->PersistExisting($Id, $BloggingORM, $BlogManger, $TagManger);
 
                 
             case self::Procedure:
-                return $this->Procedure($Id, $BloggingStorm, $BlogManger, $TagManger);
+                return $this->Procedure($Id, $BloggingORM, $BlogManger, $TagManger);
 
 
             case self::Discard:
-                return $this->Discard($Id, $BloggingStorm, $BlogManger, $TagManger);
+                return $this->Discard($Id, $BloggingORM, $BlogManger, $TagManger);
 
             default:
                 return null;
         }
     }
     
-    private function Persist($Id, Storm $BloggingStorm, 
-            EntityManager $BlogManger, 
-            EntityManager $AuthorManger,
-            EntityManager $TagManger) {
+    private function Persist($Id, ORM $BloggingORM, 
+            IEntityManager $BlogManger, 
+            IEntityManager $AuthorManger,
+            IEntityManager $TagManger) {
         
         $Blog = $this->CreateBlog();
         $BlogManger->Persist($Blog);
@@ -120,7 +120,7 @@ class Example implements \StormExamples\IStormExample {
         return $Blog;
     }
     
-    private function Retreive($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
+    private function Retreive($Id, ORM $BloggingORM, IEntityManager $BlogManger, IEntityManager $TagManger) {
         $RevivedBlog = $BlogManger->LoadById($Id);
         if($RevivedBlog === null) {
             throw new \Exception("Entity with id: $Id does not exist");
@@ -137,14 +137,14 @@ class Example implements \StormExamples\IStormExample {
         $Test = $Author->FirstName;
         $Foo = $RevivedBlog->Posts[0]->Tags->getArrayCopy();
         $Foo = $RevivedBlog->Posts[1]->Tags->getArrayCopy();
-        \Storm\Utilities\Debug::Dump($RevivedBlog);
+        
         $BlogManger->GetIdentityMap()->Clear();
         
         return null;
     }
     
-    private function RetreiveSimple($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
-        $PostManger = $BloggingStorm->GetEntityManger(Entities\Post::GetType());
+    private function RetreiveSimple($Id, ORM $BloggingORM, IEntityManager $BlogManger, IEntityManager $TagManger) {
+        $PostManger = $BloggingORM->GetEntityManger(Entities\Post::GetType());
         
         $SubRequest = $BlogManger->Request()
                 ->Where(function (Entities\Blog $Blog) { return $Blog->GetName() !== 'test' ; })
@@ -155,10 +155,8 @@ class Example implements \StormExamples\IStormExample {
                 ->OrderByDescending(function (Entities\Blog $Blog) { return $Blog->Id . $Blog->CreatedDate; })
                 ->OrderBy(function (Entities\Blog $Blog) { return $Blog->Id; })
                 ->GroupBy(function (Entities\Blog $Blog) { return $Blog->Id % 20; })
-                ->Select(function (Entities\Blog $Blog, \Storm\Pinq\IAggregate $Blogs) {
-                    
+                ->Select(function (Entities\Blog $Blog, \Penumbra\Pinq\IAggregate $Blogs) {
                     $Id = function (Entities\Blog $Blog) { return $Blog->Id; };
-                    
                     return [
                         'Key' => $Blog->Id,
                         'CreatedDate' =>  $Blog->Id % 2 === 0 ? $Blog->CreatedDate->add(new \DateInterval('P1M3DT5H6M'))->sub(new \DateInterval('PT1S')) : $Blog->CreatedDate->sub(new \DateInterval('P5Y')),
@@ -180,7 +178,7 @@ class Example implements \StormExamples\IStormExample {
         return null;
     }
     
-    private function RetreiveComplex($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
+    private function RetreiveComplex($Id, ORM $BloggingORM, IEntityManager $BlogManger, IEntityManager $TagManger) {
         $Outside = new \DateTime();
         $Outside->sub(new \DateInterval('P1D'));
 
@@ -223,7 +221,7 @@ class Example implements \StormExamples\IStormExample {
         return null;
     }
     
-    private function PersistExisting($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
+    private function PersistExisting($Id, ORM $BloggingORM, IEntityManager $BlogManger, IEntityManager $TagManger) {
         
         $Blog = $BlogManger->LoadById($Id);
         $Blog->Posts[0]->Content = 'foobar';
@@ -236,7 +234,7 @@ class Example implements \StormExamples\IStormExample {
         return $Blog;
     }
     
-    private function Procedure($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
+    private function Procedure($Id, ORM $BloggingORM, IEntityManager $BlogManger, IEntityManager $TagManger) {
         $BlogManger->Procedure()
                 ->Where(function (Entities\Blog $Blog) use ($Id) {
                     return $Blog->Id === $Id && null == null && (~3 ^ 2) < (40 % 5) && in_array(1, [1,2,3,4,5,6]);
@@ -255,7 +253,7 @@ class Example implements \StormExamples\IStormExample {
         $Blog->CreatedDate = (new \DateTime())->add((new \DateTime())->diff($Blog->CreatedDate, true));
     }
     
-    private function Discard($Id, Storm $BloggingStorm, EntityManager $BlogManger, EntityManager $TagManger) {
+    private function Discard($Id, ORM $BloggingORM, IEntityManager $BlogManger, IEntityManager $TagManger) {
 
         $BlogManger->Discard($BlogManger->LoadById($Id));
         $BlogManger->Remove()

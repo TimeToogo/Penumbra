@@ -12,7 +12,7 @@ The future:
  - Implement CodeFirst driver
  - Finalize the API
  - Begin writing a test suite for the major parts of the application
- - Implement an active record flavour of Storm (This could be quite sexy coupled with integrated query)
+ - Implement an active record flavour of Penumbra (This could be quite sexy coupled with integrated query)
  - Implement other platforms for SQL Server, PostgreSQL, SQLite, Oracle
  - Restructure UnitOfWork / Transaction such that the order of operations is preserved ?
  - Built-in support for optimistic / pessimistic locking ?

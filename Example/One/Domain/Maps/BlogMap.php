@@ -1,13 +1,13 @@
 <?php
 
-namespace StormExamples\One\Domain\Maps;
+namespace PenumbraExamples\One\Domain\Maps;
 
-use \Storm\Core\Object\Domain;
-use \Storm\Drivers\Base\Object;
-use \Storm\Drivers\Base\Object\Properties;
-use \Storm\Drivers\Base\Object\Properties\Accessors;
-use \Storm\Drivers\Constant\Object\EntityMap;
-use \StormExamples\One\Entities\Blog;
+use \Penumbra\Core\Object\Domain;
+use \Penumbra\Drivers\Base\Object;
+use \Penumbra\Drivers\Base\Object\Properties;
+use \Penumbra\Drivers\Base\Object\Properties\Accessors;
+use \Penumbra\Drivers\Constant\Object\EntityMap;
+use \PenumbraExamples\One\Entities\Blog;
 
 class BlogMap extends EntityMap {
     protected function EntityType() {
@@ -32,7 +32,7 @@ class BlogMap extends EntityMap {
         $this->CreatedDate = new Properties\DataProperty(new Accessors\Field('CreatedDate'));
         
         $this->Posts = new Properties\CollectionProperty(new Accessors\Field('Posts'), 
-                \StormExamples\One\Entities\Post::GetType(), 
+                \PenumbraExamples\One\Entities\Post::GetType(), 
                 new Properties\Relationships\Identifying(), 
                 $Domain->PostMap->Blog);
     }

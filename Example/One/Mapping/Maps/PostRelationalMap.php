@@ -1,11 +1,11 @@
 <?php
 
-namespace StormExamples\One\Mapping\Maps;
+namespace PenumbraExamples\One\Mapping\Maps;
 
-use \Storm\Drivers\Constant\Mapping;
-use \StormExamples\One\Entities\Post;
-use \Storm\Core\Object;
-use \Storm\Core\Relational;
+use \Penumbra\Drivers\Constant\Mapping;
+use \PenumbraExamples\One\Entities\Post;
+use \Penumbra\Core\Object;
+use \Penumbra\Core\Relational;
 
 final class PostRelationalMap extends Mapping\EntityRelationalMap {
     
@@ -14,8 +14,8 @@ final class PostRelationalMap extends Mapping\EntityRelationalMap {
     }
     
     protected function InitializeMappings(Object\IEntityMap $EntityMap, Relational\Database $Database) {
-        /* @var $EntityMap \StormExamples\One\Domain\Maps\PostMap */
-        /* @var $Table \StormExamples\One\Relational\Tables\Posts */
+        /* @var $EntityMap \PenumbraExamples\One\Domain\Maps\PostMap */
+        /* @var $Table \PenumbraExamples\One\Relational\Tables\Posts */
         $Table = $Database->Posts;
         
         $this->Map($EntityMap->Title)->ToColumn($Table->Title);

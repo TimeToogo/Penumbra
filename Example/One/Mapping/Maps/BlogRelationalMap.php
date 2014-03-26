@@ -1,12 +1,12 @@
 <?php
 
-namespace StormExamples\One\Mapping\Maps;
+namespace PenumbraExamples\One\Mapping\Maps;
 
-use \Storm\Drivers\Constant\Mapping;
-use \StormExamples\One\Entities\Blog;
-use \Storm\Core\Object;
-use \Storm\Core\Relational;
-use \Storm\Drivers\Base\Relational\Expressions\Expression;
+use \Penumbra\Drivers\Constant\Mapping;
+use \PenumbraExamples\One\Entities\Blog;
+use \Penumbra\Core\Object;
+use \Penumbra\Core\Relational;
+use \Penumbra\Drivers\Base\Relational\Expressions\Expression;
 
 final class BlogRelationalMap extends Mapping\EntityRelationalMap {
     
@@ -15,8 +15,8 @@ final class BlogRelationalMap extends Mapping\EntityRelationalMap {
     }
     
     protected function InitializeMappings(Object\IEntityMap $EntityMap, Relational\Database $Database) {
-        /* @var $EntityMap \StormExamples\One\Domain\Maps\BlogMap */
-        /* @var $Table \StormExamples\One\Relational\Tables\Blogs */
+        /* @var $EntityMap \PenumbraExamples\One\Domain\Maps\BlogMap */
+        /* @var $Table \PenumbraExamples\One\Relational\Tables\Blogs */
         $Table = $Database->Blogs;
         
         $this->Map($EntityMap->Id)->ToColumn($Table->Id);

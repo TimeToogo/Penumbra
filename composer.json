@@ -1,8 +1,8 @@
 {
-    "name": "timetoogo/storm",
+    "name": "timetoogo/penumbra",
     "description": "Domain oriented ORM, crafted for PHP 5.4+",
     "keywords": ["orm", "database", "object", "relational", "mapper"],
-    "homepage": "http://www.github.com/TimeToogo/Storm",
+    "homepage": "http://www.github.com/TimeToogo/Penumbra",
     "license": "MIT",
     "authors": [
         {
@@ -20,6 +20,6 @@
         "phpunit/dbunit": ">=1.2"
     },
     "autoload": {
-        "psr-0": { "Storm": "Storm/" }
+        "psr-0": { "Penumbra": "Library/" }
     }
 }

@@ -1,11 +1,11 @@
 <?php
 
-namespace StormExamples\One\Mapping\Maps;
+namespace PenumbraExamples\One\Mapping\Maps;
 
-use \Storm\Drivers\Constant\Mapping;
-use \StormExamples\One\Entities\Profile;
-use \Storm\Core\Object;
-use \Storm\Core\Relational;
+use \Penumbra\Drivers\Constant\Mapping;
+use \PenumbraExamples\One\Entities\Profile;
+use \Penumbra\Core\Object;
+use \Penumbra\Core\Relational;
 
 final class ProfileRelationalMap extends Mapping\EntityRelationalMap {
     
@@ -14,8 +14,8 @@ final class ProfileRelationalMap extends Mapping\EntityRelationalMap {
     }
     
     protected function InitializeMappings(Object\IEntityMap $EntityMap, Relational\Database $Database) {
-        /* @var $EntityMap \StormExamples\One\Domain\Maps\ProfileMap */
-        /* @var $Table \StormExamples\One\Relational\Tables\Profiles */
+        /* @var $EntityMap \PenumbraExamples\One\Domain\Maps\ProfileMap */
+        /* @var $Table \PenumbraExamples\One\Relational\Tables\Profiles */
         $Table = $Database->Profiles;
         
         $this->Map($EntityMap->Author)->ToEntity($Table->Author);

@@ -1,8 +1,8 @@
 <?php
 
-namespace StormExamples\One\Domain;
+namespace PenumbraExamples\One\Domain;
 
-use \Storm\Drivers\Constant\Object;
+use \Penumbra\Drivers\Constant\Object;
 
 class BloggingDomain extends Object\Domain {
     public $TagMap;

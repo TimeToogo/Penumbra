@@ -1,6 +1,6 @@
 <?php
 
-namespace StormExamples;
+namespace PenumbraExamples;
 
 ?>
 
@@ -74,28 +74,28 @@ if(isset($_GET['Test'])) {
     if(file_exists($TestFile)) {
         var_dump('Running Test From Dir: ' . $TestDir);
         $TestInstance = require_once $TestFile;
-        if($TestInstance instanceof IStormExample)
+        if($TestInstance instanceof IPenumbraExample)
         {
             require_once 'UBench.php';
-            require_once '../Storm/Loader.php';
+            require_once '../Library/Loader.php';
             
             $Benchmark = new \Ubench();
             
             $Benchmark->start();
-            $Storm = $TestInstance->GetStorm();
+            $Penumbra = $TestInstance->GetPenumbra();
             $Benchmark->end();
             
-            var_dump('Storm');
+            var_dump('Penumbra');
             var_dump($Benchmark->getTime());
             var_dump($Benchmark->getMemoryPeak());
             
             $Benchmark->start();
-            $Result = $TestInstance->Run($Storm);
+            $Result = $TestInstance->Run($Penumbra);
             $Benchmark->end();
             
             var_dump('Test');
             var_dump($Benchmark->getTime());
-            $TimeSpentQuerying = $Storm->GetDomainDatabaseMap()->GetDatabase()->GetPlatform()->GetConnection()->GetTimeSpentQuerying();
+            $TimeSpentQuerying = $Penumbra->GetDomainDatabaseMap()->GetDatabase()->GetPlatform()->GetConnection()->GetTimeSpentQuerying();
             var_dump('Time spent querying: ' . round($TimeSpentQuerying * 1000) . 'ms');
             var_dump('Time spent querying percentage: ' . ($TimeSpentQuerying / $Benchmark->getTime(true) * 100) . '%');
             var_dump($Benchmark->getMemoryPeak());

@@ -1,13 +1,13 @@
 <?php
 
-namespace StormExamples\One\Relational\Tables;
+namespace PenumbraExamples\One\Relational\Tables;
 
-use \Storm\Core\Relational\Database;
-use \Storm\Drivers\Constant\Relational;
-use \Storm\Drivers\Base\Relational\Columns\IColumnSet;
-use \Storm\Drivers\Base\Relational\PrimaryKeys\IKeyGeneratorSet;
-use \Storm\Drivers\Base\Relational\Traits;
-use \Storm\Drivers\Base\Relational\Relations;
+use \Penumbra\Core\Relational\Database;
+use \Penumbra\Drivers\Constant\Relational;
+use \Penumbra\Drivers\Base\Relational\Columns\IColumnSet;
+use \Penumbra\Drivers\Base\Relational\PrimaryKeys\IKeyGeneratorSet;
+use \Penumbra\Drivers\Base\Relational\Traits;
+use \Penumbra\Drivers\Base\Relational\Relations;
 
 
 class Authors extends Relational\Table {

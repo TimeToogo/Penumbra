@@ -1,6 +1,6 @@
 <?php
 
-namespace StormExamples\One\Entities;
+namespace PenumbraExamples\One\Entities;
 
 abstract class Entity {    
     public static function GetType() {
