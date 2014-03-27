@@ -16,9 +16,9 @@ Please be aware that this is my first large open source project, so any tips/rec
 
 Another ORM for PHP?!
 =====================
-Yes! I built this to learn, but now I see that it offers features that no
-other ORM has. Penumbra is 100% data mapper and aims to stay [completely decoupled](#domainmodels)
-from your domain models while offering a [powerful OO query api](#pinq). 
+Yes! Penumbra offers features that no other ORM has. Penumbra is 100% 
+data mapper and aims to stay [completely decoupled](#domainmodels)
+from your domain models while offering a [powerful language integrated query api](#pinq). 
 
 Summary of the current state of Penumbra
 =====================================

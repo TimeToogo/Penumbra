@@ -1,7 +1,7 @@
 {
     "name": "timetoogo/penumbra",
-    "description": "Domain oriented ORM, crafted for PHP 5.4+",
-    "keywords": ["orm", "database", "object", "relational", "mapper"],
+    "description": "Domain oriented ORM with PHP integrated query for PHP 5.4+",
+    "keywords": ["orm", "database", "object", "relational", "mapper", "query", "pinq"],
     "homepage": "http://www.github.com/TimeToogo/Penumbra",
     "license": "MIT",
     "authors": [
@@ -20,6 +20,9 @@
         "phpunit/dbunit": ">=1.2"
     },
     "autoload": {
-        "psr-0": { "Penumbra": "Library/" }
+        "psr-4": { 
+            "Penumbra\\": "Source/",
+            "Penumbra\\Tests\\": "Tests/" 
+        }
     }
 }

@@ -77,7 +77,7 @@ if(isset($_GET['Test'])) {
         if($TestInstance instanceof IPenumbraExample)
         {
             require_once 'UBench.php';
-            require_once '../Library/Loader.php';
+            require_once '../Source/Loader.php';
             
             $Benchmark = new \Ubench();
             

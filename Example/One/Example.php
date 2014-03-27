@@ -62,7 +62,7 @@ class Example implements \PenumbraExamples\IPenumbraExample {
         $TagManger = $BloggingORM->GetEntityManger(Entities\Tag::GetType());
         $AuthorManger = $BloggingORM->GetEntityManger(Entities\Author::GetType());
         
-        $Action = self::Retreive;
+        $Action = self::RetreiveSimple;
         
         $Amount = 1;        
         $Last;
