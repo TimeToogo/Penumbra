@@ -85,7 +85,7 @@ class FunctionMapper extends Mapping\FunctionMapper {
                 $ArgumentExpressions[1] : R\Expression::BoundValue(" \t\n\r\0\x0B");
 
 
-        if (!($TrimCharacters instanceof EE\ConstantExpression) ||
+        if (!($TrimCharacters instanceof R\ValueExpression) ||
                 strlen($TrimCharacters->GetValue()) !== 1) {
             
             throw new PlatformException(
